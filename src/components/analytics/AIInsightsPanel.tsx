@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AI_INSIGHTS, CHANNEL_CONFIG } from '@/lib/analyticsData';
 import type { AIInsight } from '@/lib/analyticsData';
 import { Lightbulb, AlertTriangle, TrendingUp, ChevronDown, Sparkles } from 'lucide-react';
@@ -131,6 +131,17 @@ export default function AIInsightsPanel() {
   const [filter, setFilter] = useState<'all' | 'high'>('all');
   const shown = AI_INSIGHTS.filter(i => filter === 'all' || i.impact === 'high');
 
+  // Rendered only after mount to avoid a server/client hydration mismatch
+  // (the current time differs between the SSR pass and hydration).
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  useEffect(() => {
+    const format = () =>
+      setUpdatedAt(new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+    format();
+    const id = setInterval(format, 60_000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <div className="glass-card p-4">
       <div className="flex items-center justify-between mb-4">
@@ -175,7 +186,7 @@ export default function AIInsightsPanel() {
       >
         <div className="w-1.5 h-1.5 rounded-full live-dot" style={{ background: '#7b93ff' }} />
         <span className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
-          AI analysis updated · {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+          AI analysis updated · <span suppressHydrationWarning>{updatedAt ?? '—:—'}</span>
         </span>
       </div>
     </div>
