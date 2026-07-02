@@ -164,6 +164,12 @@ function GeoDistribution({ storeId, storeColor }: { storeId: string; storeColor:
 function ShopifyFlowTracker({ storeId }: { storeId: string }) {
   const flows = SHOPIFY_FLOWS[storeId] ?? [];
   const totalToday = flows.reduce((s, f) => s + f.triggeredToday, 0);
+  const [viewedAll, setViewedAll] = useState(false);
+
+  const handleViewAll = () => {
+    setViewedAll(true);
+    setTimeout(() => setViewedAll(false), 2000);
+  };
 
   return (
     <div className="glass-card" style={{ padding: '16px 20px' }}>
@@ -178,9 +184,10 @@ function ShopifyFlowTracker({ storeId }: { storeId: string }) {
           {totalToday} triggered today
         </span>
         <button
+          onClick={handleViewAll}
           className="ml-auto text-[11px] transition-all"
-          style={{ color: '#00d9ff', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-          View All Flows
+          style={{ color: viewedAll ? '#10d98a' : '#00d9ff', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+          {viewedAll ? `Showing all ${flows.length}` : 'View All Flows'}
         </button>
       </div>
       <p className="section-label mb-4" style={{ fontSize: 10 }}>

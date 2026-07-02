@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Clock, ArrowRight, Package, FileText, DollarSign } from 'lucide-react';
+import { Plus, Clock, ArrowRight, Package, FileText, DollarSign, X } from 'lucide-react';
 import { COMPETITOR_DATA } from '@/lib/seoData';
-import type { CompetitorChangeType } from '@/lib/seoData';
+import type { CompetitorChangeType, CompetitorData } from '@/lib/seoData';
 
 type ChangeTab = CompetitorChangeType;
 
@@ -29,15 +29,42 @@ function formatTime(iso: string): string {
 }
 
 export function CompetitorMonitor() {
+  const [competitors, setCompetitors] = useState<CompetitorData[]>(COMPETITOR_DATA);
   const [activeTabs, setActiveTabs] = useState<Record<string, ChangeTab>>(() =>
     Object.fromEntries(COMPETITOR_DATA.map(c => [c.id, 'price']))
   );
+  const [adding, setAdding]           = useState(false);
+  const [newName, setNewName]         = useState('');
+  const [newDomain, setNewDomain]     = useState('');
 
   const setTab = (competitorId: string, tab: ChangeTab) => {
     setActiveTabs(prev => ({ ...prev, [competitorId]: tab }));
   };
 
-  const totalChangesThisWeek = COMPETITOR_DATA.reduce((sum, c) => sum + c.weeklyChanges, 0);
+  const resetForm = () => {
+    setNewName('');
+    setNewDomain('');
+    setAdding(false);
+  };
+
+  const addCompetitor = () => {
+    if (!newName.trim() || !newDomain.trim()) return;
+    const id = `comp-${Date.now()}`;
+    const competitor: CompetitorData = {
+      id,
+      domain: newDomain.trim().replace(/^https?:\/\//, ''),
+      displayName: newName.trim(),
+      lastChecked: new Date().toISOString(),
+      totalChanges: 0,
+      weeklyChanges: 0,
+      changes: [],
+    };
+    setCompetitors(prev => [...prev, competitor]);
+    setActiveTabs(prev => ({ ...prev, [id]: 'price' }));
+    resetForm();
+  };
+
+  const totalChangesThisWeek = competitors.reduce((sum, c) => sum + c.weeklyChanges, 0);
 
   return (
     <div className='space-y-4'>
@@ -46,20 +73,77 @@ export function CompetitorMonitor() {
         <div>
           <div className='section-label mb-1'>Competitor Monitor</div>
           <div className='text-sm font-semibold' style={{ color: 'var(--text-primary)' }}>
-            {COMPETITOR_DATA.length} competitors · {totalChangesThisWeek} changes this week
+            {competitors.length} competitors · {totalChangesThisWeek} changes this week
           </div>
         </div>
         <button
+          onClick={() => setAdding(a => !a)}
           className='flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium transition-all'
-          style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-dim)' }}
+          style={adding
+            ? { background: 'rgba(0,217,255,0.12)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.25)' }
+            : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-dim)' }}
         >
           <Plus size={12} />Add Competitor
         </button>
       </div>
 
+      {/* Inline add-competitor form */}
+      {adding && (
+        <div
+          className='glass-card p-4 flex flex-col gap-2.5'
+          style={{ border: '1px solid rgba(0,217,255,0.25)' }}
+        >
+          <div className='flex items-center justify-between'>
+            <span className='section-label' style={{ color: '#00d9ff' }}>New Competitor</span>
+            <button onClick={resetForm} style={{ color: 'var(--text-muted)' }}>
+              <X size={13} />
+            </button>
+          </div>
+          <div className='flex items-center gap-2'>
+            <input
+              type='text'
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
+              placeholder='Competitor name'
+              className='flex-1 text-xs px-2.5 py-1.5 rounded-lg outline-none'
+              style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
+            />
+            <input
+              type='text'
+              value={newDomain}
+              onChange={e => setNewDomain(e.target.value)}
+              placeholder='domain.com'
+              className='flex-1 text-xs px-2.5 py-1.5 rounded-lg outline-none font-mono'
+              style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
+            />
+          </div>
+          <div className='flex gap-2'>
+            <button
+              onClick={addCompetitor}
+              disabled={!newName.trim() || !newDomain.trim()}
+              className='flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all'
+              style={{
+                background: 'rgba(0,217,255,0.12)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.25)',
+                opacity: newName.trim() && newDomain.trim() ? 1 : 0.5,
+                cursor: newName.trim() && newDomain.trim() ? 'pointer' : 'not-allowed',
+              }}
+            >
+              Add Competitor
+            </button>
+            <button
+              onClick={resetForm}
+              className='px-3 py-1.5 rounded-lg text-xs font-medium transition-all'
+              style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Summary stats row */}
       <div className='grid grid-cols-3 gap-3'>
-        {COMPETITOR_DATA.map(comp => (
+        {competitors.map(comp => (
           <div
             key={comp.id}
             className='glass-card-elevated px-4 py-3'
@@ -84,7 +168,7 @@ export function CompetitorMonitor() {
       </div>
 
       {/* Competitor cards */}
-      {COMPETITOR_DATA.map(comp => {
+      {competitors.map(comp => {
         const activeTab  = activeTabs[comp.id] ?? 'price';
         const tabChanges = comp.changes.filter(c => c.type === activeTab);
         const lastChecked = formatTime(comp.lastChecked);

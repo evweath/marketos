@@ -73,7 +73,7 @@ function cellGradient(idx: number): string {
 
 // ─── Instagram Grid Preview ────────────────────────────────────────────────────
 
-function InstagramGridPreview() {
+function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: SocialPost) => void; onNewPost: () => void }) {
   const [gridStoreIdx, setGridStoreIdx] = useState(0);
   const [showUpcoming, setShowUpcoming] = useState(false);
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
@@ -398,6 +398,7 @@ function InstagramGridPreview() {
               {/* Action buttons */}
               <div className="flex flex-col gap-2 pt-1">
                 <button
+                  onClick={() => onEditPost(selectedPost)}
                   className="w-full py-2 rounded-lg text-xs font-semibold transition-all"
                   style={{ background: '#00d9ff', color: '#0a0e1a' }}>
                   Edit Post
@@ -437,6 +438,7 @@ function InstagramGridPreview() {
               <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Empty slot</p>
               <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>Schedule a post to fill this position</p>
               <button
+                onClick={onNewPost}
                 className="mt-4 flex items-center gap-1.5 mx-auto px-3 py-1.5 rounded-xl text-xs font-medium"
                 style={{ background: '#00d9ff', color: '#0a0e1a' }}>
                 <Plus size={11} /> New Post
@@ -1135,7 +1137,10 @@ export default function SocialPage() {
               {tab === 'aitools'  && <div className="flex-1 overflow-y-auto"><AIToolsPanel /></div>}
               {tab === 'grid' && (
                 <div className="flex-1 overflow-y-auto overflow-x-auto">
-                  <InstagramGridPreview />
+                  <InstagramGridPreview
+                    onEditPost={post => { setTab('calendar'); handleSelectPost(post); }}
+                    onNewPost={() => { setTab('calendar'); handleNewPost(); }}
+                  />
                 </div>
               )}
             </div>

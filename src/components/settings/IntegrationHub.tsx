@@ -73,6 +73,7 @@ function IntegrationCard({ integration, statuses, onStatusChange }: IntegrationC
   const currentStatus = statuses[integration.id] ?? integration.status;
   const [state, setState] = useState<CardState>({ connectState: 'idle', apiKey: '', secret: '' });
   const [hovered, setHovered] = useState(false);
+  const [managing, setManaging] = useState(false);
 
   const handleConnect = () => setState(s => ({ ...s, connectState: 'form' }));
   const handleCancel  = () => setState(s => ({ ...s, connectState: 'idle', apiKey: '', secret: '' }));
@@ -128,6 +129,31 @@ function IntegrationCard({ integration, statuses, onStatusChange }: IntegrationC
       <p className='text-xs leading-relaxed flex-1' style={{ color: 'var(--text-secondary)' }}>
         {integration.description}
       </p>
+
+      {/* Manage panel — inline details */}
+      {isConnected && managing && (
+        <div
+          className='flex flex-col gap-1.5 p-3 rounded-xl text-[10px] font-mono'
+          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-secondary)' }}
+        >
+          <div className='flex items-center justify-between'>
+            <span style={{ color: 'var(--text-muted)' }}>Account</span>
+            <span>{integration.accountName ?? '—'}</span>
+          </div>
+          <div className='flex items-center justify-between'>
+            <span style={{ color: 'var(--text-muted)' }}>Category</span>
+            <span className='capitalize'>{integration.category}</span>
+          </div>
+          <div className='flex items-center justify-between'>
+            <span style={{ color: 'var(--text-muted)' }}>Last sync</span>
+            <span suppressHydrationWarning>{integration.lastSync ? formatSyncTime(integration.lastSync) : '—'}</span>
+          </div>
+          <div className='flex items-center justify-between'>
+            <span style={{ color: 'var(--text-muted)' }}>Status</span>
+            <span style={{ color: '#10d98a' }}>Connected</span>
+          </div>
+        </div>
+      )}
 
       {/* Connected account info */}
       {isConnected && integration.accountName && (
@@ -209,10 +235,13 @@ function IntegrationCard({ integration, statuses, onStatusChange }: IntegrationC
           {isConnected && (
             <>
               <button
+                onClick={() => setManaging(m => !m)}
                 className='flex-1 text-xs py-2 rounded-lg font-medium transition-all'
-                style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
+                style={managing
+                  ? { background: 'rgba(0,217,255,0.10)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }
+                  : { background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
               >
-                Manage
+                {managing ? 'Hide Details' : 'Manage'}
               </button>
               {hovered && (
                 <button

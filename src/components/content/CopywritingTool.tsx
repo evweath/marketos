@@ -124,6 +124,7 @@ export function CopywritingTool() {
   const [variants, setVariants] = useState<CopyVariant[]>(INITIAL_VARIANTS);
   const [history] = useState<HistoryItem[]>(INITIAL_HISTORY);
   const [copied, setCopied] = useState<string | null>(null);
+  const [applied, setApplied] = useState<string | null>(null);
 
   const handleGenerate = () => {
     setGenerating(true);
@@ -288,9 +289,10 @@ export function CopywritingTool() {
                     {copied === variant.id ? <Check size={10} /> : <Copy size={10} />}
                     {copied === variant.id ? 'Copied!' : 'Copy'}
                   </button>
-                  <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] transition-all hover:bg-white/5"
-                    style={{ color: '#7b93ff', border: '1px solid rgba(123,147,255,0.2)' }}>
-                    <ChevronRight size={10} />Use This
+                  <button onClick={() => { setApplied(variant.id); setTimeout(() => setApplied(null), 2000); }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] transition-all hover:bg-white/5"
+                    style={{ color: applied === variant.id ? '#10d98a' : '#7b93ff', border: `1px solid ${applied === variant.id ? 'rgba(16,217,138,0.3)' : 'rgba(123,147,255,0.2)'}` }}>
+                    <ChevronRight size={10} />{applied === variant.id ? 'Applied!' : 'Use This'}
                   </button>
                 </div>
               </div>

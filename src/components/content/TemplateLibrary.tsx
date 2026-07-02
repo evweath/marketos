@@ -60,6 +60,7 @@ export function TemplateLibrary() {
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>('all');
   const [sort, setSort] = useState<SortOption>('popular');
   const [selected, setSelected] = useState<Template | null>(null);
+  const [customizing, setCustomizing] = useState(false);
 
   const filtered = TEMPLATES.filter(t => {
     const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase()) || t.category.toLowerCase().includes(search.toLowerCase());
@@ -185,7 +186,8 @@ export function TemplateLibrary() {
                   </div>
                 </div>
                 <div className="mt-2">
-                  <button className="w-full py-1.5 rounded-lg text-[10px] font-medium transition-all hover:opacity-90"
+                  <button onClick={e => { e.stopPropagation(); setSelected(template); }}
+                    className="w-full py-1.5 rounded-lg text-[10px] font-medium transition-all hover:opacity-90"
                     style={{ background: 'rgba(0,217,255,0.1)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
                     Use Template
                   </button>
@@ -252,9 +254,10 @@ export function TemplateLibrary() {
               </div>
             </div>
 
-            <button className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold transition-all hover:opacity-90"
+            <button onClick={() => { setCustomizing(true); setTimeout(() => setCustomizing(false), 2000); }}
+              className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold transition-all hover:opacity-90"
               style={{ background: '#00d9ff', color: '#0a0e1a' }}>
-              <ChevronRight size={13} />Customize in Editor
+              <ChevronRight size={13} />{customizing ? 'Opening Editor…' : 'Customize in Editor'}
             </button>
           </div>
         </div>

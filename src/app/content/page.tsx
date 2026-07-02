@@ -186,7 +186,18 @@ function PhotoStudioPanel() {
                     <div className='flex items-center gap-2' style={{ color: 'var(--text-muted)' }}>
                       <span>{job.time}</span>
                       {job.result !== 'pending' && (
-                        <button className='p-1 rounded hover:bg-white/[0.05]' style={{ color: '#00d9ff' }}>
+                        <button
+                          onClick={() => {
+                            const content = `Photo Job\nFilename: ${job.name}\nOriginal Size: ${job.original}\nResult: ${job.result === 'bg_removed' ? 'Background Removed' : job.style}\nProcessed: ${job.time}`;
+                            const blob = new Blob([content], { type: 'text/plain' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `${job.name.replace(/\.[^.]+$/, '')}-processed.txt`;
+                            a.click();
+                            URL.revokeObjectURL(url);
+                          }}
+                          className='p-1 rounded hover:bg-white/[0.05]' style={{ color: '#00d9ff' }}>
                           <Download size={11} />
                         </button>
                       )}
@@ -220,6 +231,7 @@ function VideoToolsPanel() {
   const [t2vPlatform, setT2vPlatform] = useState('TikTok');
   const [t2vLen, setT2vLen] = useState('0:30');
   const [jobs, setJobs] = useState<VideoJob[]>(VIDEO_JOBS);
+  const [playingId, setPlayingId] = useState<string | null>(null);
 
   const createVideo = () => {
     const id = `vj-new-${Date.now()}`;
@@ -386,8 +398,26 @@ function VideoToolsPanel() {
                   <td className='px-4 py-2.5'>
                     {job.status === 'done' && (
                       <div className='flex items-center gap-1.5'>
-                        <button className='p-1 rounded hover:bg-white/[0.05]' style={{ color: '#00d9ff' }}><Play size={11} /></button>
-                        <button className='p-1 rounded hover:bg-white/[0.05]' style={{ color: '#7b93ff' }}><Download size={11} /></button>
+                        <button
+                          onClick={() => { setPlayingId(job.id); setTimeout(() => setPlayingId(null), 1500); }}
+                          className='p-1 rounded hover:bg-white/[0.05]'
+                          style={{ color: playingId === job.id ? '#10d98a' : '#00d9ff' }}>
+                          <Play size={11} />
+                        </button>
+                        <button
+                          onClick={() => {
+                            const content = `Video\nTitle: ${job.title}\nType: ${job.type === 'text_to_video' ? 'Text-to-Video' : 'AI Edit'}\nPlatform: ${job.platform}\nDuration: ${job.duration}\nCaptions: ${job.captions ? 'Yes' : 'No'}\nCreated: ${job.time}`;
+                            const blob = new Blob([content], { type: 'text/plain' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `${job.title.replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase()}.txt`;
+                            a.click();
+                            URL.revokeObjectURL(url);
+                          }}
+                          className='p-1 rounded hover:bg-white/[0.05]' style={{ color: '#7b93ff' }}>
+                          <Download size={11} />
+                        </button>
                         {job.captions && <Captions size={11} style={{ color: '#10d98a' }} />}
                       </div>
                     )}

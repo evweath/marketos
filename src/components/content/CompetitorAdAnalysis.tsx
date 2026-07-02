@@ -199,6 +199,7 @@ export function CompetitorAdAnalysis() {
   const [adTypeFilter, setAdTypeFilter] = useState<AdTypeFilter>('all');
   const [perfFilter, setPerfFilter] = useState<PerfFilter>('all');
   const [modal, setModal] = useState<AnalysisModal | null>(null);
+  const [searching, setSearching] = useState(false);
 
   const filtered = COMPETITOR_ADS.filter(ad => {
     const matchSearch = !searchQuery || ad.competitor.includes(searchQuery.toLowerCase()) || ad.headline.toLowerCase().includes(searchQuery.toLowerCase());
@@ -246,9 +247,10 @@ export function CompetitorAdAnalysis() {
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}
             />
           </div>
-          <button className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all hover:opacity-90"
+          <button onClick={() => { setSearching(true); setTimeout(() => setSearching(false), 1200); }}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all hover:opacity-90"
             style={{ background: '#00d9ff', color: '#0a0e1a' }}>
-            <Search size={12} />Search
+            <Search size={12} />{searching ? 'Searching…' : 'Search'}
           </button>
         </div>
 

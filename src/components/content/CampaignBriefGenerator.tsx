@@ -66,9 +66,37 @@ export function CampaignBriefGenerator() {
   const [channels, setChannels] = useState<string[]>(['Google', 'Meta']);
   const [generating, setGenerating] = useState(false);
   const [brief, setBrief] = useState<CampaignBrief | null>(null);
+  const [shared, setShared] = useState(false);
+  const [viewedId, setViewedId] = useState<string | null>(null);
 
   const toggleChannel = (ch: string) => {
     setChannels(prev => prev.includes(ch) ? prev.filter(c => c !== ch) : [...prev, ch]);
+  };
+
+  const briefToText = (b: CampaignBrief) =>
+    `${b.title}\n${'='.repeat(b.title.length)}\n\n` +
+    `Objective: ${b.objective}\nBudget: ${b.budget}\nTimeline: ${b.timeline}\nChannels: ${b.channels.join(', ')}\n\n` +
+    `EXECUTIVE SUMMARY\n${b.executiveSummary}\n\n` +
+    `TARGET AUDIENCE\n- Demographics: ${b.targetAudience.demographics}\n- Psychographics: ${b.targetAudience.psychographics}\n- Behaviors: ${b.targetAudience.behaviors}\n\n` +
+    `KEY MESSAGES\n${b.keyMessages.map((m, i) => `${i + 1}. ${m}`).join('\n')}\n\n` +
+    `CHANNEL STRATEGY\n${b.channelStrategy.map(c => `- ${c.channel} (${c.budgetPercent}%): ${c.recommendation}`).join('\n')}\n\n` +
+    `KPI TARGETS\nImpressions: ${b.kpiTargets.impressions} · Clicks: ${b.kpiTargets.clicks} · Conversions: ${b.kpiTargets.conversions} · ROAS: ${b.kpiTargets.roas} · CPA: ${b.kpiTargets.cpa}\n\n` +
+    `MILESTONES\n${b.milestones.join('\n')}`;
+
+  const handleShare = (b: CampaignBrief) => {
+    navigator.clipboard?.writeText(briefToText(b)).catch(() => undefined);
+    setShared(true);
+    setTimeout(() => setShared(false), 2000);
+  };
+
+  const handleExportPdf = (b: CampaignBrief) => {
+    const blob = new Blob([briefToText(b)], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${b.title.replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleGenerate = () => {
@@ -223,11 +251,13 @@ export function CampaignBriefGenerator() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] hover:bg-white/5 transition-colors"
-                      style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
-                      <Share2 size={10} />Share
+                    <button onClick={() => handleShare(brief)}
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] hover:bg-white/5 transition-colors"
+                      style={{ color: shared ? '#10d98a' : 'var(--text-secondary)', border: `1px solid ${shared ? 'rgba(16,217,138,0.3)' : 'var(--border-subtle)'}` }}>
+                      <Share2 size={10} />{shared ? 'Copied!' : 'Share'}
                     </button>
-                    <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] hover:bg-white/5 transition-colors"
+                    <button onClick={() => handleExportPdf(brief)}
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] hover:bg-white/5 transition-colors"
                       style={{ color: '#ffb347', border: '1px solid rgba(255,179,71,0.25)' }}>
                       <Download size={10} />Export PDF
                     </button>
@@ -377,8 +407,9 @@ export function CampaignBriefGenerator() {
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   <span className="text-[9px] font-mono" style={{ color: 'var(--text-muted)' }}>{b.generatedAt}</span>
-                  <button className="px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all hover:opacity-80"
-                    style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-dim)' }}>
+                  <button onClick={() => { setBrief(b); setViewedId(b.id); }}
+                    className="px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all hover:opacity-80"
+                    style={{ background: 'var(--bg-elevated)', color: viewedId === b.id ? '#ffb347' : 'var(--text-secondary)', border: `1px solid ${viewedId === b.id ? 'rgba(255,179,71,0.3)' : 'var(--border-dim)'}` }}>
                     View
                   </button>
                 </div>

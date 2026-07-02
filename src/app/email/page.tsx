@@ -309,16 +309,28 @@ const CONV_STATUS_CFG = {
 };
 
 function ConversationalSmsPanel() {
+  const [conversations, setConversations] = useState<SmsConversation[]>(SMS_CONVERSATIONS);
   const [selected, setSelected] = useState<string | null>('conv-1');
-  const conv = SMS_CONVERSATIONS.find(c => c.id === selected);
-  const recovered = SMS_CONVERSATIONS.filter(c => c.status === 'recovered');
+  const [reply, setReply] = useState('');
+  const conv = conversations.find(c => c.id === selected);
+  const recovered = conversations.filter(c => c.status === 'recovered');
   const recRevenue = recovered.reduce((s, c) => s + c.cartValue, 0);
+
+  const sendReply = () => {
+    if (!reply.trim() || !selected) return;
+    const text = reply.trim();
+    setConversations(prev => prev.map(c => c.id !== selected ? c : {
+      ...c,
+      messages: [...c.messages, { role: 'brand', text, time: 'just now' }],
+    }));
+    setReply('');
+  };
 
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Active Conversations', value: SMS_CONVERSATIONS.filter(c => c.status === 'active').length.toString(), color: '#00d9ff' },
+          { label: 'Active Conversations', value: conversations.filter(c => c.status === 'active').length.toString(), color: '#00d9ff' },
           { label: 'Recovered (30d)',       value: recovered.length.toString(), color: '#10d98a' },
           { label: 'Revenue Recovered',     value: c$(recRevenue), color: '#ffb347' },
         ].map(s => (
@@ -332,7 +344,7 @@ function ConversationalSmsPanel() {
       <div className="flex gap-4" style={{ minHeight: 360 }}>
         {/* Conversation list */}
         <div className="flex flex-col gap-2 shrink-0" style={{ width: 240 }}>
-          {SMS_CONVERSATIONS.map(c => {
+          {conversations.map(c => {
             const sc = CONV_STATUS_CFG[c.status];
             const last = c.messages[c.messages.length - 1];
             return (
@@ -378,9 +390,9 @@ function ConversationalSmsPanel() {
             </div>
             {conv.status === 'active' && (
               <div className="px-4 py-3 border-t flex gap-2" style={{ borderColor: 'var(--border-subtle)' }}>
-                <input placeholder="Type a reply…" className="flex-1 px-3 py-2 rounded-lg text-xs"
+                <input value={reply} onChange={e => setReply(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendReply()} placeholder="Type a reply…" className="flex-1 px-3 py-2 rounded-lg text-xs"
                   style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
-                <button className="px-3 py-2 rounded-lg text-xs font-medium" style={{ background: 'var(--accent-blue)', color: '#fff' }}>Send</button>
+                <button onClick={sendReply} className="px-3 py-2 rounded-lg text-xs font-medium" style={{ background: 'var(--accent-blue)', color: '#fff' }}>Send</button>
               </div>
             )}
           </div>

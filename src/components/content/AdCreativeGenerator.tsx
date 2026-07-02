@@ -45,6 +45,23 @@ export function AdCreativeGenerator() {
   const [store, setStore] = useState('donut-equipment.com');
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState<GeneratedResult | null>(null);
+  const [previewAction, setPreviewAction] = useState<'edit' | 'publish' | null>(null);
+
+  const downloadCreative = (g: GeneratedResult) => {
+    const content = `AI Generated Creative\nName: ${g.name}\nPlatform: ${g.platform}\nSize: ${g.size}\nFormat: ${g.format}`;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${g.name.replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const flashAction = (action: 'edit' | 'publish') => {
+    setPreviewAction(action);
+    setTimeout(() => setPreviewAction(null), 2000);
+  };
 
   const subTabs: { key: SubTab; label: string; icon: typeof Image }[] = [
     { key: 'image', label: 'Image Ads',  icon: Image  },
@@ -211,17 +228,20 @@ export function AdCreativeGenerator() {
               <div className="p-3 rounded-lg" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)' }}>
                 <div className="text-xs font-medium mb-1" style={{ color: 'var(--text-primary)' }}>{generated.name}</div>
                 <div className="flex gap-2 mt-2">
-                  <button className="flex items-center gap-1 px-2 py-1 rounded text-[10px] transition-colors hover:bg-white/5"
+                  <button onClick={() => downloadCreative(generated)}
+                    className="flex items-center gap-1 px-2 py-1 rounded text-[10px] transition-colors hover:bg-white/5"
                     style={{ color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
                     <Download size={10} />Download
                   </button>
-                  <button className="flex items-center gap-1 px-2 py-1 rounded text-[10px] transition-colors hover:bg-white/5"
+                  <button onClick={() => flashAction('edit')}
+                    className="flex items-center gap-1 px-2 py-1 rounded text-[10px] transition-colors hover:bg-white/5"
                     style={{ color: '#7b93ff', border: '1px solid rgba(123,147,255,0.2)' }}>
-                    <Edit3 size={10} />Edit
+                    <Edit3 size={10} />{previewAction === 'edit' ? 'Editing…' : 'Edit'}
                   </button>
-                  <button className="flex items-center gap-1 px-2 py-1 rounded text-[10px] transition-colors hover:bg-white/5"
+                  <button onClick={() => flashAction('publish')}
+                    className="flex items-center gap-1 px-2 py-1 rounded text-[10px] transition-colors hover:bg-white/5"
                     style={{ color: '#10d98a', border: '1px solid rgba(16,217,138,0.2)' }}>
-                    <Send size={10} />Publish
+                    <Send size={10} />{previewAction === 'publish' ? 'Published!' : 'Publish'}
                   </button>
                 </div>
               </div>
@@ -291,6 +311,19 @@ function CreativeCard({ creative }: { creative: GeneratedCreative }) {
   const pc = PLATFORM_CONFIG[creative.platform];
   const sc = STATUS_CONFIG[creative.status];
   const scoreColor = SCORE_COLOR(creative.performanceScore);
+  const [editing, setEditing] = useState(false);
+  const [starred, setStarred] = useState(false);
+
+  const handleDownload = () => {
+    const content = `Creative\nName: ${creative.name}\nPlatform: ${pc.label}\nSize: ${creative.size}\nStatus: ${sc.label}\nPerformance Score: ${creative.performanceScore}\nCreated: ${creative.createdAt}`;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${creative.name.replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="rounded-xl overflow-hidden transition-all hover:border-white/20 cursor-pointer"
@@ -337,17 +370,20 @@ function CreativeCard({ creative }: { creative: GeneratedCreative }) {
 
         {/* Actions */}
         <div className="flex gap-1">
-          <button className="flex-1 flex items-center justify-center gap-1 py-1 rounded text-[9px] transition-colors hover:bg-white/5"
+          <button onClick={handleDownload}
+            className="flex-1 flex items-center justify-center gap-1 py-1 rounded text-[9px] transition-colors hover:bg-white/5"
             style={{ color: '#00d9ff', border: '1px solid rgba(0,217,255,0.15)' }}>
             <Download size={9} />DL
           </button>
-          <button className="flex-1 flex items-center justify-center gap-1 py-1 rounded text-[9px] transition-colors hover:bg-white/5"
+          <button onClick={() => { setEditing(true); setTimeout(() => setEditing(false), 2000); }}
+            className="flex-1 flex items-center justify-center gap-1 py-1 rounded text-[9px] transition-colors hover:bg-white/5"
             style={{ color: '#7b93ff', border: '1px solid rgba(123,147,255,0.15)' }}>
-            <Edit3 size={9} />Edit
+            <Edit3 size={9} />{editing ? '…' : 'Edit'}
           </button>
-          <button className="flex-1 flex items-center justify-center gap-1 py-1 rounded text-[9px] transition-colors hover:bg-white/5"
+          <button onClick={() => setStarred(s => !s)}
+            className="flex-1 flex items-center justify-center gap-1 py-1 rounded text-[9px] transition-colors hover:bg-white/5"
             style={{ color: '#10d98a', border: '1px solid rgba(16,217,138,0.15)' }}>
-            <Star size={9} />
+            <Star size={9} fill={starred ? '#10d98a' : 'none'} />
           </button>
         </div>
       </div>

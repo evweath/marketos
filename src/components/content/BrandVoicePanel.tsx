@@ -14,6 +14,7 @@ export function BrandVoicePanel() {
   const [editing, setEditing] = useState(false);
   const [saved, setSaved] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [browsing, setBrowsing] = useState(false);
 
   // Editable state
   const [toneValue, setToneValue] = useState(BRAND_VOICE_SETTINGS.toneValue);
@@ -305,9 +306,10 @@ export function BrandVoicePanel() {
           <div className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
             PDF, DOCX, or TXT · Up to 50MB per file
           </div>
-          <button className="px-4 py-2 rounded-lg text-xs font-medium transition-all hover:opacity-90"
+          <button onClick={() => { setBrowsing(true); setTimeout(() => setBrowsing(false), 1500); }}
+            className="px-4 py-2 rounded-lg text-xs font-medium transition-all hover:opacity-90"
             style={{ background: 'rgba(255,179,71,0.12)', color: '#ffb347', border: '1px solid rgba(255,179,71,0.25)' }}>
-            Browse Files
+            {browsing ? 'Opening…' : 'Browse Files'}
           </button>
         </div>
 

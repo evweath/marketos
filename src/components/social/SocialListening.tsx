@@ -119,6 +119,8 @@ function timeAgo(iso: string) {
 
 export default function SocialListening() {
   const [showAnalytics, setShowAnalytics] = useState(true);
+  const [actedIds, setActedIds] = useState<Set<string>>(new Set());
+  const markActed = (id: string) => setActedIds(prev => new Set(prev).add(id));
   return (
     <div className="glass-card p-4">
       {/* Header */}
@@ -221,22 +223,24 @@ export default function SocialListening() {
                 </div>
 
                 {item.sentiment !== 'negative' ? (
-                  <button className="text-[10px] font-medium px-2.5 py-1 rounded-full transition-all hover:brightness-110"
+                  <button onClick={() => markActed(item.id)}
+                    className="text-[10px] font-medium px-2.5 py-1 rounded-full transition-all hover:brightness-110"
                     style={{
-                      background: 'rgba(0,217,255,0.10)',
-                      color: '#00d9ff',
-                      border: '1px solid rgba(0,217,255,0.2)',
+                      background: actedIds.has(item.id) ? 'rgba(16,217,138,0.12)' : 'rgba(0,217,255,0.10)',
+                      color: actedIds.has(item.id) ? '#10d98a' : '#00d9ff',
+                      border: `1px solid ${actedIds.has(item.id) ? 'rgba(16,217,138,0.25)' : 'rgba(0,217,255,0.2)'}`,
                     }}>
-                    Engage
+                    {actedIds.has(item.id) ? '✓ Engaged' : 'Engage'}
                   </button>
                 ) : (
-                  <button className="text-[10px] font-medium px-2.5 py-1 rounded-full transition-all hover:brightness-110"
+                  <button onClick={() => markActed(item.id)}
+                    className="text-[10px] font-medium px-2.5 py-1 rounded-full transition-all hover:brightness-110"
                     style={{
-                      background: 'rgba(255,68,68,0.10)',
-                      color: '#ff4444',
-                      border: '1px solid rgba(255,68,68,0.2)',
+                      background: actedIds.has(item.id) ? 'rgba(16,217,138,0.12)' : 'rgba(255,68,68,0.10)',
+                      color: actedIds.has(item.id) ? '#10d98a' : '#ff4444',
+                      border: `1px solid ${actedIds.has(item.id) ? 'rgba(16,217,138,0.25)' : 'rgba(255,68,68,0.2)'}`,
                     }}>
-                    Respond
+                    {actedIds.has(item.id) ? '✓ Responded' : 'Respond'}
                   </button>
                 )}
               </div>
