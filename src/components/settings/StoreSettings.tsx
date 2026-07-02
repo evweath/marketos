@@ -364,11 +364,20 @@ function StoreCard({ store, savedCreds, onSaveCreds }: StoreCardProps) {
 
 // ─── Add Store form ───────────────────────────────────────────────────────────
 
-interface AddStoreFormProps {
-  onClose: () => void;
+interface NewStorePayload {
+  name: string;
+  domain: string;
+  accessToken: string;
+  apiSecret: string;
+  webhookSecret: string;
 }
 
-function AddStoreForm({ onClose }: AddStoreFormProps) {
+interface AddStoreFormProps {
+  onClose: () => void;
+  onAdd: (payload: NewStorePayload) => void;
+}
+
+function AddStoreForm({ onClose, onAdd }: AddStoreFormProps) {
   const [name,          setName]          = useState('');
   const [domain,        setDomain]        = useState('');
   const [accessToken,   setAccessToken]   = useState('');
@@ -380,7 +389,18 @@ function AddStoreForm({ onClose }: AddStoreFormProps) {
   const handleConnect = () => {
     if (!domain.trim() || !accessToken.trim()) return;
     setSaving(true);
-    setTimeout(() => { setSaving(false); setDone(true); setTimeout(onClose, 1200); }, 1000);
+    setTimeout(() => {
+      setSaving(false);
+      setDone(true);
+      onAdd({
+        name:          name.trim(),
+        domain:        domain.trim(),
+        accessToken:   accessToken.trim(),
+        apiSecret:     apiSecret.trim(),
+        webhookSecret: webhookSecret.trim(),
+      });
+      setTimeout(onClose, 1200);
+    }, 1000);
   };
 
   return (
@@ -461,12 +481,51 @@ function AddStoreForm({ onClose }: AddStoreFormProps) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
+const STORE_COLORS = ['#00d9ff', '#ffb347', '#10d98a', '#7b93ff', '#ff6ac1', '#f5c542'];
+const DEFAULT_WEBHOOKS = ['orders/create', 'orders/updated', 'products/update', 'checkouts/create', 'customers/create'];
+
+function slugify(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
 export function StoreSettings() {
   const [showAddForm, setShowAddForm]                 = useState(false);
+  const [stores, setStores]                           = useState<StoreData[]>(INITIAL_STORES);
   const [savedCreds, setSavedCreds]                   = useState<Record<string, Credentials>>({});
 
   const handleSaveCreds = (id: string, creds: Credentials) => {
     setSavedCreds(prev => ({ ...prev, [id]: creds }));
+  };
+
+  const handleAddStore = (payload: NewStorePayload) => {
+    const base = slugify(payload.name || payload.domain) || `store-${stores.length + 1}`;
+    let id = base;
+    for (let n = 2; stores.some(s => s.id === id); n++) id = `${base}-${n}`;
+
+    const newStore: StoreData = {
+      id,
+      name:            payload.name || payload.domain,
+      domain:          payload.domain,
+      color:           STORE_COLORS[stores.length % STORE_COLORS.length],
+      status:          'connected',
+      lastSync:        new Date().toISOString(),
+      apiKeyMasked:    maskToken(payload.accessToken),
+      products:        0,
+      orders30d:       0,
+      activeCampaigns: 0,
+      webhooks:        DEFAULT_WEBHOOKS,
+    };
+
+    setStores(prev => [...prev, newStore]);
+    setSavedCreds(prev => ({
+      ...prev,
+      [id]: {
+        domain:        payload.domain,
+        accessToken:   payload.accessToken,
+        apiSecret:     payload.apiSecret,
+        webhookSecret: payload.webhookSecret,
+      },
+    }));
   };
 
   return (
@@ -478,11 +537,11 @@ export function StoreSettings() {
             Manage connected store credentials and sync settings
           </div>
         </div>
-        <span className='section-label'>{INITIAL_STORES.length} stores connected</span>
+        <span className='section-label'>{stores.length} stores connected</span>
       </div>
 
       <div className='flex flex-col gap-3'>
-        {INITIAL_STORES.map(store => (
+        {stores.map(store => (
           <StoreCard
             key={store.id}
             store={store}
@@ -493,7 +552,7 @@ export function StoreSettings() {
       </div>
 
       {showAddForm ? (
-        <AddStoreForm onClose={() => setShowAddForm(false)} />
+        <AddStoreForm onClose={() => setShowAddForm(false)} onAdd={handleAddStore} />
       ) : (
         <button
           onClick={() => setShowAddForm(true)}
