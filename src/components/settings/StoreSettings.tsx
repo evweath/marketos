@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RefreshCw, ExternalLink, Plus, CheckCircle, Loader2, Webhook, Eye, EyeOff, Save, X, KeyRound } from 'lucide-react';
 
 interface StoreData {
@@ -488,10 +488,38 @@ function slugify(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
+const STORES_KEY = 'marketos.stores';
+const CREDS_KEY  = 'marketos.storeCreds';
+
 export function StoreSettings() {
   const [showAddForm, setShowAddForm]                 = useState(false);
   const [stores, setStores]                           = useState<StoreData[]>(INITIAL_STORES);
   const [savedCreds, setSavedCreds]                   = useState<Record<string, Credentials>>({});
+  const [loaded, setLoaded]                           = useState(false);
+
+  // Restore persisted stores after mount. Kept out of the initial render so the
+  // server-rendered HTML matches the client's first paint (no hydration mismatch);
+  // localStorage is browser-only. This is what makes an added store survive both
+  // settings-tab navigation (the panel unmounts) and a full page reload.
+  useEffect(() => {
+    try {
+      const s = localStorage.getItem(STORES_KEY);
+      const c = localStorage.getItem(CREDS_KEY);
+      if (s) setStores(JSON.parse(s));
+      if (c) setSavedCreds(JSON.parse(c));
+    } catch { /* corrupt/unavailable storage — fall back to seed data */ }
+    setLoaded(true);
+  }, []);
+
+  // Persist on change (only after the initial restore, so we never clobber saved
+  // data with the seed defaults on first mount).
+  useEffect(() => {
+    if (!loaded) return;
+    try {
+      localStorage.setItem(STORES_KEY, JSON.stringify(stores));
+      localStorage.setItem(CREDS_KEY, JSON.stringify(savedCreds));
+    } catch { /* storage full/unavailable — best-effort persistence */ }
+  }, [stores, savedCreds, loaded]);
 
   const handleSaveCreds = (id: string, creds: Credentials) => {
     setSavedCreds(prev => ({ ...prev, [id]: creds }));
