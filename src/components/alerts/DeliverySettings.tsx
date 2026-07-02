@@ -133,7 +133,12 @@ function QuietHoursPanel() {
   const [exceptCrit, setExceptCrit] = useState(QUIET_HOURS.exceptCritical);
   const [start, setStart] = useState(QUIET_HOURS.start);
   const [end, setEnd] = useState(QUIET_HOURS.end);
+  const [daysActive, setDaysActive] = useState<number[]>(QUIET_HOURS.daysActive);
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  function toggleDay(i: number) {
+    setDaysActive(prev => prev.includes(i) ? prev.filter(d => d !== i) : [...prev, i]);
+  }
 
   return (
     <div className="glass-card p-4">
@@ -175,9 +180,10 @@ function QuietHoursPanel() {
           <div className="section-label mb-1.5">Active Days</div>
           <div className="flex gap-1.5">
             {days.map((d, i) => {
-              const isActive = QUIET_HOURS.daysActive.includes(i);
+              const isActive = daysActive.includes(i);
               return (
                 <button key={d}
+                  onClick={() => toggleDay(i)}
                   className="w-8 h-8 rounded-lg text-[10px] font-semibold transition-all"
                   style={{
                     background: isActive ? 'rgba(123,147,255,0.15)' : 'var(--bg-elevated)',

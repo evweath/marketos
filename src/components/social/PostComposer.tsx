@@ -8,6 +8,8 @@ import type { SocialPost, SocialPlatform, PostCategory } from '@/lib/socialData'
 interface Props {
   post?: SocialPost | null;
   defaultDate?: Date;
+  onAddPost?: (post: SocialPost) => void;
+  onUpdatePost?: (id: string, status: SocialPost['status']) => void;
   onClose: () => void;
 }
 
@@ -29,7 +31,7 @@ interface AiSuggestion {
   hashtags: string[];
 }
 
-export default function PostComposer({ post, defaultDate, onClose }: Props) {
+export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePost, onClose }: Props) {
   const [caption, setCaption] = useState(post?.caption ?? '');
   const [selectedPlatforms, setSelectedPlatforms] = useState<SocialPlatform[]>(post?.platforms ?? ['instagram']);
   const [category, setCategory] = useState<PostCategory>(post?.category ?? 'product');
@@ -40,6 +42,8 @@ export default function PostComposer({ post, defaultDate, onClose }: Props) {
   const [activePlatformPreview, setActivePlatformPreview] = useState<SocialPlatform>(
     post?.platforms[0] ?? 'instagram'
   );
+  const [feedback, setFeedback] = useState('');
+  const [boosted, setBoosted] = useState(false);
 
   const isExisting = !!post;
   const charLimit = PLATFORM_CONFIG[activePlatformPreview].charLimit;
@@ -69,6 +73,36 @@ export default function PostComposer({ post, defaultDate, onClose }: Props) {
   };
 
   const schedDate = defaultDate || (post ? new Date(post.scheduledFor) : new Date());
+
+  const createPost = (status: 'draft' | 'scheduled' | 'published') => {
+    if (!caption.trim() || selectedPlatforms.length === 0) return;
+    const now = new Date();
+    const when = defaultDate || now;
+    const newPost: SocialPost = {
+      id: `sp-${now.getTime()}`,
+      platforms: selectedPlatforms,
+      status,
+      category,
+      caption: caption.trim(),
+      hashtags: [],
+      mediaType: 'image',
+      scheduledFor: when.toISOString(),
+      publishedAt: status === 'published' ? now.toISOString() : undefined,
+      author: 'You',
+      store: 'donut-equipment.com',
+    };
+    onAddPost?.(newPost);
+    setFeedback(
+      status === 'draft' ? 'Draft saved' : status === 'scheduled' ? 'Post scheduled' : 'Published now'
+    );
+    setTimeout(() => onClose(), 900);
+  };
+
+  const handleApproval = (status: 'published' | 'failed') => {
+    if (!post) return;
+    onUpdatePost?.(post.id, status);
+    setFeedback(status === 'published' ? 'Post approved' : 'Post rejected');
+  };
 
   return (
     <div className="flex flex-col h-full" style={{ background: 'var(--bg-surface)' }}>
@@ -325,9 +359,10 @@ export default function PostComposer({ post, defaultDate, onClose }: Props) {
               <div className="mt-2 px-3 py-2 rounded-lg flex items-center justify-between"
                 style={{ background: 'rgba(0,217,255,0.05)', border: '1px solid rgba(0,217,255,0.15)' }}>
                 <span className="text-xs" style={{ color: '#00d9ff' }}>⚡ High-performer — eligible for paid boost</span>
-                <button className="text-[11px] px-2.5 py-1 rounded font-medium transition-colors hover:bg-cyan-400/20"
+                <button onClick={() => setBoosted(true)}
+                  className="text-[11px] px-2.5 py-1 rounded font-medium transition-colors hover:bg-cyan-400/20"
                   style={{ background: 'rgba(0,217,255,0.15)', color: '#00d9ff' }}>
-                  Boost Post
+                  {boosted ? '✓ Boosted' : 'Boost Post'}
                 </button>
               </div>
             )}
@@ -344,11 +379,13 @@ export default function PostComposer({ post, defaultDate, onClose }: Props) {
               <span style={{ color: '#ffb347' }}>{post.approver}</span>
             </div>
             <div className="flex gap-2">
-              <button className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+              <button onClick={() => handleApproval('published')}
+                className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-colors"
                 style={{ background: 'rgba(16,217,138,0.12)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.25)' }}>
                 ✓ Approve
               </button>
-              <button className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+              <button onClick={() => handleApproval('failed')}
+                className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-colors"
                 style={{ background: 'rgba(255,68,68,0.10)', color: '#ff4444', border: '1px solid rgba(255,68,68,0.2)' }}>
                 ✗ Reject
               </button>
@@ -357,26 +394,37 @@ export default function PostComposer({ post, defaultDate, onClose }: Props) {
         )}
       </div>
 
+      {/* Success feedback */}
+      {feedback && (
+        <div className="px-4 py-2 text-xs font-medium text-center border-t shrink-0"
+          style={{ borderColor: 'var(--border-subtle)', background: 'rgba(16,217,138,0.08)', color: '#10d98a' }}>
+          ✓ {feedback}
+        </div>
+      )}
+
       {/* Footer actions — Draft (tertiary) / Schedule (secondary) / Publish (primary) */}
       {!isExisting && (
         <div className="flex items-center gap-2 p-4 border-t shrink-0"
           style={{ borderColor: 'var(--border-subtle)' }}>
           {/* Draft — tertiary */}
-          <button className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all hover:bg-white/[0.05]"
+          <button onClick={() => createPost('draft')}
+            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all hover:bg-white/[0.05]"
             style={{ color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
             <Save size={12} />
             Draft
           </button>
 
           {/* Schedule — secondary */}
-          <button className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-all hover:bg-cyan-400/[0.12]"
+          <button onClick={() => createPost('scheduled')}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-all hover:bg-cyan-400/[0.12]"
             style={{ background: 'rgba(0,217,255,0.08)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.22)' }}>
             <Clock size={13} />
             Schedule
           </button>
 
           {/* Publish — primary */}
-          <button className="flex items-center justify-center gap-1.5 px-5 py-2 rounded-lg text-sm font-semibold transition-all hover:brightness-110 active:scale-[0.98]"
+          <button onClick={() => createPost('published')}
+            className="flex items-center justify-center gap-1.5 px-5 py-2 rounded-lg text-sm font-semibold transition-all hover:brightness-110 active:scale-[0.98]"
             style={{ background: '#00d9ff', color: '#080b18' }}>
             <Send size={13} />
             Publish Now

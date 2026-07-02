@@ -267,3 +267,99 @@ export const DATE_RANGE_LABELS: Record<DateRange, string> = {
   'mtd': 'Month to Date',
   'ytd': 'Year to Date',
 };
+
+// ─── Deterministic Range Scaling ──────────────────────────────────────────────
+// The base constants above represent a 30-day period. All range-dependent views
+// derive from them via these PURE helpers so SSR and client hydration match
+// (no Date.now()/Math.random()). Volume metrics (spend, revenue, conversions,
+// clicks, impressions) scale with the range's day count relative to 30; rate
+// metrics (ctr, cpc, roas, cpa, margin, budget) are period-independent.
+
+// Effective day count each range represents relative to the 30-day baseline.
+export const DATE_RANGE_DAYS: Record<DateRange, number> = {
+  '7d': 7,
+  '30d': 30,
+  '90d': 90,
+  'mtd': 18,   // deterministic "month-to-date" snapshot
+  'ytd': 212,  // deterministic "year-to-date" snapshot
+};
+
+// Volume multiplier for a range (1 === 30-day baseline).
+export function rangeScale(range: DateRange): number {
+  return DATE_RANGE_DAYS[range] / 30;
+}
+
+// Number of daily points a range's time-series should render.
+export function rangePoints(range: DateRange): number {
+  return Math.min(DATE_RANGE_DAYS[range], 30);
+}
+
+// Scale a single channel's volume metrics for the given range; rates unchanged.
+export function scaleChannel(c: ChannelMetrics, range: DateRange): ChannelMetrics {
+  const k = rangeScale(range);
+  return {
+    ...c,
+    impressions: Math.round(c.impressions * k),
+    clicks: Math.round(c.clicks * k),
+    spend: Math.round(c.spend * k),
+    conversions: Math.round(c.conversions * k),
+    revenue: Math.round(c.revenue * k),
+  };
+}
+
+export function scaledChannelMetrics(range: DateRange): ChannelMetrics[] {
+  return CHANNEL_METRICS.map(c => scaleChannel(c, range));
+}
+
+export interface AnalyticsTotals {
+  totalSpend: number;
+  totalRevenue: number;
+  totalConversions: number;
+  totalClicks: number;
+  totalImpressions: number;
+  blendedRoas: number;
+  totalBudget: number;
+}
+
+// Totals for a range. Budget stays monthly (period-independent); the 30d case
+// reproduces ANALYTICS_TOTALS exactly.
+export function scaledTotals(range: DateRange): AnalyticsTotals {
+  const metrics = scaledChannelMetrics(range);
+  const totalSpend = metrics.reduce((s, c) => s + c.spend, 0);
+  const totalRevenue = metrics.reduce((s, c) => s + c.revenue, 0);
+  return {
+    totalSpend,
+    totalRevenue,
+    totalConversions: metrics.reduce((s, c) => s + c.conversions, 0),
+    totalClicks: metrics.reduce((s, c) => s + c.clicks, 0),
+    totalImpressions: metrics.reduce((s, c) => s + c.impressions, 0),
+    blendedRoas: totalRevenue / (totalSpend || 1),
+    totalBudget: ANALYTICS_TOTALS.totalBudget,
+  };
+}
+
+// Time series sliced/scaled for the range. Ranges ≤30d take the last N days of
+// the baseline series; ranges >30d scale each day's volume up by rangeScale/N-ratio
+// so totals stay consistent with scaledTotals.
+export function scaledTimeSeries(range: DateRange): ChannelTimeSeries[] {
+  const points = rangePoints(range);
+  // Per-day multiplier so the sum over `points` days equals the full range volume.
+  const k = (rangeScale(range) * 30) / points;
+  return TIME_SERIES.map(ts => ({
+    channel: ts.channel,
+    data: ts.data.slice(-points).map(d => ({
+      ...d,
+      spend: Math.round(d.spend * k),
+      revenue: Math.round(d.revenue * k),
+      conversions: Math.round(d.conversions * k),
+      impressions: Math.round(d.impressions * k),
+      clicks: Math.round(d.clicks * k),
+    })),
+  }));
+}
+
+// Attributed conversion count backing the attribution panel, scaled by range.
+export const ATTRIBUTION_BASE_CONVERSIONS = 3131;
+export function scaledAttributionConversions(range: DateRange): number {
+  return Math.round(ATTRIBUTION_BASE_CONVERSIONS * rangeScale(range));
+}

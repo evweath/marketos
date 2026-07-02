@@ -5,8 +5,8 @@ import {
   AreaChart, Area, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid,
 } from 'recharts';
-import { TIME_SERIES, CHANNEL_CONFIG } from '@/lib/analyticsData';
-import type { Channel } from '@/lib/analyticsData';
+import { scaledTimeSeries, DATE_RANGE_LABELS, CHANNEL_CONFIG } from '@/lib/analyticsData';
+import type { Channel, DateRange } from '@/lib/analyticsData';
 
 const DEFAULT_CHANNELS: Channel[] = ['google-ads', 'meta-ads', 'linkedin', 'email'];
 
@@ -59,9 +59,11 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   );
 };
 
-export default function RevenueSpendChart() {
+export default function RevenueSpendChart({ dateRange = '30d' }: { dateRange?: DateRange }) {
   const [activeChannels, setActiveChannels] = useState<Set<Channel>>(new Set(DEFAULT_CHANNELS));
   const [metric, setMetric] = useState<Metric>('revenue');
+
+  const timeSeries = scaledTimeSeries(dateRange);
 
   const toggleChannel = (ch: Channel) => {
     setActiveChannels(prev => {
@@ -72,9 +74,9 @@ export default function RevenueSpendChart() {
     });
   };
 
-  const mergedData = TIME_SERIES[0].data.map((_, dayIdx) => {
-    const dayObj: Record<string, number | string> = { date: TIME_SERIES[0].data[dayIdx].date };
-    for (const ts of TIME_SERIES) {
+  const mergedData = timeSeries[0].data.map((_, dayIdx) => {
+    const dayObj: Record<string, number | string> = { date: timeSeries[0].data[dayIdx].date };
+    for (const ts of timeSeries) {
       if (activeChannels.has(ts.channel)) {
         dayObj[ts.channel] = ts.data[dayIdx][metric];
       }
@@ -82,13 +84,13 @@ export default function RevenueSpendChart() {
     return dayObj;
   });
 
-  const activeTimeSeries = TIME_SERIES.filter(ts => activeChannels.has(ts.channel));
+  const activeTimeSeries = timeSeries.filter(ts => activeChannels.has(ts.channel));
 
   return (
     <div className="glass-card p-4">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <div className="section-label mb-1">Channel Trends — 30 Days</div>
+          <div className="section-label mb-1">Channel Trends — {DATE_RANGE_LABELS[dateRange]}</div>
           <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>{METRIC_LABELS[metric]}</div>
         </div>
 
@@ -171,7 +173,7 @@ export default function RevenueSpendChart() {
 
       {/* Channel toggle pills */}
       <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
-        {TIME_SERIES.map(ts => {
+        {timeSeries.map(ts => {
           const cfg = CHANNEL_CONFIG[ts.channel];
           const active = activeChannels.has(ts.channel);
           return (

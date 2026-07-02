@@ -246,6 +246,7 @@ export function AiBlogGenerator() {
   const [generating, setGenerating]   = useState(false);
   const [generated, setGenerated]     = useState<GeneratedBlog | null>(null);
   const [showContent, setShowContent] = useState(false);
+  const [editing, setEditing]         = useState(false);
   const [prevBlogs, setPrevBlogs]     = useState<GeneratedBlog[]>(PREVIOUS_BLOGS);
 
   const handleGenerate = () => {
@@ -256,11 +257,19 @@ export function AiBlogGenerator() {
       setGenerated(blog);
       setGenerating(false);
       setShowContent(false);
+      setEditing(false);
     }, 2000);
   };
 
   const handlePublish = (blog: GeneratedBlog) => {
     setPrevBlogs(prev => prev.filter(b => b.id !== blog.id));
+  };
+
+  const handleEditFromList = (blog: GeneratedBlog) => {
+    setGenerated(blog);
+    setPrevBlogs(prev => prev.filter(b => b.id !== blog.id));
+    setShowContent(false);
+    setEditing(true);
   };
 
   return (
@@ -376,13 +385,33 @@ export function AiBlogGenerator() {
         <div className='glass-card p-5'>
           <div className='flex items-start justify-between gap-4 mb-4'>
             <div className='flex-1 min-w-0'>
-              <div className='section-label mb-2'>Generated Blog Post</div>
-              <div className='text-sm font-semibold mb-2 leading-snug' style={{ color: 'var(--text-primary)' }}>
-                {generated.title}
-              </div>
-              <div className='text-xs leading-relaxed' style={{ color: 'var(--text-secondary)' }}>
-                {generated.metaDescription}
-              </div>
+              <div className='section-label mb-2'>{editing ? 'Editing Blog Post' : 'Generated Blog Post'}</div>
+              {editing ? (
+                <>
+                  <input
+                    value={generated.title}
+                    onChange={e => setGenerated(g => g && { ...g, title: e.target.value })}
+                    className='w-full text-sm font-semibold mb-2 leading-snug px-3 py-2 rounded-lg outline-none'
+                    style={{ ...SELECT_STYLE, color: 'var(--text-primary)' }}
+                  />
+                  <textarea
+                    value={generated.metaDescription}
+                    onChange={e => setGenerated(g => g && { ...g, metaDescription: e.target.value })}
+                    rows={3}
+                    className='w-full text-xs leading-relaxed px-3 py-2 rounded-lg outline-none resize-none'
+                    style={{ ...SELECT_STYLE, color: 'var(--text-secondary)' }}
+                  />
+                </>
+              ) : (
+                <>
+                  <div className='text-sm font-semibold mb-2 leading-snug' style={{ color: 'var(--text-primary)' }}>
+                    {generated.title}
+                  </div>
+                  <div className='text-xs leading-relaxed' style={{ color: 'var(--text-secondary)' }}>
+                    {generated.metaDescription}
+                  </div>
+                </>
+              )}
             </div>
             {/* Large prominent gauge */}
             <ScoreGauge score={generated.seoScore} />
@@ -443,11 +472,13 @@ export function AiBlogGenerator() {
 
           <div className='flex gap-2'>
             <button
-              onClick={() => setPrevBlogs(prev => [generated, ...prev])}
+              onClick={() => setEditing(e => !e)}
               className='flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-medium transition-all'
-              style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-dim)' }}
+              style={editing
+                ? { background: 'rgba(123,147,255,0.15)', color: '#7b93ff', border: '1px solid rgba(123,147,255,0.3)' }
+                : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-dim)' }}
             >
-              <Edit2 size={12} />Edit Draft
+              <Edit2 size={12} />{editing ? 'Done Editing' : 'Edit Draft'}
             </button>
             <button
               onClick={() => {
@@ -503,6 +534,7 @@ export function AiBlogGenerator() {
                 {/* Actions */}
                 <div className='flex gap-1.5 shrink-0'>
                   <button
+                    onClick={() => handleEditFromList(blog)}
                     className='flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-mono transition-all hover:bg-white/5'
                     style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
                   >

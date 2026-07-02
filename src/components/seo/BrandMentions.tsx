@@ -36,6 +36,7 @@ const SOURCE_FILTERS: SourceFilter[] = ['all', 'web', 'social', 'news'];
 
 export function BrandMentions() {
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
+  const [responded, setResponded] = useState<Record<string, boolean>>({});
 
   const filtered = BRAND_MENTIONS.filter(m => sourceFilter === 'all' || m.source === sourceFilter);
 
@@ -275,16 +276,30 @@ export function BrandMentions() {
                         >
                           <ExternalLink size={11} />
                         </a>
-                        <button
-                          className='flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-mono transition-all'
-                          style={{
-                            background: mention.sentiment === 'negative' ? 'rgba(255,68,68,0.1)' : 'rgba(0,217,255,0.08)',
-                            color: mention.sentiment === 'negative' ? '#ff4444' : '#00d9ff',
-                            border: `1px solid ${mention.sentiment === 'negative' ? 'rgba(255,68,68,0.2)' : 'rgba(0,217,255,0.15)'}`,
-                          }}
-                        >
-                          <MessageCircle size={9} />Respond
-                        </button>
+                        {responded[mention.id] ? (
+                          <span
+                            className='flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-mono'
+                            style={{
+                              background: 'rgba(16,217,138,0.12)',
+                              color: '#10d98a',
+                              border: '1px solid rgba(16,217,138,0.25)',
+                            }}
+                          >
+                            <CheckCircle size={9} />Responded
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => setResponded(prev => ({ ...prev, [mention.id]: true }))}
+                            className='flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-mono transition-all'
+                            style={{
+                              background: mention.sentiment === 'negative' ? 'rgba(255,68,68,0.1)' : 'rgba(0,217,255,0.08)',
+                              color: mention.sentiment === 'negative' ? '#ff4444' : '#00d9ff',
+                              border: `1px solid ${mention.sentiment === 'negative' ? 'rgba(255,68,68,0.2)' : 'rgba(0,217,255,0.15)'}`,
+                            }}
+                          >
+                            <MessageCircle size={9} />Respond
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>

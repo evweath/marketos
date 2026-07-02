@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import type { AbandonedCart } from '@/types';
 import { formatCurrency, formatMinutesAgo } from '@/lib/mockData';
 import { Mail, MessageSquare, MapPin, ShoppingBag, CheckCircle, Send } from 'lucide-react';
@@ -31,24 +32,47 @@ interface RecoveryIconProps {
   icon: React.ReactNode;
   sentTitle: string;
   pendingTitle: string;
+  onSend?: () => void;
 }
 
-function RecoveryIcon({ sent, icon, sentTitle, pendingTitle }: RecoveryIconProps) {
+function RecoveryIcon({ sent, icon, sentTitle, pendingTitle, onSend }: RecoveryIconProps) {
+  const style: React.CSSProperties = {
+    background: sent ? 'rgba(16,217,138,0.12)' : 'rgba(123,147,255,0.1)',
+    border: `1px solid ${sent ? 'rgba(16,217,138,0.25)' : 'rgba(123,147,255,0.2)'}`,
+    color: sent ? '#10d98a' : '#7b93ff',
+  };
+  const content = sent ? <CheckCircle size={10} /> : icon;
+  if (sent || !onSend) {
+    return (
+      <div
+        className='flex items-center justify-center w-6 h-6 rounded'
+        title={sent ? sentTitle : pendingTitle}
+        style={style}>
+        {content}
+      </div>
+    );
+  }
   return (
-    <div
-      className='flex items-center justify-center w-6 h-6 rounded'
-      title={sent ? sentTitle : pendingTitle}
-      style={{
-        background: sent ? 'rgba(16,217,138,0.12)' : 'rgba(123,147,255,0.1)',
-        border: `1px solid ${sent ? 'rgba(16,217,138,0.25)' : 'rgba(123,147,255,0.2)'}`,
-        color: sent ? '#10d98a' : '#7b93ff',
-      }}>
-      {sent ? <CheckCircle size={10} /> : icon}
-    </div>
+    <button
+      onClick={onSend}
+      className='flex items-center justify-center w-6 h-6 rounded transition-all'
+      title={pendingTitle}
+      style={style}>
+      {content}
+    </button>
   );
 }
 
-export default function AbandonedCartFeed({ carts, storeColor: _storeColor }: Props) {
+export default function AbandonedCartFeed({ carts: initialCarts, storeColor: _storeColor }: Props) {
+  const [carts, setCarts] = useState(initialCarts);
+
+  const triggerAllRecovery = () =>
+    setCarts(prev => prev.map(c => ({ ...c, recoveryEmailSent: true, smsSent: true })));
+
+  const sendRecovery = (id: string, channel: 'email' | 'sms') =>
+    setCarts(prev => prev.map(c => c.id !== id ? c
+      : channel === 'email' ? { ...c, recoveryEmailSent: true } : { ...c, smsSent: true }));
+
   if (carts.length === 0) {
     return (
       <div className='glass-card p-4'>
@@ -80,7 +104,8 @@ export default function AbandonedCartFeed({ carts, storeColor: _storeColor }: Pr
             </span>
           </div>
         </div>
-        <button className='flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium transition-all'
+        <button onClick={triggerAllRecovery}
+          className='flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium transition-all'
           style={{
             background: 'rgba(0,217,255,0.08)',
             color: '#00d9ff',
@@ -130,12 +155,14 @@ export default function AbandonedCartFeed({ carts, storeColor: _storeColor }: Pr
                       icon={<Mail size={10} />}
                       sentTitle='Email sent'
                       pendingTitle='Send recovery email'
+                      onSend={() => sendRecovery(cart.id, 'email')}
                     />
                     <RecoveryIcon
                       sent={cart.smsSent}
                       icon={<MessageSquare size={10} />}
                       sentTitle='SMS sent'
                       pendingTitle='Send recovery SMS'
+                      onSend={() => sendRecovery(cart.id, 'sms')}
                     />
                   </div>
                 </div>

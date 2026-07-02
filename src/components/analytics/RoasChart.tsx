@@ -1,7 +1,8 @@
 'use client';
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine, CartesianGrid } from 'recharts';
-import { CHANNEL_METRICS } from '@/lib/analyticsData';
+import { scaledChannelMetrics, CHANNEL_METRICS } from '@/lib/analyticsData';
+import type { DateRange } from '@/lib/analyticsData';
 
 interface TooltipPayloadItem {
   value: number;
@@ -45,8 +46,8 @@ const ZONE_LEGEND = [
   { color: '#ff4444', label: '< 3×  Weak' },
 ];
 
-export default function RoasChart() {
-  const data = CHANNEL_METRICS
+export default function RoasChart({ dateRange = '30d' }: { dateRange?: DateRange }) {
+  const data = scaledChannelMetrics(dateRange)
     .filter(c => c.channel !== 'organic')
     .sort((a, b) => b.roas - a.roas)
     .map(c => ({

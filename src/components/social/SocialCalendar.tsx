@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
-import { SOCIAL_POSTS, PLATFORM_CONFIG } from '@/lib/socialData';
+import { PLATFORM_CONFIG } from '@/lib/socialData';
 import type { SocialPost, SocialPlatform } from '@/lib/socialData';
 
 interface Props {
+  posts: SocialPost[];
   onSelectPost: (post: SocialPost | null) => void;
   onNewPost: (date: Date) => void;
   filterPlatform: SocialPlatform | 'all';
@@ -39,7 +40,7 @@ function sameDay(d1: Date, d2: Date) {
 
 const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-export default function SocialCalendar({ onSelectPost, onNewPost, filterPlatform }: Props) {
+export default function SocialCalendar({ posts, onSelectPost, onNewPost, filterPlatform }: Props) {
   const today = new Date();
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
 
@@ -53,7 +54,7 @@ export default function SocialCalendar({ onSelectPost, onNewPost, filterPlatform
 
   const postsForDay = (day: number) => {
     const dayDate = new Date(year, month, day);
-    return SOCIAL_POSTS.filter(p => {
+    return posts.filter(p => {
       const pDate = new Date(p.scheduledFor);
       if (!sameDay(dayDate, pDate)) return false;
       if (filterPlatform !== 'all' && !p.platforms.includes(filterPlatform)) return false;

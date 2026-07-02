@@ -420,6 +420,7 @@ function UpsellPanel() {
   const [offers, setOffers] = useState<UpsellOffer[]>(UPSELL_OFFERS);
   const [deletingId, setDeletingId]     = useState<string | null>(null);
   const [addOpen, setAddOpen]           = useState(false);
+  const [editingId, setEditingId]       = useState<string | null>(null);
 
   // New offer form state
   const [newName, setNewName]             = useState('');
@@ -442,24 +443,50 @@ function UpsellPanel() {
     }
   };
 
+  const resetForm = () => {
+    setNewName(''); setNewType('upsell'); setNewTrigger('after'); setNewProduct('');
+    setNewOriginal(''); setNewDiscounted(''); setNewTiming('immediate');
+  };
+
+  const startEdit = (offer: UpsellOffer) => {
+    setEditingId(offer.id);
+    setNewName(offer.name);
+    setNewType(offer.type);
+    setNewTrigger(offer.trigger.startsWith('First') ? 'first' : offer.trigger.startsWith('Specific') ? 'specific' : offer.trigger.startsWith('Order value') ? 'value' : 'after');
+    setNewProduct(offer.offerProduct);
+    setNewOriginal(String(offer.originalPrice));
+    setNewDiscounted(String(offer.offerPrice));
+    setAddOpen(true);
+  };
+
   const handleCreate = () => {
     if (!newName.trim() || !newProduct.trim()) return;
-    const offer: UpsellOffer = {
-      id: `u-${Date.now()}`,
-      name: newName,
-      type: newType,
-      trigger: newTrigger === 'after' ? 'After purchase' : newTrigger === 'first' ? 'First purchase' : newTrigger === 'specific' ? 'Specific product purchased' : 'Order value > $X',
-      offerProduct: newProduct,
-      originalPrice: Number(newOriginal) || 0,
-      offerPrice: Number(newDiscounted) || 0,
-      discount: newOriginal && newDiscounted ? `${Math.round((1 - Number(newDiscounted) / Number(newOriginal)) * 100)}% off` : '—',
-      acceptRate: 0,
-      revenue30d: 0,
-      status: 'active',
-    };
-    setOffers(prev => [offer, ...prev]);
+    const trigger = newTrigger === 'after' ? 'After purchase' : newTrigger === 'first' ? 'First purchase' : newTrigger === 'specific' ? 'Specific product purchased' : 'Order value > $X';
+    const discount = newOriginal && newDiscounted ? `${Math.round((1 - Number(newDiscounted) / Number(newOriginal)) * 100)}% off` : '—';
+    if (editingId) {
+      setOffers(prev => prev.map(o => o.id === editingId ? {
+        ...o, name: newName, type: newType, trigger, offerProduct: newProduct,
+        originalPrice: Number(newOriginal) || 0, offerPrice: Number(newDiscounted) || 0, discount,
+      } : o));
+      setEditingId(null);
+    } else {
+      const offer: UpsellOffer = {
+        id: `u-${Date.now()}`,
+        name: newName,
+        type: newType,
+        trigger,
+        offerProduct: newProduct,
+        originalPrice: Number(newOriginal) || 0,
+        offerPrice: Number(newDiscounted) || 0,
+        discount,
+        acceptRate: 0,
+        revenue30d: 0,
+        status: 'active',
+      };
+      setOffers(prev => [offer, ...prev]);
+    }
     setAddOpen(false);
-    setNewName(''); setNewProduct(''); setNewOriginal(''); setNewDiscounted('');
+    resetForm();
   };
 
   return (
@@ -483,7 +510,7 @@ function UpsellPanel() {
       <div className="glass-card p-4">
         <div className="flex items-center justify-between mb-4">
           <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Active Upsell Offers</div>
-          <button onClick={() => setAddOpen(o => !o)}
+          <button onClick={() => { setAddOpen(o => !o); setEditingId(null); resetForm(); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
             style={{ background: 'rgba(0,217,255,0.1)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
             <Plus size={12} />Add Offer
@@ -494,7 +521,7 @@ function UpsellPanel() {
         {/* Add offer form */}
         {addOpen && (
           <div className="mb-4 p-4 rounded-xl space-y-3" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)' }}>
-            <div className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>New Upsell Offer</div>
+            <div className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{editingId ? 'Edit Upsell Offer' : 'New Upsell Offer'}</div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
@@ -561,7 +588,7 @@ function UpsellPanel() {
             </div>
 
             <div className="flex gap-2 justify-end">
-              <button onClick={() => setAddOpen(false)}
+              <button onClick={() => { setAddOpen(false); setEditingId(null); resetForm(); }}
                 className="px-4 py-1.5 rounded-lg text-xs"
                 style={{ color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
                 Cancel
@@ -569,7 +596,7 @@ function UpsellPanel() {
               <button onClick={handleCreate}
                 className="px-4 py-1.5 rounded-lg text-xs font-semibold"
                 style={{ background: '#00d9ff', color: '#0a0e1a' }}>
-                Create Offer
+                {editingId ? 'Save Offer' : 'Create Offer'}
               </button>
             </div>
           </div>
@@ -624,7 +651,8 @@ function UpsellPanel() {
 
                     {/* Actions */}
                     <div className="flex items-center gap-1.5">
-                      <button className="p-1.5 rounded-lg transition-colors"
+                      <button onClick={() => startEdit(offer)}
+                        className="p-1.5 rounded-lg transition-colors"
                         style={{ background: 'rgba(123,147,255,0.1)', color: '#7b93ff', border: '1px solid rgba(123,147,255,0.2)' }}>
                         <Pencil size={11} />
                       </button>
@@ -956,10 +984,14 @@ type Tab = 'live' | 'sequences' | 'recovered' | 'exitintent' | 'upsell' | 'watch
 
 export default function CartPage() {
   const [tab, setTab] = useState<Tab>('live');
+  const [liveCarts, setLiveCarts] = useState(ABANDONED_CARTS);
   const s = RECOVERY_STATS;
 
+  const triggerAllRecovery = () =>
+    setLiveCarts(prev => prev.map(cart => ({ ...cart, recoveryEmailSent: true, smsSent: true })));
+
   const TABS = [
-    { key: 'live' as Tab,        label: 'Live Carts',           icon: ShoppingCart, badge: ABANDONED_CARTS.length },
+    { key: 'live' as Tab,        label: 'Live Carts',           icon: ShoppingCart, badge: liveCarts.length },
     { key: 'sequences' as Tab,   label: 'Recovery Sequences',   icon: BarChart2    },
     { key: 'recovered' as Tab,   label: 'Recovered',            icon: TrendingUp   },
     { key: 'exitintent' as Tab,  label: 'Exit-Intent',          icon: MousePointer },
@@ -1044,18 +1076,18 @@ export default function CartPage() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full live-dot-amber" style={{ background: '#ffb347' }} />
-                    <span className="data-value text-xl font-bold" style={{ color: '#ffb347' }}>{ABANDONED_CARTS.length}</span>
+                    <span className="data-value text-xl font-bold" style={{ color: '#ffb347' }}>{liveCarts.length}</span>
                     <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
                       active carts · {formatCurrency(s.totalCartValue)} at risk
                     </span>
                   </div>
-                  <button className="text-xs px-3 py-1.5 rounded-lg font-medium"
+                  <button onClick={triggerAllRecovery} className="text-xs px-3 py-1.5 rounded-lg font-medium"
                     style={{ background: 'rgba(255,179,71,0.1)', color: '#ffb347', border: '1px solid rgba(255,179,71,0.2)' }}>
                     Trigger All Recovery
                   </button>
                 </div>
                 <div className="space-y-2">
-                  {ABANDONED_CARTS.map(cart => {
+                  {liveCarts.map(cart => {
                     const store = getStoreById(cart.storeId);
                     const urgent = cart.minutesAgo < 15;
                     return (

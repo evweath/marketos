@@ -54,7 +54,11 @@ const STATUS_CONFIG: Record<AlertStatus, {
 
 // ─── Detail Panel ─────────────────────────────────────────────────────────────
 
-function AlertDetail({ alert, onClose }: { alert: FiredAlert; onClose: () => void }) {
+function AlertDetail({ alert, onClose, onUpdateStatus }: {
+  alert: FiredAlert;
+  onClose: () => void;
+  onUpdateStatus: (status: AlertStatus) => void;
+}) {
   const sc = SEV_CONFIG[alert.severity];
   const stc = STATUS_CONFIG[alert.status];
   const cat = CATEGORY_CONFIG[alert.category];
@@ -185,15 +189,18 @@ function AlertDetail({ alert, onClose }: { alert: FiredAlert; onClose: () => voi
       {/* Action buttons */}
       {alert.status === 'active' && (
         <div className="flex gap-2 p-4 border-t shrink-0" style={{ borderColor: 'var(--border-subtle)' }}>
-          <button className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all hover:brightness-110"
+          <button onClick={() => onUpdateStatus('acknowledged')}
+            className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all hover:brightness-110"
             style={{ background: 'rgba(123,147,255,0.12)', color: '#7b93ff', border: '1px solid rgba(123,147,255,0.25)' }}>
             Acknowledge
           </button>
-          <button className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all hover:brightness-110"
+          <button onClick={() => onUpdateStatus('snoozed')}
+            className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all hover:brightness-110"
             style={{ background: 'rgba(255,179,71,0.10)', color: '#ffb347', border: '1px solid rgba(255,179,71,0.22)' }}>
             Snooze 1h
           </button>
-          <button className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all hover:brightness-110"
+          <button onClick={() => onUpdateStatus('resolved')}
+            className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all hover:brightness-110"
             style={{ background: 'rgba(16,217,138,0.12)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.22)' }}>
             Resolve
           </button>
@@ -296,9 +303,29 @@ const SEV_FILTERS: { key: AlertSeverity | 'all'; label: string; color?: string }
 export default function AlertFeed() {
   const [statusFilter, setStatusFilter] = useState<AlertStatus | 'all'>('all');
   const [sevFilter, setSevFilter] = useState<AlertSeverity | 'all'>('all');
-  const [selected, setSelected] = useState<FiredAlert | null>(null);
+  const [allAlerts, setAllAlerts] = useState<FiredAlert[]>(FIRED_ALERTS);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const alerts = FIRED_ALERTS.filter(a => {
+  const selected = selectedId ? allAlerts.find(a => a.id === selectedId) ?? null : null;
+
+  function updateStatus(id: string, status: AlertStatus) {
+    const now = new Date().toISOString();
+    setAllAlerts(prev => prev.map(a => {
+      if (a.id !== id) return a;
+      const next = { ...a, status };
+      if (status === 'acknowledged') {
+        next.acknowledgedAt = a.acknowledgedAt ?? now;
+        next.acknowledgedBy = a.acknowledgedBy ?? 'You';
+      } else if (status === 'resolved') {
+        next.acknowledgedAt = a.acknowledgedAt ?? now;
+        next.acknowledgedBy = a.acknowledgedBy ?? 'You';
+        next.resolvedAt = now;
+      }
+      return next;
+    }));
+  }
+
+  const alerts = allAlerts.filter(a => {
     if (statusFilter !== 'all' && a.status !== statusFilter) return false;
     if (sevFilter !== 'all' && a.severity !== sevFilter) return false;
     return true;
@@ -317,7 +344,7 @@ export default function AlertFeed() {
           {/* Status tabs — pill container */}
           <div className="flex items-center gap-0.5 p-0.5 rounded-lg" style={{ background: 'var(--bg-elevated)', width: 'fit-content' }}>
             {STATUS_TABS.map(t => {
-              const cnt = t.key === 'all' ? FIRED_ALERTS.length : FIRED_ALERTS.filter(a => a.status === t.key).length;
+              const cnt = t.key === 'all' ? allAlerts.length : allAlerts.filter(a => a.status === t.key).length;
               const isActive = statusFilter === t.key;
               const tabColor = t.key !== 'all' ? STATUS_CONFIG[t.key as AlertStatus]?.color : undefined;
               return (
@@ -372,8 +399,8 @@ export default function AlertFeed() {
         {/* Alert rows */}
         <div className="flex-1 overflow-y-auto">
           {alerts.map(a => (
-            <AlertRow key={a.id} alert={a} selected={selected?.id === a.id}
-              onClick={() => setSelected(selected?.id === a.id ? null : a)} />
+            <AlertRow key={a.id} alert={a} selected={selectedId === a.id}
+              onClick={() => setSelectedId(selectedId === a.id ? null : a.id)} />
           ))}
           {alerts.length === 0 && (
             <div className="flex items-center justify-center h-32" style={{ color: 'var(--text-muted)' }}>
@@ -386,7 +413,8 @@ export default function AlertFeed() {
       {/* Detail panel */}
       {selected && (
         <div style={{ width: 360, flexShrink: 0 }}>
-          <AlertDetail alert={selected} onClose={() => setSelected(null)} />
+          <AlertDetail alert={selected} onClose={() => setSelectedId(null)}
+            onUpdateStatus={status => updateStatus(selected.id, status)} />
         </div>
       )}
     </div>

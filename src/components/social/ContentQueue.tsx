@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { Clock, BarChart2 } from 'lucide-react';
-import { SOCIAL_POSTS, PLATFORM_CONFIG, CATEGORY_CONFIG } from '@/lib/socialData';
+import { PLATFORM_CONFIG, CATEGORY_CONFIG } from '@/lib/socialData';
 import type { SocialPost, PostStatus, SocialPlatform } from '@/lib/socialData';
 
 interface Props {
+  posts: SocialPost[];
   onSelectPost: (post: SocialPost) => void;
   filterPlatform: SocialPlatform | 'all';
 }
@@ -37,10 +38,10 @@ const STATUS_TABS: { key: PostStatus | 'all'; label: string }[] = [
   { key: 'published', label: 'Published' },
 ];
 
-export default function ContentQueue({ onSelectPost, filterPlatform }: Props) {
+export default function ContentQueue({ posts, onSelectPost, filterPlatform }: Props) {
   const [statusFilter, setStatusFilter] = useState<PostStatus | 'all'>('all');
 
-  const posts = SOCIAL_POSTS.filter(p => {
+  const visiblePosts = posts.filter(p => {
     if (statusFilter !== 'all' && p.status !== statusFilter) return false;
     if (filterPlatform !== 'all' && !p.platforms.includes(filterPlatform)) return false;
     return true;
@@ -57,8 +58,8 @@ export default function ContentQueue({ onSelectPost, filterPlatform }: Props) {
         <div className="flex items-center gap-0.5 p-0.5 rounded-lg" style={{ background: 'var(--bg-elevated)' }}>
           {STATUS_TABS.map(tab => {
             const count = tab.key === 'all'
-              ? SOCIAL_POSTS.length
-              : SOCIAL_POSTS.filter(p => p.status === tab.key).length;
+              ? posts.length
+              : posts.filter(p => p.status === tab.key).length;
             const isActive = statusFilter === tab.key;
             const tabColor = tab.key !== 'all' ? STATUS_STYLE[tab.key as PostStatus]?.color : undefined;
 
@@ -90,7 +91,7 @@ export default function ContentQueue({ onSelectPost, filterPlatform }: Props) {
 
       {/* Posts list */}
       <div className="flex-1 overflow-y-auto">
-        {posts.map(post => {
+        {visiblePosts.map(post => {
           const ss = STATUS_STYLE[post.status];
           const catCfg = CATEGORY_CONFIG[post.category];
           const authorInitials = post.author.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
@@ -178,7 +179,7 @@ export default function ContentQueue({ onSelectPost, filterPlatform }: Props) {
           );
         })}
 
-        {posts.length === 0 && (
+        {visiblePosts.length === 0 && (
           <div className="flex items-center justify-center py-16" style={{ color: 'var(--text-muted)' }}>
             <span className="text-sm">No posts match this filter</span>
           </div>

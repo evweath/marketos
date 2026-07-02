@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ALERT_RULES, CATEGORY_CONFIG } from '@/lib/alertData';
 import type { AlertRule, AlertCategory } from '@/lib/alertData';
-import { Shield, ChevronDown, ChevronUp, Edit2, Bell, Clock } from 'lucide-react';
+import { Shield, ChevronDown, ChevronUp, Edit2, Bell, Clock, X } from 'lucide-react';
 
 const DELIVERY_ICONS: Record<string, string> = {
   email: '✉', sms: '📱', slack: '💬', teams: '🔷', push: '🔔',
@@ -214,11 +214,53 @@ function RuleCard({ rule }: { rule: AlertRule }) {
   );
 }
 
+const NEW_RULE_CATEGORIES: AlertCategory[] = [
+  'budget', 'roas', 'uptime', 'ssl', 'cart', 'stock', 'traffic', 'revenue',
+];
+
 export default function AlertRulesPanel() {
   const [catFilter, setCatFilter] = useState<AlertCategory | 'all'>('all');
   const [showDisabled, setShowDisabled] = useState(false);
+  const [allRules, setAllRules] = useState<AlertRule[]>(ALERT_RULES);
+  const [adding, setAdding] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newCategory, setNewCategory] = useState<AlertCategory>('budget');
+  const [newSeverity, setNewSeverity] = useState<AlertRule['severity']>('warning');
+  const [newMetric, setNewMetric] = useState('');
+  const [newThreshold, setNewThreshold] = useState('');
 
-  const rules = ALERT_RULES.filter(r => {
+  function resetForm() {
+    setNewName('');
+    setNewCategory('budget');
+    setNewSeverity('warning');
+    setNewMetric('');
+    setNewThreshold('');
+    setAdding(false);
+  }
+
+  function addRule() {
+    if (!newName.trim()) return;
+    const rule: AlertRule = {
+      id: `rule-${Date.now()}`,
+      name: newName.trim(),
+      category: newCategory,
+      enabled: true,
+      severity: newSeverity,
+      metric: newMetric.trim() || 'custom_metric',
+      operator: '>=',
+      threshold: Number(newThreshold) || 0,
+      unit: '',
+      storeIds: ['all'],
+      channels: ['email'],
+      cooldownMinutes: 60,
+      description: 'Custom rule created from the dashboard.',
+      fireCount30d: 0,
+    };
+    setAllRules(prev => [rule, ...prev]);
+    resetForm();
+  }
+
+  const rules = allRules.filter(r => {
     if (!showDisabled && !r.enabled) return false;
     if (catFilter !== 'all' && r.category !== catFilter) return false;
     return true;
@@ -240,7 +282,7 @@ export default function AlertRulesPanel() {
             <span className="section-label">Alert Rules</span>
             <span className="text-[10px] font-mono px-1.5 py-0.5 rounded"
               style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-              {ALERT_RULES.filter(r => r.enabled).length}/{ALERT_RULES.length} active
+              {allRules.filter(r => r.enabled).length}/{allRules.length} active
             </span>
           </div>
           <div className="flex items-center gap-3">
@@ -249,7 +291,8 @@ export default function AlertRulesPanel() {
               <input type="checkbox" checked={showDisabled} onChange={e => setShowDisabled(e.target.checked)} />
               Show disabled
             </label>
-            <button className="text-xs px-3 py-1.5 rounded-lg font-semibold transition-all hover:brightness-110"
+            <button onClick={() => setAdding(a => !a)}
+              className="text-xs px-3 py-1.5 rounded-lg font-semibold transition-all hover:brightness-110"
               style={{ background: 'rgba(0,217,255,0.10)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.22)' }}>
               + New Rule
             </button>
@@ -278,6 +321,89 @@ export default function AlertRulesPanel() {
 
       {/* Rules list */}
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
+        {/* Inline add-rule form */}
+        {adding && (
+          <div className="rounded-xl p-3.5 space-y-2.5 animate-fade-up"
+            style={{ background: 'var(--bg-elevated)', border: '1px solid rgba(0,217,255,0.25)' }}>
+            <div className="flex items-center justify-between">
+              <span className="section-label" style={{ color: '#00d9ff' }}>New Rule</span>
+              <button onClick={resetForm}
+                className="p-1 rounded-lg transition-colors hover:bg-white/[0.06]"
+                style={{ color: 'var(--text-muted)' }}>
+                <X size={12} />
+              </button>
+            </div>
+
+            <input
+              type="text"
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
+              placeholder="Rule name"
+              className="w-full text-xs px-2 py-1.5 rounded-lg outline-none"
+              style={{ background: 'var(--bg-overlay)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
+            />
+
+            <div className="flex gap-2">
+              <select
+                value={newCategory}
+                onChange={e => setNewCategory(e.target.value as AlertCategory)}
+                className="flex-1 text-xs px-2 py-1.5 rounded-lg outline-none"
+                style={{ background: 'var(--bg-overlay)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}>
+                {NEW_RULE_CATEGORIES.map(c => (
+                  <option key={c} value={c}>{CATEGORY_CONFIG[c].icon} {CATEGORY_CONFIG[c].label}</option>
+                ))}
+              </select>
+              <select
+                value={newSeverity}
+                onChange={e => setNewSeverity(e.target.value as AlertRule['severity'])}
+                className="flex-1 text-xs px-2 py-1.5 rounded-lg outline-none"
+                style={{ background: 'var(--bg-overlay)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}>
+                <option value="critical">Critical</option>
+                <option value="warning">Warning</option>
+                <option value="info">Info</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={newMetric}
+                onChange={e => setNewMetric(e.target.value)}
+                placeholder="metric"
+                className="flex-1 text-xs px-2 py-1.5 rounded-lg outline-none font-mono"
+                style={{ background: 'var(--bg-overlay)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
+              />
+              <span className="text-[10px] font-mono shrink-0" style={{ color: 'var(--text-muted)' }}>&gt;=</span>
+              <input
+                type="number"
+                value={newThreshold}
+                onChange={e => setNewThreshold(e.target.value)}
+                placeholder="0"
+                className="w-20 text-xs px-2 py-1.5 rounded-lg outline-none font-mono"
+                style={{ background: 'var(--bg-overlay)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
+              />
+            </div>
+
+            <div className="flex gap-2 pt-0.5">
+              <button onClick={addRule}
+                disabled={!newName.trim()}
+                className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all hover:brightness-110"
+                style={{
+                  background: 'rgba(0,217,255,0.12)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.25)',
+                  opacity: newName.trim() ? 1 : 0.5,
+                  cursor: newName.trim() ? 'pointer' : 'not-allowed',
+                }}>
+                Add Rule
+              </button>
+              <button onClick={resetForm}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                style={{ background: 'var(--bg-overlay)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
         {rules.map(rule => <RuleCard key={rule.id} rule={rule} />)}
         {rules.length === 0 && (
           <div className="flex items-center justify-center h-24" style={{ color: 'var(--text-muted)' }}>

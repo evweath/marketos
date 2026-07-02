@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { ATTRIBUTION } from '@/lib/analyticsData';
+import { ATTRIBUTION, scaledAttributionConversions, DATE_RANGE_LABELS } from '@/lib/analyticsData';
+import type { DateRange } from '@/lib/analyticsData';
 
 type Model = 'firstTouch' | 'lastTouch' | 'linearTouch' | 'positionBased';
 
@@ -21,8 +22,9 @@ const MODEL_DESC: Record<Model, string> = {
 
 const MODELS: Model[] = ['firstTouch', 'lastTouch', 'linearTouch', 'positionBased'];
 
-export default function AttributionPanel() {
+export default function AttributionPanel({ dateRange = '30d' }: { dateRange?: DateRange }) {
   const [model, setModel] = useState<Model>('linearTouch');
+  const conversions = scaledAttributionConversions(dateRange);
   const data = [...ATTRIBUTION].sort((a, b) => b[model] - a[model]);
 
   return (
@@ -110,7 +112,7 @@ export default function AttributionPanel() {
         className="mt-3 pt-3 border-t text-[10px] font-mono"
         style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}
       >
-        Based on {(3131).toLocaleString()} conversions in last 30 days
+        Based on {conversions.toLocaleString()} conversions · {DATE_RANGE_LABELS[dateRange].toLowerCase()}
       </div>
     </div>
   );

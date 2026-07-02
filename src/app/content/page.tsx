@@ -71,9 +71,18 @@ const STYLE_PRESETS = ['Studio White', 'Lifestyle Kitchen', 'Dark Dramatic', 'Fl
 function PhotoStudioPanel() {
   const [activeStyle, setActiveStyle] = useState<string>('Studio White');
   const [mode, setMode] = useState<'bg_remove' | 'style'>('bg_remove');
+  const [jobs, setJobs] = useState<PhotoJob[]>(PHOTO_JOBS);
 
-  const done = PHOTO_JOBS.filter(j => j.result !== 'pending');
-  const pending = PHOTO_JOBS.filter(j => j.result === 'pending');
+  const runJob = () => {
+    const id = `pj-new-${Date.now()}`;
+    const newJob: PhotoJob = mode === 'bg_remove'
+      ? { id, name: `Upload-${jobs.length + 1}.jpg`, original: '1.0 MB', result: 'pending', time: 'Processing…' }
+      : { id, name: `Upload-${jobs.length + 1}.png`, original: '1.0 MB', result: 'pending', style: activeStyle, time: 'Processing…' };
+    setJobs(prev => [newJob, ...prev]);
+  };
+
+  const done = jobs.filter(j => j.result !== 'pending');
+  const pending = jobs.filter(j => j.result === 'pending');
 
   return (
     <div className='flex flex-col gap-4'>
@@ -134,7 +143,7 @@ function PhotoStudioPanel() {
               </div>
             )}
 
-            <button className='w-full mt-3 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-2'
+            <button onClick={runJob} className='w-full mt-3 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-2'
               style={{ background: 'rgba(0,217,255,0.1)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.25)' }}>
               <Wand2 size={12} />
               {mode === 'bg_remove' ? 'Remove Background' : 'Apply AI Style'}
@@ -161,7 +170,7 @@ function PhotoStudioPanel() {
               </tr>
             </thead>
             <tbody>
-              {PHOTO_JOBS.map(job => (
+              {jobs.map(job => (
                 <tr key={job.id} className='border-b hover:bg-white/[0.02] transition-colors' style={{ borderColor: 'var(--border-subtle)' }}>
                   <td className='px-4 py-2.5 font-medium' style={{ color: 'var(--text-primary)' }}>{job.name}</td>
                   <td className='px-4 py-2.5 font-mono' style={{ color: 'var(--text-muted)' }}>{job.original}</td>
@@ -210,6 +219,34 @@ function VideoToolsPanel() {
   const [t2vPrompt, setT2vPrompt] = useState('');
   const [t2vPlatform, setT2vPlatform] = useState('TikTok');
   const [t2vLen, setT2vLen] = useState('0:30');
+  const [jobs, setJobs] = useState<VideoJob[]>(VIDEO_JOBS);
+
+  const createVideo = () => {
+    const id = `vj-new-${Date.now()}`;
+    const newJob: VideoJob = videoMode === 't2v'
+      ? {
+          id,
+          title: t2vPrompt.trim() ? t2vPrompt.trim().slice(0, 60) : 'Untitled Text-to-Video',
+          type: 'text_to_video',
+          platform: t2vPlatform,
+          duration: t2vLen,
+          status: 'rendering',
+          captions: true,
+          time: 'Just now',
+        }
+      : {
+          id,
+          title: 'Uploaded Footage — AI Edit',
+          type: 'edit',
+          platform: t2vPlatform,
+          duration: t2vLen,
+          status: 'rendering',
+          captions: true,
+          time: 'Just now',
+        };
+    setJobs(prev => [newJob, ...prev]);
+    if (videoMode === 't2v') setT2vPrompt('');
+  };
 
   return (
     <div className='flex flex-col gap-4'>
@@ -302,7 +339,7 @@ function VideoToolsPanel() {
               </div>
             )}
 
-            <button className='w-full mt-3 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-2'
+            <button onClick={createVideo} className='w-full mt-3 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-2'
               style={{ background: 'rgba(0,217,255,0.1)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.25)' }}>
               {videoMode === 't2v' ? <><Wand2 size={12} />Generate Video</> : <><Scissors size={12} />Process Footage</>}
             </button>
@@ -313,9 +350,9 @@ function VideoToolsPanel() {
         <div className='col-span-2 glass-card overflow-hidden'>
           <div className='px-4 py-3 border-b flex items-center justify-between' style={{ borderColor: 'var(--border-subtle)' }}>
             <span className='section-label'>Recent Videos</span>
-            {VIDEO_JOBS.filter(j => j.status === 'rendering').length > 0 && (
+            {jobs.filter(j => j.status === 'rendering').length > 0 && (
               <span className='text-[10px] px-2 py-0.5 rounded-full' style={{ background: 'rgba(0,217,255,.1)', color: '#00d9ff' }}>
-                {VIDEO_JOBS.filter(j => j.status === 'rendering').length} rendering
+                {jobs.filter(j => j.status === 'rendering').length} rendering
               </span>
             )}
           </div>
@@ -328,7 +365,7 @@ function VideoToolsPanel() {
               </tr>
             </thead>
             <tbody>
-              {VIDEO_JOBS.map(job => (
+              {jobs.map(job => (
                 <tr key={job.id} className='border-b hover:bg-white/[0.02] transition-colors' style={{ borderColor: 'var(--border-subtle)' }}>
                   <td className='px-4 py-2.5 font-medium max-w-[160px] truncate' style={{ color: 'var(--text-primary)' }}>{job.title}</td>
                   <td className='px-4 py-2.5'>

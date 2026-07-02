@@ -1,9 +1,10 @@
 'use client';
 
-import { X, Pause, TrendingUp, TrendingDown, Users, Image, Zap, DollarSign, MousePointer, BarChart2 } from 'lucide-react';
+import { useState } from 'react';
+import { X, Pause, Play, TrendingUp, TrendingDown, Users, Image, Zap, DollarSign, MousePointer, BarChart2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { AD_PLATFORM_CONFIG, STATUS_CONFIG, AD_SETS, CREATIVES } from '@/lib/campaignData';
-import type { Campaign } from '@/lib/campaignData';
+import type { Campaign, CampaignStatus } from '@/lib/campaignData';
 
 const c$ = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
@@ -24,8 +25,13 @@ interface KPIItem {
 }
 
 export default function CampaignDetail({ campaign: c, onClose }: Props) {
+  const [status, setStatus] = useState<CampaignStatus>(c.status);
+  const isPaused = status === 'paused';
+  const togglePause = () =>
+    setStatus(prev => (prev === 'paused' ? 'active' : 'paused'));
+
   const pc = AD_PLATFORM_CONFIG[c.platform];
-  const sc = STATUS_CONFIG[c.status];
+  const sc = STATUS_CONFIG[status];
   const adSets    = AD_SETS.filter(a => a.campaignId === c.id);
   const creatives = CREATIVES.filter(cr => cr.campaignId === c.id);
 
@@ -66,9 +72,13 @@ export default function CampaignDetail({ campaign: c, onClose }: Props) {
           <h3 className='text-sm font-bold leading-snug' style={{ color: 'var(--text-primary)' }}>{c.name}</h3>
         </div>
         <div className='flex items-center gap-1.5 ml-2 shrink-0'>
-          <button className='p-1.5 rounded-lg text-xs transition-all'
-            style={{ background: 'rgba(255,179,71,0.1)', color: '#ffb347', border: '1px solid rgba(255,179,71,0.2)' }}>
-            <Pause size={12} />
+          <button onClick={togglePause}
+            title={isPaused ? 'Resume campaign' : 'Pause campaign'}
+            className='p-1.5 rounded-lg text-xs transition-all'
+            style={isPaused
+              ? { background: 'rgba(16,217,138,0.1)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.2)' }
+              : { background: 'rgba(255,179,71,0.1)', color: '#ffb347', border: '1px solid rgba(255,179,71,0.2)' }}>
+            {isPaused ? <Play size={12} /> : <Pause size={12} />}
           </button>
           <button onClick={onClose}
             className='p-1.5 rounded-lg transition-colors hover:bg-white/5'

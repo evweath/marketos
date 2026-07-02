@@ -1007,10 +1007,20 @@ function DMAutomationPanel() {
 
 export default function SocialPage() {
   const [tab, setTab] = useState<Tab>('calendar');
+  const [posts, setPosts] = useState<SocialPost[]>(SOCIAL_POSTS);
   const [selectedPost, setSelectedPost] = useState<SocialPost | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [newPostDate, setNewPostDate] = useState<Date | null>(null);
   const [platformFilter, setPlatformFilter] = useState<SocialPlatform | 'all'>('all');
+
+  const handleAddPost = (post: SocialPost) => {
+    setPosts(prev => [post, ...prev]);
+  };
+
+  const handleUpdatePost = (id: string, status: SocialPost['status']) => {
+    setPosts(prev => prev.map(p => p.id !== id ? p : { ...p, status }));
+    setSelectedPost(prev => prev && prev.id === id ? { ...prev, status } : prev);
+  };
 
   const handleSelectPost = (post: SocialPost | null) => {
     setSelectedPost(post);
@@ -1105,6 +1115,7 @@ export default function SocialPage() {
             <div className={`flex flex-col min-h-0 transition-all duration-300 ${showPanel ? 'flex-1' : 'flex-1'}`}>
               {tab === 'calendar' && (
                 <SocialCalendar
+                  posts={posts}
                   onSelectPost={handleSelectPost}
                   onNewPost={handleNewPost}
                   filterPlatform={platformFilter}
@@ -1112,6 +1123,7 @@ export default function SocialPage() {
               )}
               {tab === 'queue' && (
                 <ContentQueue
+                  posts={posts}
                   onSelectPost={handleSelectPost}
                   filterPlatform={platformFilter}
                 />
@@ -1135,6 +1147,8 @@ export default function SocialPage() {
                 <PostComposer
                   post={selectedPost}
                   defaultDate={newPostDate || undefined}
+                  onAddPost={handleAddPost}
+                  onUpdatePost={handleUpdatePost}
                   onClose={() => { setComposerOpen(false); setSelectedPost(null); }}
                 />
               </div>

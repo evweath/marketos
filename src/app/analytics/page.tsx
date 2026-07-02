@@ -11,16 +11,27 @@ import AttributionPanel from '@/components/analytics/AttributionPanel';
 import AIInsightsPanel from '@/components/analytics/AIInsightsPanel';
 import RoasChart from '@/components/analytics/RoasChart';
 import DateRangePicker from '@/components/analytics/DateRangePicker';
+import { scaledTotals, DATE_RANGE_LABELS } from '@/lib/analyticsData';
 import type { DateRange } from '@/lib/analyticsData';
 import { Download, Share2, ExternalLink, Copy, CheckCircle2 } from 'lucide-react';
 
-const SHARED_REPORTS = [
+interface SharedReport {
+  id: string;
+  name: string;
+  platform: string;
+  lastUpdated: string;
+  views: number;
+  shareUrl: string;
+  live: boolean;
+}
+
+const SHARED_REPORTS: SharedReport[] = [
   { id: 'sr-1', name: 'Monthly Performance — All Stores', platform: 'Looker Studio', lastUpdated: '2h ago', views: 14, shareUrl: 'https://lookerstudio.google.com/r/abc123', live: true },
   { id: 'sr-2', name: 'Q1 Ad Spend Summary',              platform: 'Google Slides', lastUpdated: '3d ago', views: 8,  shareUrl: 'https://docs.google.com/presentation/d/xyz789', live: true },
   { id: 'sr-3', name: 'Channel Attribution Deep-Dive',    platform: 'Looker Studio', lastUpdated: '1w ago', views: 5,  shareUrl: 'https://lookerstudio.google.com/r/def456', live: false },
 ];
 
-function ShareableReportsPanel({ onClose }: { onClose: () => void }) {
+function ShareableReportsPanel({ onClose, reports, onCreate }: { onClose: () => void; reports: SharedReport[]; onCreate: () => void }) {
   const [copied, setCopied] = useState<string | null>(null);
 
   const handleCopy = (id: string) => {
@@ -42,7 +53,7 @@ function ShareableReportsPanel({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className='flex flex-col gap-2'>
-          {SHARED_REPORTS.map(r => (
+          {reports.map(r => (
             <div key={r.id} className='rounded-xl px-4 py-3 flex items-center gap-3'
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
               <div className='flex-1 min-w-0'>
@@ -71,7 +82,7 @@ function ShareableReportsPanel({ onClose }: { onClose: () => void }) {
 
         <div className='pt-2 border-t flex items-center justify-between' style={{ borderColor: 'var(--border-subtle)' }}>
           <span className='text-xs' style={{ color: 'var(--text-muted)' }}>Connected: Google Looker Studio, Google Slides</span>
-          <button className='text-xs px-3 py-1.5 rounded-lg font-medium'
+          <button onClick={onCreate} className='text-xs px-3 py-1.5 rounded-lg font-medium'
             style={{ background: 'rgba(0,217,255,0.1)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.25)' }}>
             + Create Report
           </button>
@@ -84,6 +95,43 @@ function ShareableReportsPanel({ onClose }: { onClose: () => void }) {
 export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [showReports, setShowReports] = useState(false);
+  const [reports, setReports] = useState<SharedReport[]>(SHARED_REPORTS);
+
+  // Runs only in a click handler (never during render), so browser-only APIs
+  // and non-deterministic values are safe here — no hydration impact.
+  const handleCreateReport = () => {
+    setReports(prev => [
+      {
+        id: `sr-${Date.now()}`,
+        name: `Custom Report — ${DATE_RANGE_LABELS[dateRange]}`,
+        platform: 'Looker Studio',
+        lastUpdated: 'just now',
+        views: 0,
+        shareUrl: 'https://lookerstudio.google.com/r/new',
+        live: true,
+      },
+      ...prev,
+    ]);
+  };
+
+  const handleExport = () => {
+    if (typeof window === 'undefined') return;
+    const t = scaledTotals(dateRange);
+    const payload = {
+      range: DATE_RANGE_LABELS[dateRange],
+      generatedAt: new Date().toISOString(),
+      totals: t,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `analytics-report-${dateRange}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-base)' }}>
@@ -108,26 +156,27 @@ export default function AnalyticsPage() {
                   style={{ border: '1px solid var(--border-dim)', color: 'var(--text-secondary)' }}>
                   <Share2 size={12} />Share
                 </button>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all"
+                <button onClick={handleExport}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all"
                   style={{ background: 'rgba(0,217,255,0.1)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
                   <Download size={12} />Export Report
                 </button>
               </div>
             </div>
           </div>
-          <KpiRow />
+          <KpiRow dateRange={dateRange} />
           <div className="grid grid-cols-3 gap-3 mb-3">
-            <div className="col-span-2"><RevenueSpendChart /></div>
-            <RoasChart />
+            <div className="col-span-2"><RevenueSpendChart dateRange={dateRange} /></div>
+            <RoasChart dateRange={dateRange} />
           </div>
           <div className="grid grid-cols-2 gap-3 mb-3">
-            <SpendBudgetChart />
-            <AttributionPanel />
+            <SpendBudgetChart dateRange={dateRange} />
+            <AttributionPanel dateRange={dateRange} />
           </div>
-          <div className="mb-3"><ChannelTable /></div>
+          <div className="mb-3"><ChannelTable dateRange={dateRange} /></div>
           <AIInsightsPanel />
         </main>
-        {showReports && <ShareableReportsPanel onClose={() => setShowReports(false)} />}
+        {showReports && <ShareableReportsPanel onClose={() => setShowReports(false)} reports={reports} onCreate={handleCreateReport} />}
       </div>
     </div>
   );

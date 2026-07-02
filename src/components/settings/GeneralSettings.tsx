@@ -92,7 +92,7 @@ export function GeneralSettings() {
   const [exportDone, setExportDone] = useState(false);
 
   // Delete confirmation
-  const [deleteStep, setDeleteStep] = useState<'idle' | 'confirm1' | 'confirm2'>('idle');
+  const [deleteStep, setDeleteStep] = useState<'idle' | 'confirm1' | 'confirm2' | 'deleted'>('idle');
   const [deleteInput, setDeleteInput] = useState('');
 
   // Notifications
@@ -431,6 +431,7 @@ export function GeneralSettings() {
                 <div className="flex gap-2">
                   <button
                     disabled={deleteInput !== 'DELETE MY ACCOUNT'}
+                    onClick={() => setDeleteStep('deleted')}
                     className="text-xs px-3 py-1.5 rounded-lg font-medium disabled:opacity-30"
                     style={{ background: 'rgba(255,68,68,0.2)', color: '#ff4444', border: '1px solid rgba(255,68,68,0.35)' }}>
                     Permanently Delete Everything
@@ -442,6 +443,16 @@ export function GeneralSettings() {
                     Cancel
                   </button>
                 </div>
+              </div>
+            )}
+
+            {deleteStep === 'deleted' && (
+              <div className="flex items-center gap-2 rounded-lg px-3 py-2.5"
+                style={{ background: 'rgba(255,68,68,0.10)', border: '1px solid rgba(255,68,68,0.25)' }}>
+                <AlertTriangle size={14} style={{ color: '#ff4444' }} />
+                <span className="text-xs" style={{ color: '#ff4444' }}>
+                  Account scheduled for deletion — all data will be permanently removed within 24 hours.
+                </span>
               </div>
             )}
           </div>

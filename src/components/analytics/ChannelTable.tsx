@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { TrendingUp, TrendingDown, ChevronDown, ChevronUp } from 'lucide-react';
-import { CHANNEL_METRICS } from '@/lib/analyticsData';
-import type { ChannelMetrics } from '@/lib/analyticsData';
+import { scaledChannelMetrics, DATE_RANGE_LABELS } from '@/lib/analyticsData';
+import type { ChannelMetrics, DateRange } from '@/lib/analyticsData';
 
 type SortKey = keyof Pick<ChannelMetrics, 'spend' | 'revenue' | 'roas' | 'conversions' | 'cpa' | 'ctr' | 'clicks' | 'impressions' | 'margin'>;
 
@@ -39,12 +39,14 @@ const COLUMNS: { key: SortKey; label: string }[] = [
   { key: 'margin',      label: 'Margin%'     },
 ];
 
-export default function ChannelTable() {
+export default function ChannelTable({ dateRange = '30d' }: { dateRange?: DateRange }) {
   const [sortKey, setSortKey] = useState<SortKey>('revenue');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
 
-  const sorted = [...CHANNEL_METRICS].sort((a, b) => {
+  const metrics = scaledChannelMetrics(dateRange);
+
+  const sorted = [...metrics].sort((a, b) => {
     const av = a[sortKey] as number;
     const bv = b[sortKey] as number;
     return sortDir === 'desc' ? bv - av : av - bv;
@@ -101,7 +103,7 @@ export default function ChannelTable() {
         <div>
           <div className="section-label mb-0.5">Channel Performance</div>
           <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-            All channels · Last 30 days
+            All channels · {DATE_RANGE_LABELS[dateRange].toLowerCase()}
           </div>
         </div>
         <div className="flex items-center gap-1 text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
@@ -238,14 +240,14 @@ export default function ChannelTable() {
               <td />
               {COLUMNS.map(col => {
                 const totals: Partial<Record<SortKey, string>> = {
-                  impressions: fmt(CHANNEL_METRICS.reduce((s, c) => s + c.impressions, 0)),
-                  clicks:      fmt(CHANNEL_METRICS.reduce((s, c) => s + c.clicks, 0)),
+                  impressions: fmt(metrics.reduce((s, c) => s + c.impressions, 0)),
+                  clicks:      fmt(metrics.reduce((s, c) => s + c.clicks, 0)),
                   ctr:         '—',
-                  spend:       currency(CHANNEL_METRICS.reduce((s, c) => s + c.spend, 0)),
-                  revenue:     currency(CHANNEL_METRICS.reduce((s, c) => s + c.revenue, 0)),
-                  roas:        (CHANNEL_METRICS.reduce((s, c) => s + c.revenue, 0) / (CHANNEL_METRICS.reduce((s, c) => s + c.spend, 0) || 1)).toFixed(2) + '×',
-                  conversions: fmt(CHANNEL_METRICS.reduce((s, c) => s + c.conversions, 0)),
-                  cpa:         currency(CHANNEL_METRICS.reduce((s, c) => s + c.spend, 0) / CHANNEL_METRICS.reduce((s, c) => s + c.conversions, 0)),
+                  spend:       currency(metrics.reduce((s, c) => s + c.spend, 0)),
+                  revenue:     currency(metrics.reduce((s, c) => s + c.revenue, 0)),
+                  roas:        (metrics.reduce((s, c) => s + c.revenue, 0) / (metrics.reduce((s, c) => s + c.spend, 0) || 1)).toFixed(2) + '×',
+                  conversions: fmt(metrics.reduce((s, c) => s + c.conversions, 0)),
+                  cpa:         currency(metrics.reduce((s, c) => s + c.spend, 0) / metrics.reduce((s, c) => s + c.conversions, 0)),
                   margin:      '—',
                 };
                 return (

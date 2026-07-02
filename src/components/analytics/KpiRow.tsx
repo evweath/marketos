@@ -1,7 +1,8 @@
 'use client';
 
 import { TrendingUp, TrendingDown, DollarSign, MousePointer, BarChart2, Target, ShoppingBag, Eye } from 'lucide-react';
-import { ANALYTICS_TOTALS, CHANNEL_METRICS } from '@/lib/analyticsData';
+import { scaledTotals, CHANNEL_METRICS } from '@/lib/analyticsData';
+import type { DateRange } from '@/lib/analyticsData';
 import type { LucideIcon } from 'lucide-react';
 
 interface KpiItem {
@@ -24,8 +25,8 @@ function currency(n: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(n);
 }
 
-export default function KpiRow() {
-  const t = ANALYTICS_TOTALS;
+export default function KpiRow({ dateRange = '30d' }: { dateRange?: DateRange }) {
+  const t = scaledTotals(dateRange);
 
   const paidChannels = CHANNEL_METRICS.filter(c => c.spend > 0 && c.channel !== 'organic' && c.channel !== 'email');
   const weightedRevDelta = paidChannels.reduce((s, c) => s + c.revenueDelta * c.revenue, 0) / paidChannels.reduce((s, c) => s + c.revenue, 0);

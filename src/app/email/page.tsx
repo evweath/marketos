@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Sidebar from '@/components/layout/Sidebar';
 import TopBar from '@/components/layout/TopBar';
 import { EMAIL_FLOWS, EMAIL_CAMPAIGNS, SEGMENTS, DELIVERABILITY, EMAIL_STATS, TRIGGER_CONFIG } from '@/lib/emailData';
-import type { EmailFlow, FlowStatus } from '@/lib/emailData';
+import type { EmailFlow, FlowStatus, EmailCampaign } from '@/lib/emailData';
 import { Mail, GitBranch, Users, Shield, Play, Pause, CheckCircle, AlertTriangle, XCircle, MessageSquare, Bell, LayoutTemplate, Clock, FlaskConical, ShoppingBag, GripVertical, Trash2, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 
 const c$ = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
@@ -90,14 +90,23 @@ function FlowCard({ flow }: { flow: EmailFlow }) {
 
 function CampaignsList() {
   const SS = { sent: { color: '#10d98a', label: 'Sent' }, scheduled: { color: '#00d9ff', label: 'Scheduled' }, draft: { color: '#7b93ff', label: 'Draft' } };
+  const [campaigns, setCampaigns] = useState<EmailCampaign[]>(EMAIL_CAMPAIGNS);
+  const addCampaign = () => {
+    const id = `ec-${Date.now()}`;
+    setCampaigns(prev => [{
+      id, subject: '[DRAFT] Untitled Campaign',
+      preview: 'Add a subject and content to get started...',
+      status: 'draft', store: 'donut-supplies.com', sentTo: 0,
+    }, ...prev]);
+  };
   return (
     <div className="glass-card overflow-hidden">
       <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
         <span className="section-label">Email Campaigns</span>
-        <button className="text-xs px-3 py-1.5 rounded-lg font-medium"
+        <button onClick={addCampaign} className="text-xs px-3 py-1.5 rounded-lg font-medium"
           style={{ background: 'rgba(0,217,255,0.08)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>+ New Campaign</button>
       </div>
-      {EMAIL_CAMPAIGNS.map(camp => {
+      {campaigns.map(camp => {
         const ss = SS[camp.status];
         return (
           <div key={camp.id} className="border-b px-4 py-3 hover:bg-white/[0.02] transition-colors" style={{ borderColor: 'var(--border-subtle)' }}>
@@ -469,13 +478,30 @@ function SmsFlowCard({ flow }: { flow: SmsFlow }) {
 
 function SmsCampaignsPanel() {
   const [subTab, setSubTab] = useState<SmsSubTab>('campaigns');
+  const [compliance, setCompliance] = useState<Record<string, boolean>>({
+    'TCPA Consent Required': true,
+    'Double Opt-In': true,
+    'Auto Opt-Out Instruction': true,
+    'Brand Name in Footer': true,
+    'Quiet Hours': true,
+    'Weekend Restriction': false,
+  });
+  const toggleCompliance = (label: string) => setCompliance(prev => ({ ...prev, [label]: !prev[label] }));
 
-  const SMS_CAMPAIGNS: SmsCampaign[] = [
+  const [smsCampaigns, setSmsCampaigns] = useState<SmsCampaign[]>([
     { id: 'sms-001', name: 'Spring Sale Blast', status: 'sent', sentAt: '2d ago', recipients: 4820, delivered: 4739, deliveryRate: 98.3, ctr: 12.4, conversions: 84, revenue: 18420, store: 'All Stores' },
     { id: 'sms-002', name: 'Back In Stock: Donut Glazer Pro', status: 'sent', sentAt: '5d ago', recipients: 1240, delivered: 1228, deliveryRate: 99.0, ctr: 24.8, conversions: 31, revenue: 22480, store: 'donut-equipment.com' },
     { id: 'sms-003', name: 'Flash Sale — 15% Off Today Only', status: 'scheduled', sentAt: 'Tomorrow 10am', recipients: 6200, delivered: 0, deliveryRate: 0, ctr: 0, conversions: 0, revenue: 0, store: 'All Stores' },
     { id: 'sms-004', name: 'VIP Early Access — New Products', status: 'draft', sentAt: '—', recipients: 842, delivered: 0, deliveryRate: 0, ctr: 0, conversions: 0, revenue: 0, store: 'bakerywholesalers.com' },
-  ];
+  ]);
+  const SMS_CAMPAIGNS = smsCampaigns;
+  const addSmsCampaign = () => {
+    const id = `sms-${Date.now()}`;
+    setSmsCampaigns(prev => [{
+      id, name: 'Untitled SMS Campaign', status: 'draft', sentAt: '—',
+      recipients: 0, delivered: 0, deliveryRate: 0, ctr: 0, conversions: 0, revenue: 0, store: 'All Stores',
+    }, ...prev]);
+  };
 
   const SMS_FLOWS: SmsFlow[] = [
     { id: 'sf-001', name: 'Abandoned Cart SMS Recovery', trigger: 'Cart Abandoned > 1hr', status: 'active', steps: 2, triggered30d: 412, convRate: 14.2, revenue30d: 28400 },
@@ -542,7 +568,7 @@ function SmsCampaignsPanel() {
         <div className="glass-card overflow-hidden">
           <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
             <span className="section-label">SMS Campaigns</span>
-            <button className="text-xs px-3 py-1.5 rounded-lg font-medium"
+            <button onClick={addSmsCampaign} className="text-xs px-3 py-1.5 rounded-lg font-medium"
               style={{ background: 'rgba(0,217,255,0.08)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
               + New SMS Campaign
             </button>
@@ -616,17 +642,17 @@ function SmsCampaignsPanel() {
             </div>
             <div className="p-4 flex flex-col gap-3">
               {[
-                { label: 'TCPA Consent Required', detail: 'Require explicit TCPA consent before sending any SMS', checked: true },
-                { label: 'Double Opt-In', detail: 'Send confirmation SMS when subscriber joins — reply to confirm', checked: true },
+                { label: 'TCPA Consent Required', detail: 'Require explicit TCPA consent before sending any SMS' },
+                { label: 'Double Opt-In', detail: 'Send confirmation SMS when subscriber joins — reply to confirm' },
               ].map(item => (
                 <div key={item.label} className="flex items-start justify-between gap-4 p-3 rounded-xl" style={{ background: 'var(--bg-elevated)' }}>
                   <div>
                     <div className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-primary)' }}>{item.label}</div>
                     <div className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{item.detail}</div>
                   </div>
-                  <div className="w-9 h-5 rounded-full shrink-0 flex items-center px-0.5 cursor-pointer"
-                    style={{ background: item.checked ? '#10d98a' : 'rgba(255,255,255,0.1)' }}>
-                    <div className="w-4 h-4 rounded-full bg-white transition-all" style={{ marginLeft: item.checked ? 'auto' : 0 }} />
+                  <div onClick={() => toggleCompliance(item.label)} className="w-9 h-5 rounded-full shrink-0 flex items-center px-0.5 cursor-pointer"
+                    style={{ background: compliance[item.label] ? '#10d98a' : 'rgba(255,255,255,0.1)' }}>
+                    <div className="w-4 h-4 rounded-full bg-white transition-all" style={{ marginLeft: compliance[item.label] ? 'auto' : 0 }} />
                   </div>
                 </div>
               ))}
@@ -650,17 +676,17 @@ function SmsCampaignsPanel() {
             </div>
             <div className="p-4 flex flex-col gap-3">
               {[
-                { label: 'Auto Opt-Out Instruction', detail: 'Append "Reply STOP to unsubscribe" to every message', checked: true },
-                { label: 'Brand Name in Footer', detail: 'Include brand name to comply with A2P 10DLC requirements', checked: true },
+                { label: 'Auto Opt-Out Instruction', detail: 'Append "Reply STOP to unsubscribe" to every message' },
+                { label: 'Brand Name in Footer', detail: 'Include brand name to comply with A2P 10DLC requirements' },
               ].map(item => (
                 <div key={item.label} className="flex items-start justify-between gap-4 p-3 rounded-xl" style={{ background: 'var(--bg-elevated)' }}>
                   <div>
                     <div className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-primary)' }}>{item.label}</div>
                     <div className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{item.detail}</div>
                   </div>
-                  <div className="w-9 h-5 rounded-full shrink-0 flex items-center px-0.5 cursor-pointer"
-                    style={{ background: item.checked ? '#10d98a' : 'rgba(255,255,255,0.1)' }}>
-                    <div className="w-4 h-4 rounded-full bg-white" style={{ marginLeft: item.checked ? 'auto' : 0 }} />
+                  <div onClick={() => toggleCompliance(item.label)} className="w-9 h-5 rounded-full shrink-0 flex items-center px-0.5 cursor-pointer"
+                    style={{ background: compliance[item.label] ? '#10d98a' : 'rgba(255,255,255,0.1)' }}>
+                    <div className="w-4 h-4 rounded-full bg-white transition-all" style={{ marginLeft: compliance[item.label] ? 'auto' : 0 }} />
                   </div>
                 </div>
               ))}
@@ -679,17 +705,17 @@ function SmsCampaignsPanel() {
             </div>
             <div className="p-4 flex flex-col gap-3">
               {[
-                { label: 'Quiet Hours', detail: 'No messages between 9:00 PM – 9:00 AM recipient local time', checked: true },
-                { label: 'Weekend Restriction', detail: 'Suppress non-transactional messages on Saturday & Sunday', checked: false },
+                { label: 'Quiet Hours', detail: 'No messages between 9:00 PM – 9:00 AM recipient local time' },
+                { label: 'Weekend Restriction', detail: 'Suppress non-transactional messages on Saturday & Sunday' },
               ].map(item => (
                 <div key={item.label} className="flex items-start justify-between gap-4 p-3 rounded-xl" style={{ background: 'var(--bg-elevated)' }}>
                   <div>
                     <div className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-primary)' }}>{item.label}</div>
                     <div className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{item.detail}</div>
                   </div>
-                  <div className="w-9 h-5 rounded-full shrink-0 flex items-center px-0.5 cursor-pointer"
-                    style={{ background: item.checked ? '#10d98a' : 'rgba(255,255,255,0.1)' }}>
-                    <div className="w-4 h-4 rounded-full bg-white" style={{ marginLeft: item.checked ? 'auto' : 0 }} />
+                  <div onClick={() => toggleCompliance(item.label)} className="w-9 h-5 rounded-full shrink-0 flex items-center px-0.5 cursor-pointer"
+                    style={{ background: compliance[item.label] ? '#10d98a' : 'rgba(255,255,255,0.1)' }}>
+                    <div className="w-4 h-4 rounded-full bg-white transition-all" style={{ marginLeft: compliance[item.label] ? 'auto' : 0 }} />
                   </div>
                 </div>
               ))}
@@ -807,11 +833,19 @@ function PushAutoRow({ auto }: { auto: PushAutomation }) {
 function PushPanel() {
   const [subTab, setSubTab] = useState<PushSubTab>('campaigns');
 
-  const PUSH_CAMPAIGNS: PushCampaign[] = [
+  const [pushCampaigns, setPushCampaigns] = useState<PushCampaign[]>([
     { id: 'pn-001', name: 'Weekend Sale Reminder', status: 'sent', sentAt: '1d ago', sent: 28400, delivered: 26912, clicked: 2154, ctr: 8.0, revenue: 4840 },
     { id: 'pn-002', name: 'New Product Launch — Croissant Maker X2', status: 'sent', sentAt: '3d ago', sent: 28400, delivered: 27100, clicked: 3280, ctr: 12.1, revenue: 8420 },
     { id: 'pn-003', name: 'Flash Sale — 4 Hours Only', status: 'scheduled', sentAt: 'Today 3pm', sent: 0, delivered: 0, clicked: 0, ctr: 0, revenue: 0 },
-  ];
+  ]);
+  const PUSH_CAMPAIGNS = pushCampaigns;
+  const addPushCampaign = () => {
+    const id = `pn-${Date.now()}`;
+    setPushCampaigns(prev => [{
+      id, name: 'Untitled Push Campaign', status: 'scheduled', sentAt: 'Not scheduled',
+      sent: 0, delivered: 0, clicked: 0, ctr: 0, revenue: 0,
+    }, ...prev]);
+  };
 
   const PUSH_AUTOMATIONS: PushAutomation[] = [
     { id: 'pa-001', name: 'Abandoned Cart Push Reminder', trigger: 'Cart Abandoned 30min', status: 'active', triggered30d: 847, ctr: 7.2, revenue30d: 3240 },
@@ -893,7 +927,7 @@ function PushPanel() {
         <div className="glass-card overflow-hidden">
           <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
             <span className="section-label">Push Campaigns</span>
-            <button className="text-xs px-3 py-1.5 rounded-lg font-medium"
+            <button onClick={addPushCampaign} className="text-xs px-3 py-1.5 rounded-lg font-medium"
               style={{ background: 'rgba(0,217,255,0.08)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
               + New Push Campaign
             </button>
@@ -1043,6 +1077,14 @@ function EmailBuilderPanel() {
   const [selected, setSelected] = useState<string | null>('b3');
   const [subject, setSubject] = useState('Spring Sale — 20% off all donut equipment');
   const [previewText, setPreviewText] = useState('Ends Sunday · Shop your favorites');
+  const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+  const runAction = (label: string) => {
+    const done: Record<string, string> = {
+      'Save Draft': 'Saved', 'Preview': 'Preview ready', 'Send Test': 'Sent', 'Schedule Send': 'Scheduled',
+    };
+    setActionFeedback(`${label}: ${done[label] ?? 'Done'}`);
+    setTimeout(() => setActionFeedback(prev => (prev && prev.startsWith(label) ? null : prev)), 2000);
+  };
 
   const removeBlock = (id: string) => setBlocks(prev => prev.filter(b => b.id !== id));
   const moveUp = (idx: number) => {
@@ -1108,11 +1150,18 @@ function EmailBuilderPanel() {
                 { label: 'Send Test',     color: '#ffb347' },
                 { label: 'Schedule Send', color: '#10d98a' },
               ].map(a => (
-                <button key={a.label} className="text-xs py-2 rounded-lg text-left px-3 transition-all hover:bg-white/[0.05]"
+                <button key={a.label} onClick={() => runAction(a.label)}
+                  className="text-xs py-2 rounded-lg text-left px-3 transition-all hover:bg-white/[0.05]"
                   style={{ background: 'var(--bg-elevated)', color: a.color }}>
                   {a.label}
                 </button>
               ))}
+              {actionFeedback && (
+                <div className="text-[10px] mt-1 px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+                  style={{ background: 'rgba(16,217,138,0.08)', color: '#10d98a' }}>
+                  <CheckCircle size={11} />{actionFeedback}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1308,6 +1357,15 @@ const EMAIL_AB_TESTS: EmailABTest[] = [
 ];
 
 function EmailABPanel() {
+  const [tests, setTests] = useState<EmailABTest[]>(EMAIL_AB_TESTS);
+  const addTest = () => {
+    const id = `ab-${Date.now()}`;
+    setTests(prev => [{
+      id, name: 'Untitled A/B Test', type: 'subject', status: 'draft',
+      variantA: 'Variant A subject', variantB: 'Variant B subject',
+      openA: 0, openB: 0, clickA: 0, clickB: 0, sampleSize: 2000, confidence: 0, winner: null, started: '—',
+    }, ...prev]);
+  };
   const TYPE_LABEL: Record<ABTestType, string> = { subject: 'Subject Line', content: 'Content', send_time: 'Send Time' };
   const TYPE_COLOR: Record<ABTestType, string> = { subject: '#00d9ff', content: '#7b93ff', send_time: '#ffb347' };
   const STATUS_CFG: Record<ABTestStatus, { color: string; bg: string; label: string }> = {
@@ -1320,8 +1378,8 @@ function EmailABPanel() {
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: 'Active Tests',      value: EMAIL_AB_TESTS.filter(t => t.status === 'running').length.toString(), color: '#10d98a' },
-          { label: 'Completed (30d)',   value: EMAIL_AB_TESTS.filter(t => t.status === 'completed').length.toString(), color: '#00d9ff' },
+          { label: 'Active Tests',      value: tests.filter(t => t.status === 'running').length.toString(), color: '#10d98a' },
+          { label: 'Completed (30d)',   value: tests.filter(t => t.status === 'completed').length.toString(), color: '#00d9ff' },
           { label: 'Avg Confidence',    value: '79%', color: '#7b93ff' },
           { label: 'Avg Open Rate Lift', value: '+4.8%', color: '#ffb347' },
         ].map(s => (
@@ -1335,12 +1393,12 @@ function EmailABPanel() {
       <div className="glass-card overflow-hidden">
         <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
           <span className="section-label">A/B Tests</span>
-          <button className="text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5"
+          <button onClick={addTest} className="text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5"
             style={{ background: 'rgba(0,217,255,0.08)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
             <Plus size={11} />New Test
           </button>
         </div>
-        {EMAIL_AB_TESTS.map(test => {
+        {tests.map(test => {
           const sc = STATUS_CFG[test.status];
           const winnerColor = test.winner ? '#10d98a' : 'var(--text-muted)';
           return (
@@ -1430,16 +1488,24 @@ const TX_TEMPLATES: TxTemplate[] = [
 ];
 
 function TransactionalPanel() {
+  const [templates, setTemplates] = useState<TxTemplate[]>(TX_TEMPLATES);
   const [flows, setFlows] = useState<Record<string, boolean>>(
     Object.fromEntries(TX_TEMPLATES.map(t => [t.id, t.status === 'active']))
   );
+  const addTemplate = () => {
+    const id = `tx-${Date.now()}`;
+    setTemplates(prev => [{
+      id, name: 'Untitled Template', trigger: 'custom.event', status: 'draft',
+      sent30d: 0, deliveryRate: 0, openRate: 0, store: 'All Stores',
+    }, ...prev]);
+  };
   const STATUS_CFG: Record<TxStatus, { color: string; bg: string; label: string }> = {
     active: { color: '#10d98a', bg: 'rgba(16,217,138,.1)', label: 'Active' },
     paused: { color: '#ffb347', bg: 'rgba(255,179,71,.1)', label: 'Paused' },
     draft:  { color: '#7b93ff', bg: 'rgba(123,147,255,.1)', label: 'Draft' },
   };
 
-  const active = TX_TEMPLATES.filter(t => t.status === 'active');
+  const active = templates.filter(t => t.status === 'active');
   const totalSent = active.reduce((s, t) => s + t.sent30d, 0);
   const avgDelivery = active.reduce((s, t) => s + t.deliveryRate, 0) / active.length;
   const avgOpen = active.reduce((s, t) => s + t.openRate, 0) / active.length;
@@ -1463,7 +1529,7 @@ function TransactionalPanel() {
       <div className="glass-card overflow-hidden">
         <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
           <span className="section-label">Transactional Templates</span>
-          <button className="text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5"
+          <button onClick={addTemplate} className="text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5"
             style={{ background: 'rgba(0,217,255,0.08)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
             <Plus size={11} />New Template
           </button>
@@ -1477,7 +1543,7 @@ function TransactionalPanel() {
             </tr>
           </thead>
           <tbody>
-            {TX_TEMPLATES.map(t => {
+            {templates.map(t => {
               const sc = STATUS_CFG[t.status];
               const on = flows[t.id];
               return (

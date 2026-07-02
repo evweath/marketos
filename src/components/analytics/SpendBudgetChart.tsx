@@ -1,6 +1,7 @@
 'use client';
 
-import { CHANNEL_METRICS } from '@/lib/analyticsData';
+import { scaledChannelMetrics, DATE_RANGE_LABELS } from '@/lib/analyticsData';
+import type { DateRange } from '@/lib/analyticsData';
 
 const currency = (n: number): string =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
@@ -20,8 +21,8 @@ function dimColor(hex: string, opacity: number): string {
   return `rgba(${r},${g},${b},${opacity})`;
 }
 
-export default function SpendBudgetChart() {
-  const data = CHANNEL_METRICS
+export default function SpendBudgetChart({ dateRange = '30d' }: { dateRange?: DateRange }) {
+  const data = scaledChannelMetrics(dateRange)
     .filter(c => c.budget > 0)
     .sort((a, b) => b.budget - a.budget)
     .map(c => ({
@@ -40,7 +41,7 @@ export default function SpendBudgetChart() {
         <div>
           <div className="section-label mb-1">Budget Utilization</div>
           <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-            Spend vs. monthly budget per channel
+            Spend ({DATE_RANGE_LABELS[dateRange].toLowerCase()}) vs. monthly budget per channel
           </div>
         </div>
         <div className="flex items-center gap-3 text-[11px]">

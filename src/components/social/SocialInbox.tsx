@@ -106,19 +106,27 @@ function MessageCard({ msg, selected, onClick }: { msg: InboxMessage; selected: 
 }
 
 export default function SocialInbox() {
+  const [messages, setMessages] = useState<InboxMessage[]>(INBOX_MESSAGES);
   const [selected, setSelected] = useState<InboxMessage | null>(null);
   const [replyText, setReplyText] = useState('');
   const [platformFilter, setPlatformFilter] = useState<PlatformTab>('all');
 
-  const unread = INBOX_MESSAGES.filter(m => !m.replied && m.requiresAttention).length;
-  const filtered = INBOX_MESSAGES.filter(m =>
+  const unread = messages.filter(m => !m.replied && m.requiresAttention).length;
+  const filtered = messages.filter(m =>
     platformFilter === 'all' || m.platform === platformFilter
   );
 
   const platformTabCount = (p: PlatformTab) =>
     p === 'all'
-      ? INBOX_MESSAGES.length
-      : INBOX_MESSAGES.filter(m => m.platform === p).length;
+      ? messages.length
+      : messages.filter(m => m.platform === p).length;
+
+  const sendReply = () => {
+    if (!selected || !replyText.trim()) return;
+    setMessages(prev => prev.map(m => m.id !== selected.id ? m : { ...m, replied: true }));
+    setSelected(prev => prev ? { ...prev, replied: true } : prev);
+    setReplyText('');
+  };
 
   return (
     <div className="glass-card flex overflow-hidden" style={{ height: 520 }}>
@@ -239,6 +247,8 @@ export default function SocialInbox() {
                   }}
                 />
                 <button
+                  onClick={sendReply}
+                  disabled={!replyText.trim()}
                   className="px-3 py-2 rounded-xl text-xs font-semibold self-end transition-all"
                   style={{
                     background: replyText.trim() ? '#00d9ff' : 'var(--bg-elevated)',

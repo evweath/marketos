@@ -64,6 +64,25 @@ export function AutomationRulesPanel() {
   const toggle = (id: string) =>
     setRules(prev => prev.map(r => r.id === id ? { ...r, enabled: !r.enabled } : r));
 
+  const addRule = () => {
+    const id = `rule-new-${Date.now()}`;
+    setRules(prev => [
+      {
+        id,
+        name: `New Automation Rule ${prev.length + 1}`,
+        platform: 'meta' as AdPlatform,
+        status: 'active',
+        enabled: true,
+        trigger: 'ROAS < 2.0',
+        action: 'Pause ad set',
+        condition: 'Checked hourly',
+        fireCount: 0,
+        lastFired: undefined,
+      },
+      ...prev,
+    ]);
+  };
+
   return (
     <div className='glass-card p-4'>
       <div className='flex items-center justify-between mb-4'>
@@ -75,7 +94,7 @@ export function AutomationRulesPanel() {
             {rules.filter(r => r.enabled).length}/{rules.length} active
           </span>
         </div>
-        <button className='text-xs px-3 py-1.5 rounded-lg font-medium'
+        <button onClick={addRule} className='text-xs px-3 py-1.5 rounded-lg font-medium'
           style={{ background: 'rgba(255,179,71,0.08)', color: '#ffb347', border: '1px solid rgba(255,179,71,0.2)' }}>
           + New Rule
         </button>
