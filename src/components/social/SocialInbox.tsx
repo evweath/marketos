@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePersistentState } from '@/lib/usePersistentState';
 import { INBOX_MESSAGES, PLATFORM_CONFIG } from '@/lib/socialData';
 import type { InboxMessage } from '@/lib/socialData';
 import { MessageSquare, AtSign, Star, Send } from 'lucide-react';
@@ -106,7 +107,7 @@ function MessageCard({ msg, selected, onClick }: { msg: InboxMessage; selected: 
 }
 
 export default function SocialInbox() {
-  const [messages, setMessages] = useState<InboxMessage[]>(INBOX_MESSAGES);
+  const [messages, setMessages] = usePersistentState<InboxMessage[]>('social.inboxMessages', INBOX_MESSAGES);
   const [selected, setSelected] = useState<InboxMessage | null>(null);
   const [replyText, setReplyText] = useState('');
   const [platformFilter, setPlatformFilter] = useState<PlatformTab>('all');

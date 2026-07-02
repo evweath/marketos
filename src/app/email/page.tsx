@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePersistentState } from '@/lib/usePersistentState';
 import Sidebar from '@/components/layout/Sidebar';
 import TopBar from '@/components/layout/TopBar';
 import { EMAIL_FLOWS, EMAIL_CAMPAIGNS, SEGMENTS, DELIVERABILITY, EMAIL_STATS, TRIGGER_CONFIG } from '@/lib/emailData';
@@ -90,7 +91,7 @@ function FlowCard({ flow }: { flow: EmailFlow }) {
 
 function CampaignsList() {
   const SS = { sent: { color: '#10d98a', label: 'Sent' }, scheduled: { color: '#00d9ff', label: 'Scheduled' }, draft: { color: '#7b93ff', label: 'Draft' } };
-  const [campaigns, setCampaigns] = useState<EmailCampaign[]>(EMAIL_CAMPAIGNS);
+  const [campaigns, setCampaigns] = usePersistentState<EmailCampaign[]>('email.campaigns', EMAIL_CAMPAIGNS);
   const addCampaign = () => {
     const id = `ec-${Date.now()}`;
     setCampaigns(prev => [{
@@ -309,7 +310,7 @@ const CONV_STATUS_CFG = {
 };
 
 function ConversationalSmsPanel() {
-  const [conversations, setConversations] = useState<SmsConversation[]>(SMS_CONVERSATIONS);
+  const [conversations, setConversations] = usePersistentState<SmsConversation[]>('email.conversations', SMS_CONVERSATIONS);
   const [selected, setSelected] = useState<string | null>('conv-1');
   const [reply, setReply] = useState('');
   const conv = conversations.find(c => c.id === selected);
@@ -490,7 +491,7 @@ function SmsFlowCard({ flow }: { flow: SmsFlow }) {
 
 function SmsCampaignsPanel() {
   const [subTab, setSubTab] = useState<SmsSubTab>('campaigns');
-  const [compliance, setCompliance] = useState<Record<string, boolean>>({
+  const [compliance, setCompliance] = usePersistentState<Record<string, boolean>>('email.compliance', {
     'TCPA Consent Required': true,
     'Double Opt-In': true,
     'Auto Opt-Out Instruction': true,
@@ -500,7 +501,7 @@ function SmsCampaignsPanel() {
   });
   const toggleCompliance = (label: string) => setCompliance(prev => ({ ...prev, [label]: !prev[label] }));
 
-  const [smsCampaigns, setSmsCampaigns] = useState<SmsCampaign[]>([
+  const [smsCampaigns, setSmsCampaigns] = usePersistentState<SmsCampaign[]>('email.smsCampaigns', [
     { id: 'sms-001', name: 'Spring Sale Blast', status: 'sent', sentAt: '2d ago', recipients: 4820, delivered: 4739, deliveryRate: 98.3, ctr: 12.4, conversions: 84, revenue: 18420, store: 'All Stores' },
     { id: 'sms-002', name: 'Back In Stock: Donut Glazer Pro', status: 'sent', sentAt: '5d ago', recipients: 1240, delivered: 1228, deliveryRate: 99.0, ctr: 24.8, conversions: 31, revenue: 22480, store: 'donut-equipment.com' },
     { id: 'sms-003', name: 'Flash Sale — 15% Off Today Only', status: 'scheduled', sentAt: 'Tomorrow 10am', recipients: 6200, delivered: 0, deliveryRate: 0, ctr: 0, conversions: 0, revenue: 0, store: 'All Stores' },
@@ -845,7 +846,7 @@ function PushAutoRow({ auto }: { auto: PushAutomation }) {
 function PushPanel() {
   const [subTab, setSubTab] = useState<PushSubTab>('campaigns');
 
-  const [pushCampaigns, setPushCampaigns] = useState<PushCampaign[]>([
+  const [pushCampaigns, setPushCampaigns] = usePersistentState<PushCampaign[]>('email.pushCampaigns', [
     { id: 'pn-001', name: 'Weekend Sale Reminder', status: 'sent', sentAt: '1d ago', sent: 28400, delivered: 26912, clicked: 2154, ctr: 8.0, revenue: 4840 },
     { id: 'pn-002', name: 'New Product Launch — Croissant Maker X2', status: 'sent', sentAt: '3d ago', sent: 28400, delivered: 27100, clicked: 3280, ctr: 12.1, revenue: 8420 },
     { id: 'pn-003', name: 'Flash Sale — 4 Hours Only', status: 'scheduled', sentAt: 'Today 3pm', sent: 0, delivered: 0, clicked: 0, ctr: 0, revenue: 0 },
@@ -1369,7 +1370,7 @@ const EMAIL_AB_TESTS: EmailABTest[] = [
 ];
 
 function EmailABPanel() {
-  const [tests, setTests] = useState<EmailABTest[]>(EMAIL_AB_TESTS);
+  const [tests, setTests] = usePersistentState<EmailABTest[]>('email.abTests', EMAIL_AB_TESTS);
   const addTest = () => {
     const id = `ab-${Date.now()}`;
     setTests(prev => [{
@@ -1500,8 +1501,9 @@ const TX_TEMPLATES: TxTemplate[] = [
 ];
 
 function TransactionalPanel() {
-  const [templates, setTemplates] = useState<TxTemplate[]>(TX_TEMPLATES);
-  const [flows, setFlows] = useState<Record<string, boolean>>(
+  const [templates, setTemplates] = usePersistentState<TxTemplate[]>('email.txTemplates', TX_TEMPLATES);
+  const [flows, setFlows] = usePersistentState<Record<string, boolean>>(
+    'email.txFlows',
     Object.fromEntries(TX_TEMPLATES.map(t => [t.id, t.status === 'active']))
   );
   const addTemplate = () => {

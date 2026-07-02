@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePersistentState } from '@/lib/usePersistentState';
 import { Mic, Plus, X, Upload, Check, BookOpen, RefreshCw } from 'lucide-react';
 import { BRAND_VOICE_SETTINGS } from '@/lib/contentData';
 
@@ -17,12 +18,12 @@ export function BrandVoicePanel() {
   const [browsing, setBrowsing] = useState(false);
 
   // Editable state
-  const [toneValue, setToneValue] = useState(BRAND_VOICE_SETTINGS.toneValue);
-  const [formalityValue, setFormalityValue] = useState(BRAND_VOICE_SETTINGS.formalityValue);
-  const [traits, setTraits] = useState<string[]>(BRAND_VOICE_SETTINGS.personalityTraits);
-  const [avoidWords, setAvoidWords] = useState<string[]>(BRAND_VOICE_SETTINGS.wordListAvoid);
-  const [useWords, setUseWords] = useState<string[]>(BRAND_VOICE_SETTINGS.wordListUse);
-  const [exampleCopy, setExampleCopy] = useState(BRAND_VOICE_SETTINGS.exampleCopy);
+  const [toneValue, setToneValue] = usePersistentState('content.brandVoice.tone', BRAND_VOICE_SETTINGS.toneValue);
+  const [formalityValue, setFormalityValue] = usePersistentState('content.brandVoice.formality', BRAND_VOICE_SETTINGS.formalityValue);
+  const [traits, setTraits] = usePersistentState<string[]>('content.brandVoice.traits', BRAND_VOICE_SETTINGS.personalityTraits);
+  const [avoidWords, setAvoidWords] = usePersistentState<string[]>('content.brandVoice.avoidWords', BRAND_VOICE_SETTINGS.wordListAvoid);
+  const [useWords, setUseWords] = usePersistentState<string[]>('content.brandVoice.useWords', BRAND_VOICE_SETTINGS.wordListUse);
+  const [exampleCopy, setExampleCopy] = usePersistentState('content.brandVoice.exampleCopy', BRAND_VOICE_SETTINGS.exampleCopy);
 
   // Tag input state
   const [avoidInput, setAvoidInput] = useState('');

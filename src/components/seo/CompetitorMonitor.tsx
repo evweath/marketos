@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Plus, Clock, ArrowRight, Package, FileText, DollarSign, X } from 'lucide-react';
+import { usePersistentState } from '@/lib/usePersistentState';
 import { COMPETITOR_DATA } from '@/lib/seoData';
 import type { CompetitorChangeType, CompetitorData } from '@/lib/seoData';
 
@@ -29,7 +30,7 @@ function formatTime(iso: string): string {
 }
 
 export function CompetitorMonitor() {
-  const [competitors, setCompetitors] = useState<CompetitorData[]>(COMPETITOR_DATA);
+  const [competitors, setCompetitors] = usePersistentState<CompetitorData[]>('seo.competitors', COMPETITOR_DATA);
   const [activeTabs, setActiveTabs] = useState<Record<string, ChangeTab>>(() =>
     Object.fromEntries(COMPETITOR_DATA.map(c => [c.id, 'price']))
   );

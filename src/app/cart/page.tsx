@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Sidebar from '@/components/layout/Sidebar';
 import TopBar from '@/components/layout/TopBar';
+import { usePersistentState } from '@/lib/usePersistentState';
 import { ABANDONED_CARTS, formatCurrency, formatMinutesAgo, getStoreById } from '@/lib/mockData';
 import {
   ShoppingCart, Mail, MessageSquare, Bell, TrendingUp, BarChart2, MapPin,
@@ -417,7 +418,7 @@ const UPSELL_STATS = { upsellRevenue30d: 24840, acceptanceRate: 12.4, avgUpsellV
 const TYPE_COLOR: Record<UpsellType, string> = { 'upsell': '#00d9ff', 'cross-sell': '#7b93ff', 'bundle': '#ffb347' };
 
 function UpsellPanel() {
-  const [offers, setOffers] = useState<UpsellOffer[]>(UPSELL_OFFERS);
+  const [offers, setOffers] = usePersistentState<UpsellOffer[]>('cart.upsellOffers', UPSELL_OFFERS);
   const [deletingId, setDeletingId]     = useState<string | null>(null);
   const [addOpen, setAddOpen]           = useState(false);
   const [editingId, setEditingId]       = useState<string | null>(null);
@@ -719,7 +720,7 @@ const STOCK_CONFIG: Record<StockStatus, { label: string; color: string }> = {
 };
 
 function WatchlistsPanel() {
-  const [products, setProducts] = useState<WatchProduct[]>(WATCH_PRODUCTS);
+  const [products, setProducts] = usePersistentState<WatchProduct[]>('cart.watchlists', WATCH_PRODUCTS);
   const [filter, setFilter] = useState<StockStatus | 'all'>('all');
 
   const notify = (id: string) => {
@@ -984,7 +985,7 @@ type Tab = 'live' | 'sequences' | 'recovered' | 'exitintent' | 'upsell' | 'watch
 
 export default function CartPage() {
   const [tab, setTab] = useState<Tab>('live');
-  const [liveCarts, setLiveCarts] = useState(ABANDONED_CARTS);
+  const [liveCarts, setLiveCarts] = usePersistentState('cart.liveCarts', ABANDONED_CARTS);
   const s = RECOVERY_STATS;
 
   const triggerAllRecovery = () =>

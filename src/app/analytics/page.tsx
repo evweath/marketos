@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePersistentState } from '@/lib/usePersistentState';
 import Sidebar from '@/components/layout/Sidebar';
 import TopBar from '@/components/layout/TopBar';
 import KpiRow from '@/components/analytics/KpiRow';
@@ -95,7 +96,7 @@ function ShareableReportsPanel({ onClose, reports, onCreate }: { onClose: () => 
 export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [showReports, setShowReports] = useState(false);
-  const [reports, setReports] = useState<SharedReport[]>(SHARED_REPORTS);
+  const [reports, setReports] = usePersistentState<SharedReport[]>('analytics.reports', SHARED_REPORTS);
 
   // Runs only in a click handler (never during render), so browser-only APIs
   // and non-deterministic values are safe here — no hydration impact.

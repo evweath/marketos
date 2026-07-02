@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { UserPlus, ChevronDown, Check, X, Trash2, CheckSquare, Square } from 'lucide-react';
+import { usePersistentState } from '@/lib/usePersistentState';
 import { TEAM_MEMBERS } from '@/lib/settingsData';
 import type { TeamMember, TeamRole } from '@/lib/settingsData';
 
@@ -108,7 +109,7 @@ function RoleDropdown({ currentRole, memberId, onRoleChange }: RoleDropdownProps
 }
 
 export function TeamSettings() {
-  const [members, setMembers] = useState<TeamMember[]>(TEAM_MEMBERS);
+  const [members, setMembers] = usePersistentState<TeamMember[]>('settings.team', TEAM_MEMBERS);
   const [removingId, setRemovingId] = useState<string | null>(null);
 
   // Invite form

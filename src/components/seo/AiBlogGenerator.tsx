@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Loader2, Sparkles, Edit2, Upload, ChevronDown } from 'lucide-react';
+import { usePersistentState } from '@/lib/usePersistentState';
 import type { StoreId } from '@/lib/seoData';
 
 type Tone = 'informative' | 'conversational' | 'persuasive' | 'technical';
@@ -247,7 +248,7 @@ export function AiBlogGenerator() {
   const [generated, setGenerated]     = useState<GeneratedBlog | null>(null);
   const [showContent, setShowContent] = useState(false);
   const [editing, setEditing]         = useState(false);
-  const [prevBlogs, setPrevBlogs]     = useState<GeneratedBlog[]>(PREVIOUS_BLOGS);
+  const [prevBlogs, setPrevBlogs]     = usePersistentState<GeneratedBlog[]>('seo.blogs', PREVIOUS_BLOGS);
 
   const handleGenerate = () => {
     if (!topic.trim()) return;

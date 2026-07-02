@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePersistentState } from '@/lib/usePersistentState';
 import Sidebar from '@/components/layout/Sidebar';
 import TopBar from '@/components/layout/TopBar';
 import CampaignTable from '@/components/ads/CampaignTable';
@@ -89,7 +90,7 @@ const STATUS_CONFIG: Record<ABStatus, { label: string; color: string; bg: string
 };
 
 function ABTestingPanel() {
-  const [tests, setTests] = useState<ABTest[]>(INITIAL_AB_TESTS);
+  const [tests, setTests] = usePersistentState<ABTest[]>('ads.abTests', INITIAL_AB_TESTS);
   const [expanded, setExpanded] = useState<string | null>('ab-001');
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
@@ -390,7 +391,7 @@ const SUGGESTIONS = [
 const MATCH_COLOR: Record<MatchType, string> = { exact: '#7b93ff', phrase: '#00d9ff', broad: '#ffb347' };
 
 function NegativeKeywordsPanel() {
-  const [keywords, setKeywords] = useState<NegKeyword[]>(INITIAL_NEG_KWS);
+  const [keywords, setKeywords] = usePersistentState<NegKeyword[]>('ads.negativeKeywords', INITIAL_NEG_KWS);
   const [filterCampaign, setFilterCampaign] = useState<string>('all');
   const [newKw, setNewKw] = useState('');
   const [newMatch, setNewMatch] = useState<MatchType>('exact');

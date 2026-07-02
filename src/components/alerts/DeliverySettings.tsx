@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePersistentState } from '@/lib/usePersistentState';
 import { DELIVERY_CHANNELS, QUIET_HOURS, DIGEST_CONFIG, CATEGORY_CONFIG } from '@/lib/alertData';
 import type { DeliveryChannelConfig } from '@/lib/alertData';
 import { CheckCircle, XCircle, AlertCircle, Send, Moon, Calendar, Loader2 } from 'lucide-react';
@@ -133,7 +134,7 @@ function QuietHoursPanel() {
   const [exceptCrit, setExceptCrit] = useState(QUIET_HOURS.exceptCritical);
   const [start, setStart] = useState(QUIET_HOURS.start);
   const [end, setEnd] = useState(QUIET_HOURS.end);
-  const [daysActive, setDaysActive] = useState<number[]>(QUIET_HOURS.daysActive);
+  const [daysActive, setDaysActive] = usePersistentState<number[]>('alerts.quietDays', QUIET_HOURS.daysActive);
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   function toggleDay(i: number) {

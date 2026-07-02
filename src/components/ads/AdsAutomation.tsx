@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePersistentState } from '@/lib/usePersistentState';
 import { Zap, Shield, CheckCircle, AlertTriangle, XCircle, Clock } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { AUTOMATION_RULES, HEALTH_CHECKS, AD_PLATFORM_CONFIG } from '@/lib/campaignData';
@@ -59,7 +60,7 @@ const RULE_STATUS_COLOR = {
 } as const;
 
 export function AutomationRulesPanel() {
-  const [rules, setRules] = useState(AUTOMATION_RULES.map(r => ({ ...r })));
+  const [rules, setRules] = usePersistentState('ads.automationRules', AUTOMATION_RULES.map(r => ({ ...r })));
 
   const toggle = (id: string) =>
     setRules(prev => prev.map(r => r.id === id ? { ...r, enabled: !r.enabled } : r));

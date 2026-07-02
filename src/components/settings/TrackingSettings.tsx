@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Eye, EyeOff, Loader2, CheckCircle, ToggleLeft, ToggleRight } from 'lucide-react';
+import { usePersistentState } from '@/lib/usePersistentState';
 import { TRACKING_SETTINGS } from '@/lib/settingsData';
 
 const ALL_META_EVENTS = [
@@ -96,9 +97,9 @@ const UTM_DEFAULTS: UTMRow[] = [
 
 export function TrackingSettings() {
   // Meta CAPI state
-  const [capiEnabled, setCapiEnabled] = useState(TRACKING_SETTINGS.metaCapi.enabled);
-  const [pixelId, setPixelId] = useState(TRACKING_SETTINGS.metaCapi.pixelId);
-  const [accessToken, setAccessToken] = useState(TRACKING_SETTINGS.metaCapi.accessToken);
+  const [capiEnabled, setCapiEnabled] = usePersistentState('settings.tracking.capiEnabled', TRACKING_SETTINGS.metaCapi.enabled);
+  const [pixelId, setPixelId] = usePersistentState('settings.tracking.pixelId', TRACKING_SETTINGS.metaCapi.pixelId);
+  const [accessToken, setAccessToken] = usePersistentState('settings.tracking.accessToken', TRACKING_SETTINGS.metaCapi.accessToken);
   const [showToken, setShowToken] = useState(false);
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set(TRACKING_SETTINGS.serverSideEvents));
   const [capiTesting, setCapiTesting] = useState(false);
@@ -106,16 +107,16 @@ export function TrackingSettings() {
   const [capiSaved, setCapiSaved] = useState(false);
 
   // Google Enhanced state
-  const [gEnhancedEnabled, setGEnhancedEnabled] = useState(TRACKING_SETTINGS.googleEnhanced.enabled);
-  const [conversionId, setConversionId] = useState(TRACKING_SETTINGS.googleEnhanced.conversionId);
-  const [conversionLabel, setConversionLabel] = useState(TRACKING_SETTINGS.googleEnhanced.label);
+  const [gEnhancedEnabled, setGEnhancedEnabled] = usePersistentState('settings.tracking.gEnhancedEnabled', TRACKING_SETTINGS.googleEnhanced.enabled);
+  const [conversionId, setConversionId] = usePersistentState('settings.tracking.conversionId', TRACKING_SETTINGS.googleEnhanced.conversionId);
+  const [conversionLabel, setConversionLabel] = usePersistentState('settings.tracking.conversionLabel', TRACKING_SETTINGS.googleEnhanced.label);
   const [enhancedFields, setEnhancedFields] = useState<Set<string>>(new Set(['email', 'phone', 'address']));
   const [gTesting, setGTesting] = useState(false);
   const [gTestResult, setGTestResult] = useState<'idle' | 'success'>('idle');
   const [gSaved, setGSaved] = useState(false);
 
   // UTM state
-  const [utmRows, setUtmRows] = useState<UTMRow[]>(UTM_DEFAULTS);
+  const [utmRows, setUtmRows] = usePersistentState<UTMRow[]>('settings.tracking.utmRows', UTM_DEFAULTS);
   const [utmSaved, setUtmSaved] = useState(false);
 
   const handleTestCapi = () => {

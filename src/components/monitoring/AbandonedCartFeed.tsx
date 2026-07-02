@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { usePersistentState } from '@/lib/usePersistentState';
 import type { AbandonedCart } from '@/types';
 import { formatCurrency, formatMinutesAgo } from '@/lib/mockData';
 import { Mail, MessageSquare, MapPin, ShoppingBag, CheckCircle, Send } from 'lucide-react';
@@ -64,7 +64,7 @@ function RecoveryIcon({ sent, icon, sentTitle, pendingTitle, onSend }: RecoveryI
 }
 
 export default function AbandonedCartFeed({ carts: initialCarts, storeColor: _storeColor }: Props) {
-  const [carts, setCarts] = useState(initialCarts);
+  const [carts, setCarts] = usePersistentState('monitoring.carts', initialCarts);
 
   const triggerAllRecovery = () =>
     setCarts(prev => prev.map(c => ({ ...c, recoveryEmailSent: true, smsSent: true })));

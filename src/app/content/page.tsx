@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePersistentState } from '@/lib/usePersistentState';
 import Sidebar from '@/components/layout/Sidebar';
 import TopBar from '@/components/layout/TopBar';
 import { AdCreativeGenerator } from '@/components/content/AdCreativeGenerator';
@@ -71,7 +72,7 @@ const STYLE_PRESETS = ['Studio White', 'Lifestyle Kitchen', 'Dark Dramatic', 'Fl
 function PhotoStudioPanel() {
   const [activeStyle, setActiveStyle] = useState<string>('Studio White');
   const [mode, setMode] = useState<'bg_remove' | 'style'>('bg_remove');
-  const [jobs, setJobs] = useState<PhotoJob[]>(PHOTO_JOBS);
+  const [jobs, setJobs] = usePersistentState<PhotoJob[]>('content.photoJobs', PHOTO_JOBS);
 
   const runJob = () => {
     const id = `pj-new-${Date.now()}`;
@@ -230,7 +231,7 @@ function VideoToolsPanel() {
   const [t2vPrompt, setT2vPrompt] = useState('');
   const [t2vPlatform, setT2vPlatform] = useState('TikTok');
   const [t2vLen, setT2vLen] = useState('0:30');
-  const [jobs, setJobs] = useState<VideoJob[]>(VIDEO_JOBS);
+  const [jobs, setJobs] = usePersistentState<VideoJob[]>('content.videoJobs', VIDEO_JOBS);
   const [playingId, setPlayingId] = useState<string | null>(null);
 
   const createVideo = () => {

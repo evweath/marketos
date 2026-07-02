@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePersistentState } from '@/lib/usePersistentState';
 import { ALERT_RULES, CATEGORY_CONFIG } from '@/lib/alertData';
 import type { AlertRule, AlertCategory } from '@/lib/alertData';
 import { Shield, ChevronDown, ChevronUp, Edit2, Bell, Clock, X } from 'lucide-react';
@@ -221,7 +222,7 @@ const NEW_RULE_CATEGORIES: AlertCategory[] = [
 export default function AlertRulesPanel() {
   const [catFilter, setCatFilter] = useState<AlertCategory | 'all'>('all');
   const [showDisabled, setShowDisabled] = useState(false);
-  const [allRules, setAllRules] = useState<AlertRule[]>(ALERT_RULES);
+  const [allRules, setAllRules] = usePersistentState<AlertRule[]>('alerts.rules', ALERT_RULES);
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState('');
   const [newCategory, setNewCategory] = useState<AlertCategory>('budget');

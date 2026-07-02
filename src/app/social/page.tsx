@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePersistentState } from '@/lib/usePersistentState';
 import Sidebar from '@/components/layout/Sidebar';
 import TopBar from '@/components/layout/TopBar';
 import PlatformStatsBar from '@/components/social/PlatformStatsBar';
@@ -491,7 +492,7 @@ const PLT_COLOR: Record<string, string> = {
 };
 
 function PostApprovalsPanel() {
-  const [posts, setPosts] = useState<ApprovalPost[]>(APPROVAL_POSTS);
+  const [posts, setPosts] = usePersistentState<ApprovalPost[]>('social.approvalPosts', APPROVAL_POSTS);
   const [filterStatus, setFilterStatus] = useState<ApprovalStatus | 'all'>('all');
   const [rejectNote, setRejectNote] = useState('');
   const [rejectingId, setRejectingId] = useState<string | null>(null);
@@ -850,7 +851,7 @@ const TRIGGER_LABELS: Record<DMTrigger, string> = {
 const PLT_DM_COLOR: Record<DMPlatform, string> = { instagram: '#e1306c', facebook: '#1877f2', tiktok: '#010101' };
 
 function DMAutomationPanel() {
-  const [rules, setRules] = useState<DMRule[]>(INITIAL_DM_RULES);
+  const [rules, setRules] = usePersistentState<DMRule[]>('social.dmRules', INITIAL_DM_RULES);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName]               = useState('');
@@ -1009,7 +1010,7 @@ function DMAutomationPanel() {
 
 export default function SocialPage() {
   const [tab, setTab] = useState<Tab>('calendar');
-  const [posts, setPosts] = useState<SocialPost[]>(SOCIAL_POSTS);
+  const [posts, setPosts] = usePersistentState<SocialPost[]>('social.posts', SOCIAL_POSTS);
   const [selectedPost, setSelectedPost] = useState<SocialPost | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [newPostDate, setNewPostDate] = useState<Date | null>(null);

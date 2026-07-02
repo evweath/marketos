@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Search, CheckCircle, Loader2, X, AlertCircle, Zap, Plus, Trash2, ArrowRight } from 'lucide-react';
+import { usePersistentState } from '@/lib/usePersistentState';
 import { INTEGRATIONS } from '@/lib/settingsData';
 import type { Integration, IntegrationCategory, IntegrationStatus } from '@/lib/settingsData';
 
@@ -313,7 +314,7 @@ const WF_STATUS_CFG: Record<WFStatus, { label: string; color: string; bg: string
 };
 
 function WorkflowBuilder() {
-  const [workflows, setWorkflows] = useState<Workflow[]>(INITIAL_WORKFLOWS);
+  const [workflows, setWorkflows] = usePersistentState<Workflow[]>('settings.workflows', INITIAL_WORKFLOWS);
   const [tab, setTab] = useState<WFPlatform | 'all'>('all');
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName]       = useState('');
@@ -463,7 +464,7 @@ function WorkflowBuilder() {
 export function IntegrationHub() {
   const [search, setSearch]               = useState('');
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all');
-  const [statuses, setStatuses]           = useState<Record<string, IntegrationStatus>>({});
+  const [statuses, setStatuses]           = usePersistentState<Record<string, IntegrationStatus>>('settings.integrations', {});
 
   const handleStatusChange = (id: string, status: IntegrationStatus) => {
     setStatuses(prev => ({ ...prev, [id]: status }));

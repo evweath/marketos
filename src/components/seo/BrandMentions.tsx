@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ExternalLink, MessageCircle, CheckCircle, XCircle, Bot } from 'lucide-react';
+import { usePersistentState } from '@/lib/usePersistentState';
 import { BRAND_MENTIONS, LLM_VISIBILITY } from '@/lib/seoData';
 import type { MentionSource, Sentiment, LlmProvider } from '@/lib/seoData';
 
@@ -36,7 +37,7 @@ const SOURCE_FILTERS: SourceFilter[] = ['all', 'web', 'social', 'news'];
 
 export function BrandMentions() {
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
-  const [responded, setResponded] = useState<Record<string, boolean>>({});
+  const [responded, setResponded] = usePersistentState<Record<string, boolean>>('seo.mentionResponded', {});
 
   const filtered = BRAND_MENTIONS.filter(m => sourceFilter === 'all' || m.source === sourceFilter);
 
