@@ -1,10 +1,11 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Upload, Trash2, AlertTriangle, Check, Loader2 } from 'lucide-react';
+import { Upload, Trash2, AlertTriangle, Check, Loader2, Bold, Italic, RotateCcw } from 'lucide-react';
 import { usePersistentState } from '@/lib/usePersistentState';
 import { GENERAL_SETTINGS, NOTIFICATION_PREFERENCES } from '@/lib/settingsData';
 import type { NotificationRule } from '@/lib/settingsData';
+import { useTheme, DEFAULT_APPEARANCE } from '@/lib/ThemeProvider';
 
 const TIMEZONES = [
   'America/New_York',
@@ -33,6 +34,12 @@ const MONTHS = [
 const DATE_RANGES = ['7 days', '14 days', '30 days', '60 days', '90 days'];
 const FREQUENCIES = ['Daily', 'Weekly', 'Bi-weekly', 'Monthly'];
 const RETENTION_OPTIONS = ['30 days', '60 days', '90 days', '180 days', '1 year', '2 years', '5 years'];
+const FONT_SCALE_OPTIONS = [
+  { label: 'Small', value: 0.9 },
+  { label: 'Medium', value: 1 },
+  { label: 'Large', value: 1.15 },
+  { label: 'X-Large', value: 1.3 },
+];
 
 const inputStyle: React.CSSProperties = {
   background: 'var(--bg-elevated)',
@@ -65,7 +72,64 @@ function SaveButton({ saved, loading, onClick }: { saved: boolean; loading?: boo
   );
 }
 
+interface AppearanceColorFieldProps {
+  label: string;
+  value: string | null;
+  defaultHint: string;
+  onChange: (v: string) => void;
+  onReset: () => void;
+}
+
+function AppearanceColorField({ label, value, defaultHint, onChange, onReset }: AppearanceColorFieldProps) {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1.5">
+        <label className="section-label">{label}</label>
+        {value && (
+          <button onClick={onReset} className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
+            Reset
+          </button>
+        )}
+      </div>
+      <div className="flex items-center gap-2.5">
+        <input
+          type="color"
+          value={value ?? defaultHint}
+          onChange={e => onChange(e.target.value)}
+          className="w-9 h-9 rounded-lg cursor-pointer shrink-0"
+          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', padding: 4 }}
+        />
+        <input
+          type="text"
+          value={value ?? ''}
+          placeholder={defaultHint}
+          onChange={e => onChange(e.target.value)}
+          className="flex-1 min-w-0 text-sm px-3 py-2 rounded-lg outline-none font-mono"
+          style={inputStyle}
+        />
+      </div>
+    </div>
+  );
+}
+
+function PillToggle({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+      style={{
+        background: active ? 'rgba(0,217,255,0.12)' : 'var(--bg-elevated)',
+        color: active ? '#00d9ff' : 'var(--text-muted)',
+        border: `1px solid ${active ? 'rgba(0,217,255,0.3)' : 'var(--border-subtle)'}`,
+      }}>
+      {children}
+    </button>
+  );
+}
+
 export function GeneralSettings() {
+  const { theme, appearance, setAppearance } = useTheme();
+
   // Business info
   const [businessName, setBusinessName] = usePersistentState('settings.general.businessName', GENERAL_SETTINGS.businessName);
   const [timezone, setTimezone] = usePersistentState('settings.general.timezone', GENERAL_SETTINGS.timezone);
@@ -278,6 +342,78 @@ export function GeneralSettings() {
         </div>
       </div>
 
+      {/* Appearance */}
+      <div className="glass-card p-5">
+        <SectionHeader title="Appearance" description="Customize colors, font size, and text style — applies while the Light theme is active" />
+        {theme === 'dark' && (
+          <div className="flex items-center gap-2 rounded-lg px-3 py-2.5 mb-4"
+            style={{ background: 'rgba(255,179,71,0.08)', border: '1px solid rgba(255,179,71,0.2)' }}>
+            <AlertTriangle size={14} style={{ color: '#ffb347' }} />
+            <span className="text-xs" style={{ color: '#ffb347' }}>
+              These changes will apply once the Light theme is selected.
+            </span>
+          </div>
+        )}
+        <div className="flex flex-col gap-4 mb-5">
+          <div className="grid grid-cols-3 gap-4">
+            <AppearanceColorField
+              label="Background Color"
+              value={appearance.bgColor}
+              defaultHint="#eef0f6"
+              onChange={v => setAppearance(a => ({ ...a, bgColor: v }))}
+              onReset={() => setAppearance(a => ({ ...a, bgColor: null }))}
+            />
+            <AppearanceColorField
+              label="Menu Color"
+              value={appearance.menuColor}
+              defaultHint="#ffffff"
+              onChange={v => setAppearance(a => ({ ...a, menuColor: v }))}
+              onReset={() => setAppearance(a => ({ ...a, menuColor: null }))}
+            />
+            <AppearanceColorField
+              label="Text Color"
+              value={appearance.textColor}
+              defaultHint="#10142a"
+              onChange={v => setAppearance(a => ({ ...a, textColor: v }))}
+              onReset={() => setAppearance(a => ({ ...a, textColor: null }))}
+            />
+          </div>
+          <div>
+            <label className="section-label mb-1.5 block">Font Size</label>
+            <div className="flex gap-2">
+              {FONT_SCALE_OPTIONS.map(opt => (
+                <PillToggle
+                  key={opt.label}
+                  active={appearance.fontScale === opt.value}
+                  onClick={() => setAppearance(a => ({ ...a, fontScale: opt.value }))}>
+                  {opt.label}
+                </PillToggle>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="section-label mb-1.5 block">Text Style</label>
+            <div className="flex gap-2">
+              <PillToggle active={appearance.bold} onClick={() => setAppearance(a => ({ ...a, bold: !a.bold }))}>
+                <span className="flex items-center gap-1.5"><Bold size={12} />Bold</span>
+              </PillToggle>
+              <PillToggle active={appearance.italic} onClick={() => setAppearance(a => ({ ...a, italic: !a.italic }))}>
+                <span className="flex items-center gap-1.5"><Italic size={12} />Italic</span>
+              </PillToggle>
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-end">
+          <button
+            onClick={() => setAppearance(DEFAULT_APPEARANCE)}
+            className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg font-medium transition-all"
+            style={{ background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
+            <RotateCcw size={13} />
+            Reset to Defaults
+          </button>
+        </div>
+      </div>
+
       {/* Reporting */}
       <div className="glass-card p-5">
         <SectionHeader title="Reporting Defaults" description="Configure default date ranges, scheduled reports, and recipients" />
@@ -444,7 +580,7 @@ export function GeneralSettings() {
                   <button
                     onClick={() => setDeleteStep('idle')}
                     className="text-xs px-3 py-1.5 rounded-lg font-medium"
-                    style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
+                    style={{ background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
                     Cancel
                   </button>
                 </div>
@@ -475,7 +611,7 @@ export function GeneralSettings() {
                   <button
                     onClick={() => { setDeleteStep('idle'); setDeleteInput(''); }}
                     className="text-xs px-3 py-1.5 rounded-lg font-medium"
-                    style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
+                    style={{ background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
                     Cancel
                   </button>
                 </div>

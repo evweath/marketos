@@ -86,7 +86,7 @@ export default function TrafficChart({ traffic, storeColor }: Props) {
                 <stop offset='100%' stopColor={storeColor} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray='3 6' stroke='rgba(255,255,255,0.04)' vertical={false} />
+            <CartesianGrid strokeDasharray='3 6' stroke='rgba(var(--overlay-rgb),0.04)' vertical={false} />
             <XAxis
               dataKey='date'
               tick={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'DM Mono, monospace' }}
@@ -96,7 +96,7 @@ export default function TrafficChart({ traffic, storeColor }: Props) {
             <YAxis hide />
             <Tooltip
               content={<CustomTooltip />}
-              cursor={{ stroke: 'rgba(255,255,255,0.08)', strokeWidth: 1 }}
+              cursor={{ stroke: 'rgba(var(--overlay-rgb),0.08)', strokeWidth: 1 }}
             />
             <Area
               type='monotone'

@@ -28,7 +28,7 @@ interface CardState {
   secret: string;
 }
 
-function StatusBadge({ status }: { status: IntegrationStatus }) {
+function StatusBadge({ status, notStarted }: { status: IntegrationStatus; notStarted?: boolean }) {
   if (status === 'connected') {
     return (
       <span className='badge-ok text-[10px] px-2 py-0.5 rounded-full font-mono flex items-center gap-1'>
@@ -48,10 +48,10 @@ function StatusBadge({ status }: { status: IntegrationStatus }) {
   return (
     <span
       className='text-[10px] px-2 py-0.5 rounded-full font-mono flex items-center gap-1'
-      style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
+      style={{ background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
     >
       <span className='w-1.5 h-1.5 rounded-full inline-block' style={{ background: 'var(--text-muted)' }} />
-      Disconnected
+      {notStarted ? 'Not Started' : 'Disconnected'}
     </span>
   );
 }
@@ -123,7 +123,7 @@ function IntegrationCard({ integration, statuses, onStatusChange }: IntegrationC
             </div>
           </div>
         </div>
-        <StatusBadge status={currentStatus} />
+        <StatusBadge status={currentStatus} notStarted={integration.notStarted} />
       </div>
 
       {/* Description */}
@@ -206,7 +206,7 @@ function IntegrationCard({ integration, statuses, onStatusChange }: IntegrationC
             <button
               onClick={handleCancel}
               className='px-2.5 py-2 rounded-lg transition-all'
-              style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
+              style={{ background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
             >
               <X size={12} />
             </button>
@@ -240,7 +240,7 @@ function IntegrationCard({ integration, statuses, onStatusChange }: IntegrationC
                 className='flex-1 text-xs py-2 rounded-lg font-medium transition-all'
                 style={managing
                   ? { background: 'rgba(0,217,255,0.10)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }
-                  : { background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
+                  : { background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
               >
                 {managing ? 'Hide Details' : 'Manage'}
               </button>

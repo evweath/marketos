@@ -10,7 +10,7 @@ const ROLE_COLORS: Record<TeamRole, { bg: string; color: string; border: string 
   admin:   { bg: 'rgba(123,147,255,0.12)', color: '#7b93ff', border: 'rgba(123,147,255,0.25)' },
   editor:  { bg: 'rgba(0,217,255,0.10)',   color: '#00d9ff', border: 'rgba(0,217,255,0.22)'   },
   analyst: { bg: 'rgba(255,179,71,0.10)',  color: '#ffb347', border: 'rgba(255,179,71,0.25)'  },
-  viewer:  { bg: 'rgba(255,255,255,0.06)', color: 'var(--text-secondary)', border: 'var(--border-subtle)' },
+  viewer:  { bg: 'rgba(var(--overlay-rgb),0.06)', color: 'var(--text-secondary)', border: 'var(--border-subtle)' },
 };
 
 function RoleBadge({ role }: { role: TeamRole }) {
@@ -42,7 +42,7 @@ function StatusBadge({ status }: { status: TeamMember['status'] }) {
   }
   return (
     <span className="text-[10px] px-2 py-0.5 rounded-full font-mono"
-      style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
+      style={{ background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
       Inactive
     </span>
   );
@@ -217,7 +217,7 @@ export function TeamSettings() {
                       </button>
                       <button onClick={() => setRemovingId(null)}
                         className="text-xs px-2 py-0.5 rounded"
-                        style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
+                        style={{ background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
                         No
                       </button>
                     </div>

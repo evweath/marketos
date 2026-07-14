@@ -168,14 +168,6 @@ export const CAMPAIGNS: Campaign[] = [
     frequency: 1.4, spendDelta: +41.2, roasDelta: 0, conversionsDelta: 0,
     startDate: '2026-05-05', adSets: 2, ads: 6, autoRulesFired: 0, store: 'bakerywholesalers.com',
   },
-  // TikTok
-  {
-    id: 'c-008', platform: 'tiktok', name: 'Donut Supplies — TopView + Spark', status: 'active',
-    objective: 'video-views', dailyBudget: 220, totalBudget: 4400, spendToDate: 3184, budgetPacing: 98,
-    impressions: 840000, clicks: 4120, ctr: 0.49, cpc: 0.77, conversions: 128, revenue: 14840, roas: 4.66, cpa: 24.88,
-    spendDelta: +42.1, roasDelta: -6.8, conversionsDelta: +28.4,
-    startDate: '2026-04-15', adSets: 2, ads: 6, autoRulesFired: 2, store: 'donut-supplies.com',
-  },
   // YouTube
   {
     id: 'c-009', platform: 'youtube', name: 'Donut Equipment — In-Stream (Skippable)', status: 'active',
@@ -184,23 +176,14 @@ export const CAMPAIGNS: Campaign[] = [
     spendDelta: +14.2, roasDelta: +7.1, conversionsDelta: +21.8,
     startDate: '2026-04-01', adSets: 2, ads: 4, autoRulesFired: 1, store: 'donut-equipment.com',
   },
-  // LinkedIn
-  {
-    id: 'c-010', platform: 'linkedin', name: 'Bakery Wholesale — Decision Makers', status: 'active',
-    objective: 'leads', dailyBudget: 260, totalBudget: 7800, spendToDate: 6284, budgetPacing: 95,
-    impressions: 64000, clicks: 1248, ctr: 1.95, cpc: 5.04, conversions: 112, revenue: 58480, roas: 9.31, cpa: 56.11,
-    spendDelta: +8.4, roasDelta: +12.4, conversionsDelta: +28.4,
-    startDate: '2026-04-01', adSets: 3, ads: 9, autoRulesFired: 0, store: 'bakerywholesalers.com',
-  },
-  // X
-  {
-    id: 'c-011', platform: 'x-twitter', name: 'Donut Equipment — Promoted Tweets', status: 'paused',
-    objective: 'traffic', dailyBudget: 115, totalBudget: 3450, spendToDate: 2847, budgetPacing: 41,
-    impressions: 124000, clicks: 1480, ctr: 1.19, cpc: 1.92, conversions: 58, revenue: 6840, roas: 2.40, cpa: 49.09,
-    spendDelta: 0, roasDelta: -18.4, conversionsDelta: -24.2,
-    startDate: '2026-04-01', adSets: 1, ads: 4, autoRulesFired: 1, store: 'donut-equipment.com',
-  },
 ];
+
+// Ad platforms not yet launched — kept as selectable/placeholder tabs in the UI,
+// but with zero real campaigns behind them.
+export const AD_PLATFORM_STARTED: Record<AdPlatform, boolean> = {
+  google: true, meta: true, youtube: true,
+  tiktok: false, linkedin: false, 'x-twitter': false,
+};
 
 // ─── Ad Sets (for campaign c-005 Meta example) ───────────────────────────────
 
@@ -280,16 +263,6 @@ export const AUTOMATION_RULES: AutomationRule[] = [
     trigger: 'Keyword Quality Score ≤ 4', action: 'Reduce max CPC bid by 20%', condition: 'Daily check',
     lastFired: new Date(Date.now() - 3 * 24 * 3600000).toISOString(), fireCount: 1, status: 'active',
   },
-  {
-    id: 'ar-006', name: 'Auto-pause TikTok ads spending >$50/day with 0 conv.', platform: 'tiktok', enabled: true,
-    trigger: 'Spend > $50/day AND conversions = 0', action: 'Pause ad', condition: 'After 24h',
-    lastFired: undefined, fireCount: 0, status: 'active',
-  },
-  {
-    id: 'ar-007', name: 'Reallocate budget: pause X, add to LinkedIn', platform: 'x-twitter', enabled: false,
-    trigger: 'X/Twitter ROAS < 2.5×', action: 'Pause X campaign, increase LinkedIn budget +$50/day', condition: 'After 7-day window',
-    lastFired: undefined, fireCount: 0, status: 'paused',
-  },
 ];
 
 // ─── Account Health Checks ────────────────────────────────────────────────────
@@ -309,9 +282,6 @@ export const HEALTH_CHECKS: HealthCheckItem[] = [
   { id: 'hc-010', platform: 'meta', category: 'Overlap', check: 'Audience Overlap', status: 'warn', detail: '62% overlap detected between LAL 2% and Interest ad sets — possible internal auction competition', priority: 'medium' },
   { id: 'hc-011', platform: 'meta', category: 'CAPI', check: 'Conversions API', status: 'pass', detail: 'Server-side CAPI active on all 3 stores — EMQ score 8.2/10', priority: 'high' },
   { id: 'hc-012', platform: 'meta', category: 'Policy', check: 'Ad Account Standing', status: 'pass', detail: 'Account in Good Standing — no active policy flags or restrictions', priority: 'high' },
-  // TikTok
-  { id: 'hc-013', platform: 'tiktok', category: 'Pixel', check: 'TikTok Pixel', status: 'pass', detail: 'Pixel active on donut-supplies.com — Purchase event verified', priority: 'high' },
-  { id: 'hc-014', platform: 'tiktok', category: 'Creative', check: 'Video Creative Length', status: 'warn', detail: '2 of 6 ad videos are >60 seconds — TikTok best practice is 21-34 seconds for highest completion rate', priority: 'medium' },
 ];
 
 // ─── Computed Totals ──────────────────────────────────────────────────────────

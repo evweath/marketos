@@ -61,7 +61,7 @@ export default function SettingsPage() {
             {/* Settings sidebar nav */}
             <nav
               className='w-60 shrink-0 flex flex-col py-5 px-3 gap-0.5 overflow-y-auto'
-              style={{ background: 'var(--bg-surface)', borderRight: '1px solid var(--border-subtle)' }}
+              style={{ background: 'var(--bg-nav)', borderRight: '1px solid var(--border-subtle)' }}
             >
               <div className='section-label px-3 mb-4'>Configuration</div>
 

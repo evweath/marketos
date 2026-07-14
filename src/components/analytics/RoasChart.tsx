@@ -60,7 +60,7 @@ export default function RoasChart({ dateRange = '30d' }: { dateRange?: DateRange
   const avgRoas = data.filter(d => d.roas > 0).reduce((s, d) => s + d.roas, 0) / data.filter(d => d.roas > 0).length;
 
   const barColor = (roas: number): string => {
-    if (roas === 0) return 'rgba(255,255,255,0.08)';
+    if (roas === 0) return 'rgba(var(--overlay-rgb),0.08)';
     if (roas >= 5) return '#10d98a';
     if (roas >= 3) return '#ffb347';
     return '#ff4444';
@@ -99,7 +99,7 @@ export default function RoasChart({ dateRange = '30d' }: { dateRange?: DateRange
                 );
               })}
             </defs>
-            <CartesianGrid stroke="rgba(255,255,255,0.04)" strokeDasharray="4 4" vertical={false} />
+            <CartesianGrid stroke="rgba(var(--overlay-rgb),0.04)" strokeDasharray="4 4" vertical={false} />
             <XAxis
               dataKey="label"
               tick={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'DM Mono' }}
@@ -109,7 +109,7 @@ export default function RoasChart({ dateRange = '30d' }: { dateRange?: DateRange
             <YAxis hide />
             <Tooltip
               content={<CustomTooltip />}
-              cursor={{ fill: 'rgba(255,255,255,0.03)' }}
+              cursor={{ fill: 'rgba(var(--overlay-rgb),0.03)' }}
             />
             <ReferenceLine
               y={avgRoas}

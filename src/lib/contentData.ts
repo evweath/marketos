@@ -32,28 +32,10 @@ export const GENERATED_CREATIVES: GeneratedCreative[] = [
     thumbnailColor: 'linear-gradient(135deg, #00d9ff22, #7b93ff22)', thumbnailInitials: 'CF',
   },
   {
-    id: 'gc-002', type: 'video', platform: 'tiktok', name: 'Donut Making Process — 15s',
-    status: 'published', performanceScore: 92, size: '1080x1920', format: 'MP4',
-    createdAt: '4h ago', store: 'donut-supplies.com',
-    thumbnailColor: 'linear-gradient(135deg, #ff005022, #ffb34722)', thumbnailInitials: 'DM',
-  },
-  {
-    id: 'gc-003', type: 'ugc', platform: 'instagram', name: 'Avatar UGC — Testimonial v2',
-    status: 'ready', performanceScore: 79, size: '1080x1920', format: 'MP4',
-    createdAt: '6h ago', store: 'donut-supplies.com',
-    thumbnailColor: 'linear-gradient(135deg, #10d98a22, #00d9ff22)', thumbnailInitials: 'AU',
-  },
-  {
     id: 'gc-004', type: 'image', platform: 'google', name: 'Display Banner — 728×90',
     status: 'published', performanceScore: 71, size: '728x90', format: 'PNG',
     createdAt: '1d ago', store: 'donut-equipment.com',
     thumbnailColor: 'linear-gradient(135deg, #4285f422, #34a85322)', thumbnailInitials: 'DB',
-  },
-  {
-    id: 'gc-005', type: 'image', platform: 'linkedin', name: 'B2B Decision Maker — Sponsored',
-    status: 'published', performanceScore: 84, size: '1200x627', format: 'PNG',
-    createdAt: '1d ago', store: 'bakerywholesalers.com',
-    thumbnailColor: 'linear-gradient(135deg, #0a66c222, #7b93ff22)', thumbnailInitials: 'BM',
   },
   {
     id: 'gc-006', type: 'video', platform: 'youtube', name: 'Bakery Equipment Overview — 30s',
@@ -68,22 +50,10 @@ export const GENERATED_CREATIVES: GeneratedCreative[] = [
     thumbnailColor: 'linear-gradient(135deg, #0866ff22, #00d9ff22)', thumbnailInitials: 'RT',
   },
   {
-    id: 'gc-008', type: 'ugc', platform: 'tiktok', name: 'UGC Unboxing — Supplies Kit',
-    status: 'draft', performanceScore: 55, size: '1080x1920', format: 'MP4',
-    createdAt: '3d ago', store: 'donut-supplies.com',
-    thumbnailColor: 'linear-gradient(135deg, #ff005022, #7b93ff22)', thumbnailInitials: 'UB',
-  },
-  {
     id: 'gc-009', type: 'image', platform: 'google', name: 'Responsive Display — Wholesale',
     status: 'published', performanceScore: 76, size: '300x250', format: 'PNG',
     createdAt: '3d ago', store: 'bakerywholesalers.com',
     thumbnailColor: 'linear-gradient(135deg, #34a85322, #10d98a22)', thumbnailInitials: 'RD',
-  },
-  {
-    id: 'gc-010', type: 'video', platform: 'instagram', name: 'Reel — Donut Art Tutorial',
-    status: 'published', performanceScore: 88, size: '1080x1920', format: 'MP4',
-    createdAt: '4d ago', store: 'donut-supplies.com',
-    thumbnailColor: 'linear-gradient(135deg, #e1306c22, #ffb34722)', thumbnailInitials: 'DA',
   },
   {
     id: 'gc-011', type: 'image', platform: 'meta', name: 'Carousel — Top 5 Fryers',
@@ -247,30 +217,6 @@ export const PERFORMANCE_SCORES: ScoredCreative[] = [
     commentary: 'This creative scores exceptionally well on clarity and brand consistency, with a strong visual hierarchy that draws the eye immediately to the product. The white background creates a professional feel that resonates with B2B buyers in the food service industry.',
     improvements: ['Increase emotional appeal by adding a human element — a chef using the equipment', 'Test a warmer color palette for the CTA button to improve click-through', 'Add a social proof element such as a star rating or customer count overlay'],
     thumbnailColor: 'linear-gradient(135deg, #00d9ff33, #7b93ff33)',
-  },
-  {
-    id: 'ps-002', name: 'Donut Making Process — 15s Video', type: 'video', platform: 'tiktok',
-    overallScore: 92, prediction: 'strong',
-    metrics: { clarity: 88, emotionalAppeal: 96, brandConsistency: 84, callToAction: 90, visualHierarchy: 94, colorContrast: 97 },
-    commentary: 'Outstanding emotional appeal and color contrast make this TikTok creative highly engaging. The process-oriented content aligns perfectly with the platform\'s educational content trend. Retention rate is predicted to be in the top 15% for this vertical.',
-    improvements: ['Add captions for the 85% of users watching without sound', 'Front-load the most visually striking moment in the first 2 seconds', 'Ensure brand logo appears within first 3 seconds for awareness'],
-    thumbnailColor: 'linear-gradient(135deg, #ff005033, #ffb34733)',
-  },
-  {
-    id: 'ps-003', name: 'Avatar UGC — Testimonial v2', type: 'ugc', platform: 'instagram',
-    overallScore: 79, prediction: 'average',
-    metrics: { clarity: 82, emotionalAppeal: 84, brandConsistency: 71, callToAction: 76, visualHierarchy: 78, colorContrast: 80 },
-    commentary: 'The UGC-style format creates authentic appeal, but brand consistency is the weak point — the avatar\'s presentation drifts from core brand guidelines. Emotional appeal is strong, which should drive reasonable engagement rates, but CTA clarity needs work.',
-    improvements: ['Align avatar\'s language more closely with brand voice guidelines', 'Make the CTA more prominent and specific — replace "check it out" with the actual offer', 'Add brand watermark/logo as an overlay throughout the video'],
-    thumbnailColor: 'linear-gradient(135deg, #10d98a33, #00d9ff33)',
-  },
-  {
-    id: 'ps-004', name: 'B2B Decision Maker — LinkedIn Sponsored', type: 'image', platform: 'linkedin',
-    overallScore: 84, prediction: 'strong',
-    metrics: { clarity: 90, emotionalAppeal: 68, brandConsistency: 92, callToAction: 86, visualHierarchy: 88, colorContrast: 82 },
-    commentary: 'Strong performance on clarity and brand consistency — essential for B2B LinkedIn creative. The professional aesthetic is well-calibrated for decision-makers. Emotional appeal is lower, which is acceptable in B2B contexts where logic and trust drive conversions more than emotion.',
-    improvements: ['Include a specific ROI or efficiency metric in the headline', 'Add a customer logo or testimonial quote to build trust signals', 'Test a darker background variant — LinkedIn feeds tend to be light-colored and contrast helps'],
-    thumbnailColor: 'linear-gradient(135deg, #0a66c233, #7b93ff33)',
   },
   {
     id: 'ps-005', name: 'Carousel — Top 5 Fryers', type: 'image', platform: 'meta',

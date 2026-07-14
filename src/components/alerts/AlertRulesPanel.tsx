@@ -45,10 +45,10 @@ function Toggle({ on, onChange, color }: { on: boolean; onChange: (v: boolean) =
 }
 
 function RuleCard({ rule }: { rule: AlertRule }) {
-  const [enabled, setEnabled] = useState(rule.enabled);
+  const [enabled, setEnabled] = usePersistentState(`alerts.ruleEnabled.${rule.id}`, rule.enabled);
   const [expanded, setExpanded] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [threshold, setThreshold] = useState(rule.threshold.toString());
+  const [threshold, setThreshold] = usePersistentState(`alerts.ruleThreshold.${rule.id}`, rule.threshold.toString());
 
   const cat = CATEGORY_CONFIG[rule.category];
   const sevColor = rule.severity === 'critical' ? '#ff4444' : rule.severity === 'warning' ? '#ffb347' : '#7b93ff';

@@ -54,7 +54,7 @@ export default function TransactionFeed({ transactions, storeColor }: Props) {
             <div key={tx.id}
               className='group flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors'
               style={{
-                background: isEven ? 'var(--bg-elevated)' : 'rgba(255,255,255,0.015)',
+                background: isEven ? 'var(--bg-elevated)' : 'rgba(var(--overlay-rgb),0.015)',
               }}>
 
               {/* Order # */}

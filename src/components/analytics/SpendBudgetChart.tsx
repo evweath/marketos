@@ -46,11 +46,11 @@ export default function SpendBudgetChart({ dateRange = '30d' }: { dateRange?: Da
         </div>
         <div className="flex items-center gap-3 text-[11px]">
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full" style={{ background: 'rgba(255,255,255,0.5)' }} />
+            <div className="w-2 h-2 rounded-full" style={{ background: 'rgba(var(--overlay-rgb),0.5)' }} />
             <span style={{ color: 'var(--text-muted)' }}>Spent</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full" style={{ background: 'rgba(255,255,255,0.12)' }} />
+            <div className="w-2 h-2 rounded-full" style={{ background: 'rgba(var(--overlay-rgb),0.12)' }} />
             <span style={{ color: 'var(--text-muted)' }}>Remaining</span>
           </div>
         </div>

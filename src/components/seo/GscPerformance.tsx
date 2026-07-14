@@ -212,7 +212,7 @@ export function GscPerformance() {
                 <stop offset='95%' stopColor={storeCfg.color} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray='3 3' stroke='rgba(255,255,255,0.04)' />
+            <CartesianGrid strokeDasharray='3 3' stroke='rgba(var(--overlay-rgb),0.04)' />
             <XAxis
               dataKey='date'
               tick={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'DM Mono' }}

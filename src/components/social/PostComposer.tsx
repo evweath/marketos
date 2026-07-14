@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { X, Sparkles, Clock, Save, Send } from 'lucide-react';
-import { PLATFORM_CONFIG, CATEGORY_CONFIG, generateCaptions } from '@/lib/socialData';
+import { PLATFORM_CONFIG, CATEGORY_CONFIG, generateCaptions, NOT_STARTED_PLATFORMS } from '@/lib/socialData';
 import type { SocialPost, SocialPlatform, PostCategory } from '@/lib/socialData';
 
 interface Props {
@@ -154,6 +154,9 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
                     {cfg.label.charAt(0)}
                   </span>
                   {cfg.label}
+                  {NOT_STARTED_PLATFORMS.includes(p) && (
+                    <span className="text-[9px] font-mono" style={{ color: 'var(--text-muted)' }}>· Not started</span>
+                  )}
                 </button>
               );
             })}

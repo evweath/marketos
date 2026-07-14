@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, Zap } from 'lucide-react';
-import { CAMPAIGNS, AD_PLATFORM_CONFIG, STATUS_CONFIG } from '@/lib/campaignData';
+import { CAMPAIGNS, AD_PLATFORM_CONFIG, STATUS_CONFIG, AD_PLATFORM_STARTED } from '@/lib/campaignData';
 import type { Campaign, AdPlatform, CampaignStatus } from '@/lib/campaignData';
 
 const c$ = (n: number) =>
@@ -111,7 +111,7 @@ export default function CampaignTable({ onSelectCampaign, selected }: Props) {
                 {t.label}
                 <span className='font-mono text-[9px] px-1 py-0.5 rounded-full'
                   style={{
-                    background: isActive ? (cfg ? cfg.color + '25' : 'rgba(255,255,255,0.1)') : 'rgba(255,255,255,0.06)',
+                    background: isActive ? (cfg ? cfg.color + '25' : 'rgba(var(--overlay-rgb),0.1)') : 'rgba(var(--overlay-rgb),0.06)',
                     color: isActive ? (cfg?.color ?? 'var(--text-primary)') : 'var(--text-muted)',
                   }}>
                   {count}
@@ -178,7 +178,7 @@ export default function CampaignTable({ onSelectCampaign, selected }: Props) {
               const rowBg = isSelected
                 ? 'rgba(0,217,255,0.04)'
                 : i % 2 !== 0
-                ? 'rgba(255,255,255,0.012)'
+                ? 'rgba(var(--overlay-rgb),0.012)'
                 : 'transparent';
 
               return (
@@ -287,6 +287,22 @@ export default function CampaignTable({ onSelectCampaign, selected }: Props) {
                 </tr>
               );
             })}
+            {campaigns.length === 0 && (
+              <tr>
+                <td colSpan={11} className='px-4 py-8 text-center'>
+                  <div className='text-xs font-medium' style={{ color: 'var(--text-primary)' }}>
+                    {platform !== 'all' && !AD_PLATFORM_STARTED[platform as AdPlatform]
+                      ? 'Not started on this platform yet'
+                      : 'No campaigns match these filters'}
+                  </div>
+                  {platform !== 'all' && !AD_PLATFORM_STARTED[platform as AdPlatform] && (
+                    <div className='text-[11px] mt-1' style={{ color: 'var(--text-muted)' }}>
+                      No ad account has been connected for {AD_PLATFORM_CONFIG[platform as AdPlatform].label} yet.
+                    </div>
+                  )}
+                </td>
+              </tr>
+            )}
           </tbody>
 
           {/* Totals footer */}
@@ -308,7 +324,7 @@ export default function CampaignTable({ onSelectCampaign, selected }: Props) {
                 {c$(campaigns.reduce((s, c) => s + c.revenue, 0))}
               </td>
               <td className='px-3 py-2.5 text-right font-mono text-xs font-bold tabular-nums' style={{ color: '#10d98a' }}>
-                {(campaigns.reduce((s, c) => s + c.revenue, 0) / campaigns.reduce((s, c) => s + c.spendToDate, 0)).toFixed(2)}×
+                {campaigns.length === 0 ? '—' : (campaigns.reduce((s, c) => s + c.revenue, 0) / (campaigns.reduce((s, c) => s + c.spendToDate, 0) || 1)).toFixed(2) + '×'}
               </td>
               <td className='px-3 py-2.5 text-right font-mono text-xs tabular-nums' style={{ color: 'var(--text-secondary)' }}>
                 {campaigns.reduce((s, c) => s + c.conversions, 0)}

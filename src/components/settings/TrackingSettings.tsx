@@ -101,7 +101,7 @@ export function TrackingSettings() {
   const [pixelId, setPixelId] = usePersistentState('settings.tracking.pixelId', TRACKING_SETTINGS.metaCapi.pixelId);
   const [accessToken, setAccessToken] = usePersistentState('settings.tracking.accessToken', TRACKING_SETTINGS.metaCapi.accessToken);
   const [showToken, setShowToken] = useState(false);
-  const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set(TRACKING_SETTINGS.serverSideEvents));
+  const [selectedEvents, setSelectedEvents] = usePersistentState<string[]>('settings.tracking.selectedEvents', TRACKING_SETTINGS.serverSideEvents);
   const [capiTesting, setCapiTesting] = useState(false);
   const [capiTestResult, setCapiTestResult] = useState<'idle' | 'success' | 'error'>('idle');
   const [capiSaved, setCapiSaved] = useState(false);
@@ -110,7 +110,7 @@ export function TrackingSettings() {
   const [gEnhancedEnabled, setGEnhancedEnabled] = usePersistentState('settings.tracking.gEnhancedEnabled', TRACKING_SETTINGS.googleEnhanced.enabled);
   const [conversionId, setConversionId] = usePersistentState('settings.tracking.conversionId', TRACKING_SETTINGS.googleEnhanced.conversionId);
   const [conversionLabel, setConversionLabel] = usePersistentState('settings.tracking.conversionLabel', TRACKING_SETTINGS.googleEnhanced.label);
-  const [enhancedFields, setEnhancedFields] = useState<Set<string>>(new Set(['email', 'phone', 'address']));
+  const [enhancedFields, setEnhancedFields] = usePersistentState<string[]>('settings.tracking.enhancedFields', ['email', 'phone', 'address']);
   const [gTesting, setGTesting] = useState(false);
   const [gTestResult, setGTestResult] = useState<'idle' | 'success'>('idle');
   const [gSaved, setGSaved] = useState(false);
@@ -155,19 +155,13 @@ export function TrackingSettings() {
   };
 
   const toggleEvent = (event: string) => {
-    setSelectedEvents(prev => {
-      const next = new Set(prev);
-      if (next.has(event)) next.delete(event); else next.add(event);
-      return next;
-    });
+    setSelectedEvents(prev =>
+      prev.includes(event) ? prev.filter(e => e !== event) : [...prev, event]);
   };
 
   const toggleField = (field: string) => {
-    setEnhancedFields(prev => {
-      const next = new Set(prev);
-      if (next.has(field)) next.delete(field); else next.add(field);
-      return next;
-    });
+    setEnhancedFields(prev =>
+      prev.includes(field) ? prev.filter(f => f !== field) : [...prev, field]);
   };
 
   const updateUtmRow = (idx: number, key: keyof UTMRow, value: string) => {
@@ -241,7 +235,7 @@ export function TrackingSettings() {
                     key={event}
                     onClick={() => toggleEvent(event)}
                     className="text-[10px] px-2 py-1.5 rounded-lg text-left font-mono transition-all"
-                    style={selectedEvents.has(event)
+                    style={selectedEvents.includes(event)
                       ? { background: 'rgba(0,217,255,0.10)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.22)' }
                       : { background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
                     {event}
@@ -338,12 +332,12 @@ export function TrackingSettings() {
                     key={field.id}
                     onClick={() => toggleField(field.id)}
                     className="flex items-center gap-2 text-xs px-3 py-2 rounded-lg text-left transition-all"
-                    style={enhancedFields.has(field.id)
+                    style={enhancedFields.includes(field.id)
                       ? { background: 'rgba(0,217,255,0.08)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }
                       : { background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
                     <div className="w-3 h-3 rounded-sm border flex items-center justify-center flex-shrink-0"
-                      style={{ borderColor: enhancedFields.has(field.id) ? '#00d9ff' : 'var(--border-dim)', background: enhancedFields.has(field.id) ? 'rgba(0,217,255,0.2)' : 'transparent' }}>
-                      {enhancedFields.has(field.id) && <span style={{ fontSize: 8, color: '#00d9ff' }}>✓</span>}
+                      style={{ borderColor: enhancedFields.includes(field.id) ? '#00d9ff' : 'var(--border-dim)', background: enhancedFields.includes(field.id) ? 'rgba(0,217,255,0.2)' : 'transparent' }}>
+                      {enhancedFields.includes(field.id) && <span style={{ fontSize: 8, color: '#00d9ff' }}>✓</span>}
                     </div>
                     {field.label}
                   </button>

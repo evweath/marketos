@@ -67,18 +67,18 @@ const CH_COL_MAP: Record<string, string> = { email: '#ffb347', sms: '#10d98a', p
 function ExitIntentPanel() {
   const EI_STATS = { shown: 4820, captured: 724, captureRate: 15.02, recovered: 412, conversionRate: 8.55, revenue: 38420, avgDiscount: '10%' };
 
-  const [enabled, setEnabled]             = useState(true);
-  const [headline, setHeadline]           = useState("Wait! Don't leave yet...");
-  const [subheadline, setSubheadline]     = useState('Complete your order and save 10%');
-  const [offerType, setOfferType]         = useState<'none' | 'pct' | 'dollar' | 'shipping'>('pct');
-  const [discountAmt, setDiscountAmt]     = useState(10);
-  const [coupon, setCoupon]               = useState('COMEBACK10');
-  const [ctaText, setCtaText]             = useState('Claim My Discount');
-  const [imageOption, setImageOption]     = useState<'none' | 'product' | 'banner'>('none');
-  const [triggerType, setTriggerType]     = useState<'mouse' | 'idle' | 'scrollup' | 'exitbtn'>('mouse');
-  const [delaySeconds, setDelaySeconds]   = useState(2);
-  const [pageTypes, setPageTypes]         = useState({ product: true, cart: true, checkout: false });
-  const [freqCap, setFreqCap]             = useState(7);
+  const [enabled, setEnabled]             = usePersistentState('cart.exitIntent.enabled', true);
+  const [headline, setHeadline]           = usePersistentState('cart.exitIntent.headline', "Wait! Don't leave yet...");
+  const [subheadline, setSubheadline]     = usePersistentState('cart.exitIntent.subheadline', 'Complete your order and save 10%');
+  const [offerType, setOfferType]         = usePersistentState<'none' | 'pct' | 'dollar' | 'shipping'>('cart.exitIntent.offerType', 'pct');
+  const [discountAmt, setDiscountAmt]     = usePersistentState('cart.exitIntent.discountAmt', 10);
+  const [coupon, setCoupon]               = usePersistentState('cart.exitIntent.coupon', 'COMEBACK10');
+  const [ctaText, setCtaText]             = usePersistentState('cart.exitIntent.ctaText', 'Claim My Discount');
+  const [imageOption, setImageOption]     = usePersistentState<'none' | 'product' | 'banner'>('cart.exitIntent.imageOption', 'none');
+  const [triggerType, setTriggerType]     = usePersistentState<'mouse' | 'idle' | 'scrollup' | 'exitbtn'>('cart.exitIntent.triggerType', 'mouse');
+  const [delaySeconds, setDelaySeconds]   = usePersistentState('cart.exitIntent.delaySeconds', 2);
+  const [pageTypes, setPageTypes]         = usePersistentState('cart.exitIntent.pageTypes', { product: true, cart: true, checkout: false });
+  const [freqCap, setFreqCap]             = usePersistentState('cart.exitIntent.freqCap', 7);
   const [saving, setSaving]               = useState(false);
   const [saved, setSaved]                 = useState(false);
 

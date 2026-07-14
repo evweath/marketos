@@ -2,7 +2,16 @@
 
 import { useState } from 'react';
 import { usePersistentState } from '@/lib/usePersistentState';
-import { RefreshCw, ExternalLink, Plus, CheckCircle, Loader2, Webhook, Eye, EyeOff, Save, X, KeyRound } from 'lucide-react';
+import { RefreshCw, ExternalLink, Plus, CheckCircle, Loader2, Webhook, Eye, EyeOff, Save, X, KeyRound, Download, Plug } from 'lucide-react';
+import { TRAFFIC, CONVERSIONS } from '@/lib/mockData';
+import {
+  INITIAL_STORE_CONNECTIONS,
+  emptyConnections,
+  withDefaults,
+  type ConnectionKey,
+  type StoreConnection,
+} from '@/lib/storeConnectionsData';
+import { StoreConnectionsPanel } from './StoreConnectionsPanel';
 
 interface StoreData {
   id: string;
@@ -83,6 +92,43 @@ function maskToken(value: string): string {
   return value.slice(0, 6) + '••••' + value.slice(-4);
 }
 
+function downloadAnalyticsCsv(store: StoreData) {
+  const traffic = TRAFFIC[store.id];
+  const conversions = CONVERSIONS[store.id];
+  const daily = traffic?.daily ?? [];
+  const rows: string[] = [];
+
+  rows.push(`Shopify Analytics Export — ${store.name}`);
+  rows.push(`Domain,${store.domain}`);
+  rows.push(`Generated At,${new Date().toISOString()}`);
+  rows.push('');
+  rows.push('Daily Traffic');
+  rows.push('Date,Sessions,Pageviews,Users');
+  if (daily.length === 0) {
+    rows.push('No traffic history available yet');
+  } else {
+    for (const day of daily) rows.push(`${day.date},${day.sessions},${day.pageviews},${day.users}`);
+  }
+  rows.push('');
+  rows.push('Conversion Summary');
+  rows.push('Overall Conversion Rate,Avg Order Value,Revenue Today,Orders Today');
+  rows.push(conversions
+    ? `${conversions.overallRate}%,${conversions.avgOrderValue},${conversions.revenueToday},${conversions.ordersToday}`
+    : '0%,0,0,0');
+  rows.push('');
+  rows.push('Conversion Funnel');
+  rows.push('Step,Count,Conversion Rate');
+  for (const step of conversions?.funnel ?? []) rows.push(`${step.label},${step.count},${step.conversionRate}%`);
+
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${store.domain.replace(/[^a-zA-Z0-9.-]+/g, '-')}-analytics.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 interface SecretFieldProps {
   label: string;
   placeholder: string;
@@ -132,12 +178,15 @@ interface StoreCardProps {
   store: StoreData;
   savedCreds: Credentials | null;
   onSaveCreds: (id: string, creds: Credentials) => void;
+  connections: Record<ConnectionKey, StoreConnection>;
+  onChangeConnection: (storeId: string, key: ConnectionKey, patch: Partial<StoreConnection>) => void;
 }
 
-function StoreCard({ store, savedCreds, onSaveCreds }: StoreCardProps) {
+function StoreCard({ store, savedCreds, onSaveCreds, connections, onChangeConnection }: StoreCardProps) {
   const [syncing, setSyncing]         = useState(false);
   const [justSynced, setJustSynced]   = useState(false);
   const [editing, setEditing]         = useState(false);
+  const [showConnections, setShowConnections] = useState(false);
   const [saving, setSaving]           = useState(false);
   const [justSaved, setJustSaved]     = useState(false);
 
@@ -302,7 +351,7 @@ function StoreCard({ store, savedCreds, onSaveCreds }: StoreCardProps) {
             <button
               onClick={handleCancel}
               className='px-3 py-2 rounded-lg text-xs transition-all'
-              style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
+              style={{ background: 'rgba(var(--overlay-rgb),0.04)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
             >
               <X size={13} />
             </button>
@@ -335,25 +384,58 @@ function StoreCard({ store, savedCreds, onSaveCreds }: StoreCardProps) {
         </div>
       </div>
 
+      {/* Connected ad & analytics accounts */}
+      {showConnections && (
+        <div
+          className='rounded-xl p-4 mb-4'
+          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)' }}
+        >
+          <div className='flex items-center gap-2 mb-3'>
+            <Plug size={13} style={{ color: '#00d9ff' }} />
+            <span className='text-xs font-semibold' style={{ color: 'var(--text-primary)' }}>Connected Accounts</span>
+          </div>
+          <StoreConnectionsPanel
+            connections={connections}
+            onChange={(key, patch) => onChangeConnection(store.id, key, patch)}
+          />
+        </div>
+      )}
+
       {/* Actions */}
-      <div className='flex items-center gap-2'>
+      <div className='flex items-center gap-2 flex-wrap'>
         <button
           onClick={handleSync}
           disabled={syncing}
           className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-50'
           style={justSynced
             ? { background: 'rgba(16,217,138,0.12)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.25)' }
-            : { background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
+            : { background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
         >
           {syncing    ? <><Loader2 size={12} className='animate-spin' />Syncing…</>
           : justSynced ? <><CheckCircle size={12} />Synced</>
           : <><RefreshCw size={12} />Re-sync</>}
         </button>
         <button
+          onClick={() => downloadAnalyticsCsv(store)}
+          className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all'
+          style={{ background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
+        >
+          <Download size={12} />Download Analytics
+        </button>
+        <button
+          onClick={() => setShowConnections(c => !c)}
+          className='text-xs px-3 py-1.5 rounded-lg font-medium transition-all'
+          style={showConnections
+            ? { background: 'rgba(var(--overlay-rgb),0.08)', color: 'var(--text-secondary)', border: '1px solid var(--border-dim)' }
+            : { background: 'rgba(0,217,255,0.08)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.18)' }}
+        >
+          {showConnections ? 'Hide Connections' : 'Connections'}
+        </button>
+        <button
           onClick={() => setEditing(e => !e)}
           className='ml-auto text-xs px-3 py-1.5 rounded-lg font-medium transition-all'
           style={editing
-            ? { background: 'rgba(255,255,255,0.08)', color: 'var(--text-secondary)', border: '1px solid var(--border-dim)' }
+            ? { background: 'rgba(var(--overlay-rgb),0.08)', color: 'var(--text-secondary)', border: '1px solid var(--border-dim)' }
             : { background: 'rgba(0,217,255,0.08)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.18)' }}
         >
           {editing ? 'Hide' : 'Edit Credentials'}
@@ -470,7 +552,7 @@ function AddStoreForm({ onClose, onAdd }: AddStoreFormProps) {
           <button
             onClick={onClose}
             className='px-4 py-2 rounded-lg text-xs transition-all'
-            style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
+            style={{ background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
           >
             Cancel
           </button>
@@ -495,9 +577,22 @@ export function StoreSettings() {
   // unmounts when you leave the Stores section) and full page reloads.
   const [stores, setStores]                           = usePersistentState<StoreData[]>('stores', INITIAL_STORES);
   const [savedCreds, setSavedCreds]                   = usePersistentState<Record<string, Credentials>>('storeCreds', {});
+  const [storeConnections, setStoreConnections]       = usePersistentState<Record<string, Record<ConnectionKey, StoreConnection>>>(
+    'storeConnections', INITIAL_STORE_CONNECTIONS,
+  );
 
   const handleSaveCreds = (id: string, creds: Credentials) => {
     setSavedCreds(prev => ({ ...prev, [id]: creds }));
+  };
+
+  const handleChangeConnection = (storeId: string, key: ConnectionKey, patch: Partial<StoreConnection>) => {
+    setStoreConnections(prev => ({
+      ...prev,
+      [storeId]: {
+        ...withDefaults(prev[storeId]),
+        [key]: { ...withDefaults(prev[storeId])[key], ...patch },
+      },
+    }));
   };
 
   const handleAddStore = (payload: NewStorePayload) => {
@@ -529,6 +624,7 @@ export function StoreSettings() {
         webhookSecret: payload.webhookSecret,
       },
     }));
+    setStoreConnections(prev => ({ ...prev, [id]: emptyConnections() }));
   };
 
   return (
@@ -550,6 +646,8 @@ export function StoreSettings() {
             store={store}
             savedCreds={savedCreds[store.id] ?? null}
             onSaveCreds={handleSaveCreds}
+            connections={withDefaults(storeConnections[store.id])}
+            onChangeConnection={handleChangeConnection}
           />
         ))}
       </div>

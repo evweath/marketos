@@ -49,7 +49,7 @@ function Toggle({ on, onChange, color = '#10d98a' }: { on: boolean; onChange: (v
 // ─── Channel Card ─────────────────────────────────────────────────────────────
 
 function ChannelCard({ ch }: { ch: DeliveryChannelConfig }) {
-  const [enabled, setEnabled] = useState(ch.enabled);
+  const [enabled, setEnabled] = usePersistentState(`alerts.channelEnabled.${ch.channel}`, ch.enabled);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<'ok' | 'error' | null>(null);
 
@@ -130,10 +130,10 @@ function ChannelCard({ ch }: { ch: DeliveryChannelConfig }) {
 // ─── Quiet Hours ──────────────────────────────────────────────────────────────
 
 function QuietHoursPanel() {
-  const [enabled, setEnabled] = useState(QUIET_HOURS.enabled);
-  const [exceptCrit, setExceptCrit] = useState(QUIET_HOURS.exceptCritical);
-  const [start, setStart] = useState(QUIET_HOURS.start);
-  const [end, setEnd] = useState(QUIET_HOURS.end);
+  const [enabled, setEnabled] = usePersistentState('alerts.quietHours.enabled', QUIET_HOURS.enabled);
+  const [exceptCrit, setExceptCrit] = usePersistentState('alerts.quietHours.exceptCritical', QUIET_HOURS.exceptCritical);
+  const [start, setStart] = usePersistentState('alerts.quietHours.start', QUIET_HOURS.start);
+  const [end, setEnd] = usePersistentState('alerts.quietHours.end', QUIET_HOURS.end);
   const [daysActive, setDaysActive] = usePersistentState<number[]>('alerts.quietDays', QUIET_HOURS.daysActive);
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -213,9 +213,9 @@ function QuietHoursPanel() {
 // ─── Digest Panel ─────────────────────────────────────────────────────────────
 
 function DigestPanel() {
-  const [enabled, setEnabled] = useState(DIGEST_CONFIG.enabled);
-  const [freq, setFreq] = useState(DIGEST_CONFIG.frequency);
-  const [time, setTime] = useState(DIGEST_CONFIG.sendAt);
+  const [enabled, setEnabled] = usePersistentState('alerts.digest.enabled', DIGEST_CONFIG.enabled);
+  const [freq, setFreq] = usePersistentState('alerts.digest.frequency', DIGEST_CONFIG.frequency);
+  const [time, setTime] = usePersistentState('alerts.digest.sendAt', DIGEST_CONFIG.sendAt);
 
   return (
     <div className="glass-card p-4">

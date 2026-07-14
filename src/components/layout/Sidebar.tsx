@@ -32,7 +32,7 @@ export default function Sidebar() {
     <aside
       className="flex flex-col h-screen w-56 shrink-0"
       style={{
-        background: 'var(--bg-surface)',
+        background: 'var(--bg-nav)',
         borderRight: '1px solid var(--border-subtle)',
         boxShadow: '1px 0 0 var(--border-subtle)',
       }}
@@ -76,7 +76,7 @@ export default function Sidebar() {
               <div
                 className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
                 style={{
-                  background: active ? 'rgba(0,217,255,0.15)' : 'rgba(255,255,255,0.04)',
+                  background: active ? 'rgba(0,217,255,0.15)' : 'rgba(var(--overlay-rgb),0.04)',
                 }}
               >
                 <Icon
@@ -143,7 +143,7 @@ export default function Sidebar() {
         >
           <div
             className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
-            style={{ background: 'rgba(255,255,255,0.04)' }}
+            style={{ background: 'rgba(var(--overlay-rgb),0.04)' }}
           >
             <Settings size={13} strokeWidth={1.8} style={{ color: 'var(--text-secondary)' }} />
           </div>

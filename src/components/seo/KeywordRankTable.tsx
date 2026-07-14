@@ -225,7 +225,7 @@ export function KeywordRankTable() {
                     <span
                       className='inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full font-mono text-[11px] font-semibold'
                       style={{
-                        background: neutral ? 'rgba(255,255,255,0.05)' : improved ? 'rgba(16,217,138,0.14)' : 'rgba(255,68,68,0.14)',
+                        background: neutral ? 'rgba(var(--overlay-rgb),0.05)' : improved ? 'rgba(16,217,138,0.14)' : 'rgba(255,68,68,0.14)',
                         color: neutral ? 'var(--text-muted)' : improved ? '#10d98a' : '#ff4444',
                       }}
                     >

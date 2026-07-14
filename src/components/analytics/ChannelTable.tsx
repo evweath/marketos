@@ -14,17 +14,19 @@ const fmt = (n: number): string =>
   n >= 1_000_000 ? (n / 1_000_000).toFixed(1) + 'M' : n >= 1_000 ? (n / 1_000).toFixed(1) + 'K' : n.toLocaleString();
 
 const STATUS_BADGE: Record<ChannelMetrics['status'], string> = {
-  strong: 'badge-ok',
-  ok:     'badge-info',
-  weak:   'badge-critical',
-  paused: 'badge-warning',
+  strong:      'badge-ok',
+  ok:          'badge-info',
+  weak:        'badge-critical',
+  paused:      'badge-warning',
+  'not-started': 'badge-warning',
 };
 
 const STATUS_LABEL: Record<ChannelMetrics['status'], string> = {
-  strong: 'Strong',
-  ok:     'OK',
-  weak:   'Weak',
-  paused: 'Paused',
+  strong:      'Strong',
+  ok:          'OK',
+  weak:        'Weak',
+  paused:      'Paused',
+  'not-started': 'Not Started',
 };
 
 const COLUMNS: { key: SortKey; label: string }[] = [
@@ -169,7 +171,7 @@ export default function ChannelTable({ dateRange = '30d' }: { dateRange?: DateRa
                   }}
                   onClick={() => setSelectedChannel(isSelected ? null : ch.channel)}
                   onMouseEnter={e => {
-                    if (!isSelected) (e.currentTarget as HTMLTableRowElement).style.background = 'rgba(255,255,255,0.018)';
+                    if (!isSelected) (e.currentTarget as HTMLTableRowElement).style.background = 'rgba(var(--overlay-rgb),0.018)';
                   }}
                   onMouseLeave={e => {
                     if (!isSelected) (e.currentTarget as HTMLTableRowElement).style.background = '';

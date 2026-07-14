@@ -18,6 +18,7 @@ export interface Integration {
   icon: string;
   description: string;
   status: IntegrationStatus;
+  notStarted?: boolean;  // platform hasn't launched yet — shown as "Not Started" instead of "Disconnected"
   accountName?: string;
   lastSync?: string;
   color: string;
@@ -135,9 +136,8 @@ export const INTEGRATIONS: Integration[] = [
     category: 'advertising',
     icon: '🎵',
     description: 'Pull TikTok campaign data, spend, and video performance metrics.',
-    status: 'connected',
-    accountName: 'TK-ACC-7483920',
-    lastSync: new Date(Date.now() - 15 * 60000).toISOString(),
+    status: 'disconnected',
+    notStarted: true,
     color: '#ff4444',
   },
   {
@@ -157,9 +157,8 @@ export const INTEGRATIONS: Integration[] = [
     category: 'social',
     icon: '𝕏',
     description: 'Monitor posts, engagement, follower growth, and ad campaigns.',
-    status: 'connected',
-    accountName: '@marketosbakery',
-    lastSync: new Date(Date.now() - 22 * 60000).toISOString(),
+    status: 'disconnected',
+    notStarted: true,
     color: '#e8eaf3',
   },
   {
@@ -169,6 +168,7 @@ export const INTEGRATIONS: Integration[] = [
     icon: '💼',
     description: 'Sync LinkedIn company page analytics and sponsored content data.',
     status: 'disconnected',
+    notStarted: true,
     color: '#0077b5',
   },
   {

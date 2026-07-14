@@ -35,7 +35,7 @@ const FLOW_STATUS_CFG: Record<FlowStatus, { color: string; bg: string; label: st
 function FlowCard({ flow }: { flow: EmailFlow }) {
   const tc = TRIGGER_CONFIG[flow.trigger];
   const sc = FLOW_STATUS_CFG[flow.status];
-  const [enabled, setEnabled] = useState(flow.status === 'active');
+  const [enabled, setEnabled] = usePersistentState(`email.flowEnabled.${flow.id}`, flow.status === 'active');
 
   return (
     <div className="glass-card p-4 transition-all hover:border-white/10"
@@ -442,7 +442,7 @@ type SmsSubTab = 'campaigns' | 'flows' | 'conversational' | 'compliance';
 
 function SmsFlowCard({ flow }: { flow: SmsFlow }) {
   const badge = SMS_FLOW_STATUS_BADGE[flow.status];
-  const [enabled, setEnabled] = useState(flow.status === 'active');
+  const [enabled, setEnabled] = usePersistentState(`email.smsFlowEnabled.${flow.id}`, flow.status === 'active');
   return (
     <div className="glass-card p-4">
       <div className="flex items-start justify-between mb-3">
@@ -664,7 +664,7 @@ function SmsCampaignsPanel() {
                     <div className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{item.detail}</div>
                   </div>
                   <div onClick={() => toggleCompliance(item.label)} className="w-9 h-5 rounded-full shrink-0 flex items-center px-0.5 cursor-pointer"
-                    style={{ background: compliance[item.label] ? '#10d98a' : 'rgba(255,255,255,0.1)' }}>
+                    style={{ background: compliance[item.label] ? '#10d98a' : 'rgba(var(--overlay-rgb),0.1)' }}>
                     <div className="w-4 h-4 rounded-full bg-white transition-all" style={{ marginLeft: compliance[item.label] ? 'auto' : 0 }} />
                   </div>
                 </div>
@@ -698,7 +698,7 @@ function SmsCampaignsPanel() {
                     <div className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{item.detail}</div>
                   </div>
                   <div onClick={() => toggleCompliance(item.label)} className="w-9 h-5 rounded-full shrink-0 flex items-center px-0.5 cursor-pointer"
-                    style={{ background: compliance[item.label] ? '#10d98a' : 'rgba(255,255,255,0.1)' }}>
+                    style={{ background: compliance[item.label] ? '#10d98a' : 'rgba(var(--overlay-rgb),0.1)' }}>
                     <div className="w-4 h-4 rounded-full bg-white transition-all" style={{ marginLeft: compliance[item.label] ? 'auto' : 0 }} />
                   </div>
                 </div>
@@ -727,7 +727,7 @@ function SmsCampaignsPanel() {
                     <div className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{item.detail}</div>
                   </div>
                   <div onClick={() => toggleCompliance(item.label)} className="w-9 h-5 rounded-full shrink-0 flex items-center px-0.5 cursor-pointer"
-                    style={{ background: compliance[item.label] ? '#10d98a' : 'rgba(255,255,255,0.1)' }}>
+                    style={{ background: compliance[item.label] ? '#10d98a' : 'rgba(var(--overlay-rgb),0.1)' }}>
                     <div className="w-4 h-4 rounded-full bg-white transition-all" style={{ marginLeft: compliance[item.label] ? 'auto' : 0 }} />
                   </div>
                 </div>
@@ -802,7 +802,7 @@ const PUSH_AUTO_STATUS_BADGE: Record<PushAutoStatus, { color: string; bg: string
 
 function PushAutoRow({ auto }: { auto: PushAutomation }) {
   const badge = PUSH_AUTO_STATUS_BADGE[auto.status];
-  const [enabled, setEnabled] = useState(auto.status === 'active');
+  const [enabled, setEnabled] = usePersistentState(`email.pushAutoEnabled.${auto.id}`, auto.status === 'active');
   return (
     <div className="border-b px-4 py-3 hover:bg-white/[0.02] transition-colors" style={{ borderColor: 'var(--border-subtle)' }}>
       <div className="flex items-center justify-between gap-3">
@@ -1272,7 +1272,7 @@ function SendTimePanel() {
         </div>
         <button onClick={() => setEnabled(v => !v)}
           className="w-11 h-6 rounded-full flex items-center px-0.5 shrink-0 transition-all"
-          style={{ background: enabled ? '#10d98a' : 'rgba(255,255,255,0.1)' }}>
+          style={{ background: enabled ? '#10d98a' : 'rgba(var(--overlay-rgb),0.1)' }}>
           <div className="w-5 h-5 rounded-full bg-white transition-all" style={{ marginLeft: enabled ? 'auto' : 0 }} />
         </button>
       </div>
@@ -1445,7 +1445,7 @@ function EmailABPanel() {
                         style={{ background: isWinner ? 'rgba(16,217,138,0.05)' : 'var(--bg-elevated)', border: `1px solid ${isWinner ? 'rgba(16,217,138,0.2)' : 'var(--border-subtle)'}` }}>
                         <div className="flex items-center gap-1.5 mb-1.5">
                           <span className="text-[9px] w-4 h-4 rounded flex items-center justify-center font-bold"
-                            style={{ background: isWinner ? 'rgba(16,217,138,.2)' : 'rgba(255,255,255,.08)', color: isWinner ? '#10d98a' : 'var(--text-muted)' }}>
+                            style={{ background: isWinner ? 'rgba(16,217,138,.2)' : 'rgba(var(--overlay-rgb),.08)', color: isWinner ? '#10d98a' : 'var(--text-muted)' }}>
                             {v}
                           </span>
                           <span className="text-[10px] flex-1 truncate" style={{ color: 'var(--text-secondary)' }}>{label}</span>

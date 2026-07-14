@@ -32,40 +32,53 @@ export default function PlatformStatsBar() {
                 </span>
               </div>
 
-              {/* Follower count */}
-              <div>
-                <div className="data-value text-xl font-bold leading-none" style={{ color: 'var(--text-primary)' }}>
-                  {fmt(stat.followers)}
+              {stat.started === false ? (
+                <div className="flex-1 flex items-center justify-center py-2">
+                  <span
+                    className="text-[10px] px-2 py-0.5 rounded-full font-mono"
+                    style={{ background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
+                  >
+                    Not Started
+                  </span>
                 </div>
-                <div className="section-label mt-0.5">Followers</div>
-              </div>
-
-              {/* Delta */}
-              <div className="flex items-center gap-1 text-[10px] font-mono"
-                style={{ color: positive ? '#10d98a' : '#ff4444' }}>
-                {positive
-                  ? <TrendingUp size={10} />
-                  : <TrendingDown size={10} />}
-                <span>{positive ? '+' : ''}{stat.followerDelta} this mo.</span>
-              </div>
-
-              {/* Engagement + posts */}
-              <div className="grid grid-cols-2 gap-1.5 mt-auto">
-                <div className="rounded-lg px-1.5 py-1.5 text-center"
-                  style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                  <div className="text-[11px] font-bold font-mono leading-none" style={{ color: engColor }}>
-                    {stat.avgEngagementRate}%
+              ) : (
+                <>
+                  {/* Follower count */}
+                  <div>
+                    <div className="data-value text-xl font-bold leading-none" style={{ color: 'var(--text-primary)' }}>
+                      {fmt(stat.followers)}
+                    </div>
+                    <div className="section-label mt-0.5">Followers</div>
                   </div>
-                  <div className="section-label mt-0.5" style={{ fontSize: 8 }}>Eng.</div>
-                </div>
-                <div className="rounded-lg px-1.5 py-1.5 text-center"
-                  style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                  <div className="text-[11px] font-bold font-mono leading-none" style={{ color: 'var(--text-primary)' }}>
-                    {stat.postsThisMonth}
+
+                  {/* Delta */}
+                  <div className="flex items-center gap-1 text-[10px] font-mono"
+                    style={{ color: positive ? '#10d98a' : '#ff4444' }}>
+                    {positive
+                      ? <TrendingUp size={10} />
+                      : <TrendingDown size={10} />}
+                    <span>{positive ? '+' : ''}{stat.followerDelta} this mo.</span>
                   </div>
-                  <div className="section-label mt-0.5" style={{ fontSize: 8 }}>Posts</div>
-                </div>
-              </div>
+
+                  {/* Engagement + posts */}
+                  <div className="grid grid-cols-2 gap-1.5 mt-auto">
+                    <div className="rounded-lg px-1.5 py-1.5 text-center"
+                      style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                      <div className="text-[11px] font-bold font-mono leading-none" style={{ color: engColor }}>
+                        {stat.avgEngagementRate}%
+                      </div>
+                      <div className="section-label mt-0.5" style={{ fontSize: 8 }}>Eng.</div>
+                    </div>
+                    <div className="rounded-lg px-1.5 py-1.5 text-center"
+                      style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                      <div className="text-[11px] font-bold font-mono leading-none" style={{ color: 'var(--text-primary)' }}>
+                        {stat.postsThisMonth}
+                      </div>
+                      <div className="section-label mt-0.5" style={{ fontSize: 8 }}>Posts</div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         );

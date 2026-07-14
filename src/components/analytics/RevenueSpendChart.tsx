@@ -134,7 +134,7 @@ export default function RevenueSpendChart({ dateRange = '30d' }: { dateRange?: D
               })}
             </defs>
             <CartesianGrid
-              stroke="rgba(255,255,255,0.04)"
+              stroke="rgba(var(--overlay-rgb),0.04)"
               strokeDasharray="4 4"
               vertical={false}
             />
@@ -148,7 +148,7 @@ export default function RevenueSpendChart({ dateRange = '30d' }: { dateRange?: D
             <YAxis hide />
             <Tooltip
               content={<CustomTooltip />}
-              cursor={{ stroke: 'rgba(255,255,255,0.06)', strokeWidth: 1 }}
+              cursor={{ stroke: 'rgba(var(--overlay-rgb),0.06)', strokeWidth: 1 }}
             />
             {activeTimeSeries.map(ts => {
               const color = CHANNEL_CONFIG[ts.channel].color;

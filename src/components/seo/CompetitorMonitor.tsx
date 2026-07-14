@@ -237,7 +237,7 @@ export function CompetitorMonitor() {
                       <span
                         className='text-[9px] px-1.5 py-0.5 rounded-full font-mono font-semibold'
                         style={{
-                          background: active ? 'rgba(0,217,255,0.2)' : 'rgba(255,255,255,0.06)',
+                          background: active ? 'rgba(0,217,255,0.2)' : 'rgba(var(--overlay-rgb),0.06)',
                           color: active ? '#00d9ff' : 'var(--text-muted)',
                         }}
                       >

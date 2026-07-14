@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Bell, RefreshCw, ChevronRight } from 'lucide-react';
+import { Bell, RefreshCw, ChevronRight, Sun, Moon } from 'lucide-react';
 import { ALERTS } from '@/lib/mockData';
+import { useTheme } from '@/lib/ThemeProvider';
 
 interface TopBarProps {
   title: string;
@@ -13,6 +14,7 @@ interface TopBarProps {
 export default function TopBar({ title, subtitle, breadcrumbs }: TopBarProps) {
   const [time, setTime] = useState('');
   const [rotating, setRotating] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   const unacknowledgedAlerts = ALERTS.filter(a => !a.acknowledged);
   const criticalCount = unacknowledgedAlerts.filter(a => a.severity === 'critical').length;
@@ -35,7 +37,7 @@ export default function TopBar({ title, subtitle, breadcrumbs }: TopBarProps) {
     <header
       className="flex items-center justify-between px-5 shrink-0"
       style={{
-        background: 'var(--bg-surface)',
+        background: 'var(--bg-nav)',
         borderBottom: '1px solid var(--border-subtle)',
         height: 52,
         boxShadow: '0 1px 0 var(--border-subtle)',
@@ -131,12 +133,24 @@ export default function TopBar({ title, subtitle, breadcrumbs }: TopBarProps) {
           </span>
         </div>
 
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          className="p-2 rounded-lg transition-colors"
+          style={{ color: 'var(--text-muted)' }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(var(--overlay-rgb),0.04)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+        >
+          {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+        </button>
+
         {/* Refresh */}
         <button
           onClick={handleRefresh}
           className="p-2 rounded-lg transition-colors"
           style={{ color: 'var(--text-muted)' }}
-          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
+          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(var(--overlay-rgb),0.04)')}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           title="Refresh data"
         >
@@ -147,7 +161,7 @@ export default function TopBar({ title, subtitle, breadcrumbs }: TopBarProps) {
         <button
           className="relative p-2 rounded-lg transition-colors"
           style={{ color: criticalCount > 0 ? '#ff4444' : unacknowledgedAlerts.length > 0 ? '#ffb347' : 'var(--text-muted)' }}
-          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
+          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(var(--overlay-rgb),0.04)')}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
         >
           <Bell size={14} />

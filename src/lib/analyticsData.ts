@@ -35,7 +35,7 @@ export interface ChannelMetrics {
   roasDelta: number;
   spendDelta: number;
   // status
-  status: 'strong' | 'ok' | 'weak' | 'paused';
+  status: 'strong' | 'ok' | 'weak' | 'paused' | 'not-started';
 }
 
 export interface DailyMetric {
@@ -104,10 +104,10 @@ export const CHANNEL_METRICS: ChannelMetrics[] = [
   },
   {
     channel: 'tiktok-ads', label: 'TikTok Ads', icon: 'TK', color: '#FF0050',
-    impressions: 1240000, clicks: 7480, ctr: 0.60, cpc: 0.89, spend: 6657,
-    budget: 8000, conversions: 218, revenue: 24640, roas: 3.70, cpa: 30.54,
-    margin: 73.0, impressionsDelta: +42.0, clicksDelta: +38.7, conversionsDelta: +31.2,
-    revenueDelta: +29.4, roasDelta: -7.1, spendDelta: +41.8, status: 'ok',
+    impressions: 0, clicks: 0, ctr: 0, cpc: 0, spend: 0,
+    budget: 0, conversions: 0, revenue: 0, roas: 0, cpa: 0,
+    margin: 0, impressionsDelta: 0, clicksDelta: 0, conversionsDelta: 0,
+    revenueDelta: 0, roasDelta: 0, spendDelta: 0, status: 'not-started',
   },
   {
     channel: 'youtube-ads', label: 'YouTube Ads', icon: 'YT', color: '#FF0000',
@@ -118,17 +118,17 @@ export const CHANNEL_METRICS: ChannelMetrics[] = [
   },
   {
     channel: 'x-twitter', label: 'X / Twitter', icon: 'X', color: '#E7E9EA',
-    impressions: 184000, clicks: 2210, ctr: 1.20, cpc: 1.56, spend: 3448,
-    budget: 4000, conversions: 89, revenue: 9840, roas: 2.85, cpa: 38.74,
-    margin: 64.9, impressionsDelta: -6.4, clicksDelta: -9.1, conversionsDelta: -12.3,
-    revenueDelta: -11.8, roasDelta: -4.2, spendDelta: +1.8, status: 'weak',
+    impressions: 0, clicks: 0, ctr: 0, cpc: 0, spend: 0,
+    budget: 0, conversions: 0, revenue: 0, roas: 0, cpa: 0,
+    margin: 0, impressionsDelta: 0, clicksDelta: 0, conversionsDelta: 0,
+    revenueDelta: 0, roasDelta: 0, spendDelta: 0, status: 'not-started',
   },
   {
     channel: 'linkedin', label: 'LinkedIn', icon: 'LI', color: '#0A66C2',
-    impressions: 94000, clicks: 1880, ctr: 2.00, cpc: 4.20, spend: 7896,
-    budget: 10000, conversions: 142, revenue: 67840, roas: 8.59, cpa: 55.60,
-    margin: 88.4, impressionsDelta: +22.1, clicksDelta: +19.8, conversionsDelta: +28.4,
-    revenueDelta: +34.2, roasDelta: +10.6, spendDelta: +8.4, status: 'strong',
+    impressions: 0, clicks: 0, ctr: 0, cpc: 0, spend: 0,
+    budget: 0, conversions: 0, revenue: 0, roas: 0, cpa: 0,
+    margin: 0, impressionsDelta: 0, clicksDelta: 0, conversionsDelta: 0,
+    revenueDelta: 0, roasDelta: 0, spendDelta: 0, status: 'not-started',
   },
   {
     channel: 'email', label: 'Email', icon: 'EM', color: '#ffb347',
@@ -190,9 +190,7 @@ function genDailyData(baseSpend: number, baseRevenue: number, trend: number, see
 export const TIME_SERIES: ChannelTimeSeries[] = [
   { channel: 'google-ads',  data: genDailyData(23625, 142890, 0.14, 12345) },
   { channel: 'meta-ads',    data: genDailyData(19517, 89340,  -0.06, 67890) },
-  { channel: 'tiktok-ads',  data: genDailyData(6657,  24640,  0.42, 11111) },
   { channel: 'youtube-ads', data: genDailyData(5075,  28960,  0.15, 22222) },
-  { channel: 'linkedin',    data: genDailyData(7896,  67840,  0.22, 33333) },
   { channel: 'email',       data: genDailyData(1215,  89640,  0.09, 44444) },
 ];
 
@@ -203,9 +201,7 @@ export const ATTRIBUTION: AttributionTouchpoint[] = [
   { channel: 'meta-ads',    label: 'Meta Ads',     color: '#0866FF', firstTouch: 18.4, lastTouch: 21.3, linearTouch: 19.7, positionBased: 20.2 },
   { channel: 'organic',     label: 'Organic',      color: '#10d98a', firstTouch: 22.1, lastTouch: 14.6, linearTouch: 18.9, positionBased: 18.1 },
   { channel: 'email',       label: 'Email',        color: '#ffb347', firstTouch: 8.2,  lastTouch: 19.4, linearTouch: 14.8, positionBased: 15.6 },
-  { channel: 'linkedin',    label: 'LinkedIn',     color: '#0A66C2', firstTouch: 9.4,  lastTouch: 7.8,  linearTouch: 9.2,  positionBased: 9.0  },
   { channel: 'youtube-ads', label: 'YouTube Ads',  color: '#FF0000', firstTouch: 4.8,  lastTouch: 5.2,  linearTouch: 6.4,  positionBased: 4.9  },
-  { channel: 'tiktok-ads',  label: 'TikTok Ads',  color: '#FF0050', firstTouch: 2.9,  lastTouch: 3.0,  linearTouch: 6.2,  positionBased: 2.8  },
 ];
 
 // ─── AI Insights ──────────────────────────────────────────────────────────────
@@ -219,33 +215,6 @@ export const AI_INSIGHTS: AIInsight[] = [
     channel: 'meta-ads',
     impact: 'high',
     action: 'Refresh top 3 ad creatives and expand to a lookalike audience based on recent purchasers.',
-  },
-  {
-    id: 'ins-002',
-    type: 'opportunity',
-    title: 'LinkedIn ROAS 8.59× — scale budget recommended',
-    detail: 'LinkedIn campaigns show the highest blended ROAS across all paid channels at 8.59×, averaging $67,840 revenue on $7,896 spend. Budget utilization is at 79% — there is $2,104 remaining budget headroom this month.',
-    channel: 'linkedin',
-    impact: 'high',
-    action: 'Increase LinkedIn daily budget by 25% and duplicate top-performing B2B ad sets targeting decision-makers.',
-  },
-  {
-    id: 'ins-003',
-    type: 'win',
-    title: 'TikTok volume up 42% MoM — ahead of projections',
-    detail: 'TikTok Ads impressions grew 42% vs. last month. Click volume is up 38.7%. Despite lower ROAS (3.7×), cost per click ($0.89) is driving significant top-of-funnel volume at low cost.',
-    channel: 'tiktok-ads',
-    impact: 'medium',
-    action: 'A/B test a retargeting campaign for TikTok viewers who did not convert to improve ROAS.',
-  },
-  {
-    id: 'ins-004',
-    type: 'warning',
-    title: 'X/Twitter CPA rising — $38.74 vs. $31.20 last month',
-    detail: 'X/Twitter cost per acquisition has risen 24.2% over the last 30 days. Conversions are down 12.3% while spend increased 1.8%. The channel is now the least efficient paid channel by CPA.',
-    channel: 'x-twitter',
-    impact: 'medium',
-    action: 'Reduce X/Twitter budget by 30% and reallocate to YouTube Ads which shows improving ROAS trend.',
   },
   {
     id: 'ins-005',
