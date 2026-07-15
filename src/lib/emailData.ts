@@ -68,7 +68,8 @@ export { TRIGGER_CONFIG };
 function daysAgo(n: number) { return new Date(Date.now() - n * 86400000).toISOString(); }
 function daysFromNow(n: number) { return new Date(Date.now() + n * 86400000).toISOString(); }
 
-export const EMAIL_FLOWS: EmailFlow[] = [
+// SAMPLE_* below seeds Settings → Data → "Load Sample Data"; the app boots empty.
+export const SAMPLE_EMAIL_FLOWS: EmailFlow[] = [
   {
     id: 'ef-001', name: 'Cart Abandonment — 3-Step (Email + SMS)', trigger: 'cart-abandon',
     status: 'active', steps: 3, channels: ['email', 'sms'], store: 'all stores',
@@ -119,7 +120,7 @@ export const EMAIL_FLOWS: EmailFlow[] = [
   },
 ];
 
-export const EMAIL_CAMPAIGNS: EmailCampaign[] = [
+export const SAMPLE_EMAIL_CAMPAIGNS: EmailCampaign[] = [
   {
     id: 'ec-001', subject: '🍩 Flash Sale: 20% Off All Glazing Mixes This Weekend',
     preview: 'Your donuts deserve the best glaze. Stock up before summer season peaks...',
@@ -147,7 +148,7 @@ export const EMAIL_CAMPAIGNS: EmailCampaign[] = [
   },
 ];
 
-export const SEGMENTS: SegmentData[] = [
+export const SAMPLE_SEGMENTS: SegmentData[] = [
   { id: 'seg-001', name: 'VIP (LTV > $5K)',      count: 284,  description: 'High-value customers with >$5,000 lifetime spend', avgClv: 12480, avgOrderValue: 847, color: '#ffb347' },
   { id: 'seg-002', name: 'Active Buyers (90d)',  count: 1847, description: 'Purchased at least once in the last 90 days',        avgClv: 2840,  avgOrderValue: 312, color: '#10d98a' },
   { id: 'seg-003', name: 'At-Risk (91-180d)',    count: 612,  description: 'No purchase in 91-180 days — churn risk medium',    avgClv: 1240,  avgOrderValue: 214, color: '#ffb347' },
@@ -156,7 +157,7 @@ export const SEGMENTS: SegmentData[] = [
   { id: 'seg-006', name: 'New Subscribers',     count: 312,  description: 'Subscribed in last 30 days, no purchase yet',      avgClv: 0,     avgOrderValue: 0,    color: '#00d9ff' },
 ];
 
-export const DELIVERABILITY: DeliverabilityMetric[] = [
+export const SAMPLE_DELIVERABILITY: DeliverabilityMetric[] = [
   { label: 'Sending Domain SPF',    value: 'Pass',      status: 'ok',   detail: 'v=spf1 include:klaviyo.com ~all — properly configured' },
   { label: 'DKIM Signature',        value: 'Pass',      status: 'ok',   detail: 'DKIM key published and signing correctly for all 3 domains' },
   { label: 'DMARC Policy',          value: 'p=quarantine', status: 'warn', detail: 'Consider upgrading to p=reject for maximum deliverability' },
@@ -167,11 +168,17 @@ export const DELIVERABILITY: DeliverabilityMetric[] = [
   { label: 'Inbox Placement',       value: '94.2%',     status: 'ok',   detail: 'Gmail: 96%, Outlook: 91%, Apple Mail: 98% inbox placement' },
 ];
 
-export const EMAIL_STATS = {
-  totalSubscribers: 23108,
-  activeSubscribers: 18420,
-  totalRevenue30d: EMAIL_FLOWS.reduce((s, f) => s + f.revenue, 0),
-  avgOpenRate: EMAIL_FLOWS.filter(f => f.sent > 0).reduce((s, f) => s + f.openRate, 0) / EMAIL_FLOWS.filter(f => f.sent > 0).length,
-  avgClickRate: EMAIL_FLOWS.filter(f => f.sent > 0).reduce((s, f) => s + f.clickRate, 0) / EMAIL_FLOWS.filter(f => f.sent > 0).length,
-  activeFlows: EMAIL_FLOWS.filter(f => f.status === 'active').length,
-};
+// Computed from whatever flows currently exist (empty by default, or seeded
+// via Load Sample Data) rather than hardcoded, plus subscriber counts which
+// have no backing data model yet — honestly zeroed until one exists.
+export function computeEmailStats(flows: EmailFlow[]) {
+  const sentFlows = flows.filter(f => f.sent > 0);
+  return {
+    totalSubscribers: 0,
+    activeSubscribers: 0,
+    totalRevenue30d: flows.reduce((s, f) => s + f.revenue, 0),
+    avgOpenRate: sentFlows.length > 0 ? sentFlows.reduce((s, f) => s + f.openRate, 0) / sentFlows.length : 0,
+    avgClickRate: sentFlows.length > 0 ? sentFlows.reduce((s, f) => s + f.clickRate, 0) / sentFlows.length : 0,
+    activeFlows: flows.filter(f => f.status === 'active').length,
+  };
+}

@@ -3,6 +3,7 @@ import { SAMPLE_ALERT_RULES, SAMPLE_FIRED_ALERTS } from './alertData';
 import { SAMPLE_STORE_HEALTH, SAMPLE_TRAFFIC, SAMPLE_CONVERSIONS, SAMPLE_ABANDONED_CARTS, SAMPLE_TRANSACTIONS, SAMPLE_PAGE_CHANGES, SAMPLE_SEO_SNAPSHOTS } from './mockData';
 import { SAMPLE_CHANNEL_METRICS, SAMPLE_TIME_SERIES, SAMPLE_ATTRIBUTION, SAMPLE_AI_INSIGHTS, SAMPLE_SHARED_REPORTS, emptyChannelMetrics, emptyTimeSeries, emptyAttribution } from './analyticsData';
 import { SAMPLE_SOCIAL_POSTS, SAMPLE_INBOX_MESSAGES, SAMPLE_LISTENING_ITEMS, SAMPLE_PLATFORM_STATS, SAMPLE_APPROVAL_POSTS, SAMPLE_DM_RULES, emptyPlatformStats } from './socialData';
+import { SAMPLE_EMAIL_FLOWS, SAMPLE_EMAIL_CAMPAIGNS, SAMPLE_SEGMENTS, SAMPLE_DELIVERABILITY } from './emailData';
 
 // ─── Sample data registry ──────────────────────────────────────────────────
 //
@@ -52,6 +53,10 @@ const REGISTRY: SampleDataEntry[] = [
   { key: 'social.platformStats',      sample: SAMPLE_PLATFORM_STATS,   empty: emptyPlatformStats() },
   { key: 'social.approvalPosts',      sample: SAMPLE_APPROVAL_POSTS,   empty: [] },
   { key: 'social.dmRules',            sample: SAMPLE_DM_RULES,         empty: [] },
+  { key: 'email.flows',               sample: SAMPLE_EMAIL_FLOWS,      empty: [] },
+  { key: 'email.campaigns',           sample: SAMPLE_EMAIL_CAMPAIGNS,  empty: [] },
+  { key: 'email.segments',            sample: SAMPLE_SEGMENTS,         empty: [] },
+  { key: 'email.deliverability',      sample: SAMPLE_DELIVERABILITY,   empty: [] },
 ];
 
 function storageKey(key: string): string {

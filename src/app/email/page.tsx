@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { usePersistentState } from '@/lib/usePersistentState';
 import Sidebar from '@/components/layout/Sidebar';
 import TopBar from '@/components/layout/TopBar';
-import { EMAIL_FLOWS, EMAIL_CAMPAIGNS, SEGMENTS, DELIVERABILITY, EMAIL_STATS, TRIGGER_CONFIG } from '@/lib/emailData';
-import type { EmailFlow, FlowStatus, EmailCampaign } from '@/lib/emailData';
+import { computeEmailStats, TRIGGER_CONFIG } from '@/lib/emailData';
+import type { EmailFlow, FlowStatus, EmailCampaign, SegmentData, DeliverabilityMetric } from '@/lib/emailData';
 import { Mail, GitBranch, Users, Shield, Play, Pause, CheckCircle, AlertTriangle, XCircle, MessageSquare, Bell, LayoutTemplate, Clock, FlaskConical, ShoppingBag, GripVertical, Trash2, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 
 const c$ = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
@@ -91,7 +91,7 @@ function FlowCard({ flow }: { flow: EmailFlow }) {
 
 function CampaignsList() {
   const SS = { sent: { color: '#10d98a', label: 'Sent' }, scheduled: { color: 'var(--cyan)', label: 'Scheduled' }, draft: { color: '#7b93ff', label: 'Draft' } };
-  const [campaigns, setCampaigns] = usePersistentState<EmailCampaign[]>('email.campaigns', EMAIL_CAMPAIGNS);
+  const [campaigns, setCampaigns] = usePersistentState<EmailCampaign[]>('email.campaigns', []);
   const addCampaign = () => {
     const id = `ec-${Date.now()}`;
     setCampaigns(prev => [{
@@ -107,6 +107,9 @@ function CampaignsList() {
         <button onClick={addCampaign} className="text-base px-3 py-1.5 rounded-lg font-medium"
           style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>+ New Campaign</button>
       </div>
+      {campaigns.length === 0 && (
+        <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>No campaigns yet — create one to get started.</div>
+      )}
       {campaigns.map(camp => {
         const ss = SS[camp.status];
         return (
@@ -135,18 +138,12 @@ function CampaignsList() {
   );
 }
 
-const PREDICTIVE_CUSTOMERS = [
-  { id: 'pc-1', name: 'Oak Street Bakery',    clv: 28400, churnRisk: 4,  nextOrderDays: 22, segment: 'VIP',       churnLabel: 'Low'    },
-  { id: 'pc-2', name: 'Metro Donuts LLC',      clv: 19200, churnRisk: 38, nextOrderDays: 14, segment: 'Active',    churnLabel: 'Medium' },
-  { id: 'pc-3', name: 'Baker Bros Wholesale',  clv: 14200, churnRisk: 72, nextOrderDays: null, segment: 'At Risk', churnLabel: 'High'   },
-  { id: 'pc-4', name: 'Sweet Rings Co.',        clv: 6840,  churnRisk: 11, nextOrderDays: 18, segment: 'Active',    churnLabel: 'Low'    },
-  { id: 'pc-5', name: 'Sunrise Bakehouse',      clv: 4100,  churnRisk: 84, nextOrderDays: null, segment: 'At Risk', churnLabel: 'High'   },
-  { id: 'pc-6', name: 'Golden Ring Suppliers',  clv: 22100, churnRisk: 6,  nextOrderDays: 6,  segment: 'VIP',       churnLabel: 'Low'    },
-  { id: 'pc-7', name: 'Artisan Donut Works',    clv: 11800, churnRisk: 28, nextOrderDays: 41, segment: 'Active',    churnLabel: 'Low'    },
-  { id: 'pc-8', name: 'Central City Bakers',    clv: 3200,  churnRisk: 91, nextOrderDays: null, segment: 'At Risk', churnLabel: 'High'   },
-];
+// Empty until real predictive-CLV/churn scoring is connected — this panel
+// gets a full rebuild in a later pass.
+const PREDICTIVE_CUSTOMERS: Array<{ id: string; name: string; clv: number; churnRisk: number; nextOrderDays: number | null; segment: string; churnLabel: string }> = [];
 
 function SegmentsPanel() {
+  const [segments] = usePersistentState<SegmentData[]>('email.segments', []);
   const [showPredictive, setShowPredictive] = useState(false);
   const highChurn = PREDICTIVE_CUSTOMERS.filter(c => c.churnRisk >= 60).length;
 
@@ -154,8 +151,11 @@ function SegmentsPanel() {
     <div className="flex flex-col gap-4">
       <div className="glass-card p-4">
         <div className="section-label mb-4">Customer Segments</div>
+        {segments.length === 0 && (
+          <div className="text-base text-center py-4" style={{ color: 'var(--text-muted)' }}>No segments defined yet.</div>
+        )}
         <div className="grid grid-cols-2 gap-3">
-          {SEGMENTS.map(seg => (
+          {segments.map(seg => (
             <div key={seg.id} className="rounded-xl p-3" style={{ background: 'var(--bg-elevated)', border: `1px solid ${seg.color}20` }}>
               <div className="flex items-center justify-between mb-1.5">
                 <div className="text-base font-semibold" style={{ color: seg.color }}>{seg.name}</div>
@@ -189,7 +189,10 @@ function SegmentsPanel() {
           <span style={{ color: 'var(--text-muted)', fontSize: 16 }}>{showPredictive ? '▲' : '▼'}</span>
         </button>
 
-        {showPredictive && (
+        {showPredictive && PREDICTIVE_CUSTOMERS.length === 0 && (
+          <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>No predictive customer data yet.</div>
+        )}
+        {showPredictive && PREDICTIVE_CUSTOMERS.length > 0 && (
           <table className="w-full text-base">
             <thead style={{ background: 'var(--bg-elevated)' }}>
               <tr>
@@ -236,6 +239,7 @@ function SegmentsPanel() {
 }
 
 function DeliverabilityPanel() {
+  const [deliverability] = usePersistentState<DeliverabilityMetric[]>('email.deliverability', []);
   const STATUS_CFG = {
     ok:   { Icon: CheckCircle,   color: '#10d98a' },
     warn: { Icon: AlertTriangle, color: '#ffb347' },
@@ -244,8 +248,11 @@ function DeliverabilityPanel() {
   return (
     <div className="glass-card overflow-hidden">
       <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}><span className="section-label">Email Deliverability</span></div>
+      {deliverability.length === 0 && (
+        <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>No deliverability data yet — connect your sending domain.</div>
+      )}
       <div>
-        {DELIVERABILITY.map(m => {
+        {deliverability.map(m => {
           const sc = STATUS_CFG[m.status];
           return (
             <div key={m.label} className="flex items-start gap-3 px-4 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
@@ -274,34 +281,8 @@ interface SmsConversation {
   messages: SmsMessage[];
 }
 
-const SMS_CONVERSATIONS: SmsConversation[] = [
-  {
-    id: 'conv-1', customer: 'Sarah M.', cartValue: 2499, store: 'donut-equipment.com', status: 'recovered',
-    messages: [
-      { role: 'brand',    text: 'Hi Sarah! You left a Pro Donut Fryer in your cart 🍩 Ready to complete your order? Reply YES for a 10% discount!', time: '2h ago' },
-      { role: 'customer', text: 'What\'s the warranty on that fryer?', time: '1h 52m ago' },
-      { role: 'brand',    text: 'Great question! It comes with a full 2-year commercial warranty covering parts and labor. Want me to send the full spec sheet?', time: '1h 51m ago' },
-      { role: 'customer', text: 'YES please', time: '1h 48m ago' },
-      { role: 'brand',    text: 'Sent! Here\'s your 10% discount code: SMSRECOVER — valid 24hrs. Complete your order: donut-equipment.com/cart', time: '1h 47m ago' },
-      { role: 'customer', text: 'Just ordered! Thanks', time: '1h 20m ago' },
-    ],
-  },
-  {
-    id: 'conv-2', customer: 'James T.', cartValue: 849, store: 'donut-supplies.com', status: 'active',
-    messages: [
-      { role: 'brand',    text: 'Hey James! Your glaze mix order is still waiting 🍩 Can I help with anything?', time: '45m ago' },
-      { role: 'customer', text: 'Is the chocolate one vegan?', time: '38m ago' },
-      { role: 'brand',    text: 'Yes! Our Bulk Chocolate Glaze Mix is 100% vegan and allergen-free. Here\'s the full ingredient list: [link]. Ready to complete your order?', time: '37m ago' },
-    ],
-  },
-  {
-    id: 'conv-3', customer: 'Maria L.', cartValue: 1249, store: 'bakerywholesalers.com', status: 'no_response',
-    messages: [
-      { role: 'brand',    text: 'Hi Maria! You left a Deck Oven in your cart. We only have 3 units left in stock — want to secure yours?', time: '3h ago' },
-      { role: 'brand',    text: 'Just checking in — your Deck Oven is still available! Reply with any questions and we\'ll help right away 🙂', time: '1h ago' },
-    ],
-  },
-];
+// Empty until real 2-way SMS conversations exist for a store.
+const SMS_CONVERSATIONS: SmsConversation[] = [];
 
 const CONV_STATUS_CFG = {
   recovered:   { label: 'Recovered',    color: '#10d98a', bg: 'rgba(16,217,138,.1)'  },
@@ -311,7 +292,7 @@ const CONV_STATUS_CFG = {
 
 function ConversationalSmsPanel() {
   const [conversations, setConversations] = usePersistentState<SmsConversation[]>('email.conversations', SMS_CONVERSATIONS);
-  const [selected, setSelected] = useState<string | null>('conv-1');
+  const [selected, setSelected] = useState<string | null>(null);
   const [reply, setReply] = useState('');
   const conv = conversations.find(c => c.id === selected);
   const recovered = conversations.filter(c => c.status === 'recovered');
@@ -345,6 +326,9 @@ function ConversationalSmsPanel() {
       <div className="flex gap-4" style={{ minHeight: 360 }}>
         {/* Conversation list */}
         <div className="flex flex-col gap-2 shrink-0" style={{ width: 240 }}>
+          {conversations.length === 0 && (
+            <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>No SMS conversations yet.</div>
+          )}
           {conversations.map(c => {
             const sc = CONV_STATUS_CFG[c.status];
             const last = c.messages[c.messages.length - 1];
@@ -1226,24 +1210,9 @@ function EmailBuilderPanel() {
 
 // ─── Send-Time Optimization (F-11) ───────────────────────────────────────────
 
-const SEND_TIME_SUBSCRIBERS = [
-  { id: 'st-1', name: 'Sarah M.',          segment: 'VIP',       optimalTime: 'Tue 9:00am',  engRate: 68, tz: 'EST', opens: 124 },
-  { id: 'st-2', name: 'James T.',          segment: 'Active',    optimalTime: 'Wed 7:30pm',  engRate: 41, tz: 'PST', opens: 38  },
-  { id: 'st-3', name: 'Maria L.',          segment: 'Active',    optimalTime: 'Mon 12:00pm', engRate: 54, tz: 'CST', opens: 61  },
-  { id: 'st-4', name: 'Oak Street Bakery', segment: 'VIP',       optimalTime: 'Thu 8:00am',  engRate: 82, tz: 'EST', opens: 218 },
-  { id: 'st-5', name: 'Metro Donuts LLC',  segment: 'Active',    optimalTime: 'Fri 10:30am', engRate: 35, tz: 'MST', opens: 29  },
-  { id: 'st-6', name: 'Sunrise Bakehouse', segment: 'At Risk',   optimalTime: 'Wed 2:00pm',  engRate: 12, tz: 'PST', opens: 8   },
-];
-
-const BEST_WINDOWS = [
-  { day: 'Mon', slots: [{ time: '9am', score: 62 }, { time: '12pm', score: 74 }, { time: '6pm', score: 48 }] },
-  { day: 'Tue', slots: [{ time: '9am', score: 81 }, { time: '12pm', score: 66 }, { time: '6pm', score: 52 }] },
-  { day: 'Wed', slots: [{ time: '9am', score: 58 }, { time: '12pm', score: 71 }, { time: '6pm', score: 69 }] },
-  { day: 'Thu', slots: [{ time: '9am', score: 77 }, { time: '12pm', score: 63 }, { time: '6pm', score: 44 }] },
-  { day: 'Fri', slots: [{ time: '9am', score: 70 }, { time: '12pm', score: 68 }, { time: '6pm', score: 38 }] },
-  { day: 'Sat', slots: [{ time: '9am', score: 35 }, { time: '12pm', score: 44 }, { time: '6pm', score: 29 }] },
-  { day: 'Sun', slots: [{ time: '9am', score: 28 }, { time: '12pm', score: 38 }, { time: '6pm', score: 32 }] },
-];
+// Empty until real per-subscriber open-time history is available.
+const SEND_TIME_SUBSCRIBERS: Array<{ id: string; name: string; segment: string; optimalTime: string; engRate: number; tz: string; opens: number }> = [];
+const BEST_WINDOWS: Array<{ day: string; slots: Array<{ time: string; score: number }> }> = [];
 
 function SendTimePanel() {
   const [enabled, setEnabled] = useState(true);
@@ -1252,9 +1221,9 @@ function SendTimePanel() {
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: 'Subscribers w/ AI Send Time', value: '12,408',  color: 'var(--cyan)' },
-          { label: 'Avg Open Rate Lift',           value: '+18.4%',  color: '#10d98a' },
-          { label: 'Timezones Covered',            value: '12',      color: '#7b93ff' },
+          { label: 'Subscribers w/ AI Send Time', value: SEND_TIME_SUBSCRIBERS.length.toString(), color: 'var(--cyan)' },
+          { label: 'Avg Open Rate Lift',           value: '—',  color: '#10d98a' },
+          { label: 'Timezones Covered',            value: new Set(SEND_TIME_SUBSCRIBERS.map(s => s.tz)).size.toString(), color: '#7b93ff' },
           { label: 'Predictions Updated',          value: 'Daily',   color: '#ffb347' },
         ].map(s => (
           <div key={s.label} className="glass-card px-4 py-3">
@@ -1281,6 +1250,9 @@ function SendTimePanel() {
         {/* Optimal send-time heatmap */}
         <div className="glass-card p-4">
           <div className="section-label mb-3">Best Send Windows (Engagement Score)</div>
+          {BEST_WINDOWS.length === 0 && (
+            <div className="text-base text-center py-4" style={{ color: 'var(--text-muted)' }}>No send-time data yet.</div>
+          )}
           <div className="flex flex-col gap-2">
             {BEST_WINDOWS.map(w => (
               <div key={w.day} className="flex items-center gap-3">
@@ -1316,6 +1288,9 @@ function SendTimePanel() {
               </tr>
             </thead>
             <tbody>
+              {SEND_TIME_SUBSCRIBERS.length === 0 && (
+                <tr><td colSpan={4} className="px-3 py-6 text-center text-base" style={{ color: 'var(--text-muted)' }}>No subscriber data yet.</td></tr>
+              )}
               {SEND_TIME_SUBSCRIBERS.map(s => (
                 <tr key={s.id} className="border-b transition-colors" style={{ borderColor: 'var(--border-subtle)' }}
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-elevated)')}
@@ -1354,23 +1329,8 @@ interface EmailABTest {
   started: string;
 }
 
-const EMAIL_AB_TESTS: EmailABTest[] = [
-  { id: 'ab-1', name: 'Spring Sale Subject', type: 'subject', status: 'completed',
-    variantA: '🍩 Spring Sale — 20% off everything', variantB: 'Your exclusive spring discount is here',
-    openA: 42.1, openB: 38.4, clickA: 8.2, clickB: 6.9, sampleSize: 4800, confidence: 96, winner: 'A', started: '3d ago' },
-  { id: 'ab-2', name: 'CTA Button Color', type: 'content', status: 'running',
-    variantA: 'Cyan button — "Shop Now"', variantB: 'Green button — "Claim Discount"',
-    openA: 39.2, openB: 41.8, clickA: 9.4, clickB: 11.2, sampleSize: 2400, confidence: 74, winner: null, started: '1d ago' },
-  { id: 'ab-3', name: 'Tuesday vs Thursday send', type: 'send_time', status: 'running',
-    variantA: 'Tuesday 9am EST', variantB: 'Thursday 9am EST',
-    openA: 44.1, openB: 39.6, clickA: 10.8, clickB: 9.1, sampleSize: 1800, confidence: 62, winner: null, started: '2d ago' },
-  { id: 'ab-4', name: 'Personalization in subject', type: 'subject', status: 'draft',
-    variantA: 'Sarah, your cart misses you 🛒', variantB: 'Complete your purchase today',
-    openA: 0, openB: 0, clickA: 0, clickB: 0, sampleSize: 3000, confidence: 0, winner: null, started: '—' },
-];
-
 function EmailABPanel() {
-  const [tests, setTests] = usePersistentState<EmailABTest[]>('email.abTests', EMAIL_AB_TESTS);
+  const [tests, setTests] = usePersistentState<EmailABTest[]>('email.abTests', []);
   const addTest = () => {
     const id = `ab-${Date.now()}`;
     setTests(prev => [{
@@ -1411,6 +1371,9 @@ function EmailABPanel() {
             <Plus size={11} />New Test
           </button>
         </div>
+        {tests.length === 0 && (
+          <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>No A/B tests yet — create one to get started.</div>
+        )}
         {tests.map(test => {
           const sc = STATUS_CFG[test.status];
           const winnerColor = test.winner ? '#10d98a' : 'var(--text-muted)';
@@ -1488,15 +1451,18 @@ interface TxTemplate {
   sent30d: number; deliveryRate: number; openRate: number; store: string;
 }
 
+// Standard transactional email trigger types every store can enable — the
+// list itself is structural, but activity (sent/delivery/open) is honestly
+// zeroed until real order/fulfillment webhooks are connected.
 const TX_TEMPLATES: TxTemplate[] = [
-  { id: 'tx-1', name: 'Order Confirmation',       trigger: 'order.placed',         status: 'active', sent30d: 1248, deliveryRate: 99.4, openRate: 78.2, store: 'All Stores' },
-  { id: 'tx-2', name: 'Shipping Confirmation',    trigger: 'fulfillment.shipped',   status: 'active', sent30d: 1192, deliveryRate: 99.1, openRate: 71.8, store: 'All Stores' },
-  { id: 'tx-3', name: 'Out for Delivery',          trigger: 'fulfillment.in_transit', status: 'active', sent30d: 984,  deliveryRate: 98.8, openRate: 64.4, store: 'All Stores' },
-  { id: 'tx-4', name: 'Delivered Confirmation',   trigger: 'fulfillment.delivered', status: 'active', sent30d: 918,  deliveryRate: 99.2, openRate: 58.1, store: 'All Stores' },
-  { id: 'tx-5', name: 'Refund Processed',          trigger: 'refund.created',        status: 'active', sent30d: 84,   deliveryRate: 99.8, openRate: 89.4, store: 'All Stores' },
-  { id: 'tx-6', name: 'Password Reset',            trigger: 'customer.password_reset', status: 'active', sent30d: 212, deliveryRate: 99.9, openRate: 92.1, store: 'All Stores' },
-  { id: 'tx-7', name: 'Account Created',           trigger: 'customer.created',      status: 'active', sent30d: 348,  deliveryRate: 99.6, openRate: 81.4, store: 'All Stores' },
-  { id: 'tx-8', name: 'Wholesale Invoice Ready',   trigger: 'invoice.created',       status: 'paused', sent30d: 124,  deliveryRate: 98.4, openRate: 88.2, store: 'bakerywholesalers.com' },
+  { id: 'tx-1', name: 'Order Confirmation',       trigger: 'order.placed',         status: 'draft', sent30d: 0, deliveryRate: 0, openRate: 0, store: 'All Stores' },
+  { id: 'tx-2', name: 'Shipping Confirmation',    trigger: 'fulfillment.shipped',   status: 'draft', sent30d: 0, deliveryRate: 0, openRate: 0, store: 'All Stores' },
+  { id: 'tx-3', name: 'Out for Delivery',          trigger: 'fulfillment.in_transit', status: 'draft', sent30d: 0, deliveryRate: 0, openRate: 0, store: 'All Stores' },
+  { id: 'tx-4', name: 'Delivered Confirmation',   trigger: 'fulfillment.delivered', status: 'draft', sent30d: 0, deliveryRate: 0, openRate: 0, store: 'All Stores' },
+  { id: 'tx-5', name: 'Refund Processed',          trigger: 'refund.created',        status: 'draft', sent30d: 0, deliveryRate: 0, openRate: 0, store: 'All Stores' },
+  { id: 'tx-6', name: 'Password Reset',            trigger: 'customer.password_reset', status: 'draft', sent30d: 0, deliveryRate: 0, openRate: 0, store: 'All Stores' },
+  { id: 'tx-7', name: 'Account Created',           trigger: 'customer.created',      status: 'draft', sent30d: 0, deliveryRate: 0, openRate: 0, store: 'All Stores' },
+  { id: 'tx-8', name: 'Wholesale Invoice Ready',   trigger: 'invoice.created',       status: 'draft', sent30d: 0, deliveryRate: 0, openRate: 0, store: 'bakerywholesalers.com' },
   { id: 'tx-9', name: 'Back-in-Stock Notification', trigger: 'inventory.back_in_stock', status: 'draft', sent30d: 0, deliveryRate: 0, openRate: 0, store: 'All Stores' },
 ];
 
@@ -1597,7 +1563,8 @@ function TransactionalPanel() {
 
 export default function EmailPage() {
   const [tab, setTab] = useState<Tab>('flows');
-  const s = EMAIL_STATS;
+  const [flows] = usePersistentState<EmailFlow[]>('email.flows', []);
+  const s = computeEmailStats(flows);
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-base)' }}>
       <Sidebar />
@@ -1637,7 +1604,14 @@ export default function EmailPage() {
             })}
           </div>
           <div className="flex-1 overflow-y-auto">
-            {tab === 'flows'          && <div className="grid grid-cols-2 gap-3">{EMAIL_FLOWS.map(f => <FlowCard key={f.id} flow={f} />)}</div>}
+            {tab === 'flows'          && (
+              <div className="grid grid-cols-2 gap-3">
+                {flows.length === 0 && (
+                  <div className="col-span-2 text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>No automation flows yet.</div>
+                )}
+                {flows.map(f => <FlowCard key={f.id} flow={f} />)}
+              </div>
+            )}
             {tab === 'campaigns'      && <CampaignsList />}
             {tab === 'builder'        && <EmailBuilderPanel />}
             {tab === 'segments'       && <SegmentsPanel />}
