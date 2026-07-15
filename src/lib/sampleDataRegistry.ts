@@ -2,6 +2,7 @@ import { SAMPLE_CAMPAIGNS, SAMPLE_AD_SETS, SAMPLE_CREATIVES, SAMPLE_AUTOMATION_R
 import { SAMPLE_ALERT_RULES, SAMPLE_FIRED_ALERTS } from './alertData';
 import { SAMPLE_STORE_HEALTH, SAMPLE_TRAFFIC, SAMPLE_CONVERSIONS, SAMPLE_ABANDONED_CARTS, SAMPLE_TRANSACTIONS, SAMPLE_PAGE_CHANGES, SAMPLE_SEO_SNAPSHOTS } from './mockData';
 import { SAMPLE_CHANNEL_METRICS, SAMPLE_TIME_SERIES, SAMPLE_ATTRIBUTION, SAMPLE_AI_INSIGHTS, SAMPLE_SHARED_REPORTS, emptyChannelMetrics, emptyTimeSeries, emptyAttribution } from './analyticsData';
+import { SAMPLE_SOCIAL_POSTS, SAMPLE_INBOX_MESSAGES, SAMPLE_LISTENING_ITEMS, SAMPLE_PLATFORM_STATS, SAMPLE_APPROVAL_POSTS, SAMPLE_DM_RULES, emptyPlatformStats } from './socialData';
 
 // ─── Sample data registry ──────────────────────────────────────────────────
 //
@@ -45,6 +46,12 @@ const REGISTRY: SampleDataEntry[] = [
   { key: 'analytics.attribution',     sample: SAMPLE_ATTRIBUTION,     empty: emptyAttribution() },
   { key: 'analytics.aiInsights',      sample: SAMPLE_AI_INSIGHTS,     empty: [] },
   { key: 'analytics.reports',         sample: SAMPLE_SHARED_REPORTS,  empty: [] },
+  { key: 'social.posts',              sample: SAMPLE_SOCIAL_POSTS,     empty: [] },
+  { key: 'social.inboxMessages',      sample: SAMPLE_INBOX_MESSAGES,   empty: [] },
+  { key: 'social.listeningItems',     sample: SAMPLE_LISTENING_ITEMS,  empty: [] },
+  { key: 'social.platformStats',      sample: SAMPLE_PLATFORM_STATS,   empty: emptyPlatformStats() },
+  { key: 'social.approvalPosts',      sample: SAMPLE_APPROVAL_POSTS,   empty: [] },
+  { key: 'social.dmRules',            sample: SAMPLE_DM_RULES,         empty: [] },
 ];
 
 function storageKey(key: string): string {

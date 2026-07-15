@@ -1,14 +1,17 @@
 'use client';
 
-import { PLATFORM_STATS, PLATFORM_CONFIG } from '@/lib/socialData';
+import { PLATFORM_CONFIG, emptyPlatformStats } from '@/lib/socialData';
+import type { PlatformStats } from '@/lib/socialData';
+import { usePersistentState } from '@/lib/usePersistentState';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
 const fmt = (n: number) => n >= 1000 ? (n / 1000).toFixed(1) + 'K' : n.toString();
 
 export default function PlatformStatsBar() {
+  const [platformStats] = usePersistentState<PlatformStats[]>('social.platformStats', emptyPlatformStats());
   return (
     <div className="grid grid-cols-6 gap-2 mb-4">
-      {PLATFORM_STATS.map(stat => {
+      {platformStats.map(stat => {
         const cfg = PLATFORM_CONFIG[stat.platform];
         const positive = stat.followerDelta >= 0;
         const engColor = stat.avgEngagementRate >= 4 ? '#10d98a' : stat.avgEngagementRate >= 2 ? '#ffb347' : '#ff4444';

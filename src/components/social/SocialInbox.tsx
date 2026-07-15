@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { usePersistentState } from '@/lib/usePersistentState';
-import { INBOX_MESSAGES, PLATFORM_CONFIG } from '@/lib/socialData';
+import { PLATFORM_CONFIG } from '@/lib/socialData';
 import type { InboxMessage } from '@/lib/socialData';
 import { MessageSquare, AtSign, Star, Send } from 'lucide-react';
 
@@ -107,7 +107,7 @@ function MessageCard({ msg, selected, onClick }: { msg: InboxMessage; selected: 
 }
 
 export default function SocialInbox() {
-  const [messages, setMessages] = usePersistentState<InboxMessage[]>('social.inboxMessages', INBOX_MESSAGES);
+  const [messages, setMessages] = usePersistentState<InboxMessage[]>('social.inboxMessages', []);
   const [selected, setSelected] = useState<InboxMessage | null>(null);
   const [replyText, setReplyText] = useState('');
   const [platformFilter, setPlatformFilter] = useState<PlatformTab>('all');
@@ -176,6 +176,9 @@ export default function SocialInbox() {
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto">
+          {filtered.length === 0 && (
+            <div className="text-base text-center py-8" style={{ color: 'var(--text-muted)' }}>No messages yet.</div>
+          )}
           {filtered.map(msg => (
             <MessageCard key={msg.id} msg={msg} selected={selected?.id === msg.id} onClick={() => setSelected(msg)} />
           ))}

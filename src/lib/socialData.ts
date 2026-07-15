@@ -97,8 +97,12 @@ function daysFromNow(d: number, h = 10, m = 0): string {
 }
 
 // ─── Posts ───────────────────────────────────────────────────────────────────
+//
+// SAMPLE_* arrays below are not the app's live data — the app boots empty
+// (see src/lib/sampleDataRegistry.ts). They seed Settings → Data → "Load
+// Sample Data" for demoing/verifying the social module with realistic content.
 
-export const SOCIAL_POSTS: SocialPost[] = [
+export const SAMPLE_SOCIAL_POSTS: SocialPost[] = [
   // — Published ————————————————
   {
     id: 'sp-001', platforms: ['facebook'], status: 'published', category: 'product',
@@ -145,7 +149,7 @@ export const SOCIAL_POSTS: SocialPost[] = [
 
 // ─── Inbox Messages ───────────────────────────────────────────────────────────
 
-export const INBOX_MESSAGES: InboxMessage[] = [
+export const SAMPLE_INBOX_MESSAGES: InboxMessage[] = [
   {
     id: 'im-002', platform: 'facebook', type: 'comment', author: 'Marco Pellegrino', authorHandle: 'Marco Pellegrino',
     avatarInitials: 'MP', sentiment: 'negative',
@@ -164,7 +168,7 @@ export const INBOX_MESSAGES: InboxMessage[] = [
 
 // ─── Social Listening ──────────────────────────────────────────────────────────
 
-export const LISTENING_ITEMS: SocialListeningItem[] = [
+export const SAMPLE_LISTENING_ITEMS: SocialListeningItem[] = [
   {
     id: 'sl-002', keyword: 'donut-equipment.com', platform: 'facebook', author: 'Bakers United Group',
     content: 'Has anyone ordered from donut-equipment.com lately? Seeing mixed reviews online.',
@@ -190,7 +194,17 @@ export interface PlatformStats {
 // cards in the UI, but with no real activity to report.
 export const NOT_STARTED_PLATFORMS: SocialPlatform[] = ['instagram', 'tiktok', 'linkedin', 'x-twitter'];
 
-export const PLATFORM_STATS: PlatformStats[] = [
+const ALL_PLATFORMS_LIST: SocialPlatform[] = ['facebook', 'instagram', 'youtube', 'x-twitter', 'linkedin', 'tiktok'];
+
+/** Every platform zeroed/not-started — the live default before any channel is connected. */
+export function emptyPlatformStats(): PlatformStats[] {
+  return ALL_PLATFORMS_LIST.map(platform => ({
+    platform, started: false, followers: 0, followerDelta: 0,
+    avgEngagementRate: 0, postsThisMonth: 0, reachThisMonth: 0, topPost: '',
+  }));
+}
+
+export const SAMPLE_PLATFORM_STATS: PlatformStats[] = [
   { platform: 'instagram',  started: false, followers: 0, followerDelta: 0, avgEngagementRate: 0, postsThisMonth: 0, reachThisMonth: 0, topPost: '' },
   { platform: 'facebook',   followers: 8240,  followerDelta: +87,  avgEngagementRate: 2.1, postsThisMonth: 14, reachThisMonth: 64000,  topPost: 'AutoFryer XL launch post' },
   { platform: 'tiktok',     started: false, followers: 0, followerDelta: 0, avgEngagementRate: 0, postsThisMonth: 0, reachThisMonth: 0, topPost: '' },
@@ -244,3 +258,54 @@ export function generateCaptions(topic: string): AICaptionSuggestion[] {
     },
   ];
 }
+
+// ─── Post Approvals (Kanban) ──────────────────────────────────────────────────
+
+export type ApprovalStatus = 'draft' | 'review' | 'approved' | 'published' | 'rejected';
+
+export interface ApprovalPost {
+  id: string;
+  title: string;
+  platforms: string[];
+  status: ApprovalStatus;
+  author: string;
+  scheduledFor: string;
+  content: string;
+  rejectionNote?: string;
+}
+
+export const SAMPLE_APPROVAL_POSTS: ApprovalPost[] = [
+  { id: 'ap-1', title: 'Summer Fryer Promo — Instagram',   platforms: ['instagram', 'facebook'], status: 'review',   author: 'Sarah K.',   scheduledFor: '2026-05-15 10:00', content: '🍩 Summer savings are here! Get 20% off our pro donut fryers...' },
+  { id: 'ap-2', title: 'Bakery Tips Video — YouTube',       platforms: ['youtube'],               status: 'review',   author: 'Mike R.',    scheduledFor: '2026-05-16 14:00', content: 'New tutorial: 5 tips for perfect donuts every time...' },
+  { id: 'ap-3', title: 'Wholesale Catalog — LinkedIn',      platforms: ['linkedin'],              status: 'approved', author: 'Sarah K.',   scheduledFor: '2026-05-14 09:00', content: 'Bakery Wholesalers Spring Catalog 2026 is live...' },
+  { id: 'ap-4', title: 'TikTok — Glaze Recipe Demo',        platforms: ['tiktok', 'instagram'],   status: 'draft',    author: 'Jenny L.',   scheduledFor: '2026-05-17 18:00', content: 'Watch us make 3 glaze flavors in under 60 seconds...' },
+  { id: 'ap-5', title: 'X/Twitter — Flash Sale Alert',      platforms: ['x-twitter'],             status: 'rejected', author: 'Mike R.',    scheduledFor: '2026-05-13 12:00', content: '⚡ 4-HOUR FLASH SALE — 30% off all supplies...', rejectionNote: 'Discount too aggressive — max 20%. Resubmit.' },
+  { id: 'ap-6', title: 'FB — Customer Spotlight',           platforms: ['facebook'],              status: 'published', author: 'Jenny L.',  scheduledFor: '2026-05-12 11:00', content: 'Meet Oak Street Bakery — they\'ve been using our fryers for 5 years...' },
+  { id: 'ap-7', title: 'Instagram Reel — Behind the Scenes', platforms: ['instagram'],            status: 'draft',    author: 'Sarah K.',   scheduledFor: '2026-05-18 15:00', content: 'Go behind the scenes at our warehouse — see how your order ships...' },
+];
+
+// ─── DM Automation ────────────────────────────────────────────────────────────
+
+export type DMPlatform = 'instagram' | 'facebook' | 'tiktok';
+export type DMTrigger = 'comment_keyword' | 'story_reply' | 'first_dm' | 'post_reaction';
+
+export interface DMRule {
+  id: string;
+  name: string;
+  platform: DMPlatform;
+  trigger: DMTrigger;
+  keyword?: string;
+  replyMessage: string;
+  dmMessage: string;
+  status: 'active' | 'paused';
+  triggeredCount: number;
+  conversionCount: number;
+}
+
+export const SAMPLE_DM_RULES: DMRule[] = [
+  { id: 'dm-1', name: 'Fryer Info Comment Capture',     platform: 'instagram', trigger: 'comment_keyword', keyword: 'price',     replyMessage: 'Check your DMs! 📬',                      dmMessage: 'Hi! You asked about our fryer prices. Here\'s the link to our full catalog: [catalog-link]. Reply with any questions!', status: 'active', triggeredCount: 284, conversionCount: 47 },
+  { id: 'dm-2', name: 'Equipment Guide — "info" trigger', platform: 'instagram', trigger: 'comment_keyword', keyword: 'info',      replyMessage: 'Sending you our guide now! 🍩',            dmMessage: 'Hi! Here\'s our free Commercial Donut Equipment Guide: [guide-link]. Let me know if you have questions!',               status: 'active', triggeredCount: 192, conversionCount: 38 },
+  { id: 'dm-3', name: 'FB Story Reply Capture',          platform: 'facebook',  trigger: 'story_reply',    keyword: undefined,   replyMessage: '',                                         dmMessage: 'Thanks for the reply! Want to know more about our donut supplies? Click here: [link]',                                  status: 'active', triggeredCount: 64,  conversionCount: 12 },
+  { id: 'dm-4', name: 'TikTok Comment — "how much"',     platform: 'tiktok',    trigger: 'comment_keyword', keyword: 'how much',  replyMessage: 'Check DMs for pricing! 💬',               dmMessage: 'Hey! Pricing starts at $299 for our entry-level fryers. Full catalog: [link]',                                         status: 'paused', triggeredCount: 89,  conversionCount: 9  },
+  { id: 'dm-5', name: 'New Follower Welcome',             platform: 'instagram', trigger: 'first_dm',       keyword: undefined,   replyMessage: '',                                         dmMessage: 'Welcome to Donut Equipment! 🍩 Here\'s a 10% welcome discount for your first order: WELCOME10. Shop here: [link]',    status: 'active', triggeredCount: 420, conversionCount: 53 },
+];

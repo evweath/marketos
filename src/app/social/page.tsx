@@ -10,8 +10,8 @@ import PostComposer from '@/components/social/PostComposer';
 import ContentQueue from '@/components/social/ContentQueue';
 import SocialInbox from '@/components/social/SocialInbox';
 import SocialListening from '@/components/social/SocialListening';
-import { PLATFORM_CONFIG, INBOX_MESSAGES, SOCIAL_POSTS } from '@/lib/socialData';
-import type { SocialPost, SocialPlatform } from '@/lib/socialData';
+import { PLATFORM_CONFIG } from '@/lib/socialData';
+import type { SocialPost, SocialPlatform, InboxMessage, ApprovalPost, ApprovalStatus, DMRule, DMPlatform, DMTrigger } from '@/lib/socialData';
 import {
   Plus, Calendar, List, Inbox, Search, Grid3X3, RefreshCw, ChevronUp, ChevronDown,
   CheckSquare, Bot, Trash2, MessageCircle, Hash, ArrowRight, Edit3, Upload,
@@ -24,7 +24,7 @@ const TABS: { key: Tab; label: string; icon: React.ElementType; badge?: number }
   { key: 'calendar',  label: 'Calendar',     icon: Calendar },
   { key: 'queue',     label: 'Queue',        icon: List },
   { key: 'approvals', label: 'Approvals',    icon: CheckSquare },
-  { key: 'inbox',     label: 'Inbox',        icon: Inbox, badge: INBOX_MESSAGES.filter(m => !m.replied && m.requiresAttention).length },
+  { key: 'inbox',     label: 'Inbox',        icon: Inbox },
   { key: 'listening', label: 'Listening',    icon: Search },
   { key: 'dmauto',    label: 'DM Automation', icon: Bot },
   { key: 'aitools',   label: 'AI Tools',      icon: Wand2 },
@@ -74,7 +74,7 @@ function cellGradient(idx: number): string {
 
 // ─── Instagram Grid Preview ────────────────────────────────────────────────────
 
-function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: SocialPost) => void; onNewPost: () => void }) {
+function InstagramGridPreview({ posts, onEditPost, onNewPost }: { posts: SocialPost[]; onEditPost: (post: SocialPost) => void; onNewPost: () => void }) {
   const [gridStoreIdx, setGridStoreIdx] = useState(0);
   const [showUpcoming, setShowUpcoming] = useState(false);
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
@@ -85,7 +85,7 @@ function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: So
   const currentStore = GRID_STORES[gridStoreIdx];
 
   // Filter instagram posts and sort
-  const instagramPosts: SocialPost[] = SOCIAL_POSTS
+  const instagramPosts: SocialPost[] = posts
     .filter(p => p.platforms.includes('instagram'))
     .sort((a, b) => {
       if (showUpcoming) {
@@ -456,28 +456,6 @@ const GRID_SIZE = 12;
 
 // ─── Post Approval Workflow ────────────────────────────────────────────────────
 
-type ApprovalStatus = 'draft' | 'review' | 'approved' | 'published' | 'rejected';
-interface ApprovalPost {
-  id: string;
-  title: string;
-  platforms: string[];
-  status: ApprovalStatus;
-  author: string;
-  scheduledFor: string;
-  content: string;
-  rejectionNote?: string;
-}
-
-const APPROVAL_POSTS: ApprovalPost[] = [
-  { id: 'ap-1', title: 'Summer Fryer Promo — Instagram',   platforms: ['instagram', 'facebook'], status: 'review',   author: 'Sarah K.',   scheduledFor: '2026-05-15 10:00', content: '🍩 Summer savings are here! Get 20% off our pro donut fryers...' },
-  { id: 'ap-2', title: 'Bakery Tips Video — YouTube',       platforms: ['youtube'],               status: 'review',   author: 'Mike R.',    scheduledFor: '2026-05-16 14:00', content: 'New tutorial: 5 tips for perfect donuts every time...' },
-  { id: 'ap-3', title: 'Wholesale Catalog — LinkedIn',      platforms: ['linkedin'],              status: 'approved', author: 'Sarah K.',   scheduledFor: '2026-05-14 09:00', content: 'Bakery Wholesalers Spring Catalog 2026 is live...' },
-  { id: 'ap-4', title: 'TikTok — Glaze Recipe Demo',        platforms: ['tiktok', 'instagram'],   status: 'draft',    author: 'Jenny L.',   scheduledFor: '2026-05-17 18:00', content: 'Watch us make 3 glaze flavors in under 60 seconds...' },
-  { id: 'ap-5', title: 'X/Twitter — Flash Sale Alert',      platforms: ['x-twitter'],             status: 'rejected', author: 'Mike R.',    scheduledFor: '2026-05-13 12:00', content: '⚡ 4-HOUR FLASH SALE — 30% off all supplies...', rejectionNote: 'Discount too aggressive — max 20%. Resubmit.' },
-  { id: 'ap-6', title: 'FB — Customer Spotlight',           platforms: ['facebook'],              status: 'published', author: 'Jenny L.',  scheduledFor: '2026-05-12 11:00', content: 'Meet Oak Street Bakery — they\'ve been using our fryers for 5 years...' },
-  { id: 'ap-7', title: 'Instagram Reel — Behind the Scenes', platforms: ['instagram'],            status: 'draft',    author: 'Sarah K.',   scheduledFor: '2026-05-18 15:00', content: 'Go behind the scenes at our warehouse — see how your order ships...' },
-];
-
 const APPROVAL_CONFIG: Record<ApprovalStatus, { label: string; color: string; bg: string; icon: React.ElementType }> = {
   draft:     { label: 'Draft',     color: '#555e7a', bg: 'rgba(85,94,122,.15)',  icon: Edit3       },
   review:    { label: 'In Review', color: '#ffb347', bg: 'rgba(255,179,71,.12)', icon: Eye         },
@@ -492,7 +470,7 @@ const PLT_COLOR: Record<string, string> = {
 };
 
 function PostApprovalsPanel() {
-  const [posts, setPosts] = usePersistentState<ApprovalPost[]>('social.approvalPosts', APPROVAL_POSTS);
+  const [posts, setPosts] = usePersistentState<ApprovalPost[]>('social.approvalPosts', []);
   const [filterStatus, setFilterStatus] = useState<ApprovalStatus | 'all'>('all');
   const [rejectNote, setRejectNote] = useState('');
   const [rejectingId, setRejectingId] = useState<string | null>(null);
@@ -664,12 +642,12 @@ function PostApprovalsPanel() {
 
 // ─── AI Tools (YouTube Description + Auto-Boost) ─────────────────────────────
 
-const HIGH_ENGAGEMENT_POSTS = SOCIAL_POSTS
-  .filter(p => p.status === 'published' && (p.engagementRate ?? 0) > 5)
-  .sort((a, b) => (b.engagementRate ?? 0) - (a.engagementRate ?? 0))
-  .slice(0, 5);
+function AIToolsPanel({ posts }: { posts: SocialPost[] }) {
+  const highEngagementPosts = posts
+    .filter(p => p.status === 'published' && (p.engagementRate ?? 0) > 5)
+    .sort((a, b) => (b.engagementRate ?? 0) - (a.engagementRate ?? 0))
+    .slice(0, 5);
 
-function AIToolsPanel() {
   // YouTube AI Description Generator
   const [yt_topic,   setYtTopic]   = useState('');
   const [yt_kws,     setYtKws]     = useState('');
@@ -712,7 +690,7 @@ function AIToolsPanel() {
   // Auto-boost
   const [boostThreshold, setBoostThreshold] = useState(5);
   const [boostedIds, setBoostedIds] = useState<Set<string>>(new Set());
-  const eligible = HIGH_ENGAGEMENT_POSTS.filter(p => (p.engagementRate ?? 0) >= boostThreshold);
+  const eligible = highEngagementPosts.filter(p => (p.engagementRate ?? 0) >= boostThreshold);
 
   const boost = (id: string) => setBoostedIds(prev => new Set(Array.from(prev).concat(id)));
 
@@ -818,29 +796,6 @@ function AIToolsPanel() {
 
 // ─── DM Automation ────────────────────────────────────────────────────────────
 
-type DMPlatform = 'instagram' | 'facebook' | 'tiktok';
-type DMTrigger = 'comment_keyword' | 'story_reply' | 'first_dm' | 'post_reaction';
-interface DMRule {
-  id: string;
-  name: string;
-  platform: DMPlatform;
-  trigger: DMTrigger;
-  keyword?: string;
-  replyMessage: string;
-  dmMessage: string;
-  status: 'active' | 'paused';
-  triggeredCount: number;
-  conversionCount: number;
-}
-
-const INITIAL_DM_RULES: DMRule[] = [
-  { id: 'dm-1', name: 'Fryer Info Comment Capture',     platform: 'instagram', trigger: 'comment_keyword', keyword: 'price',     replyMessage: 'Check your DMs! 📬',                      dmMessage: 'Hi! You asked about our fryer prices. Here\'s the link to our full catalog: [catalog-link]. Reply with any questions!', status: 'active', triggeredCount: 284, conversionCount: 47 },
-  { id: 'dm-2', name: 'Equipment Guide — "info" trigger', platform: 'instagram', trigger: 'comment_keyword', keyword: 'info',      replyMessage: 'Sending you our guide now! 🍩',            dmMessage: 'Hi! Here\'s our free Commercial Donut Equipment Guide: [guide-link]. Let me know if you have questions!',               status: 'active', triggeredCount: 192, conversionCount: 38 },
-  { id: 'dm-3', name: 'FB Story Reply Capture',          platform: 'facebook',  trigger: 'story_reply',    keyword: undefined,   replyMessage: '',                                         dmMessage: 'Thanks for the reply! Want to know more about our donut supplies? Click here: [link]',                                  status: 'active', triggeredCount: 64,  conversionCount: 12 },
-  { id: 'dm-4', name: 'TikTok Comment — "how much"',     platform: 'tiktok',    trigger: 'comment_keyword', keyword: 'how much',  replyMessage: 'Check DMs for pricing! 💬',               dmMessage: 'Hey! Pricing starts at $299 for our entry-level fryers. Full catalog: [link]',                                         status: 'paused', triggeredCount: 89,  conversionCount: 9  },
-  { id: 'dm-5', name: 'New Follower Welcome',             platform: 'instagram', trigger: 'first_dm',       keyword: undefined,   replyMessage: '',                                         dmMessage: 'Welcome to Donut Equipment! 🍩 Here\'s a 10% welcome discount for your first order: WELCOME10. Shop here: [link]',    status: 'active', triggeredCount: 420, conversionCount: 53 },
-];
-
 const TRIGGER_LABELS: Record<DMTrigger, string> = {
   comment_keyword: 'Comment Keyword',
   story_reply:     'Story Reply',
@@ -851,7 +806,7 @@ const TRIGGER_LABELS: Record<DMTrigger, string> = {
 const PLT_DM_COLOR: Record<DMPlatform, string> = { instagram: '#e1306c', facebook: '#1877f2', tiktok: '#010101' };
 
 function DMAutomationPanel() {
-  const [rules, setRules] = usePersistentState<DMRule[]>('social.dmRules', INITIAL_DM_RULES);
+  const [rules, setRules] = usePersistentState<DMRule[]>('social.dmRules', []);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName]               = useState('');
@@ -1010,7 +965,9 @@ function DMAutomationPanel() {
 
 export default function SocialPage() {
   const [tab, setTab] = useState<Tab>('calendar');
-  const [posts, setPosts] = usePersistentState<SocialPost[]>('social.posts', SOCIAL_POSTS);
+  const [posts, setPosts] = usePersistentState<SocialPost[]>('social.posts', []);
+  const [inboxMessages] = usePersistentState<InboxMessage[]>('social.inboxMessages', []);
+  const inboxBadge = inboxMessages.filter(m => !m.replied && m.requiresAttention).length;
   const [selectedPost, setSelectedPost] = useState<SocialPost | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [newPostDate, setNewPostDate] = useState<Date | null>(null);
@@ -1056,6 +1013,7 @@ export default function SocialPage() {
             <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
               {TABS.map(t => {
                 const Icon = t.icon;
+                const badge = t.key === 'inbox' && inboxBadge > 0 ? inboxBadge : null;
                 return (
                   <button key={t.key}
                     onClick={() => setTab(t.key)}
@@ -1068,10 +1026,10 @@ export default function SocialPage() {
                     }}>
                     <Icon size={13} />
                     {t.label}
-                    {t.badge ? (
+                    {badge ? (
                       <span className="text-[16px] px-1 py-0.5 rounded-full font-mono"
                         style={{ background: '#ff4444', color: 'white', minWidth: 16, textAlign: 'center' }}>
-                        {t.badge}
+                        {badge}
                       </span>
                     ) : null}
                   </button>
@@ -1135,10 +1093,11 @@ export default function SocialPage() {
               {tab === 'listening' && <SocialListening />}
               {tab === 'approvals' && <div className="flex-1 overflow-y-auto"><PostApprovalsPanel /></div>}
               {tab === 'dmauto'   && <div className="flex-1 overflow-y-auto"><DMAutomationPanel /></div>}
-              {tab === 'aitools'  && <div className="flex-1 overflow-y-auto"><AIToolsPanel /></div>}
+              {tab === 'aitools'  && <div className="flex-1 overflow-y-auto"><AIToolsPanel posts={posts} /></div>}
               {tab === 'grid' && (
                 <div className="flex-1 overflow-y-auto overflow-x-auto">
                   <InstagramGridPreview
+                    posts={posts}
                     onEditPost={post => { setTab('calendar'); handleSelectPost(post); }}
                     onNewPost={() => { setTab('calendar'); handleNewPost(); }}
                   />

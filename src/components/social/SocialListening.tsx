@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { LISTENING_ITEMS, PLATFORM_CONFIG } from '@/lib/socialData';
+import { PLATFORM_CONFIG } from '@/lib/socialData';
+import type { SocialListeningItem } from '@/lib/socialData';
+import { usePersistentState } from '@/lib/usePersistentState';
 import { Search, ExternalLink, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 const SENTIMENT_CONFIG = {
@@ -11,28 +13,30 @@ const SENTIMENT_CONFIG = {
 };
 
 // ─── Sentiment Analytics ───────────────────────────────────────────────────────
+//
+// Empty until real historical sentiment tracking exists — this weekly-trend
+// view is slated for a full rebuild (a real donut chart) in a later pass.
+const SENTIMENT_HISTORY: Array<{ week: string; positive: number; neutral: number; negative: number }> = [];
 
-const SENTIMENT_HISTORY = [
-  { week: 'Apr 21', positive: 58, neutral: 28, negative: 14 },
-  { week: 'Apr 28', positive: 62, neutral: 26, negative: 12 },
-  { week: 'May 5',  positive: 67, neutral: 24, negative: 9  },
-  { week: 'May 12', positive: 71, neutral: 21, negative: 8  },
-];
+function SentimentAnalyticsPanel({ listeningItems }: { listeningItems: SocialListeningItem[] }) {
+  const totalMentions = listeningItems.length;
 
-function SentimentAnalyticsPanel() {
+  if (SENTIMENT_HISTORY.length < 2) {
+    return (
+      <div className="rounded-xl p-4 mb-4 flex flex-col gap-2" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+        <div className="flex items-center justify-between">
+          <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Sentiment Analysis</span>
+          <span className="section-label">{totalMentions} mentions monitored</span>
+        </div>
+        <p className="text-base" style={{ color: 'var(--text-muted)' }}>Not enough history yet to show a sentiment trend.</p>
+      </div>
+    );
+  }
+
   const current  = SENTIMENT_HISTORY[SENTIMENT_HISTORY.length - 1];
   const previous = SENTIMENT_HISTORY[SENTIMENT_HISTORY.length - 2];
   const posDelta = current.positive - previous.positive;
   const negDelta = current.negative - previous.negative;
-
-  const totalMentions = LISTENING_ITEMS.length;
-  const byPlatform = PLATFORM_CONFIG && Object.entries(
-    LISTENING_ITEMS.reduce<Record<string, { positive: number; negative: number; neutral: number }>>((acc, item) => {
-      if (!acc[item.platform]) acc[item.platform] = { positive: 0, negative: 0, neutral: 0 };
-      acc[item.platform][item.sentiment]++;
-      return acc;
-    }, {})
-  );
 
   return (
     <div className="rounded-xl p-4 mb-4 flex flex-col gap-4"
@@ -118,6 +122,7 @@ function timeAgo(iso: string) {
 }
 
 export default function SocialListening() {
+  const [listeningItems] = usePersistentState<SocialListeningItem[]>('social.listeningItems', []);
   const [showAnalytics, setShowAnalytics] = useState(true);
   const [actedIds, setActedIds] = useState<Set<string>>(new Set());
   const markActed = (id: string) => setActedIds(prev => new Set(prev).add(id));
@@ -144,7 +149,7 @@ export default function SocialListening() {
         style={{ color: '#7b93ff', background: 'rgba(123,147,255,.08)', border: '1px solid rgba(123,147,255,.2)' }}>
         {showAnalytics ? '▲' : '▼'} Sentiment Analysis
       </button>
-      {showAnalytics && <SentimentAnalyticsPanel />}
+      {showAnalytics && <SentimentAnalyticsPanel listeningItems={listeningItems} />}
 
       {/* Tracked keywords */}
       <div className="flex flex-wrap gap-1.5 mb-4">
@@ -162,8 +167,11 @@ export default function SocialListening() {
       </div>
 
       {/* Listening items */}
+      {listeningItems.length === 0 && (
+        <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>No mentions found yet for your tracked keywords.</div>
+      )}
       <div className="space-y-2">
-        {LISTENING_ITEMS.map(item => {
+        {listeningItems.map(item => {
           const pCfg = PLATFORM_CONFIG[item.platform];
           const sCfg = SENTIMENT_CONFIG[item.sentiment];
 
