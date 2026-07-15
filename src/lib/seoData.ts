@@ -300,6 +300,7 @@ export const SAMPLE_GSC_METRICS: GscStoreMetrics[] = [
 
 export interface SeoAuditItem {
   id: string;
+  store: StoreId;
   category: AuditCategory;
   status: AuditStatus;
   impact: ImpactLevel;
@@ -310,133 +311,133 @@ export interface SeoAuditItem {
 
 export const SAMPLE_SEO_AUDIT_ITEMS: SeoAuditItem[] = [
   {
-    id: 'audit-001', category: 'meta', status: 'error', impact: 'high',
+    id: 'audit-001', store: 'donut-equipment', category: 'meta', status: 'error', impact: 'high',
     page: '/products/industrial-mixers',
     issue: 'Missing meta description',
     detail: 'Page has no meta description tag. Google will auto-generate one, reducing CTR by an estimated 20-30%.',
   },
   {
-    id: 'audit-002', category: 'meta', status: 'warn', impact: 'medium',
+    id: 'audit-002', store: 'donut-supplies', category: 'meta', status: 'warn', impact: 'medium',
     page: '/products/fry-shortening',
     issue: 'Title tag too long (74 chars)',
     detail: 'Title is 74 characters, exceeding the 60-char recommended limit. It will be truncated in SERPs.',
   },
   {
-    id: 'audit-003', category: 'meta', status: 'ok', impact: 'low',
+    id: 'audit-003', store: 'donut-equipment', category: 'meta', status: 'ok', impact: 'low',
     page: '/products/commercial-donut-fryers',
     issue: 'Meta description within optimal range',
     detail: 'Meta description is 152 characters — within the 150-160 char optimal range.',
   },
   {
-    id: 'audit-004', category: 'meta', status: 'error', impact: 'high',
+    id: 'audit-004', store: 'bakery-wholesalers', category: 'meta', status: 'error', impact: 'high',
     page: '/wholesale-ingredients',
     issue: 'Duplicate title tag',
     detail: 'Title tag "Wholesale Baking Ingredients" is used on 3 other pages. Consolidate or differentiate.',
   },
   {
-    id: 'audit-005', category: 'headings', status: 'error', impact: 'high',
+    id: 'audit-005', store: 'donut-supplies', category: 'headings', status: 'error', impact: 'high',
     page: '/products/donut-packaging',
     issue: 'Multiple H1 tags (3 found)',
     detail: 'Page contains 3 H1 tags. Only one H1 should exist per page for clear semantic hierarchy.',
   },
   {
-    id: 'audit-006', category: 'headings', status: 'warn', impact: 'medium',
+    id: 'audit-006', store: 'bakery-wholesalers', category: 'headings', status: 'warn', impact: 'medium',
     page: '/bakery-supplies',
     issue: 'H2 skipped — H3 used directly after H1',
     detail: 'Heading hierarchy jumps from H1 to H3 in the features section. Add H2 wrappers for proper structure.',
   },
   {
-    id: 'audit-007', category: 'headings', status: 'ok', impact: 'low',
+    id: 'audit-007', store: 'donut-equipment', category: 'headings', status: 'ok', impact: 'low',
     page: '/products/donut-glazing-machines',
     issue: 'Heading structure is correct',
     detail: 'H1 → H2 → H3 hierarchy is properly nested with keyword-rich headings.',
   },
   {
-    id: 'audit-008', category: 'content', status: 'warn', impact: 'high',
+    id: 'audit-008', store: 'donut-equipment', category: 'content', status: 'warn', impact: 'high',
     page: '/products/proofing-cabinets',
     issue: 'Thin content — 248 words',
     detail: 'Page has only 248 words. Competing top-10 pages average 1,200+ words. Expand with specs, FAQs, and use cases.',
   },
   {
-    id: 'audit-009', category: 'content', status: 'warn', impact: 'medium',
+    id: 'audit-009', store: 'donut-supplies', category: 'content', status: 'warn', impact: 'medium',
     page: '/products/vanilla-extract-bulk',
     issue: 'Target keyword density too low (0.3%)',
     detail: '"Bulk vanilla extract" appears only once in the body. Aim for 1.0-1.5% density without stuffing.',
   },
   {
-    id: 'audit-010', category: 'content', status: 'ok', impact: 'medium',
+    id: 'audit-010', store: 'donut-equipment', category: 'content', status: 'ok', impact: 'medium',
     page: '/products/commercial-donut-fryers',
     issue: 'Content length and keyword density optimal',
     detail: 'Page has 1,840 words with 1.2% keyword density. Images have alt tags. Reading level is Grade 9.',
   },
   {
-    id: 'audit-011', category: 'content', status: 'error', impact: 'high',
+    id: 'audit-011', store: 'bakery-wholesalers', category: 'content', status: 'error', impact: 'high',
     page: '/products/bulk-flour',
     issue: 'No structured data / schema markup',
     detail: 'Product page is missing JSON-LD Schema.org markup. Adding Product schema can unlock rich result features.',
   },
   {
-    id: 'audit-012', category: 'technical', status: 'error', impact: 'high',
+    id: 'audit-012', store: 'donut-equipment', category: 'technical', status: 'error', impact: 'high',
     page: '/products/industrial-mixers',
     issue: 'Page load time 6.4s (Core Web Vitals fail)',
     detail: 'LCP is 6.4s — far above the 2.5s threshold. Largest image (1.8MB hero) is not compressed or lazy-loaded.',
   },
   {
-    id: 'audit-013', category: 'technical', status: 'warn', impact: 'high',
+    id: 'audit-013', store: 'bakery-wholesalers', category: 'technical', status: 'warn', impact: 'high',
     page: '/bakery-supplies',
     issue: 'Missing canonical tag',
     detail: 'Page is accessible via 3 URLs (/bakery-supplies, /bakery-supplies/, /en/bakery-supplies). Add canonical to prevent duplicate content penalties.',
   },
   {
-    id: 'audit-014', category: 'technical', status: 'ok', impact: 'medium',
+    id: 'audit-014', store: 'bakery-wholesalers', category: 'technical', status: 'ok', impact: 'medium',
     page: '/wholesale-ingredients',
     issue: 'Sitemap includes this page',
     detail: 'Page is correctly included in sitemap.xml with proper lastmod and changefreq.',
   },
   {
-    id: 'audit-015', category: 'technical', status: 'warn', impact: 'medium',
+    id: 'audit-015', store: 'donut-equipment', category: 'technical', status: 'warn', impact: 'medium',
     page: '/products/donut-depositors',
     issue: 'Mobile viewport not optimised',
     detail: 'Product image gallery overflows on 375px screens. CLS score is 0.18 (above 0.1 threshold).',
   },
   {
-    id: 'audit-016', category: 'technical', status: 'error', impact: 'high',
+    id: 'audit-016', store: 'donut-supplies', category: 'technical', status: 'error', impact: 'high',
     page: '/products/glaze-powder-bulk',
     issue: '404 — referenced in internal links',
     detail: 'Page /products/glaze-powder-bulk/reviews returns 404 but 12 internal links point to it.',
   },
   {
-    id: 'audit-017', category: 'links', status: 'error', impact: 'high',
+    id: 'audit-017', store: 'donut-supplies', category: 'links', status: 'error', impact: 'high',
     page: '/products/donut-mix-wholesale',
     issue: '3 broken outbound links',
     detail: 'Links to fda.gov and usda.gov regulatory pages return 301 chains and one 404. Update all three.',
   },
   {
-    id: 'audit-018', category: 'links', status: 'warn', impact: 'medium',
+    id: 'audit-018', store: 'donut-supplies', category: 'links', status: 'warn', impact: 'medium',
     page: '/products/fry-shortening',
     issue: 'No internal links to this page',
     detail: 'Page receives zero internal links. It is an SEO orphan. Add links from related category and blog pages.',
   },
   {
-    id: 'audit-019', category: 'links', status: 'ok', impact: 'low',
+    id: 'audit-019', store: 'donut-equipment', category: 'links', status: 'ok', impact: 'low',
     page: '/products/commercial-donut-fryers',
     issue: 'Internal linking is healthy',
     detail: 'Page receives 14 internal links from relevant category pages and blog posts.',
   },
   {
-    id: 'audit-020', category: 'links', status: 'warn', impact: 'medium',
+    id: 'audit-020', store: 'bakery-wholesalers', category: 'links', status: 'warn', impact: 'medium',
     page: '/bakery-supplies',
     issue: 'Anchor text is generic ("click here" x4)',
     detail: '4 outbound links use the anchor text "click here" — replace with descriptive, keyword-rich anchors.',
   },
   {
-    id: 'audit-021', category: 'meta', status: 'warn', impact: 'low',
+    id: 'audit-021', store: 'donut-equipment', category: 'meta', status: 'warn', impact: 'low',
     page: '/products/donut-depositors',
     issue: 'Open Graph image missing',
     detail: 'No og:image tag — social media previews will use a fallback or no image, reducing click-through.',
   },
   {
-    id: 'audit-022', category: 'technical', status: 'ok', impact: 'high',
+    id: 'audit-022', store: 'donut-equipment', category: 'technical', status: 'ok', impact: 'high',
     page: '/products/automatic-donut-makers',
     issue: 'HTTPS and www redirect configured correctly',
     detail: 'All HTTP → HTTPS and non-www → www redirects resolve in a single hop with 301 status.',
@@ -460,6 +461,7 @@ export interface CompetitorChange {
 
 export interface CompetitorData {
   id: string;
+  store: StoreId;
   domain: string;
   displayName: string;
   lastChecked: string;
@@ -471,6 +473,7 @@ export interface CompetitorData {
 export const SAMPLE_COMPETITOR_DATA: CompetitorData[] = [
   {
     id: 'comp-001',
+    store: 'donut-equipment',
     domain: 'bakeryequipmentpro.com',
     displayName: 'Bakery Equipment Pro',
     lastChecked: '2026-05-11T08:42:00Z',
@@ -511,6 +514,7 @@ export const SAMPLE_COMPETITOR_DATA: CompetitorData[] = [
   },
   {
     id: 'comp-002',
+    store: 'donut-supplies',
     domain: 'wholesalebakingsupplies.com',
     displayName: 'Wholesale Baking Supplies',
     lastChecked: '2026-05-11T08:44:00Z',
@@ -541,6 +545,7 @@ export const SAMPLE_COMPETITOR_DATA: CompetitorData[] = [
   },
   {
     id: 'comp-003',
+    store: 'bakery-wholesalers',
     domain: 'commercialbakeryoutlet.com',
     displayName: 'Commercial Bakery Outlet',
     lastChecked: '2026-05-11T08:46:00Z',
@@ -565,6 +570,7 @@ export const SAMPLE_COMPETITOR_DATA: CompetitorData[] = [
 
 export interface BrandMention {
   id: string;
+  store: StoreId;
   source: MentionSource;
   platform: string;
   author: string;
@@ -577,83 +583,83 @@ export interface BrandMention {
 
 export const SAMPLE_BRAND_MENTIONS: BrandMention[] = [
   {
-    id: 'bm-001', source: 'social', platform: 'Reddit', author: 'u/BakeryNerd_PDX',
+    id: 'bm-001', store: 'donut-equipment', source: 'social', platform: 'Reddit', author: 'u/BakeryNerd_PDX',
     content: 'Just got our new commercial donut fryer from donut-equipment.com — setup took 20 minutes and the output is incredible. 150 donuts/hr without breaking a sweat.',
     sentiment: 'positive', reach: 8400, url: 'https://reddit.com/r/bakery', timeAgo: '2h ago',
   },
   {
-    id: 'bm-002', source: 'news', platform: 'BakeryMag',
+    id: 'bm-002', store: 'donut-equipment', source: 'news', platform: 'BakeryMag',
     author: 'Sarah K., BakeryMag',
     content: 'Donut Equipment Co. ranked #3 in our annual "Best Commercial Donut Equipment Suppliers 2026" roundup, praised for fast shipping and pre-sales support.',
     sentiment: 'positive', reach: 42000, url: 'https://bakerymag.com/best-suppliers-2026', timeAgo: '1d ago',
   },
   {
-    id: 'bm-003', source: 'social', platform: 'X/Twitter', author: '@pastry_chef_miami',
+    id: 'bm-003', store: 'donut-supplies', source: 'social', platform: 'X/Twitter', author: '@pastry_chef_miami',
     content: 'Ordered from @donutsupplies twice now — bulk glaze powder is great quality but the website checkout keeps timing out on mobile. Anyone else?',
     sentiment: 'neutral', reach: 3200, url: 'https://x.com/pastry_chef_miami', timeAgo: '4h ago',
   },
   {
-    id: 'bm-004', source: 'web', platform: 'Trustpilot', author: 'Carlos M.',
+    id: 'bm-004', store: 'bakery-wholesalers', source: 'web', platform: 'Trustpilot', author: 'Carlos M.',
     content: 'Horrible experience with bakery-wholesalers.com. Ordered $2,400 of flour and only received half. Customer service took 8 days to respond and the refund is still pending.',
     sentiment: 'negative', reach: 1800, url: 'https://trustpilot.com/review/bakery-wholesalers', timeAgo: '6h ago',
   },
   {
-    id: 'bm-005', source: 'social', platform: 'Instagram', author: '@donutdreams_atl',
+    id: 'bm-005', store: 'donut-equipment', source: 'social', platform: 'Instagram', author: '@donutdreams_atl',
     content: 'The automatic donut maker from Donut Equipment is a game changer for our pop-up. We went from 60 to 200 donuts per hour. 🍩 #smallbakery #donutlove',
     sentiment: 'positive', reach: 12600, url: 'https://instagram.com/p/example', timeAgo: '8h ago',
   },
   {
-    id: 'bm-006', source: 'news', platform: 'FoodServiceNews', author: 'Mike T., FSN',
+    id: 'bm-006', store: 'bakery-wholesalers', source: 'news', platform: 'FoodServiceNews', author: 'Mike T., FSN',
     content: 'The commercial bakery supplies market is consolidating. Bakery Wholesalers has reportedly increased its flour SKU count by 40% in Q1, positioning against national distributors.',
     sentiment: 'neutral', reach: 28000, url: 'https://foodservicenews.com/bakery-supplies-market', timeAgo: '2d ago',
   },
   {
-    id: 'bm-007', source: 'social', platform: 'Facebook', author: 'Helen R.',
+    id: 'bm-007', store: 'donut-supplies', source: 'social', platform: 'Facebook', author: 'Helen R.',
     content: 'Shoutout to Donut Supplies Co. for same-day shipping on our emergency vanilla extract order. Saved our Saturday production run. You guys are lifesavers!',
     sentiment: 'positive', reach: 2100, url: 'https://facebook.com/groups/bakery-pros', timeAgo: '12h ago',
   },
   {
-    id: 'bm-008', source: 'web', platform: 'Google Reviews', author: 'Frank D.',
+    id: 'bm-008', store: 'donut-equipment', source: 'web', platform: 'Google Reviews', author: 'Frank D.',
     content: 'Donut Equipment — 5 stars. The proofing cabinet runs silent and the temperature is rock steady. Two years of daily use and zero issues.',
     sentiment: 'positive', reach: 940, url: 'https://google.com/maps', timeAgo: '1d ago',
   },
   {
-    id: 'bm-009', source: 'social', platform: 'TikTok', author: '@the_donut_lab',
+    id: 'bm-009', store: 'donut-equipment', source: 'social', platform: 'TikTok', author: '@the_donut_lab',
     content: 'We did a full review of the DF-400 commercial fryer from donut-equipment.com. Hot take: best entry-level commercial fryer under $4k. Link in bio.',
     sentiment: 'positive', reach: 54000, url: 'https://tiktok.com/@the_donut_lab', timeAgo: '3d ago',
   },
   {
-    id: 'bm-010', source: 'web', platform: 'Yelp', author: 'Michelle P.',
+    id: 'bm-010', store: 'bakery-wholesalers', source: 'web', platform: 'Yelp', author: 'Michelle P.',
     content: 'Bakery Wholesalers has the best prices on bulk flour in the Pacific Northwest but the minimum order is $500 which rules out smaller shops.',
     sentiment: 'neutral', reach: 680, url: 'https://yelp.com/biz/bakery-wholesalers', timeAgo: '2d ago',
   },
   {
-    id: 'bm-011', source: 'news', platform: 'NRN', author: 'James L., NRN',
+    id: 'bm-011', store: 'donut-equipment', source: 'news', platform: 'NRN', author: 'James L., NRN',
     content: 'Donut Equipment Co. featured in our "Top 50 Food Equipment Vendors" list. Their rapid expansion into automated depositor systems is drawing attention from franchise operators.',
     sentiment: 'positive', reach: 67000, url: 'https://nrn.com/equipment/top-50', timeAgo: '4d ago',
   },
   {
-    id: 'bm-012', source: 'social', platform: 'LinkedIn', author: 'Greg B., Pastry Director',
+    id: 'bm-012', store: 'donut-equipment', source: 'social', platform: 'LinkedIn', author: 'Greg B., Pastry Director',
     content: 'We just standardized our 8-location donut chain on equipment from Donut Equipment Co. The ROI on the glazing machines alone paid for itself in 14 months.',
     sentiment: 'positive', reach: 7800, url: 'https://linkedin.com/posts/example', timeAgo: '5d ago',
   },
   {
-    id: 'bm-013', source: 'web', platform: 'Trustpilot', author: 'Amanda K.',
+    id: 'bm-013', store: 'donut-equipment', source: 'web', platform: 'Trustpilot', author: 'Amanda K.',
     content: 'Ordered the wrong size donut depositor but the return process from Donut Equipment was painless. 5 days for full refund. Will order again.',
     sentiment: 'positive', reach: 420, url: 'https://trustpilot.com/review/donut-equipment', timeAgo: '5d ago',
   },
   {
-    id: 'bm-014', source: 'social', platform: 'X/Twitter', author: '@baker_in_chief',
+    id: 'bm-014', store: 'bakery-wholesalers', source: 'social', platform: 'X/Twitter', author: '@baker_in_chief',
     content: 'The bakery-wholesalers.com website is down again. Third time this month. Impossible to place bulk orders when the cart page errors out. @donut_supplies is way more reliable.',
     sentiment: 'negative', reach: 2800, url: 'https://x.com/baker_in_chief', timeAgo: '6d ago',
   },
   {
-    id: 'bm-015', source: 'news', platform: 'PMQ Pizza & Bakery', author: 'Lena H., PMQ',
+    id: 'bm-015', store: 'donut-supplies', source: 'news', platform: 'PMQ Pizza & Bakery', author: 'Lena H., PMQ',
     content: 'Donut Supplies Co. recently launched a subscription model for bulk ingredients — first in the industry. Analysts say this could reshape how independent bakeries manage procurement.',
     sentiment: 'positive', reach: 38000, url: 'https://pmq.com/donut-supplies-subscription', timeAgo: '6d ago',
   },
   {
-    id: 'bm-016', source: 'social', platform: 'Reddit', author: 'u/FryMaster2000',
+    id: 'bm-016', store: 'donut-equipment', source: 'social', platform: 'Reddit', author: 'u/FryMaster2000',
     content: 'Donut Equipment keeps advertising their fryer capacity but my unit outputs 30% less than the spec sheet. No response from support in 5 days.',
     sentiment: 'negative', reach: 5100, url: 'https://reddit.com/r/commercialkitchen', timeAgo: '7d ago',
   },
@@ -663,6 +669,10 @@ export const SAMPLE_BRAND_MENTIONS: BrandMention[] = [
 
 export interface LlmVisibilityEntry {
   llm: LlmProvider;
+  // Brand-level queries ("best commercial donut equipment supplier") don't
+  // always target one store — omitted means the check applies account-wide
+  // and stays visible regardless of the selected store scope.
+  store?: StoreId;
   mentioned: boolean;
   rank: number | null;
   context: string;

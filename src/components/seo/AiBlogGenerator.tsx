@@ -162,7 +162,7 @@ const SELECT_STYLE: React.CSSProperties = {
   fontFamily: 'DM Sans, sans-serif',
 };
 
-export function AiBlogGenerator() {
+export function AiBlogGenerator({ selectedStoreIds }: { selectedStoreIds: string[] }) {
   const [topic, setTopic]             = useState('');
   const [store, setStore]             = useState<StoreId>('donut-equipment');
   const [tone, setTone]               = useState<Tone>('informative');
@@ -171,7 +171,8 @@ export function AiBlogGenerator() {
   const [generated, setGenerated]     = useState<GeneratedBlog | null>(null);
   const [showContent, setShowContent] = useState(false);
   const [editing, setEditing]         = useState(false);
-  const [prevBlogs, setPrevBlogs]     = usePersistentState<GeneratedBlog[]>('seo.blogs', []);
+  const [allPrevBlogs, setPrevBlogs]  = usePersistentState<GeneratedBlog[]>('seo.blogs', []);
+  const prevBlogs = allPrevBlogs.filter(b => selectedStoreIds.includes(b.store));
 
   const handleGenerate = () => {
     if (!topic.trim()) return;
@@ -424,7 +425,9 @@ export function AiBlogGenerator() {
         <div className='space-y-2'>
           {prevBlogs.length === 0 && (
             <div className='text-base text-center py-6' style={{ color: 'var(--text-muted)' }}>
-              No blog posts generated yet — use the form above.
+              {allPrevBlogs.length === 0
+                ? 'No blog posts generated yet — use the form above.'
+                : `No blog posts for the selected store${selectedStoreIds.length !== 1 ? 's' : ''}.`}
             </div>
           )}
           {prevBlogs.map(blog => {

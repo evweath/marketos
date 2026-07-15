@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { Plus, Clock, ArrowRight, Package, FileText, DollarSign, X } from 'lucide-react';
 import { usePersistentState } from '@/lib/usePersistentState';
-import type { CompetitorChangeType, CompetitorData } from '@/lib/seoData';
+import { useStores } from '@/lib/storeScope';
+import type { CompetitorChangeType, CompetitorData, StoreId } from '@/lib/seoData';
 
 type ChangeTab = CompetitorChangeType;
 
@@ -28,12 +29,15 @@ function formatTime(iso: string): string {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
-export function CompetitorMonitor() {
-  const [competitors, setCompetitors] = usePersistentState<CompetitorData[]>('seo.competitors', []);
+export function CompetitorMonitor({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
+  const [allCompetitors, setCompetitors] = usePersistentState<CompetitorData[]>('seo.competitors', []);
+  const competitors = allCompetitors.filter(c => selectedStoreIds.includes(c.store));
   const [activeTabs, setActiveTabs] = useState<Record<string, ChangeTab>>({});
   const [adding, setAdding]           = useState(false);
   const [newName, setNewName]         = useState('');
   const [newDomain, setNewDomain]     = useState('');
+  const [newStore, setNewStore]       = useState(stores[0]?.id ?? '');
 
   const setTab = (competitorId: string, tab: ChangeTab) => {
     setActiveTabs(prev => ({ ...prev, [competitorId]: tab }));
@@ -46,10 +50,11 @@ export function CompetitorMonitor() {
   };
 
   const addCompetitor = () => {
-    if (!newName.trim() || !newDomain.trim()) return;
+    if (!newName.trim() || !newDomain.trim() || !newStore) return;
     const id = `comp-${Date.now()}`;
     const competitor: CompetitorData = {
       id,
+      store: newStore as StoreId,
       domain: newDomain.trim().replace(/^https?:\/\//, ''),
       displayName: newName.trim(),
       lastChecked: new Date().toISOString(),
@@ -114,6 +119,14 @@ export function CompetitorMonitor() {
               className='flex-1 text-base px-2.5 py-1.5 rounded-lg outline-none font-mono'
               style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
             />
+            <select
+              value={newStore}
+              onChange={e => setNewStore(e.target.value)}
+              className='text-base px-2.5 py-1.5 rounded-lg outline-none'
+              style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
+            >
+              {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
           </div>
           <div className='flex gap-2'>
             <button
@@ -141,7 +154,9 @@ export function CompetitorMonitor() {
 
       {competitors.length === 0 && (
         <div className='text-base text-center py-10' style={{ color: 'var(--text-muted)' }}>
-          No competitors tracked yet — click Add Competitor to start monitoring.
+          {allCompetitors.length === 0
+            ? 'No competitors tracked yet — click Add Competitor to start monitoring.'
+            : `No competitors tracked for the selected store${selectedStoreIds.length !== 1 ? 's' : ''}.`}
         </div>
       )}
 

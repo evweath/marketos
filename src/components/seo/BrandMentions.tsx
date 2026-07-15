@@ -35,9 +35,11 @@ function fmt(n: number): string {
 
 const SOURCE_FILTERS: SourceFilter[] = ['all', 'web', 'social', 'news'];
 
-export function BrandMentions() {
-  const [mentions] = usePersistentState<BrandMention[]>('seo.brandMentions', []);
-  const [llmVisibility] = usePersistentState<LlmVisibilityEntry[]>('seo.llmVisibility', emptyLlmVisibility());
+export function BrandMentions({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [allMentions] = usePersistentState<BrandMention[]>('seo.brandMentions', []);
+  const mentions = allMentions.filter(m => selectedStoreIds.includes(m.store));
+  const [allLlmVisibility] = usePersistentState<LlmVisibilityEntry[]>('seo.llmVisibility', emptyLlmVisibility());
+  const llmVisibility = allLlmVisibility.filter(e => !e.store || selectedStoreIds.includes(e.store));
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
   const [responded, setResponded] = usePersistentState<Record<string, boolean>>('seo.mentionResponded', {});
 
@@ -225,7 +227,9 @@ export function BrandMentions() {
         <div className='space-y-2'>
           {filtered.length === 0 && (
             <div className='text-base text-center py-10' style={{ color: 'var(--text-muted)' }}>
-              No brand mentions tracked yet.
+              {allMentions.length === 0
+                ? 'No brand mentions tracked yet.'
+                : `No brand mentions for the selected store${selectedStoreIds.length !== 1 ? 's' : ''}.`}
             </div>
           )}
           {filtered.map(mention => {

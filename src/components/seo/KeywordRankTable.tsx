@@ -67,8 +67,9 @@ const TH_STYLE: React.CSSProperties = {
   letterSpacing: '0.08em',
 };
 
-export function KeywordRankTable() {
-  const [keywords] = usePersistentState<KeywordRanking[]>('seo.keywordRankings', []);
+export function KeywordRankTable({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [allKeywords] = usePersistentState<KeywordRanking[]>('seo.keywordRankings', []);
+  const keywords = allKeywords.filter(k => selectedStoreIds.includes(k.store));
   const [storeFilter, setStoreFilter] = useState<StoreId | 'all'>('all');
   const [sortKey, setSortKey]         = useState<SortKey>('rank');
   const [sortAsc, setSortAsc]         = useState(true);

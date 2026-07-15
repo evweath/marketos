@@ -30,8 +30,9 @@ const IMPACT_BADGE: Record<ImpactLevel, string> = {
 const CATEGORIES: (AuditCategory | 'all')[] = ['all', 'meta', 'headings', 'content', 'technical', 'links'];
 const STATUSES: (AuditStatus | 'all')[] = ['all', 'error', 'warn', 'ok'];
 
-export function OnSiteSeoAudit() {
-  const [auditItems] = usePersistentState<SeoAuditItem[]>('seo.auditItems', []);
+export function OnSiteSeoAudit({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [allAuditItems] = usePersistentState<SeoAuditItem[]>('seo.auditItems', []);
+  const auditItems = allAuditItems.filter(i => selectedStoreIds.includes(i.store));
   const [categoryFilter, setCategoryFilter] = useState<AuditCategory | 'all'>('all');
   const [statusFilter, setStatusFilter]     = useState<AuditStatus | 'all'>('all');
   const [auditing, setAuditing]             = useState(false);
@@ -192,8 +193,10 @@ export function OnSiteSeoAudit() {
       <div className='space-y-2'>
         {filtered.length === 0 && (
           <div className='text-center py-10' style={{ color: 'var(--text-muted)' }}>
-            {auditItems.length === 0
+            {allAuditItems.length === 0
               ? 'No audit has been run yet — click Run New Audit to scan your stores.'
+              : auditItems.length === 0
+              ? `No audit items for the selected store${selectedStoreIds.length !== 1 ? 's' : ''}.`
               : 'No audit items match the selected filters.'}
           </div>
         )}

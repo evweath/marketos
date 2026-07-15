@@ -12,6 +12,8 @@ import { BrandMentions }     from '@/components/seo/BrandMentions';
 import { computeSeoStats } from '@/lib/seoData';
 import type { KeywordRanking, GscStoreMetrics } from '@/lib/seoData';
 import { usePersistentState } from '@/lib/usePersistentState';
+import { useStoreScope } from '@/lib/storeScope';
+import { StoreScopeBar } from '@/components/shared/StoreScopeBar';
 import {
   Search, MousePointer, Award,
   Target, DollarSign, BarChart2, Wrench, PenSquare, Globe, MessageSquare,
@@ -41,8 +43,11 @@ interface StatCard {
 
 export default function SeoPage() {
   const [activeTab, setActiveTab] = useState<Tab>('keywords');
-  const [keywords] = usePersistentState<KeywordRanking[]>('seo.keywordRankings', []);
-  const [gscMetrics] = usePersistentState<GscStoreMetrics[]>('seo.gscMetrics', []);
+  const { selectedStoreIds } = useStoreScope('seo');
+  const [allKeywords] = usePersistentState<KeywordRanking[]>('seo.keywordRankings', []);
+  const [allGscMetrics] = usePersistentState<GscStoreMetrics[]>('seo.gscMetrics', []);
+  const keywords = allKeywords.filter(k => selectedStoreIds.includes(k.store));
+  const gscMetrics = allGscMetrics.filter(m => selectedStoreIds.includes(m.store));
   const s = computeSeoStats(keywords, gscMetrics);
 
   const statCards: StatCard[] = [
@@ -84,10 +89,12 @@ export default function SeoPage() {
       <div className='flex flex-col flex-1 min-w-0 overflow-hidden'>
         <TopBar
           title='SEO'
-          subtitle='All Stores'
+          subtitle={`${selectedStoreIds.length} store${selectedStoreIds.length !== 1 ? 's' : ''}`}
           breadcrumbs={['MarketOS', 'SEO']}
         />
         <main className='flex-1 overflow-y-auto p-5'>
+
+          <div className='mb-5'><StoreScopeBar sectionKey='seo' /></div>
 
           {/* Stats bar */}
           <div className='grid grid-cols-5 gap-3 mb-5'>
@@ -156,12 +163,12 @@ export default function SeoPage() {
           </div>
 
           {/* Tab content */}
-          {activeTab === 'keywords'   && <KeywordRankTable />}
-          {activeTab === 'gsc'        && <GscPerformance />}
-          {activeTab === 'audit'      && <OnSiteSeoAudit />}
-          {activeTab === 'blog'       && <AiBlogGenerator />}
-          {activeTab === 'competitor' && <CompetitorMonitor />}
-          {activeTab === 'mentions'   && <BrandMentions />}
+          {activeTab === 'keywords'   && <KeywordRankTable selectedStoreIds={selectedStoreIds} />}
+          {activeTab === 'gsc'        && <GscPerformance selectedStoreIds={selectedStoreIds} />}
+          {activeTab === 'audit'      && <OnSiteSeoAudit selectedStoreIds={selectedStoreIds} />}
+          {activeTab === 'blog'       && <AiBlogGenerator selectedStoreIds={selectedStoreIds} />}
+          {activeTab === 'competitor' && <CompetitorMonitor selectedStoreIds={selectedStoreIds} />}
+          {activeTab === 'mentions'   && <BrandMentions selectedStoreIds={selectedStoreIds} />}
 
         </main>
       </div>

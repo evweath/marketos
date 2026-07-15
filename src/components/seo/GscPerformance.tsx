@@ -54,21 +54,23 @@ function positionBadgeColor(pos: number): string {
   return '#7b93ff';
 }
 
-export function GscPerformance() {
+export function GscPerformance({ selectedStoreIds }: { selectedStoreIds: string[] }) {
   const [gscMetrics] = usePersistentState<GscStoreMetrics[]>('seo.gscMetrics', []);
   const [store, setStore]         = useState<StoreId>('donut-equipment');
   const [dateRange, setDateRange] = useState<DateRange>('30d');
 
-  const storeData = gscMetrics.find(m => m.store === store);
-  const storeCfg  = STORE_CONFIG[store];
+  const inScopeStores = STORES.filter(s => selectedStoreIds.includes(s));
+  const activeStore = inScopeStores.includes(store) ? store : inScopeStores[0];
+  const storeData = activeStore ? gscMetrics.find(m => m.store === activeStore) : undefined;
+  const storeCfg  = activeStore ? STORE_CONFIG[activeStore] : undefined;
 
-  if (!storeData) {
+  if (!storeData || !storeCfg) {
     return (
       <div className='glass-card p-4'>
         <div className='flex items-center gap-0.5 p-1 mb-4' style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: 10, width: 'fit-content' }}>
-          {STORES.map(s => {
+          {inScopeStores.map(s => {
             const cfg    = STORE_CONFIG[s];
-            const active = store === s;
+            const active = activeStore === s;
             return (
               <button
                 key={s}
@@ -87,7 +89,9 @@ export function GscPerformance() {
           })}
         </div>
         <div className='text-base text-center py-10' style={{ color: 'var(--text-muted)' }}>
-          No Search Console data connected for this store yet.
+          {inScopeStores.length === 0
+            ? 'No store selected — choose a store above to view Search Console data.'
+            : 'No Search Console data connected for this store yet.'}
         </div>
       </div>
     );
@@ -142,9 +146,9 @@ export function GscPerformance() {
             borderRadius: 10,
           }}
         >
-          {STORES.map(s => {
+          {inScopeStores.map(s => {
             const cfg    = STORE_CONFIG[s];
-            const active = store === s;
+            const active = activeStore === s;
             return (
               <button
                 key={s}
