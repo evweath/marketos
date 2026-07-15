@@ -1,11 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   BarChart2, Globe, Bell, Send, Zap, ShoppingCart,
-  Mail, Search, Settings, Radio, Sparkles, BookOpen
+  Mail, Search, Settings, Radio, Sparkles, BookOpen, ChevronDown, ChevronRight
 } from 'lucide-react';
+import { useStores } from '@/lib/storeScope';
 
 const NAV_ITEMS = [
   { href: '/monitoring', label: 'Site Monitoring', icon: Globe,        badge: 3,    badgeColor: '#ffb347' },
@@ -20,14 +22,10 @@ const NAV_ITEMS = [
   { href: '/glossary',   label: 'Glossary',        icon: BookOpen,    badge: null, badgeColor: null },
 ];
 
-const STORES = [
-  { id: 'donut-equipment',   label: 'Donut Equipment',  color: '#00d9ff', status: 'online'   },
-  { id: 'donut-supplies',    label: 'Donut Supplies',   color: '#ffb347', status: 'degraded' },
-  { id: 'bakery-wholesalers',label: 'Bakery Wholesale', color: '#10d98a', status: 'online'   },
-];
-
 export default function Sidebar() {
   const pathname = usePathname();
+  const [stores] = useStores();
+  const [storesExpanded, setStoresExpanded] = useState(true);
 
   return (
     <aside
@@ -57,7 +55,7 @@ export default function Sidebar() {
             MarketOS
           </div>
           <div className="text-[16px] mt-1 font-mono" style={{ color: 'var(--text-muted)' }}>
-            3 stores connected
+            {stores.length} {stores.length === 1 ? 'store' : 'stores'} connected
           </div>
         </div>
       </div>
@@ -104,36 +102,46 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* ── Store Status ─────────────────── */}
+      {/* ── Stores ────────────────────────── */}
       <div
-        className="px-2.5 py-3"
-        style={{ borderTop: '1px solid var(--border-subtle)' }}
+        className="px-2.5 py-3 overflow-y-auto"
+        style={{ borderTop: '1px solid var(--border-subtle)', maxHeight: '40vh' }}
       >
-        <div className="section-label px-2 mb-2">Stores</div>
-        {STORES.map(store => (
-          <div
-            key={store.id}
-            className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg"
-            style={{ cursor: 'default' }}
-          >
-            <div
-              className={`w-1.5 h-1.5 rounded-full shrink-0 ${store.status === 'degraded' ? 'live-dot-amber' : 'live-dot'}`}
-              style={{ background: store.color }}
-            />
-            <span
-              className="text-base truncate flex-1"
-              style={{ color: 'var(--text-secondary)', fontWeight: 450 }}
+        <button
+          onClick={() => setStoresExpanded(e => !e)}
+          className="flex items-center gap-1 w-full px-2 mb-2"
+        >
+          {storesExpanded ? <ChevronDown size={11} style={{ color: 'var(--text-muted)' }} /> : <ChevronRight size={11} style={{ color: 'var(--text-muted)' }} />}
+          <span className="section-label">Stores</span>
+          <span className="text-[16px] font-mono ml-auto" style={{ color: 'var(--text-muted)' }}>{stores.length}</span>
+        </button>
+        {storesExpanded && stores.map(store => {
+          const active = pathname.startsWith(`/stores/${store.id}`);
+          return (
+            <Link
+              key={store.id}
+              href={`/stores/${store.id}`}
+              className={`nav-item ${active ? 'active' : ''}`}
             >
-              {store.label}
-            </span>
-            <span
-              className="text-[16px] font-mono font-semibold"
-              style={{ color: store.status === 'degraded' ? '#ffb347' : '#10d98a' }}
-            >
-              {store.status === 'degraded' ? 'SLOW' : 'UP'}
-            </span>
-          </div>
-        ))}
+              <div
+                className={`w-1.5 h-1.5 rounded-full shrink-0 ${store.status === 'error' ? 'live-dot-red' : 'live-dot'}`}
+                style={{ background: store.color }}
+              />
+              <span
+                className="text-base truncate flex-1"
+                style={{ color: 'var(--text-secondary)', fontWeight: 450 }}
+              >
+                {store.name}
+              </span>
+              <span
+                className="text-[16px] font-mono font-semibold"
+                style={{ color: store.status === 'error' ? '#ff6464' : '#10d98a' }}
+              >
+                {store.status === 'error' ? 'ERROR' : 'OK'}
+              </span>
+            </Link>
+          );
+        })}
       </div>
 
       {/* ── Settings ─────────────────────── */}

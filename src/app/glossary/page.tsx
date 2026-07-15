@@ -169,6 +169,14 @@ export default function GlossaryPage() {
                         <p className="text-base leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                           {entry.definition}
                         </p>
+                        {entry.formula && (
+                          <div className="flex items-start gap-1.5 mt-2 pt-2" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                            <span className="section-label shrink-0">Formula</span>
+                            <span className="text-base font-mono" style={{ color: 'var(--text-primary)' }}>
+                              {entry.formula}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

@@ -11,21 +11,14 @@ import {
   type ConnectionKey,
   type StoreConnection,
 } from '@/lib/storeConnectionsData';
+import { useStores, STORE_COLORS, type StoreRecord } from '@/lib/storeScope';
 import { StoreConnectionsPanel } from './StoreConnectionsPanel';
 
-interface StoreData {
-  id: string;
-  name: string;
-  domain: string;
-  color: string;
-  status: 'connected' | 'error';
-  lastSync: string;
-  apiKeyMasked: string;
-  products: number;
-  orders30d: number;
-  activeCampaigns: number;
-  webhooks: string[];
-}
+// `StoreData` is kept as an alias so the rest of this file (and future
+// diffs) reads naturally — the canonical shape/seed data now lives in
+// `storeScope.ts` so the Sidebar and every store-scoped page shares the
+// exact same persisted list instead of each maintaining its own copy.
+type StoreData = StoreRecord;
 
 interface Credentials {
   domain: string;
@@ -33,48 +26,6 @@ interface Credentials {
   apiSecret: string;
   webhookSecret: string;
 }
-
-const INITIAL_STORES: StoreData[] = [
-  {
-    id: 'donut-equipment',
-    name: 'Donut Equipment',
-    domain: 'donut-equipment.myshopify.com',
-    color: 'var(--cyan)',
-    status: 'connected',
-    lastSync: new Date(Date.now() - 4 * 60000).toISOString(),
-    apiKeyMasked: '****9a4b',
-    products: 284,
-    orders30d: 3847,
-    activeCampaigns: 12,
-    webhooks: ['orders/create', 'orders/updated', 'products/update', 'checkouts/create', 'customers/create'],
-  },
-  {
-    id: 'donut-supplies',
-    name: 'Donut Supplies',
-    domain: 'donut-supplies.myshopify.com',
-    color: '#ffb347',
-    status: 'error',
-    lastSync: new Date(Date.now() - 2 * 3600000).toISOString(),
-    apiKeyMasked: '****c2f7',
-    products: 141,
-    orders30d: 1924,
-    activeCampaigns: 7,
-    webhooks: ['orders/create', 'products/update', 'checkouts/create'],
-  },
-  {
-    id: 'bakery-wholesalers',
-    name: 'Bakery Wholesalers',
-    domain: 'bakery-wholesalers.myshopify.com',
-    color: '#10d98a',
-    status: 'connected',
-    lastSync: new Date(Date.now() - 2 * 60000).toISOString(),
-    apiKeyMasked: '****e81d',
-    products: 512,
-    orders30d: 9214,
-    activeCampaigns: 21,
-    webhooks: ['orders/create', 'orders/updated', 'orders/paid', 'products/update', 'products/create', 'checkouts/create', 'customers/create', 'refunds/create'],
-  },
-];
 
 function formatSyncTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -622,7 +573,6 @@ function AddStoreForm({ onClose, onAdd }: AddStoreFormProps) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-const STORE_COLORS = ['#00d9ff', '#ffb347', '#10d98a', '#7b93ff', '#ff6ac1', '#f5c542'];
 const DEFAULT_WEBHOOKS = ['orders/create', 'orders/updated', 'products/update', 'checkouts/create', 'customers/create'];
 
 function slugify(value: string): string {
@@ -632,8 +582,9 @@ function slugify(value: string): string {
 export function StoreSettings() {
   const [showAddForm, setShowAddForm]                 = useState(false);
   // Persisted so an added store survives settings-tab navigation (this panel
-  // unmounts when you leave the Stores section) and full page reloads.
-  const [stores, setStores]                           = usePersistentState<StoreData[]>('stores', INITIAL_STORES);
+  // unmounts when you leave the Stores section) and full page reloads. Shared
+  // with the Sidebar and every store-scoped page via the same 'stores' key.
+  const [stores, setStores]                           = useStores();
   const [savedCreds, setSavedCreds]                   = usePersistentState<Record<string, Credentials>>('storeCreds', {});
   const [storeConnections, setStoreConnections]       = usePersistentState<Record<string, Record<ConnectionKey, StoreConnection>>>(
     'storeConnections', INITIAL_STORE_CONNECTIONS,
