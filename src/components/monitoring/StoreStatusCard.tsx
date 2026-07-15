@@ -80,13 +80,13 @@ export default function StoreStatusCard({ store, traffic, conversions, isSelecte
         <div className='flex items-center gap-2.5'>
           <div className={`w-2 h-2 rounded-full ${sc.dotClass} shrink-0`} style={{ background: sc.color }} />
           <div>
-            <div className='font-semibold text-sm' style={{ color: 'var(--text-primary)' }}>{store.name}</div>
+            <div className='font-semibold text-base' style={{ color: 'var(--text-primary)' }}>{store.name}</div>
             <a
               href={`https://${store.domain}`}
               target='_blank'
               rel='noopener noreferrer'
               onClick={e => e.stopPropagation()}
-              className='text-[11px] mt-0.5 flex items-center gap-1 hover:underline'
+              className='text-[16px] mt-0.5 flex items-center gap-1 hover:underline'
               style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono, monospace' }}>
               {store.domain}
               <ExternalLink size={9} />
@@ -95,7 +95,7 @@ export default function StoreStatusCard({ store, traffic, conversions, isSelecte
         </div>
         <div className='flex items-center gap-1.5 px-2 py-0.5 rounded'
           style={{ background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>
-          <span className='text-[10px] font-mono font-bold tracking-wide'>{sc.label}</span>
+          <span className='text-[16px] font-mono font-bold tracking-wide'>{sc.label}</span>
         </div>
       </div>
 
@@ -135,7 +135,7 @@ export default function StoreStatusCard({ store, traffic, conversions, isSelecte
       <div className='flex items-center gap-0 pt-2.5 border-t' style={{ borderColor: 'var(--border-subtle)' }}>
         <div className='flex-1'>
           <div className='section-label mb-0.5'>Today Revenue</div>
-          <div className='font-mono text-sm font-bold' style={{ color: store.color }}>
+          <div className='font-mono text-base font-bold' style={{ color: store.color }}>
             {formatCurrency(conversions.revenueToday)}
           </div>
         </div>
@@ -143,10 +143,10 @@ export default function StoreStatusCard({ store, traffic, conversions, isSelecte
         <div className='flex-1 text-right'>
           <div className='section-label mb-0.5'>Sessions</div>
           <div className='flex items-center gap-1 justify-end'>
-            <span className='font-mono text-sm font-semibold' style={{ color: 'var(--text-primary)' }}>
+            <span className='font-mono text-base font-semibold' style={{ color: 'var(--text-primary)' }}>
               {traffic.sessionsToday.toLocaleString()}
             </span>
-            <span className='text-[10px] font-mono flex items-center gap-0.5'
+            <span className='text-[16px] font-mono flex items-center gap-0.5'
               style={{ color: traffic.sessionsDelta >= 0 ? '#10d98a' : '#ff4444' }}>
               {traffic.sessionsDelta >= 0 ? <TrendingUp size={9} /> : <TrendingDown size={9} />}
               {Math.abs(traffic.sessionsDelta)}%
@@ -157,7 +157,7 @@ export default function StoreStatusCard({ store, traffic, conversions, isSelecte
 
       {/* SSL expiry warning strip */}
       {sslWarning && (
-        <div className='mt-3 px-2.5 py-1.5 rounded text-[11px] flex items-center gap-1.5'
+        <div className='mt-3 px-2.5 py-1.5 rounded text-[16px] flex items-center gap-1.5'
           style={{
             background: sslCritical ? 'rgba(255,68,68,0.1)' : 'rgba(255,179,71,0.1)',
             color: sslCritical ? '#ff4444' : '#ffb347',

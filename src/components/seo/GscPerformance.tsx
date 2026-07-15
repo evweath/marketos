@@ -10,7 +10,7 @@ import { GSC_METRICS } from '@/lib/seoData';
 import type { StoreId, DateRange } from '@/lib/seoData';
 
 const STORE_CONFIG: Record<StoreId, { label: string; color: string }> = {
-  'donut-equipment':    { label: 'Donut Equipment',  color: '#00d9ff' },
+  'donut-equipment':    { label: 'Donut Equipment',  color: 'var(--cyan)' },
   'donut-supplies':     { label: 'Donut Supplies',   color: '#ffb347' },
   'bakery-wholesalers': { label: 'Bakery Wholesale', color: '#10d98a' },
 };
@@ -35,9 +35,9 @@ function ChartTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
   return (
     <div className='rounded-xl px-3 py-2.5' style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-dim)' }}>
-      <div className='text-[10px] font-mono mb-2' style={{ color: 'var(--text-muted)' }}>{label}</div>
+      <div className='text-[16px] font-mono mb-2' style={{ color: 'var(--text-muted)' }}>{label}</div>
       {payload.map(p => (
-        <div key={p.name} className='flex items-center gap-2 text-xs font-mono'>
+        <div key={p.name} className='flex items-center gap-2 text-base font-mono'>
           <div className='w-2 h-2 rounded-full' style={{ background: p.color }} />
           <span style={{ color: 'var(--text-secondary)' }}>{p.name}:</span>
           <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{fmt(p.value)}</span>
@@ -68,7 +68,7 @@ export function GscPerformance() {
       value: fmt(metrics.clicks),
       delta: metrics.clicksDelta,
       icon: MousePointer,
-      color: '#00d9ff',
+      color: 'var(--cyan)',
     },
     {
       label: 'Impressions',
@@ -116,7 +116,7 @@ export function GscPerformance() {
               <button
                 key={s}
                 onClick={() => setStore(s)}
-                className='px-3 py-1.5 text-xs font-medium transition-all whitespace-nowrap'
+                className='px-3 py-1.5 text-base font-medium transition-all whitespace-nowrap'
                 style={{
                   borderRadius: 7,
                   background: active ? cfg.color + '18' : 'transparent',
@@ -145,11 +145,11 @@ export function GscPerformance() {
               <button
                 key={dr}
                 onClick={() => setDateRange(dr)}
-                className='px-3 py-1 text-[11px] font-mono transition-all'
+                className='px-3 py-1 text-[16px] font-mono transition-all'
                 style={{
                   borderRadius: 6,
                   background: active ? 'rgba(0,217,255,0.15)' : 'transparent',
-                  color: active ? '#00d9ff' : 'var(--text-secondary)',
+                  color: active ? 'var(--cyan)' : 'var(--text-secondary)',
                   border: active ? '1px solid rgba(0,217,255,0.3)' : '1px solid transparent',
                   fontWeight: active ? 600 : 400,
                 }}
@@ -187,7 +187,7 @@ export function GscPerformance() {
               <div className='font-bold text-xl mb-1.5 leading-none' style={{ fontFamily: 'DM Mono', color: kpi.color }}>
                 {kpi.value}
               </div>
-              <div className='flex items-center gap-1 text-[10px] font-mono'
+              <div className='flex items-center gap-1 text-[16px] font-mono'
                 style={{ color: isGood ? '#10d98a' : '#ff4444' }}>
                 {isGood ? <TrendingUp size={9} /> : <TrendingDown size={9} />}
                 {display}
@@ -215,14 +215,14 @@ export function GscPerformance() {
             <CartesianGrid strokeDasharray='3 3' stroke='rgba(var(--overlay-rgb),0.04)' />
             <XAxis
               dataKey='date'
-              tick={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'DM Mono' }}
+              tick={{ fill: 'var(--text-muted)', fontSize: 16, fontFamily: 'DM Mono' }}
               tickLine={false}
               axisLine={false}
               interval={dateRange === '7d' ? 0 : dateRange === '30d' ? 4 : 12}
             />
             <YAxis
               yAxisId='clicks'
-              tick={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'DM Mono' }}
+              tick={{ fill: 'var(--text-muted)', fontSize: 16, fontFamily: 'DM Mono' }}
               tickLine={false}
               axisLine={false}
               tickFormatter={fmt}
@@ -230,14 +230,14 @@ export function GscPerformance() {
             <YAxis
               yAxisId='impressions'
               orientation='right'
-              tick={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'DM Mono' }}
+              tick={{ fill: 'var(--text-muted)', fontSize: 16, fontFamily: 'DM Mono' }}
               tickLine={false}
               axisLine={false}
               tickFormatter={fmt}
             />
             <Tooltip content={<ChartTooltip />} />
             <Legend
-              wrapperStyle={{ fontSize: 10, fontFamily: 'DM Mono', color: 'var(--text-muted)', paddingTop: 6 }}
+              wrapperStyle={{ fontSize: 16, fontFamily: 'DM Mono', color: 'var(--text-muted)', paddingTop: 6 }}
             />
             <Area
               yAxisId='impressions'
@@ -267,12 +267,12 @@ export function GscPerformance() {
         {/* Top Pages */}
         <div>
           <div className='section-label mb-2.5'>Top Pages</div>
-          <table className='w-full text-xs' style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+          <table className='w-full text-base' style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                 {['URL', 'Clicks', 'Imp', 'CTR', 'Pos'].map(h => (
                   <th key={h} className='text-left pb-2 pr-2'
-                    style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono', fontWeight: 500, fontSize: 9, letterSpacing: '0.08em' }}>
+                    style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono', fontWeight: 500, fontSize: 16, letterSpacing: '0.08em' }}>
                     {h}
                   </th>
                 ))}
@@ -288,18 +288,18 @@ export function GscPerformance() {
                   <td className='py-2 pr-2' style={{ maxWidth: 120 }}>
                     <span
                       className='font-mono block truncate'
-                      style={{ color: '#7b93ff', fontSize: 10, maxWidth: 120 }}
+                      style={{ color: '#7b93ff', fontSize: 16, maxWidth: 120 }}
                     >
                       {p.url}
                     </span>
                   </td>
-                  <td className='py-2 pr-2 font-mono tabular-nums' style={{ color: 'var(--text-primary)', fontSize: 10 }}>{fmt(p.clicks)}</td>
-                  <td className='py-2 pr-2 font-mono tabular-nums' style={{ color: 'var(--text-secondary)', fontSize: 10 }}>{fmt(p.impressions)}</td>
-                  <td className='py-2 pr-2 font-mono tabular-nums' style={{ color: '#10d98a', fontSize: 10 }}>{p.ctr.toFixed(1)}%</td>
+                  <td className='py-2 pr-2 font-mono tabular-nums' style={{ color: 'var(--text-primary)', fontSize: 16 }}>{fmt(p.clicks)}</td>
+                  <td className='py-2 pr-2 font-mono tabular-nums' style={{ color: 'var(--text-secondary)', fontSize: 16 }}>{fmt(p.impressions)}</td>
+                  <td className='py-2 pr-2 font-mono tabular-nums' style={{ color: '#10d98a', fontSize: 16 }}>{p.ctr.toFixed(1)}%</td>
                   <td className='py-2'>
                     <span
                       className='inline-flex items-center justify-center px-1.5 py-0.5 rounded font-mono font-semibold'
-                      style={{ fontSize: 9, background: positionBadgeColor(p.position) + '20', color: positionBadgeColor(p.position) }}
+                      style={{ fontSize: 16, background: positionBadgeColor(p.position) + '20', color: positionBadgeColor(p.position) }}
                     >
                       {p.position.toFixed(1)}
                     </span>
@@ -313,12 +313,12 @@ export function GscPerformance() {
         {/* Top Queries */}
         <div>
           <div className='section-label mb-2.5'>Top Queries</div>
-          <table className='w-full text-xs' style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+          <table className='w-full text-base' style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                 {['Query', 'Clicks', 'Imp', 'CTR', 'Pos'].map(h => (
                   <th key={h} className='text-left pb-2 pr-2'
-                    style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono', fontWeight: 500, fontSize: 9, letterSpacing: '0.08em' }}>
+                    style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono', fontWeight: 500, fontSize: 16, letterSpacing: '0.08em' }}>
                     {h}
                   </th>
                 ))}
@@ -334,18 +334,18 @@ export function GscPerformance() {
                   <td className='py-2 pr-2' style={{ maxWidth: 150 }}>
                     <span
                       className='block truncate'
-                      style={{ color: 'var(--text-primary)', fontSize: 10, maxWidth: 150 }}
+                      style={{ color: 'var(--text-primary)', fontSize: 16, maxWidth: 150 }}
                     >
                       {q.query}
                     </span>
                   </td>
-                  <td className='py-2 pr-2 font-mono tabular-nums' style={{ color: 'var(--text-primary)', fontSize: 10 }}>{fmt(q.clicks)}</td>
-                  <td className='py-2 pr-2 font-mono tabular-nums' style={{ color: 'var(--text-secondary)', fontSize: 10 }}>{fmt(q.impressions)}</td>
-                  <td className='py-2 pr-2 font-mono tabular-nums' style={{ color: '#10d98a', fontSize: 10 }}>{q.ctr.toFixed(1)}%</td>
+                  <td className='py-2 pr-2 font-mono tabular-nums' style={{ color: 'var(--text-primary)', fontSize: 16 }}>{fmt(q.clicks)}</td>
+                  <td className='py-2 pr-2 font-mono tabular-nums' style={{ color: 'var(--text-secondary)', fontSize: 16 }}>{fmt(q.impressions)}</td>
+                  <td className='py-2 pr-2 font-mono tabular-nums' style={{ color: '#10d98a', fontSize: 16 }}>{q.ctr.toFixed(1)}%</td>
                   <td className='py-2'>
                     <span
                       className='inline-flex items-center justify-center px-1.5 py-0.5 rounded font-mono font-semibold'
-                      style={{ fontSize: 9, background: positionBadgeColor(q.position) + '20', color: positionBadgeColor(q.position) }}
+                      style={{ fontSize: 16, background: positionBadgeColor(q.position) + '20', color: positionBadgeColor(q.position) }}
                     >
                       {q.position.toFixed(1)}
                     </span>

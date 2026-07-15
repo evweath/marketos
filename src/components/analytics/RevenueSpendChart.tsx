@@ -40,7 +40,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (!active || !payload?.length) return null;
   return (
     <div
-      className="glass-card-elevated px-3 py-2.5 text-xs min-w-40"
+      className="glass-card-elevated px-3 py-2.5 text-base min-w-40"
       style={{ border: '1px solid var(--border-dim)', boxShadow: 'var(--shadow-float)' }}
     >
       <div className="font-mono font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{label}</div>
@@ -91,7 +91,7 @@ export default function RevenueSpendChart({ dateRange = '30d' }: { dateRange?: D
       <div className="flex items-center justify-between mb-4">
         <div>
           <div className="section-label mb-1">Channel Trends — {DATE_RANGE_LABELS[dateRange]}</div>
-          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>{METRIC_LABELS[metric]}</div>
+          <div className="text-base" style={{ color: 'var(--text-secondary)' }}>{METRIC_LABELS[metric]}</div>
         </div>
 
         {/* Segmented metric control */}
@@ -103,7 +103,7 @@ export default function RevenueSpendChart({ dateRange = '30d' }: { dateRange?: D
             <button
               key={m}
               onClick={() => setMetric(m)}
-              className="px-3 py-1 rounded-full text-xs transition-all"
+              className="px-3 py-1 rounded-full text-base transition-all"
               style={{
                 background: metric === m ? 'var(--bg-overlay)' : 'transparent',
                 color: metric === m ? 'var(--text-primary)' : 'var(--text-muted)',
@@ -140,7 +140,7 @@ export default function RevenueSpendChart({ dateRange = '30d' }: { dateRange?: D
             />
             <XAxis
               dataKey="date"
-              tick={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'DM Mono' }}
+              tick={{ fill: 'var(--text-muted)', fontSize: 16, fontFamily: 'DM Mono' }}
               axisLine={false}
               tickLine={false}
               interval={4}
@@ -180,7 +180,7 @@ export default function RevenueSpendChart({ dateRange = '30d' }: { dateRange?: D
             <button
               key={ts.channel}
               onClick={() => toggleChannel(ts.channel)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] transition-all"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[16px] transition-all"
               style={{
                 background: active ? cfg.color + '18' : 'var(--bg-elevated)',
                 color: active ? cfg.color : 'var(--text-muted)',

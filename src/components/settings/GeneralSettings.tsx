@@ -50,8 +50,8 @@ const inputStyle: React.CSSProperties = {
 function SectionHeader({ title, description }: { title: string; description: string }) {
   return (
     <div className="mb-4">
-      <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{title}</div>
-      <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{description}</div>
+      <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>{title}</div>
+      <div className="text-base mt-0.5" style={{ color: 'var(--text-muted)' }}>{description}</div>
     </div>
   );
 }
@@ -61,10 +61,10 @@ function SaveButton({ saved, loading, onClick }: { saved: boolean; loading?: boo
     <button
       onClick={onClick}
       disabled={loading}
-      className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg font-medium transition-all disabled:opacity-50"
+      className="flex items-center gap-1.5 text-base px-4 py-2 rounded-lg font-medium transition-all disabled:opacity-50"
       style={saved
         ? { background: 'rgba(16,217,138,0.12)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.25)' }
-        : { background: 'rgba(0,217,255,0.10)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
+        : { background: 'rgba(0,217,255,0.10)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
       {loading ? <><Loader2 size={13} className="animate-spin" />Saving…</>
         : saved ? <><Check size={13} />Saved!</>
         : 'Save Changes'}
@@ -86,7 +86,7 @@ function AppearanceColorField({ label, value, defaultHint, onChange, onReset }: 
       <div className="flex items-center justify-between mb-1.5">
         <label className="section-label">{label}</label>
         {value && (
-          <button onClick={onReset} className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
+          <button onClick={onReset} className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
             Reset
           </button>
         )}
@@ -104,7 +104,7 @@ function AppearanceColorField({ label, value, defaultHint, onChange, onReset }: 
           value={value ?? ''}
           placeholder={defaultHint}
           onChange={e => onChange(e.target.value)}
-          className="flex-1 min-w-0 text-sm px-3 py-2 rounded-lg outline-none font-mono"
+          className="flex-1 min-w-0 text-base px-3 py-2 rounded-lg outline-none font-mono"
           style={inputStyle}
         />
       </div>
@@ -116,10 +116,10 @@ function PillToggle({ active, onClick, children }: { active: boolean; onClick: (
   return (
     <button
       onClick={onClick}
-      className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+      className="px-3 py-1.5 rounded-lg text-base font-medium transition-all"
       style={{
         background: active ? 'rgba(0,217,255,0.12)' : 'var(--bg-elevated)',
-        color: active ? '#00d9ff' : 'var(--text-muted)',
+        color: active ? 'var(--cyan)' : 'var(--text-muted)',
         border: `1px solid ${active ? 'rgba(0,217,255,0.3)' : 'var(--border-subtle)'}`,
       }}>
       {children}
@@ -219,7 +219,7 @@ export function GeneralSettings() {
               type="text"
               value={businessName}
               onChange={e => setBusinessName(e.target.value)}
-              className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+              className="w-full text-base px-3 py-2 rounded-lg outline-none"
               style={inputStyle}
             />
           </div>
@@ -228,7 +228,7 @@ export function GeneralSettings() {
             <select
               value={timezone}
               onChange={e => setTimezone(e.target.value)}
-              className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+              className="w-full text-base px-3 py-2 rounded-lg outline-none"
               style={inputStyle}>
               {TIMEZONES.map(tz => <option key={tz} value={tz}>{tz.replace('_', ' ')}</option>)}
             </select>
@@ -238,7 +238,7 @@ export function GeneralSettings() {
             <select
               value={currency}
               onChange={e => setCurrency(e.target.value)}
-              className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+              className="w-full text-base px-3 py-2 rounded-lg outline-none"
               style={inputStyle}>
               {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
@@ -248,7 +248,7 @@ export function GeneralSettings() {
             <select
               value={fiscalMonth}
               onChange={e => setFiscalMonth(Number(e.target.value))}
-              className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+              className="w-full text-base px-3 py-2 rounded-lg outline-none"
               style={inputStyle}>
               {MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
             </select>
@@ -258,7 +258,7 @@ export function GeneralSettings() {
             <select
               value={dateFormat}
               onChange={e => setDateFormat(e.target.value)}
-              className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+              className="w-full text-base px-3 py-2 rounded-lg outline-none"
               style={inputStyle}>
               {DATE_FORMATS.map(f => <option key={f} value={f}>{f}</option>)}
             </select>
@@ -268,7 +268,7 @@ export function GeneralSettings() {
             <select
               value={language}
               onChange={e => setLanguage(e.target.value)}
-              className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+              className="w-full text-base px-3 py-2 rounded-lg outline-none"
               style={inputStyle}>
               {LANGUAGES.map(l => <option key={l} value={l}>{l}</option>)}
             </select>
@@ -299,7 +299,7 @@ export function GeneralSettings() {
               style={{ border: `1px dashed ${logoName ? 'rgba(16,217,138,0.4)' : 'var(--border-dim)'}` }}>
               <div className="flex flex-col items-center gap-2">
                 {logoName ? <Check size={18} style={{ color: '#10d98a' }} /> : <Upload size={18} style={{ color: 'var(--text-muted)' }} />}
-                <span className="text-xs" style={{ color: logoName ? '#10d98a' : 'var(--text-muted)' }}>
+                <span className="text-base" style={{ color: logoName ? '#10d98a' : 'var(--text-muted)' }}>
                   {logoName ? `${logoName} selected — click to replace` : 'Click to upload logo — PNG, SVG, up to 2MB'}
                 </span>
               </div>
@@ -320,7 +320,7 @@ export function GeneralSettings() {
                   type="text"
                   value={brandColor}
                   onChange={e => setBrandColor(e.target.value)}
-                  className="flex-1 text-sm px-3 py-2 rounded-lg outline-none font-mono"
+                  className="flex-1 text-base px-3 py-2 rounded-lg outline-none font-mono"
                   style={inputStyle}
                 />
               </div>
@@ -331,7 +331,7 @@ export function GeneralSettings() {
                 type="text"
                 value={footerText}
                 onChange={e => setFooterText(e.target.value)}
-                className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+                className="w-full text-base px-3 py-2 rounded-lg outline-none"
                 style={inputStyle}
               />
             </div>
@@ -349,7 +349,7 @@ export function GeneralSettings() {
           <div className="flex items-center gap-2 rounded-lg px-3 py-2.5 mb-4"
             style={{ background: 'rgba(255,179,71,0.08)', border: '1px solid rgba(255,179,71,0.2)' }}>
             <AlertTriangle size={14} style={{ color: '#ffb347' }} />
-            <span className="text-xs" style={{ color: '#ffb347' }}>
+            <span className="text-base" style={{ color: '#ffb347' }}>
               These changes will apply once the Light theme is selected.
             </span>
           </div>
@@ -406,7 +406,7 @@ export function GeneralSettings() {
         <div className="flex justify-end">
           <button
             onClick={() => setAppearance(DEFAULT_APPEARANCE)}
-            className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg font-medium transition-all"
+            className="flex items-center gap-1.5 text-base px-4 py-2 rounded-lg font-medium transition-all"
             style={{ background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
             <RotateCcw size={13} />
             Reset to Defaults
@@ -423,7 +423,7 @@ export function GeneralSettings() {
             <select
               value={defaultRange}
               onChange={e => setDefaultRange(e.target.value)}
-              className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+              className="w-full text-base px-3 py-2 rounded-lg outline-none"
               style={inputStyle}>
               {DATE_RANGES.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
@@ -433,7 +433,7 @@ export function GeneralSettings() {
             <select
               value={frequency}
               onChange={e => setFrequency(e.target.value)}
-              className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+              className="w-full text-base px-3 py-2 rounded-lg outline-none"
               style={inputStyle}>
               {FREQUENCIES.map(f => <option key={f} value={f}>{f}</option>)}
             </select>
@@ -444,7 +444,7 @@ export function GeneralSettings() {
               type="text"
               value={recipientEmails}
               onChange={e => setRecipientEmails(e.target.value)}
-              className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+              className="w-full text-base px-3 py-2 rounded-lg outline-none"
               style={inputStyle}
             />
           </div>
@@ -452,8 +452,8 @@ export function GeneralSettings() {
             <label className="section-label mb-2 block">Auto-send Reports</label>
             <button
               onClick={() => setAutoSend(s => !s)}
-              className="flex items-center gap-2.5 text-sm"
-              style={{ color: autoSend ? '#00d9ff' : 'var(--text-muted)' }}>
+              className="flex items-center gap-2.5 text-base"
+              style={{ color: autoSend ? 'var(--cyan)' : 'var(--text-muted)' }}>
               <div className="relative w-10 h-5 rounded-full transition-all"
                 style={{ background: autoSend ? 'rgba(0,217,255,0.25)' : 'var(--bg-overlay)', border: `1px solid ${autoSend ? 'rgba(0,217,255,0.4)' : 'var(--border-dim)'}` }}>
                 <div className="absolute top-0.5 transition-all w-4 h-4 rounded-full"
@@ -471,8 +471,8 @@ export function GeneralSettings() {
       {/* Notifications */}
       <div className="glass-card overflow-hidden">
         <div className="px-5 py-4 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
-          <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Notification Preferences</div>
-          <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Choose which events trigger alerts and through which channels</div>
+          <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Notification Preferences</div>
+          <div className="text-base mt-0.5" style={{ color: 'var(--text-muted)' }}>Choose which events trigger alerts and through which channels</div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -489,7 +489,7 @@ export function GeneralSettings() {
                 <tr key={rule.id}
                   style={{ borderBottom: i < notifications.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
                   <td className="px-5 py-3">
-                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{rule.label}</span>
+                    <span className="text-base" style={{ color: 'var(--text-secondary)' }}>{rule.label}</span>
                   </td>
                   {(['email', 'sms', 'slack', 'push'] as const).map(ch => (
                     <td key={ch} className="px-5 py-3 text-center">
@@ -499,7 +499,7 @@ export function GeneralSettings() {
                         style={rule[ch]
                           ? { background: 'rgba(0,217,255,0.15)', border: '1px solid rgba(0,217,255,0.3)' }
                           : { background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)' }}>
-                        {rule[ch] && <Check size={10} style={{ color: '#00d9ff' }} />}
+                        {rule[ch] && <Check size={10} style={{ color: 'var(--cyan)' }} />}
                       </button>
                     </td>
                   ))}
@@ -523,7 +523,7 @@ export function GeneralSettings() {
               <select
                 value={retention}
                 onChange={e => setRetention(e.target.value)}
-                className="text-sm px-3 py-2 rounded-lg outline-none"
+                className="text-base px-3 py-2 rounded-lg outline-none"
                 style={{ ...inputStyle, minWidth: 160 }}>
                 {RETENTION_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
               </select>
@@ -532,7 +532,7 @@ export function GeneralSettings() {
               <button
                 onClick={handleExport}
                 disabled={exportLoading}
-                className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg font-medium transition-all disabled:opacity-50"
+                className="flex items-center gap-1.5 text-base px-4 py-2 rounded-lg font-medium transition-all disabled:opacity-50"
                 style={exportDone
                   ? { background: 'rgba(16,217,138,0.12)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.25)' }
                   : { background: 'rgba(123,147,255,0.10)', color: '#7b93ff', border: '1px solid rgba(123,147,255,0.22)' }}>
@@ -549,9 +549,9 @@ export function GeneralSettings() {
           <div className="rounded-xl p-4 mt-2" style={{ background: 'rgba(255,68,68,0.05)', border: '1px solid rgba(255,68,68,0.15)' }}>
             <div className="flex items-center gap-2 mb-2">
               <AlertTriangle size={14} style={{ color: '#ff4444' }} />
-              <span className="text-sm font-semibold" style={{ color: '#ff4444' }}>Danger Zone</span>
+              <span className="text-base font-semibold" style={{ color: '#ff4444' }}>Danger Zone</span>
             </div>
-            <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-base mb-3" style={{ color: 'var(--text-secondary)' }}>
               Deleting your account will permanently remove all data, integrations, team members, and settings.
               This action cannot be undone.
             </p>
@@ -559,7 +559,7 @@ export function GeneralSettings() {
             {deleteStep === 'idle' && (
               <button
                 onClick={() => setDeleteStep('confirm1')}
-                className="text-xs px-3 py-1.5 rounded-lg font-medium transition-all"
+                className="text-base px-3 py-1.5 rounded-lg font-medium transition-all"
                 style={{ background: 'rgba(255,68,68,0.10)', color: '#ff4444', border: '1px solid rgba(255,68,68,0.25)' }}>
                 Delete Account
               </button>
@@ -567,19 +567,19 @@ export function GeneralSettings() {
 
             {deleteStep === 'confirm1' && (
               <div className="flex flex-col gap-2">
-                <p className="text-xs" style={{ color: '#ffb347' }}>
+                <p className="text-base" style={{ color: '#ffb347' }}>
                   Are you sure? This will delete all 3 stores, 21 integrations, and 5 team members.
                 </p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setDeleteStep('confirm2')}
-                    className="text-xs px-3 py-1.5 rounded-lg font-medium"
+                    className="text-base px-3 py-1.5 rounded-lg font-medium"
                     style={{ background: 'rgba(255,68,68,0.15)', color: '#ff4444', border: '1px solid rgba(255,68,68,0.3)' }}>
                     Yes, I'm sure
                   </button>
                   <button
                     onClick={() => setDeleteStep('idle')}
-                    className="text-xs px-3 py-1.5 rounded-lg font-medium"
+                    className="text-base px-3 py-1.5 rounded-lg font-medium"
                     style={{ background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
                     Cancel
                   </button>
@@ -589,7 +589,7 @@ export function GeneralSettings() {
 
             {deleteStep === 'confirm2' && (
               <div className="flex flex-col gap-2">
-                <p className="text-xs" style={{ color: '#ff4444' }}>
+                <p className="text-base" style={{ color: '#ff4444' }}>
                   Type <span className="font-mono font-bold">DELETE MY ACCOUNT</span> to confirm permanent deletion:
                 </p>
                 <input
@@ -597,20 +597,20 @@ export function GeneralSettings() {
                   placeholder="DELETE MY ACCOUNT"
                   value={deleteInput}
                   onChange={e => setDeleteInput(e.target.value)}
-                  className="text-sm px-3 py-2 rounded-lg outline-none font-mono"
+                  className="text-base px-3 py-2 rounded-lg outline-none font-mono"
                   style={{ background: 'rgba(255,68,68,0.05)', border: '1px solid rgba(255,68,68,0.3)', color: '#ff4444' }}
                 />
                 <div className="flex gap-2">
                   <button
                     disabled={deleteInput !== 'DELETE MY ACCOUNT'}
                     onClick={() => setDeleteStep('deleted')}
-                    className="text-xs px-3 py-1.5 rounded-lg font-medium disabled:opacity-30"
+                    className="text-base px-3 py-1.5 rounded-lg font-medium disabled:opacity-30"
                     style={{ background: 'rgba(255,68,68,0.2)', color: '#ff4444', border: '1px solid rgba(255,68,68,0.35)' }}>
                     Permanently Delete Everything
                   </button>
                   <button
                     onClick={() => { setDeleteStep('idle'); setDeleteInput(''); }}
-                    className="text-xs px-3 py-1.5 rounded-lg font-medium"
+                    className="text-base px-3 py-1.5 rounded-lg font-medium"
                     style={{ background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
                     Cancel
                   </button>
@@ -622,7 +622,7 @@ export function GeneralSettings() {
               <div className="flex items-center gap-2 rounded-lg px-3 py-2.5"
                 style={{ background: 'rgba(255,68,68,0.10)', border: '1px solid rgba(255,68,68,0.25)' }}>
                 <AlertTriangle size={14} style={{ color: '#ff4444' }} />
-                <span className="text-xs" style={{ color: '#ff4444' }}>
+                <span className="text-base" style={{ color: '#ff4444' }}>
                   Account scheduled for deletion — all data will be permanently removed within 24 hours.
                 </span>
               </div>

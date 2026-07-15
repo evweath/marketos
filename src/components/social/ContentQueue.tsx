@@ -13,7 +13,7 @@ interface Props {
 
 const STATUS_STYLE: Record<PostStatus, { color: string; bg: string; label: string }> = {
   published: { color: '#10d98a', bg: 'rgba(16,217,138,0.10)',  label: 'Published' },
-  scheduled: { color: '#00d9ff', bg: 'rgba(0,217,255,0.10)',   label: 'Scheduled' },
+  scheduled: { color: 'var(--cyan)', bg: 'rgba(0,217,255,0.10)',   label: 'Scheduled' },
   draft:     { color: '#7b93ff', bg: 'rgba(123,147,255,0.10)', label: 'Draft'     },
   failed:    { color: '#ff4444', bg: 'rgba(255,68,68,0.10)',   label: 'Failed'    },
   review:    { color: '#ffb347', bg: 'rgba(255,179,71,0.10)',  label: 'In Review' },
@@ -66,7 +66,7 @@ export default function ContentQueue({ posts, onSelectPost, filterPlatform }: Pr
             return (
               <button key={tab.key}
                 onClick={() => setStatusFilter(tab.key)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] transition-all"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[16px] transition-all"
                 style={{
                   background: isActive ? 'var(--bg-overlay)' : 'transparent',
                   color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
@@ -75,7 +75,7 @@ export default function ContentQueue({ posts, onSelectPost, filterPlatform }: Pr
                 {tab.label}
                 {count > 0 && (
                   <span
-                    className="min-w-[16px] h-4 rounded-full flex items-center justify-center font-mono text-[9px] px-1"
+                    className="min-w-[16px] h-4 rounded-full flex items-center justify-center font-mono text-[16px] px-1"
                     style={{
                       background: tabColor ? tabColor + '22' : 'var(--bg-overlay)',
                       color: tabColor ?? 'var(--text-muted)',
@@ -105,7 +105,7 @@ export default function ContentQueue({ posts, onSelectPost, filterPlatform }: Pr
               <div className="flex items-start gap-3 px-4 py-3">
                 {/* Author avatar */}
                 <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5"
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-[16px] font-bold shrink-0 mt-0.5"
                   style={{ background: ss.color + '20', color: ss.color, border: `1px solid ${ss.color}30` }}>
                   {authorInitials}
                 </div>
@@ -117,7 +117,7 @@ export default function ContentQueue({ posts, onSelectPost, filterPlatform }: Pr
                     <div className="flex gap-1">
                       {post.platforms.map(p => (
                         <span key={p}
-                          className="text-[9px] font-bold px-1.5 py-0.5 rounded"
+                          className="text-[16px] font-bold px-1.5 py-0.5 rounded"
                           style={{ background: PLATFORM_CONFIG[p].color + '18', color: PLATFORM_CONFIG[p].color }}>
                           {PLATFORM_CONFIG[p].label.charAt(0)}
                         </span>
@@ -125,27 +125,27 @@ export default function ContentQueue({ posts, onSelectPost, filterPlatform }: Pr
                     </div>
 
                     {/* Category */}
-                    <span className="text-[9px] font-mono" style={{ color: catCfg.color }}>
+                    <span className="text-[16px] font-mono" style={{ color: catCfg.color }}>
                       {catCfg.icon} {catCfg.label}
                     </span>
 
                     {/* Status pill */}
                     <span
-                      className="ml-auto text-[9px] font-mono px-1.5 py-0.5 rounded"
+                      className="ml-auto text-[16px] font-mono px-1.5 py-0.5 rounded"
                       style={{ background: ss.bg, color: ss.color, border: `1px solid ${ss.color}30` }}>
                       {ss.label}
                     </span>
                   </div>
 
                   {/* Caption — 2-line clamp */}
-                  <p className="text-xs line-clamp-2 mb-2"
-                    style={{ color: 'var(--text-secondary)', lineHeight: 1.55, fontSize: 12 }}>
+                  <p className="text-base line-clamp-2 mb-2"
+                    style={{ color: 'var(--text-secondary)', lineHeight: 1.55, fontSize: 16 }}>
                     {post.caption.replace(/\[DRAFT\]\s*/, '')}
                   </p>
 
                   <div className="flex items-center gap-3 flex-wrap">
                     {/* Schedule time */}
-                    <div className="flex items-center gap-1 font-mono text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                    <div className="flex items-center gap-1 font-mono text-[16px]" style={{ color: 'var(--text-muted)' }}>
                       <Clock size={9} />
                       {formatDate(post.scheduledFor)}
                     </div>
@@ -154,12 +154,12 @@ export default function ContentQueue({ posts, onSelectPost, filterPlatform }: Pr
                     {post.status === 'published' && post.reach && (
                       <div className="flex items-center gap-1.5">
                         <span
-                          className="flex items-center gap-0.5 text-[9px] font-mono px-1.5 py-0.5 rounded"
+                          className="flex items-center gap-0.5 text-[16px] font-mono px-1.5 py-0.5 rounded"
                           style={{ background: 'rgba(16,217,138,0.12)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.2)' }}>
                           <BarChart2 size={8} />
                           {fmt(post.reach)}
                         </span>
-                        <span className="text-[9px] font-mono" style={{ color: 'var(--text-muted)' }}>
+                        <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
                           {post.engagementRate?.toFixed(1)}% eng.
                         </span>
                       </div>
@@ -167,8 +167,8 @@ export default function ContentQueue({ posts, onSelectPost, filterPlatform }: Pr
 
                     {/* Boost badge */}
                     {post.boostEligible && (
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
-                        style={{ background: 'rgba(0,217,255,0.08)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.15)' }}>
+                      <span className="text-[16px] font-mono px-1.5 py-0.5 rounded"
+                        style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.15)' }}>
                         ⚡ Boost
                       </span>
                     )}
@@ -181,7 +181,7 @@ export default function ContentQueue({ posts, onSelectPost, filterPlatform }: Pr
 
         {visiblePosts.length === 0 && (
           <div className="flex items-center justify-center py-16" style={{ color: 'var(--text-muted)' }}>
-            <span className="text-sm">No posts match this filter</span>
+            <span className="text-base">No posts match this filter</span>
           </div>
         )}
       </div>

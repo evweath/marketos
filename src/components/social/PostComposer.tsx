@@ -18,7 +18,7 @@ const ALL_CATEGORIES: PostCategory[] = ['promotional', 'educational', 'product',
 
 const STATUS_STYLE = {
   published: { color: '#10d98a', bg: 'rgba(16,217,138,0.10)',  label: 'Published' },
-  scheduled: { color: '#00d9ff', bg: 'rgba(0,217,255,0.10)',   label: 'Scheduled' },
+  scheduled: { color: 'var(--cyan)', bg: 'rgba(0,217,255,0.10)',   label: 'Scheduled' },
   draft:     { color: '#7b93ff', bg: 'rgba(123,147,255,0.10)', label: 'Draft'     },
   failed:    { color: '#ff4444', bg: 'rgba(255,68,68,0.10)',   label: 'Failed'    },
   review:    { color: '#ffb347', bg: 'rgba(255,179,71,0.10)',  label: 'In Review' },
@@ -110,11 +110,11 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
       <div className="flex items-center justify-between px-4 py-3 border-b shrink-0"
         style={{ borderColor: 'var(--border-subtle)' }}>
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+          <span className="font-semibold text-base" style={{ color: 'var(--text-primary)' }}>
             {isExisting ? 'Post Details' : 'New Post'}
           </span>
           {post && (
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded"
+            <span className="text-[16px] font-mono px-2 py-0.5 rounded"
               style={{ background: STATUS_STYLE[post.status].bg, color: STATUS_STYLE[post.status].color }}>
               {STATUS_STYLE[post.status].label}
             </span>
@@ -140,7 +140,7 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
                 <button key={p}
                   onClick={() => !isExisting && togglePlatform(p)}
                   onMouseEnter={() => setActivePlatformPreview(p)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-base font-medium transition-all"
                   style={{
                     background: active ? cfg.color + '18' : 'var(--bg-elevated)',
                     color: active ? cfg.color : 'var(--text-muted)',
@@ -149,13 +149,13 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
                     cursor: isExisting ? 'default' : 'pointer',
                   }}>
                   <span
-                    className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
+                    className="w-4 h-4 rounded-full flex items-center justify-center text-[16px] font-bold"
                     style={{ background: cfg.color + '30', color: cfg.color }}>
                     {cfg.label.charAt(0)}
                   </span>
                   {cfg.label}
                   {NOT_STARTED_PLATFORMS.includes(p) && (
-                    <span className="text-[9px] font-mono" style={{ color: 'var(--text-muted)' }}>· Not started</span>
+                    <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>· Not started</span>
                   )}
                 </button>
               );
@@ -169,7 +169,7 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
             <div className="section-label">Caption</div>
             <div className="flex items-center gap-2">
               {/* Character counter */}
-              <div className="flex items-center gap-1 font-mono text-[10px]" style={{ color: charColor }}>
+              <div className="flex items-center gap-1 font-mono text-[16px]" style={{ color: charColor }}>
                 <span>{chars.toLocaleString()}</span>
                 <span style={{ color: 'var(--text-muted)' }}>/ {charLimit.toLocaleString()}</span>
                 <span style={{ color: 'var(--text-muted)' }}>({activePlatformPreview})</span>
@@ -177,7 +177,7 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
               {!isExisting && (
                 <button
                   onClick={() => setShowAI(v => !v)}
-                  className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all"
+                  className="flex items-center gap-1 px-2 py-1 rounded text-[16px] font-medium transition-all"
                   style={{
                     background: showAI ? 'rgba(123,147,255,0.15)' : 'var(--bg-elevated)',
                     color: showAI ? '#7b93ff' : 'var(--text-secondary)',
@@ -194,7 +194,7 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
             onChange={e => !isExisting && setCaption(e.target.value)}
             readOnly={isExisting}
             rows={6}
-            className="w-full text-sm rounded-xl px-3 py-3 resize-none outline-none transition-colors"
+            className="w-full text-base rounded-xl px-3 py-3 resize-none outline-none transition-colors"
             style={{
               background: 'var(--bg-elevated)',
               color: 'var(--text-primary)',
@@ -222,8 +222,8 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
                 style={{ background: 'rgba(123,147,255,0.2)' }}>
                 <Sparkles size={11} style={{ color: '#7b93ff' }} />
               </div>
-              <span className="text-xs font-semibold" style={{ color: '#7b93ff' }}>AI Caption Generator</span>
-              <span className="text-[9px] font-mono ml-auto" style={{ color: 'var(--text-muted)' }}>
+              <span className="text-base font-semibold" style={{ color: '#7b93ff' }}>AI Caption Generator</span>
+              <span className="text-[16px] font-mono ml-auto" style={{ color: 'var(--text-muted)' }}>
                 powered by Claude
               </span>
             </div>
@@ -234,12 +234,12 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
                 onChange={e => setAiTopic(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleGenerateAI()}
                 placeholder="Describe your post topic..."
-                className="flex-1 text-xs rounded-lg outline-none"
+                className="flex-1 text-base rounded-lg outline-none"
                 style={{ padding: '8px 12px' }}
               />
               <button onClick={handleGenerateAI}
                 disabled={aiLoading}
-                className="px-3 py-2 rounded-lg text-xs font-semibold transition-all"
+                className="px-3 py-2 rounded-lg text-base font-semibold transition-all"
                 style={{
                   background: aiLoading ? 'rgba(123,147,255,0.2)' : '#7b93ff',
                   color: aiLoading ? '#7b93ff' : '#080b18',
@@ -254,21 +254,21 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
                   <div key={s.platform} className="rounded-lg p-2.5"
                     style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[10px] font-mono" style={{ color: PLATFORM_CONFIG[s.platform as SocialPlatform].color }}>
+                      <span className="text-[16px] font-mono" style={{ color: PLATFORM_CONFIG[s.platform as SocialPlatform].color }}>
                         {PLATFORM_CONFIG[s.platform as SocialPlatform].label} · {s.tone}
                       </span>
                       <button onClick={() => applySuggestion(s.caption)}
-                        className="text-[10px] px-2 py-0.5 rounded transition-colors"
-                        style={{ background: 'rgba(0,217,255,0.12)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
+                        className="text-[16px] px-2 py-0.5 rounded transition-colors"
+                        style={{ background: 'rgba(0,217,255,0.12)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
                         Use This
                       </button>
                     </div>
-                    <p className="text-[11px] leading-relaxed line-clamp-3" style={{ color: 'var(--text-secondary)' }}>
+                    <p className="text-[16px] leading-relaxed line-clamp-3" style={{ color: 'var(--text-secondary)' }}>
                       {s.caption}
                     </p>
                     <div className="flex flex-wrap gap-1 mt-1.5">
                       {s.hashtags.slice(0, 4).map(h => (
-                        <span key={h} className="text-[9px] font-mono" style={{ color: 'var(--text-muted)' }}>{h}</span>
+                        <span key={h} className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>{h}</span>
                       ))}
                     </div>
                   </div>
@@ -284,7 +284,7 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
             <div className="section-label mb-2">Hashtags</div>
             <div className="flex flex-wrap gap-1.5">
               {post.hashtags.map(h => (
-                <span key={h} className="text-[11px] font-mono px-2 py-0.5 rounded"
+                <span key={h} className="text-[16px] font-mono px-2 py-0.5 rounded"
                   style={{ background: 'rgba(123,147,255,0.10)', color: '#7b93ff', border: '1px solid rgba(123,147,255,0.2)' }}>
                   {h}
                 </span>
@@ -303,14 +303,14 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
               return (
                 <button key={cat}
                   onClick={() => !isExisting && setCategory(cat)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-all"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-base transition-all"
                   style={{
                     background: active ? cfg.color + '18' : 'var(--bg-elevated)',
                     color: active ? cfg.color : 'var(--text-muted)',
                     border: `1px solid ${active ? cfg.color + '35' : 'var(--border-subtle)'}`,
                     cursor: isExisting ? 'default' : 'pointer',
                   }}>
-                  <span style={{ fontSize: 10 }}>{cfg.icon}</span>
+                  <span style={{ fontSize: 16 }}>{cfg.icon}</span>
                   {cfg.label}
                 </button>
               );
@@ -324,13 +324,13 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
           <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
             <Clock size={13} style={{ color: 'var(--text-muted)' }} />
-            <span className="data-value text-sm" style={{ color: 'var(--text-primary)' }}>
+            <span className="data-value text-base" style={{ color: 'var(--text-primary)' }}>
               {schedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
               {' · '}
               {schedDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
             </span>
             {post?.aiOptimalTime && (
-              <span className="ml-auto text-[10px] font-mono flex items-center gap-1" style={{ color: '#10d98a' }}>
+              <span className="ml-auto text-[16px] font-mono flex items-center gap-1" style={{ color: '#10d98a' }}>
                 <Sparkles size={9} />
                 AI optimal
               </span>
@@ -353,7 +353,7 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
               ].map(m => (
                 <div key={m.label} className="rounded-lg p-2 text-center"
                   style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                  <div className="data-value text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{m.value}</div>
+                  <div className="data-value text-base font-semibold" style={{ color: 'var(--text-primary)' }}>{m.value}</div>
                   <div className="section-label mt-0.5">{m.label}</div>
                 </div>
               ))}
@@ -361,10 +361,10 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
             {post.boostEligible && (
               <div className="mt-2 px-3 py-2 rounded-lg flex items-center justify-between"
                 style={{ background: 'rgba(0,217,255,0.05)', border: '1px solid rgba(0,217,255,0.15)' }}>
-                <span className="text-xs" style={{ color: '#00d9ff' }}>⚡ High-performer — eligible for paid boost</span>
+                <span className="text-base" style={{ color: 'var(--cyan)' }}>⚡ High-performer — eligible for paid boost</span>
                 <button onClick={() => setBoosted(true)}
-                  className="text-[11px] px-2.5 py-1 rounded font-medium transition-colors hover:bg-cyan-400/20"
-                  style={{ background: 'rgba(0,217,255,0.15)', color: '#00d9ff' }}>
+                  className="text-[16px] px-2.5 py-1 rounded font-medium transition-colors hover:bg-cyan-400/20"
+                  style={{ background: 'rgba(0,217,255,0.15)', color: 'var(--cyan)' }}>
                   {boosted ? '✓ Boosted' : 'Boost Post'}
                 </button>
               </div>
@@ -377,18 +377,18 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
           <div className="rounded-xl p-3"
             style={{ background: 'rgba(255,179,71,0.05)', border: '1px solid rgba(255,179,71,0.2)' }}>
             <div className="section-label mb-1.5">Approval Required</div>
-            <div className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+            <div className="text-base mb-3" style={{ color: 'var(--text-secondary)' }}>
               Waiting for approval from{' '}
               <span style={{ color: '#ffb347' }}>{post.approver}</span>
             </div>
             <div className="flex gap-2">
               <button onClick={() => handleApproval('published')}
-                className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                className="flex-1 py-1.5 rounded-lg text-base font-semibold transition-colors"
                 style={{ background: 'rgba(16,217,138,0.12)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.25)' }}>
                 ✓ Approve
               </button>
               <button onClick={() => handleApproval('failed')}
-                className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                className="flex-1 py-1.5 rounded-lg text-base font-semibold transition-colors"
                 style={{ background: 'rgba(255,68,68,0.10)', color: '#ff4444', border: '1px solid rgba(255,68,68,0.2)' }}>
                 ✗ Reject
               </button>
@@ -399,7 +399,7 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
 
       {/* Success feedback */}
       {feedback && (
-        <div className="px-4 py-2 text-xs font-medium text-center border-t shrink-0"
+        <div className="px-4 py-2 text-base font-medium text-center border-t shrink-0"
           style={{ borderColor: 'var(--border-subtle)', background: 'rgba(16,217,138,0.08)', color: '#10d98a' }}>
           ✓ {feedback}
         </div>
@@ -411,7 +411,7 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
           style={{ borderColor: 'var(--border-subtle)' }}>
           {/* Draft — tertiary */}
           <button onClick={() => createPost('draft')}
-            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all hover:bg-white/[0.05]"
+            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-base font-medium transition-all hover:bg-white/[0.05]"
             style={{ color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
             <Save size={12} />
             Draft
@@ -419,15 +419,15 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
 
           {/* Schedule — secondary */}
           <button onClick={() => createPost('scheduled')}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-all hover:bg-cyan-400/[0.12]"
-            style={{ background: 'rgba(0,217,255,0.08)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.22)' }}>
+            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-base font-medium transition-all hover:bg-cyan-400/[0.12]"
+            style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.22)' }}>
             <Clock size={13} />
             Schedule
           </button>
 
           {/* Publish — primary */}
           <button onClick={() => createPost('published')}
-            className="flex items-center justify-center gap-1.5 px-5 py-2 rounded-lg text-sm font-semibold transition-all hover:brightness-110 active:scale-[0.98]"
+            className="flex items-center justify-center gap-1.5 px-5 py-2 rounded-lg text-base font-semibold transition-all hover:brightness-110 active:scale-[0.98]"
             style={{ background: '#00d9ff', color: '#080b18' }}>
             <Send size={13} />
             Publish Now

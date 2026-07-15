@@ -48,8 +48,8 @@ function MetricBar({ label, value }: { label: string; value: number }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
-        <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{label}</span>
-        <span className="text-[10px] font-mono font-bold" style={{ color }}>{value}</span>
+        <span className="text-[16px]" style={{ color: 'var(--text-secondary)' }}>{label}</span>
+        <span className="text-[16px] font-mono font-bold" style={{ color }}>{value}</span>
       </div>
       <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-overlay)' }}>
         <div className="h-full rounded-full transition-all duration-500"
@@ -82,7 +82,7 @@ export function PerformanceScorer() {
       {/* Input Area */}
       <div className="glass-card p-4">
         <div className="flex items-center gap-2 mb-3">
-          <TrendingUp size={13} style={{ color: '#00d9ff' }} />
+          <TrendingUp size={13} style={{ color: 'var(--cyan)' }} />
           <span className="section-label">Score a Creative</span>
         </div>
         <div className="grid grid-cols-2 gap-4">
@@ -96,25 +96,25 @@ export function PerformanceScorer() {
               border: `2px dashed ${dragOver ? '#00d9ff' : 'var(--border-dim)'}`,
               background: dragOver ? 'rgba(0,217,255,0.04)' : 'var(--bg-elevated)',
             }}>
-            <Upload size={20} className="mb-2" style={{ color: dragOver ? '#00d9ff' : 'var(--text-muted)' }} />
-            <div className="text-xs font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Drop creative to score</div>
-            <div className="text-[10px]" style={{ color: 'var(--text-muted)' }}>JPG, PNG, MP4 · up to 50MB</div>
+            <Upload size={20} className="mb-2" style={{ color: dragOver ? 'var(--cyan)' : 'var(--text-muted)' }} />
+            <div className="text-base font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Drop creative to score</div>
+            <div className="text-[16px]" style={{ color: 'var(--text-muted)' }}>JPG, PNG, MP4 · up to 50MB</div>
           </div>
 
           {/* URL Input */}
           <div className="flex flex-col justify-center gap-3">
-            <div className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>— or paste a URL —</div>
+            <div className="text-base text-center" style={{ color: 'var(--text-muted)' }}>— or paste a URL —</div>
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <Link2 size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
                 <input value={urlInput} onChange={e => setUrlInput(e.target.value)}
                   placeholder="https://..."
-                  className="w-full pl-7 pr-3 py-2 rounded-lg text-xs outline-none"
+                  className="w-full pl-7 pr-3 py-2 rounded-lg text-base outline-none"
                   style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}
                 />
               </div>
               <button onClick={handleScore} disabled={scoring || !urlInput.trim()}
-                className="px-4 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
+                className="px-4 py-2 rounded-lg text-base font-semibold transition-all whitespace-nowrap"
                 style={{
                   background: scoring || !urlInput.trim() ? 'rgba(0,217,255,0.3)' : '#00d9ff',
                   color: '#0a0e1a',
@@ -131,9 +131,9 @@ export function PerformanceScorer() {
         {/* Score Panel */}
         <div className="glass-card p-4 col-span-2">
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp size={13} style={{ color: '#00d9ff' }} />
+            <TrendingUp size={13} style={{ color: 'var(--cyan)' }} />
             <span className="section-label">Score Results</span>
-            <span className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>— {selected.name}</span>
+            <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>— {selected.name}</span>
           </div>
 
           <div className="flex gap-5 mb-5">
@@ -144,20 +144,20 @@ export function PerformanceScorer() {
                 <span className="text-2xl font-bold font-mono" style={{ color: scoreColor(selected.overallScore) }}>
                   {selected.overallScore}
                 </span>
-                <span className="text-[9px]" style={{ color: 'var(--text-muted)' }}>/ 100</span>
+                <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>/ 100</span>
               </div>
             </div>
 
             {/* Prediction + commentary */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
-                <span className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-lg"
+                <span className="flex items-center gap-1.5 text-[16px] font-medium px-2.5 py-1 rounded-lg"
                   style={{ background: predCfg.bg, color: predCfg.color }}>
                   <PredIcon size={11} />
                   {predCfg.label}
                 </span>
               </div>
-              <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-[16px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                 {selected.commentary}
               </p>
             </div>
@@ -178,9 +178,9 @@ export function PerformanceScorer() {
                 <div key={i} className="flex items-start gap-2">
                   <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5"
                     style={{ background: 'rgba(255,179,71,0.12)', border: '1px solid rgba(255,179,71,0.25)' }}>
-                    <span className="text-[8px] font-mono font-bold" style={{ color: '#ffb347' }}>{i + 1}</span>
+                    <span className="text-[16px] font-mono font-bold" style={{ color: '#ffb347' }}>{i + 1}</span>
                   </div>
-                  <span className="text-[10px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{imp}</span>
+                  <span className="text-[16px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{imp}</span>
                 </div>
               ))}
             </div>
@@ -203,10 +203,10 @@ export function PerformanceScorer() {
                     border: `1px solid ${isActive ? 'var(--border-bright)' : 'var(--border-subtle)'}`,
                   }}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-[11px] font-medium truncate flex-1" style={{ color: 'var(--text-primary)' }}>
+                    <span className="text-[16px] font-medium truncate flex-1" style={{ color: 'var(--text-primary)' }}>
                       {sc.name}
                     </span>
-                    <span className="text-sm font-bold font-mono ml-2 shrink-0" style={{ color }}>
+                    <span className="text-base font-bold font-mono ml-2 shrink-0" style={{ color }}>
                       {sc.overallScore}
                     </span>
                   </div>
@@ -214,12 +214,12 @@ export function PerformanceScorer() {
                     <div className="h-1 flex-1 rounded-full overflow-hidden" style={{ background: 'var(--bg-surface)' }}>
                       <div className="h-full rounded-full" style={{ width: `${sc.overallScore}%`, background: color }} />
                     </div>
-                    <span className="text-[8px] font-mono px-1 py-0.5 rounded shrink-0"
+                    <span className="text-[16px] font-mono px-1 py-0.5 rounded shrink-0"
                       style={{ background: pc.bg, color: pc.color }}>
                       {sc.prediction}
                     </span>
                   </div>
-                  <div className="text-[9px] mt-1 capitalize" style={{ color: 'var(--text-muted)' }}>
+                  <div className="text-[16px] mt-1 capitalize" style={{ color: 'var(--text-muted)' }}>
                     {sc.type} · {sc.platform}
                   </div>
                 </button>

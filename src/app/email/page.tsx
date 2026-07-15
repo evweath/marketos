@@ -45,8 +45,8 @@ function FlowCard({ flow }: { flow: EmailFlow }) {
           <div className="w-8 h-8 rounded-xl flex items-center justify-center text-base shrink-0"
             style={{ background: tc.color + '18' }}>{tc.icon}</div>
           <div>
-            <div className="text-sm font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>{flow.name}</div>
-            <div className="flex items-center gap-2 text-[10px]">
+            <div className="text-base font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>{flow.name}</div>
+            <div className="flex items-center gap-2 text-[16px]">
               <span className="font-mono px-1.5 py-0.5 rounded" style={{ background: sc.bg, color: sc.color }}>{sc.label}</span>
               <span style={{ color: 'var(--text-muted)' }}>{flow.steps} steps · {flow.channels.join(' + ')} · {flow.store}</span>
             </div>
@@ -66,23 +66,23 @@ function FlowCard({ flow }: { flow: EmailFlow }) {
             { label: 'Triggered',  value: fmt(flow.triggered),                     color: 'var(--text-primary)' },
             { label: 'Open Rate',  value: flow.openRate.toFixed(1) + '%',          color: flow.openRate > 40 ? '#10d98a' : '#ffb347' },
             { label: 'Click Rate', value: flow.clickRate.toFixed(1) + '%',         color: flow.clickRate > 15 ? '#10d98a' : '#ffb347' },
-            { label: 'Conv.',      value: flow.conversionRate.toFixed(1) + '%',    color: '#00d9ff' },
+            { label: 'Conv.',      value: flow.conversionRate.toFixed(1) + '%',    color: 'var(--cyan)' },
           ].map(m => (
             <div key={m.label} className="rounded-lg p-2 text-center" style={{ background: 'var(--bg-elevated)' }}>
-              <div className="data-value text-sm font-semibold" style={{ color: m.color }}>{m.value}</div>
-              <div className="section-label" style={{ fontSize: 9 }}>{m.label}</div>
+              <div className="data-value text-base font-semibold" style={{ color: m.color }}>{m.value}</div>
+              <div className="section-label" style={{ fontSize: 16 }}>{m.label}</div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="text-xs text-center py-3" style={{ color: 'var(--text-muted)' }}>
+        <div className="text-base text-center py-3" style={{ color: 'var(--text-muted)' }}>
           {flow.status === 'draft' ? 'Complete setup to activate' : 'No sends yet'}
         </div>
       )}
       {flow.revenue > 0 && (
         <div className="mt-3 pt-3 border-t flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
-          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>30d revenue attributed</span>
-          <span className="data-value text-sm font-semibold" style={{ color: tc.color }}>{c$(flow.revenue)}</span>
+          <span className="text-base" style={{ color: 'var(--text-muted)' }}>30d revenue attributed</span>
+          <span className="data-value text-base font-semibold" style={{ color: tc.color }}>{c$(flow.revenue)}</span>
         </div>
       )}
     </div>
@@ -90,7 +90,7 @@ function FlowCard({ flow }: { flow: EmailFlow }) {
 }
 
 function CampaignsList() {
-  const SS = { sent: { color: '#10d98a', label: 'Sent' }, scheduled: { color: '#00d9ff', label: 'Scheduled' }, draft: { color: '#7b93ff', label: 'Draft' } };
+  const SS = { sent: { color: '#10d98a', label: 'Sent' }, scheduled: { color: 'var(--cyan)', label: 'Scheduled' }, draft: { color: '#7b93ff', label: 'Draft' } };
   const [campaigns, setCampaigns] = usePersistentState<EmailCampaign[]>('email.campaigns', EMAIL_CAMPAIGNS);
   const addCampaign = () => {
     const id = `ec-${Date.now()}`;
@@ -104,8 +104,8 @@ function CampaignsList() {
     <div className="glass-card overflow-hidden">
       <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
         <span className="section-label">Email Campaigns</span>
-        <button onClick={addCampaign} className="text-xs px-3 py-1.5 rounded-lg font-medium"
-          style={{ background: 'rgba(0,217,255,0.08)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>+ New Campaign</button>
+        <button onClick={addCampaign} className="text-base px-3 py-1.5 rounded-lg font-medium"
+          style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>+ New Campaign</button>
       </div>
       {campaigns.map(camp => {
         const ss = SS[camp.status];
@@ -114,17 +114,17 @@ function CampaignsList() {
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: ss.color + '18', color: ss.color }}>{ss.label}</span>
-                  <span className="text-[9px] font-mono" style={{ color: 'var(--text-muted)' }}>{camp.store}</span>
+                  <span className="text-[16px] font-mono px-1.5 py-0.5 rounded" style={{ background: ss.color + '18', color: ss.color }}>{ss.label}</span>
+                  <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>{camp.store}</span>
                 </div>
-                <div className="text-sm font-medium mb-0.5" style={{ color: 'var(--text-primary)' }}>{camp.subject}</div>
-                <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{camp.preview}</div>
+                <div className="text-base font-medium mb-0.5" style={{ color: 'var(--text-primary)' }}>{camp.subject}</div>
+                <div className="text-base truncate" style={{ color: 'var(--text-muted)' }}>{camp.preview}</div>
               </div>
               {camp.status === 'sent' && (
                 <div className="flex items-center gap-4 shrink-0">
-                  <div className="text-right"><div className="data-value text-sm font-semibold" style={{ color: '#10d98a' }}>{camp.openRate?.toFixed(1)}%</div><div className="section-label">Open</div></div>
-                  <div className="text-right"><div className="data-value text-sm font-semibold" style={{ color: '#00d9ff' }}>{camp.clickRate?.toFixed(1)}%</div><div className="section-label">Click</div></div>
-                  <div className="text-right"><div className="data-value text-sm font-semibold" style={{ color: '#ffb347' }}>{c$(camp.revenue!)}</div><div className="section-label">Revenue</div></div>
+                  <div className="text-right"><div className="data-value text-base font-semibold" style={{ color: '#10d98a' }}>{camp.openRate?.toFixed(1)}%</div><div className="section-label">Open</div></div>
+                  <div className="text-right"><div className="data-value text-base font-semibold" style={{ color: 'var(--cyan)' }}>{camp.clickRate?.toFixed(1)}%</div><div className="section-label">Click</div></div>
+                  <div className="text-right"><div className="data-value text-base font-semibold" style={{ color: '#ffb347' }}>{c$(camp.revenue!)}</div><div className="section-label">Revenue</div></div>
                 </div>
               )}
             </div>
@@ -158,12 +158,12 @@ function SegmentsPanel() {
           {SEGMENTS.map(seg => (
             <div key={seg.id} className="rounded-xl p-3" style={{ background: 'var(--bg-elevated)', border: `1px solid ${seg.color}20` }}>
               <div className="flex items-center justify-between mb-1.5">
-                <div className="text-xs font-semibold" style={{ color: seg.color }}>{seg.name}</div>
+                <div className="text-base font-semibold" style={{ color: seg.color }}>{seg.name}</div>
                 <div className="data-value text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{fmt(seg.count)}</div>
               </div>
-              <div className="text-[11px] mb-2" style={{ color: 'var(--text-secondary)' }}>{seg.description}</div>
+              <div className="text-[16px] mb-2" style={{ color: 'var(--text-secondary)' }}>{seg.description}</div>
               {seg.avgClv > 0 && (
-                <div className="flex items-center justify-between text-[10px] font-mono">
+                <div className="flex items-center justify-between text-[16px] font-mono">
                   <span style={{ color: 'var(--text-muted)' }}>CLV: <span style={{ color: seg.color }}>{c$(seg.avgClv)}</span></span>
                   <span style={{ color: 'var(--text-muted)' }}>AOV: {c$(seg.avgOrderValue)}</span>
                 </div>
@@ -179,18 +179,18 @@ function SegmentsPanel() {
           style={{ borderColor: 'var(--border-subtle)' }}
           onClick={() => setShowPredictive(v => !v)}>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>Predictive Customer Intelligence</span>
+            <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Predictive Customer Intelligence</span>
             {highChurn > 0 && (
-              <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ color: '#ff4444', background: 'rgba(255,68,68,.1)' }}>
+              <span className="text-[16px] px-2 py-0.5 rounded-full" style={{ color: '#ff4444', background: 'rgba(255,68,68,.1)' }}>
                 {highChurn} high churn risk
               </span>
             )}
           </div>
-          <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{showPredictive ? '▲' : '▼'}</span>
+          <span style={{ color: 'var(--text-muted)', fontSize: 16 }}>{showPredictive ? '▲' : '▼'}</span>
         </button>
 
         {showPredictive && (
-          <table className="w-full text-xs">
+          <table className="w-full text-base">
             <thead style={{ background: 'var(--bg-elevated)' }}>
               <tr>
                 {['Customer', 'Segment', 'Pred. CLV', 'Churn Risk', 'Next Order'].map(h => (
@@ -207,12 +207,12 @@ function SegmentsPanel() {
                     onMouseLeave={e => (e.currentTarget.style.background = '')}>
                     <td className="px-3 py-2.5 font-medium" style={{ color: 'var(--text-primary)' }}>{c.name}</td>
                     <td className="px-3 py-2.5">
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full"
-                        style={{ color: c.segment === 'VIP' ? '#7b93ff' : c.segment === 'At Risk' ? '#ff4444' : '#00d9ff', background: c.segment === 'VIP' ? 'rgba(123,147,255,.1)' : c.segment === 'At Risk' ? 'rgba(255,68,68,.1)' : 'rgba(0,217,255,.1)' }}>
+                      <span className="text-[16px] px-1.5 py-0.5 rounded-full"
+                        style={{ color: c.segment === 'VIP' ? '#7b93ff' : c.segment === 'At Risk' ? '#ff4444' : 'var(--cyan)', background: c.segment === 'VIP' ? 'rgba(123,147,255,.1)' : c.segment === 'At Risk' ? 'rgba(255,68,68,.1)' : 'rgba(0,217,255,.1)' }}>
                         {c.segment}
                       </span>
                     </td>
-                    <td className="px-3 py-2.5 font-bold" style={{ color: '#00d9ff' }}>{c$(c.clv)}</td>
+                    <td className="px-3 py-2.5 font-bold" style={{ color: 'var(--cyan)' }}>{c$(c.clv)}</td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-2">
                         <div className="w-16 h-1.5 rounded-full" style={{ background: 'var(--bg-surface)' }}>
@@ -252,10 +252,10 @@ function DeliverabilityPanel() {
               <sc.Icon size={14} style={{ color: sc.color, marginTop: 1, flexShrink: 0 }} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2 mb-0.5">
-                  <span className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{m.label}</span>
-                  <span className="data-value text-xs font-semibold shrink-0" style={{ color: sc.color }}>{m.value}</span>
+                  <span className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>{m.label}</span>
+                  <span className="data-value text-base font-semibold shrink-0" style={{ color: sc.color }}>{m.value}</span>
                 </div>
-                <div className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{m.detail}</div>
+                <div className="text-[16px]" style={{ color: 'var(--text-secondary)' }}>{m.detail}</div>
               </div>
             </div>
           );
@@ -305,7 +305,7 @@ const SMS_CONVERSATIONS: SmsConversation[] = [
 
 const CONV_STATUS_CFG = {
   recovered:   { label: 'Recovered',    color: '#10d98a', bg: 'rgba(16,217,138,.1)'  },
-  active:      { label: 'Active',       color: '#00d9ff', bg: 'rgba(0,217,255,.1)'   },
+  active:      { label: 'Active',       color: 'var(--cyan)', bg: 'rgba(0,217,255,.1)'   },
   no_response: { label: 'No Response',  color: '#ffb347', bg: 'rgba(255,179,71,.1)'  },
 };
 
@@ -331,7 +331,7 @@ function ConversationalSmsPanel() {
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Active Conversations', value: conversations.filter(c => c.status === 'active').length.toString(), color: '#00d9ff' },
+          { label: 'Active Conversations', value: conversations.filter(c => c.status === 'active').length.toString(), color: 'var(--cyan)' },
           { label: 'Recovered (30d)',       value: recovered.length.toString(), color: '#10d98a' },
           { label: 'Revenue Recovered',     value: c$(recRevenue), color: '#ffb347' },
         ].map(s => (
@@ -353,11 +353,11 @@ function ConversationalSmsPanel() {
                 className="glass-card p-3 text-left transition-all"
                 style={{ border: selected === c.id ? '1px solid #00d9ff44' : '1px solid var(--border-subtle)' }}>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{c.customer}</span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ color: sc.color, background: sc.bg }}>{sc.label}</span>
+                  <span className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>{c.customer}</span>
+                  <span className="text-[16px] px-1.5 py-0.5 rounded-full" style={{ color: sc.color, background: sc.bg }}>{sc.label}</span>
                 </div>
-                <div className="text-[10px] mb-1" style={{ color: 'var(--text-muted)' }}>{c.store} · {c$(c.cartValue)}</div>
-                <div className="text-[10px] truncate" style={{ color: 'var(--text-secondary)' }}>{last.text.slice(0, 45)}…</div>
+                <div className="text-[16px] mb-1" style={{ color: 'var(--text-muted)' }}>{c.store} · {c$(c.cartValue)}</div>
+                <div className="text-[16px] truncate" style={{ color: 'var(--text-secondary)' }}>{last.text.slice(0, 45)}…</div>
               </button>
             );
           })}
@@ -368,10 +368,10 @@ function ConversationalSmsPanel() {
           <div className="flex-1 glass-card flex flex-col overflow-hidden">
             <div className="px-4 py-3 border-b flex items-center gap-3" style={{ borderColor: 'var(--border-subtle)' }}>
               <div>
-                <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{conv.customer}</div>
+                <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>{conv.customer}</div>
                 <div className="section-label">{conv.store} · Cart: {c$(conv.cartValue)}</div>
               </div>
-              <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full" style={{ color: CONV_STATUS_CFG[conv.status].color, background: CONV_STATUS_CFG[conv.status].bg }}>
+              <span className="ml-auto text-[16px] px-2 py-0.5 rounded-full" style={{ color: CONV_STATUS_CFG[conv.status].color, background: CONV_STATUS_CFG[conv.status].bg }}>
                 {CONV_STATUS_CFG[conv.status].label}
               </span>
             </div>
@@ -383,17 +383,17 @@ function ConversationalSmsPanel() {
                       background: msg.role === 'brand' ? 'var(--bg-elevated)' : 'rgba(0,217,255,.12)',
                       border: msg.role === 'brand' ? '1px solid var(--border-dim)' : '1px solid rgba(0,217,255,.25)',
                     }}>
-                    <div className="text-xs" style={{ color: 'var(--text-primary)' }}>{msg.text}</div>
-                    <div className="text-[9px] mt-1 text-right" style={{ color: 'var(--text-muted)' }}>{msg.time}</div>
+                    <div className="text-base" style={{ color: 'var(--text-primary)' }}>{msg.text}</div>
+                    <div className="text-[16px] mt-1 text-right" style={{ color: 'var(--text-muted)' }}>{msg.time}</div>
                   </div>
                 </div>
               ))}
             </div>
             {conv.status === 'active' && (
               <div className="px-4 py-3 border-t flex gap-2" style={{ borderColor: 'var(--border-subtle)' }}>
-                <input value={reply} onChange={e => setReply(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendReply()} placeholder="Type a reply…" className="flex-1 px-3 py-2 rounded-lg text-xs"
+                <input value={reply} onChange={e => setReply(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendReply()} placeholder="Type a reply…" className="flex-1 px-3 py-2 rounded-lg text-base"
                   style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
-                <button onClick={sendReply} className="px-3 py-2 rounded-lg text-xs font-medium" style={{ background: 'var(--accent-blue)', color: '#fff' }}>Send</button>
+                <button onClick={sendReply} className="px-3 py-2 rounded-lg text-base font-medium" style={{ background: 'var(--accent-blue)', color: '#fff' }}>Send</button>
               </div>
             )}
           </div>
@@ -447,12 +447,12 @@ function SmsFlowCard({ flow }: { flow: SmsFlow }) {
     <div className="glass-card p-4">
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{flow.name}</div>
+          <div className="text-base font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{flow.name}</div>
           <div className="flex items-center gap-2">
-            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+            <span className="text-[16px] font-mono px-1.5 py-0.5 rounded"
               style={{ background: badge.bg, color: badge.color }}>{badge.label}</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded"
-              style={{ background: 'rgba(0,217,255,0.08)', color: '#00d9ff' }}>{flow.trigger}</span>
+            <span className="text-[16px] px-1.5 py-0.5 rounded"
+              style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)' }}>{flow.trigger}</span>
           </div>
         </div>
         <button onClick={() => setEnabled(e => !e)}
@@ -463,24 +463,24 @@ function SmsFlowCard({ flow }: { flow: SmsFlow }) {
       </div>
       <div className="grid grid-cols-3 gap-2">
         <div className="rounded-lg p-2 text-center" style={{ background: 'var(--bg-elevated)' }}>
-          <div className="data-value text-sm font-semibold" style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono' }}>{flow.steps}</div>
-          <div className="section-label" style={{ fontSize: 9 }}>Steps</div>
+          <div className="data-value text-base font-semibold" style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono' }}>{flow.steps}</div>
+          <div className="section-label" style={{ fontSize: 16 }}>Steps</div>
         </div>
         <div className="rounded-lg p-2 text-center" style={{ background: 'var(--bg-elevated)' }}>
-          <div className="data-value text-sm font-semibold" style={{ color: '#00d9ff', fontFamily: 'DM Mono' }}>{fmt(flow.triggered30d)}</div>
-          <div className="section-label" style={{ fontSize: 9 }}>Triggered</div>
+          <div className="data-value text-base font-semibold" style={{ color: 'var(--cyan)', fontFamily: 'DM Mono' }}>{fmt(flow.triggered30d)}</div>
+          <div className="section-label" style={{ fontSize: 16 }}>Triggered</div>
         </div>
         <div className="rounded-lg p-2 text-center" style={{ background: 'var(--bg-elevated)' }}>
-          <div className="data-value text-sm font-semibold" style={{ color: flow.convRate !== null ? '#10d98a' : 'var(--text-muted)', fontFamily: 'DM Mono' }}>
+          <div className="data-value text-base font-semibold" style={{ color: flow.convRate !== null ? '#10d98a' : 'var(--text-muted)', fontFamily: 'DM Mono' }}>
             {flow.convRate !== null ? flow.convRate.toFixed(1) + '%' : '—'}
           </div>
-          <div className="section-label" style={{ fontSize: 9 }}>Conv. Rate</div>
+          <div className="section-label" style={{ fontSize: 16 }}>Conv. Rate</div>
         </div>
       </div>
       {flow.revenue30d > 0 && (
         <div className="mt-3 pt-3 border-t flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
-          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>30d revenue</span>
-          <span className="data-value text-sm font-semibold" style={{ color: '#ffb347', fontFamily: 'DM Mono' }}>{c$(flow.revenue30d)}</span>
+          <span className="text-base" style={{ color: 'var(--text-muted)' }}>30d revenue</span>
+          <span className="data-value text-base font-semibold" style={{ color: '#ffb347', fontFamily: 'DM Mono' }}>{c$(flow.revenue30d)}</span>
         </div>
       )}
     </div>
@@ -531,7 +531,7 @@ function SmsCampaignsPanel() {
 
   const STATUS_BADGE: Record<SmsStatus, { color: string; label: string }> = {
     sent:      { color: '#10d98a', label: 'Sent'      },
-    scheduled: { color: '#00d9ff', label: 'Scheduled' },
+    scheduled: { color: 'var(--cyan)', label: 'Scheduled' },
     draft:     { color: '#7b93ff', label: 'Draft'     },
   };
 
@@ -547,7 +547,7 @@ function SmsCampaignsPanel() {
       {/* Header stats */}
       <div className="grid grid-cols-4 gap-3 shrink-0">
         {[
-          { label: 'Total SMS Sent (30d)', value: fmt(totalSent),              color: '#00d9ff' },
+          { label: 'Total SMS Sent (30d)', value: fmt(totalSent),              color: 'var(--cyan)' },
           { label: 'Avg Delivery Rate',    value: avgDelivery.toFixed(1) + '%', color: '#10d98a' },
           { label: 'Avg CTR',              value: avgCtr.toFixed(1) + '%',      color: '#7b93ff' },
           { label: 'SMS Revenue (30d)',     value: c$(smsRevenue),              color: '#ffb347' },
@@ -564,7 +564,7 @@ function SmsCampaignsPanel() {
         style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', width: 'fit-content' }}>
         {SUB_TABS.map(t => (
           <button key={t.key} onClick={() => setSubTab(t.key)}
-            className="px-3 py-1.5 rounded-lg text-xs transition-all"
+            className="px-3 py-1.5 rounded-lg text-base transition-all"
             style={{
               background: subTab === t.key ? 'var(--bg-elevated)' : 'transparent',
               color: subTab === t.key ? 'var(--text-primary)' : 'var(--text-muted)',
@@ -581,8 +581,8 @@ function SmsCampaignsPanel() {
         <div className="glass-card overflow-hidden">
           <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
             <span className="section-label">SMS Campaigns</span>
-            <button onClick={addSmsCampaign} className="text-xs px-3 py-1.5 rounded-lg font-medium"
-              style={{ background: 'rgba(0,217,255,0.08)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
+            <button onClick={addSmsCampaign} className="text-base px-3 py-1.5 rounded-lg font-medium"
+              style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
               + New SMS Campaign
             </button>
           </div>
@@ -594,15 +594,15 @@ function SmsCampaignsPanel() {
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+                      <span className="text-[16px] font-mono px-1.5 py-0.5 rounded"
                         style={{ background: badge.color + '18', color: badge.color }}>{badge.label}</span>
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+                      <span className="text-[16px] font-mono px-1.5 py-0.5 rounded"
                         style={{ background: 'rgba(123,147,255,0.1)', color: '#7b93ff' }}>{camp.store}</span>
-                      <span className="text-[9px]" style={{ color: 'var(--text-muted)' }}>{camp.sentAt}</span>
+                      <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>{camp.sentAt}</span>
                     </div>
-                    <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{camp.name}</div>
+                    <div className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>{camp.name}</div>
                     {isSent && (
-                      <div className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                      <div className="text-[16px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
                         {fmt(camp.recipients)} recipients
                       </div>
                     )}
@@ -610,19 +610,19 @@ function SmsCampaignsPanel() {
                   {isSent && (
                     <div className="flex items-center gap-4 shrink-0">
                       <div className="text-right">
-                        <div className="data-value text-sm font-semibold" style={{ color: '#10d98a', fontFamily: 'DM Mono' }}>{camp.deliveryRate.toFixed(1)}%</div>
+                        <div className="data-value text-base font-semibold" style={{ color: '#10d98a', fontFamily: 'DM Mono' }}>{camp.deliveryRate.toFixed(1)}%</div>
                         <div className="section-label">Delivery</div>
                       </div>
                       <div className="text-right">
-                        <div className="data-value text-sm font-semibold" style={{ color: '#00d9ff', fontFamily: 'DM Mono' }}>{camp.ctr.toFixed(1)}%</div>
+                        <div className="data-value text-base font-semibold" style={{ color: 'var(--cyan)', fontFamily: 'DM Mono' }}>{camp.ctr.toFixed(1)}%</div>
                         <div className="section-label">CTR</div>
                       </div>
                       <div className="text-right">
-                        <div className="data-value text-sm font-semibold" style={{ color: '#7b93ff', fontFamily: 'DM Mono' }}>{camp.conversions}</div>
+                        <div className="data-value text-base font-semibold" style={{ color: '#7b93ff', fontFamily: 'DM Mono' }}>{camp.conversions}</div>
                         <div className="section-label">Conv.</div>
                       </div>
                       <div className="text-right">
-                        <div className="data-value text-sm font-semibold" style={{ color: '#ffb347', fontFamily: 'DM Mono' }}>{c$(camp.revenue)}</div>
+                        <div className="data-value text-base font-semibold" style={{ color: '#ffb347', fontFamily: 'DM Mono' }}>{c$(camp.revenue)}</div>
                         <div className="section-label">Revenue</div>
                       </div>
                     </div>
@@ -660,8 +660,8 @@ function SmsCampaignsPanel() {
               ].map(item => (
                 <div key={item.label} className="flex items-start justify-between gap-4 p-3 rounded-xl" style={{ background: 'var(--bg-elevated)' }}>
                   <div>
-                    <div className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-primary)' }}>{item.label}</div>
-                    <div className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{item.detail}</div>
+                    <div className="text-base font-medium mb-0.5" style={{ color: 'var(--text-primary)' }}>{item.label}</div>
+                    <div className="text-[16px]" style={{ color: 'var(--text-secondary)' }}>{item.detail}</div>
                   </div>
                   <div onClick={() => toggleCompliance(item.label)} className="w-9 h-5 rounded-full shrink-0 flex items-center px-0.5 cursor-pointer"
                     style={{ background: compliance[item.label] ? '#10d98a' : 'rgba(var(--overlay-rgb),0.1)' }}>
@@ -675,8 +675,8 @@ function SmsCampaignsPanel() {
                   { label: 'Opt-Out Keywords', value: 'STOP · UNSUBSCRIBE' },
                 ].map(kw => (
                   <div key={kw.label} className="p-3 rounded-xl" style={{ background: 'var(--bg-elevated)' }}>
-                    <div className="text-[10px] mb-1.5 section-label">{kw.label}</div>
-                    <div className="text-sm font-semibold font-mono" style={{ color: '#00d9ff' }}>{kw.value}</div>
+                    <div className="text-[16px] mb-1.5 section-label">{kw.label}</div>
+                    <div className="text-base font-semibold font-mono" style={{ color: 'var(--cyan)' }}>{kw.value}</div>
                   </div>
                 ))}
               </div>
@@ -694,8 +694,8 @@ function SmsCampaignsPanel() {
               ].map(item => (
                 <div key={item.label} className="flex items-start justify-between gap-4 p-3 rounded-xl" style={{ background: 'var(--bg-elevated)' }}>
                   <div>
-                    <div className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-primary)' }}>{item.label}</div>
-                    <div className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{item.detail}</div>
+                    <div className="text-base font-medium mb-0.5" style={{ color: 'var(--text-primary)' }}>{item.label}</div>
+                    <div className="text-[16px]" style={{ color: 'var(--text-secondary)' }}>{item.detail}</div>
                   </div>
                   <div onClick={() => toggleCompliance(item.label)} className="w-9 h-5 rounded-full shrink-0 flex items-center px-0.5 cursor-pointer"
                     style={{ background: compliance[item.label] ? '#10d98a' : 'rgba(var(--overlay-rgb),0.1)' }}>
@@ -704,8 +704,8 @@ function SmsCampaignsPanel() {
                 </div>
               ))}
               <div className="p-3 rounded-xl" style={{ background: 'var(--bg-elevated)', border: '1px solid rgba(0,217,255,0.12)' }}>
-                <div className="text-[10px] mb-2 section-label">Footer Preview</div>
-                <div className="text-xs p-2 rounded-lg" style={{ background: 'rgba(0,0,0,0.3)', color: 'var(--text-secondary)', fontFamily: 'DM Mono' }}>
+                <div className="text-[16px] mb-2 section-label">Footer Preview</div>
+                <div className="text-base p-2 rounded-lg" style={{ background: 'rgba(0,0,0,0.3)', color: 'var(--text-secondary)', fontFamily: 'DM Mono' }}>
                   [MarketOS] Reply STOP to unsubscribe · Msg &amp; data rates may apply
                 </div>
               </div>
@@ -723,8 +723,8 @@ function SmsCampaignsPanel() {
               ].map(item => (
                 <div key={item.label} className="flex items-start justify-between gap-4 p-3 rounded-xl" style={{ background: 'var(--bg-elevated)' }}>
                   <div>
-                    <div className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-primary)' }}>{item.label}</div>
-                    <div className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{item.detail}</div>
+                    <div className="text-base font-medium mb-0.5" style={{ color: 'var(--text-primary)' }}>{item.label}</div>
+                    <div className="text-[16px]" style={{ color: 'var(--text-secondary)' }}>{item.detail}</div>
                   </div>
                   <div onClick={() => toggleCompliance(item.label)} className="w-9 h-5 rounded-full shrink-0 flex items-center px-0.5 cursor-pointer"
                     style={{ background: compliance[item.label] ? '#10d98a' : 'rgba(var(--overlay-rgb),0.1)' }}>
@@ -733,11 +733,11 @@ function SmsCampaignsPanel() {
                 </div>
               ))}
               <div className="p-3 rounded-xl" style={{ background: 'var(--bg-elevated)' }}>
-                <div className="text-[10px] mb-2 section-label">Frequency Cap</div>
+                <div className="text-[16px] mb-2 section-label">Frequency Cap</div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Max</span>
-                  <span className="text-sm font-semibold px-2 py-1 rounded-lg" style={{ background: 'rgba(0,217,255,0.08)', color: '#00d9ff', fontFamily: 'DM Mono' }}>3</span>
-                  <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>messages per contact per week</span>
+                  <span className="text-base" style={{ color: 'var(--text-secondary)' }}>Max</span>
+                  <span className="text-base font-semibold px-2 py-1 rounded-lg" style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', fontFamily: 'DM Mono' }}>3</span>
+                  <span className="text-base" style={{ color: 'var(--text-secondary)' }}>messages per contact per week</span>
                 </div>
               </div>
             </div>
@@ -754,7 +754,7 @@ function SmsCampaignsPanel() {
                 'A2P 10DLC registered',
                 'Double opt-in active',
               ].map(item => (
-                <div key={item} className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                <div key={item} className="flex items-center gap-2 text-base" style={{ color: 'var(--text-secondary)' }}>
                   <CheckCircle size={12} style={{ color: '#10d98a', flexShrink: 0 }} />
                   {item}
                 </div>
@@ -808,25 +808,25 @@ function PushAutoRow({ auto }: { auto: PushAutomation }) {
       <div className="flex items-center justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+            <span className="text-[16px] font-mono px-1.5 py-0.5 rounded"
               style={{ background: badge.bg, color: badge.color }}>{badge.label}</span>
-            <span className="text-[9px] px-1.5 py-0.5 rounded"
-              style={{ background: 'rgba(0,217,255,0.08)', color: '#00d9ff' }}>{auto.trigger}</span>
+            <span className="text-[16px] px-1.5 py-0.5 rounded"
+              style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)' }}>{auto.trigger}</span>
           </div>
-          <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{auto.name}</div>
+          <div className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>{auto.name}</div>
         </div>
         <div className="flex items-center gap-4 shrink-0">
           <div className="text-right">
-            <div className="data-value text-sm font-semibold" style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono' }}>{fmt(auto.triggered30d)}</div>
+            <div className="data-value text-base font-semibold" style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono' }}>{fmt(auto.triggered30d)}</div>
             <div className="section-label">Triggered</div>
           </div>
           <div className="text-right">
-            <div className="data-value text-sm font-semibold" style={{ color: '#10d98a', fontFamily: 'DM Mono' }}>{auto.ctr.toFixed(1)}%</div>
+            <div className="data-value text-base font-semibold" style={{ color: '#10d98a', fontFamily: 'DM Mono' }}>{auto.ctr.toFixed(1)}%</div>
             <div className="section-label">CTR</div>
           </div>
           {auto.revenue30d > 0 && (
             <div className="text-right">
-              <div className="data-value text-sm font-semibold" style={{ color: '#ffb347', fontFamily: 'DM Mono' }}>{c$(auto.revenue30d)}</div>
+              <div className="data-value text-base font-semibold" style={{ color: '#ffb347', fontFamily: 'DM Mono' }}>{c$(auto.revenue30d)}</div>
               <div className="section-label">Revenue</div>
             </div>
           )}
@@ -869,7 +869,7 @@ function PushPanel() {
 
   const PUSH_CAMPAIGN_BADGE: Record<PushStatus, { color: string; label: string }> = {
     sent:      { color: '#10d98a', label: 'Sent'      },
-    scheduled: { color: '#00d9ff', label: 'Scheduled' },
+    scheduled: { color: 'var(--cyan)', label: 'Scheduled' },
   };
 
 
@@ -895,7 +895,7 @@ function PushPanel() {
   ];
 
   const BROWSERS = [
-    { name: 'Chrome',  pct: 68, color: '#00d9ff' },
+    { name: 'Chrome',  pct: 68, color: 'var(--cyan)' },
     { name: 'Safari',  pct: 18, color: '#7b93ff' },
     { name: 'Firefox', pct: 8,  color: '#ffb347' },
     { name: 'Edge',    pct: 6,  color: '#10d98a' },
@@ -906,7 +906,7 @@ function PushPanel() {
       {/* Header stats */}
       <div className="grid grid-cols-4 gap-3 shrink-0">
         {[
-          { label: 'Push Subscribers',  value: fmt(28400),  color: '#00d9ff' },
+          { label: 'Push Subscribers',  value: fmt(28400),  color: 'var(--cyan)' },
           { label: 'Avg CTR',           value: '9.4%',      color: '#10d98a' },
           { label: 'Revenue (30d)',      value: c$(totalRevenue30d), color: '#ffb347' },
           { label: 'Opt-In Rate',        value: '12.8%',    color: '#7b93ff' },
@@ -923,7 +923,7 @@ function PushPanel() {
         style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', width: 'fit-content' }}>
         {SUB_TABS.map(t => (
           <button key={t.key} onClick={() => setSubTab(t.key)}
-            className="px-3 py-1.5 rounded-lg text-xs transition-all"
+            className="px-3 py-1.5 rounded-lg text-base transition-all"
             style={{
               background: subTab === t.key ? 'var(--bg-elevated)' : 'transparent',
               color: subTab === t.key ? 'var(--text-primary)' : 'var(--text-muted)',
@@ -940,8 +940,8 @@ function PushPanel() {
         <div className="glass-card overflow-hidden">
           <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
             <span className="section-label">Push Campaigns</span>
-            <button onClick={addPushCampaign} className="text-xs px-3 py-1.5 rounded-lg font-medium"
-              style={{ background: 'rgba(0,217,255,0.08)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
+            <button onClick={addPushCampaign} className="text-base px-3 py-1.5 rounded-lg font-medium"
+              style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
               + New Push Campaign
             </button>
           </div>
@@ -953,13 +953,13 @@ function PushPanel() {
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+                      <span className="text-[16px] font-mono px-1.5 py-0.5 rounded"
                         style={{ background: badge.color + '18', color: badge.color }}>{badge.label}</span>
-                      <span className="text-[9px]" style={{ color: 'var(--text-muted)' }}>{camp.sentAt}</span>
+                      <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>{camp.sentAt}</span>
                     </div>
-                    <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{camp.name}</div>
+                    <div className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>{camp.name}</div>
                     {isSent && (
-                      <div className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                      <div className="text-[16px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
                         {fmt(camp.sent)} sent · {fmt(camp.delivered)} delivered
                       </div>
                     )}
@@ -967,15 +967,15 @@ function PushPanel() {
                   {isSent && (
                     <div className="flex items-center gap-4 shrink-0">
                       <div className="text-right">
-                        <div className="data-value text-sm font-semibold" style={{ color: '#00d9ff', fontFamily: 'DM Mono' }}>{fmt(camp.clicked)}</div>
+                        <div className="data-value text-base font-semibold" style={{ color: 'var(--cyan)', fontFamily: 'DM Mono' }}>{fmt(camp.clicked)}</div>
                         <div className="section-label">Clicked</div>
                       </div>
                       <div className="text-right">
-                        <div className="data-value text-sm font-semibold" style={{ color: '#10d98a', fontFamily: 'DM Mono' }}>{camp.ctr.toFixed(1)}%</div>
+                        <div className="data-value text-base font-semibold" style={{ color: '#10d98a', fontFamily: 'DM Mono' }}>{camp.ctr.toFixed(1)}%</div>
                         <div className="section-label">CTR</div>
                       </div>
                       <div className="text-right">
-                        <div className="data-value text-sm font-semibold" style={{ color: '#ffb347', fontFamily: 'DM Mono' }}>{c$(camp.revenue)}</div>
+                        <div className="data-value text-base font-semibold" style={{ color: '#ffb347', fontFamily: 'DM Mono' }}>{c$(camp.revenue)}</div>
                         <div className="section-label">Revenue</div>
                       </div>
                     </div>
@@ -1009,8 +1009,8 @@ function PushPanel() {
                 return (
                   <div key={store.name}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{store.name}</span>
-                      <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono' }}>{fmt(store.subscribers)}</span>
+                      <span className="text-base" style={{ color: 'var(--text-secondary)' }}>{store.name}</span>
+                      <span className="text-base font-semibold" style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono' }}>{fmt(store.subscribers)}</span>
                     </div>
                     <div className="h-1.5 rounded-full" style={{ background: 'var(--bg-elevated)' }}>
                       <div className="h-full rounded-full" style={{ width: pct + '%', background: '#00d9ff' }} />
@@ -1033,7 +1033,7 @@ function PushPanel() {
               {ACTIVITY.map(a => (
                 <div key={a.label} className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-elevated)', border: `1px solid ${a.color}20` }}>
                   <div className="data-value text-lg font-bold mb-0.5" style={{ color: a.color, fontFamily: 'DM Mono' }}>{fmt(a.count)}</div>
-                  <div className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{a.label}</div>
+                  <div className="text-[16px]" style={{ color: 'var(--text-secondary)' }}>{a.label}</div>
                 </div>
               ))}
             </div>
@@ -1046,8 +1046,8 @@ function PushPanel() {
               {BROWSERS.map(b => (
                 <div key={b.name}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{b.name}</span>
-                    <span className="text-xs font-semibold" style={{ color: b.color, fontFamily: 'DM Mono' }}>{b.pct}%</span>
+                    <span className="text-base" style={{ color: 'var(--text-secondary)' }}>{b.name}</span>
+                    <span className="text-base font-semibold" style={{ color: b.color, fontFamily: 'DM Mono' }}>{b.pct}%</span>
                   </div>
                   <div className="h-1.5 rounded-full" style={{ background: 'var(--bg-elevated)' }}>
                     <div className="h-full rounded-full" style={{ width: b.pct + '%', background: b.color }} />
@@ -1123,15 +1123,15 @@ function EmailBuilderPanel() {
       <div className="glass-card p-4 flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-[10px] section-label block mb-1.5">Subject Line</label>
+            <label className="text-[16px] section-label block mb-1.5">Subject Line</label>
             <input value={subject} onChange={e => setSubject(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-xs"
+              className="w-full px-3 py-2 rounded-lg text-base"
               style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
           </div>
           <div>
-            <label className="text-[10px] section-label block mb-1.5">Preview Text</label>
+            <label className="text-[16px] section-label block mb-1.5">Preview Text</label>
             <input value={previewText} onChange={e => setPreviewText(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-xs"
+              className="w-full px-3 py-2 rounded-lg text-base"
               style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
           </div>
         </div>
@@ -1148,7 +1148,7 @@ function EmailBuilderPanel() {
                   className="flex flex-col items-center gap-1.5 py-2.5 rounded-xl transition-all hover:bg-white/[0.05]"
                   style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                   <span className="text-base">{b.icon}</span>
-                  <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{b.label}</span>
+                  <span className="text-[16px]" style={{ color: 'var(--text-secondary)' }}>{b.label}</span>
                 </button>
               ))}
             </div>
@@ -1159,18 +1159,18 @@ function EmailBuilderPanel() {
             <div className="flex flex-col gap-1.5">
               {[
                 { label: 'Save Draft',    color: '#7b93ff' },
-                { label: 'Preview',       color: '#00d9ff' },
+                { label: 'Preview',       color: 'var(--cyan)' },
                 { label: 'Send Test',     color: '#ffb347' },
                 { label: 'Schedule Send', color: '#10d98a' },
               ].map(a => (
                 <button key={a.label} onClick={() => runAction(a.label)}
-                  className="text-xs py-2 rounded-lg text-left px-3 transition-all hover:bg-white/[0.05]"
+                  className="text-base py-2 rounded-lg text-left px-3 transition-all hover:bg-white/[0.05]"
                   style={{ background: 'var(--bg-elevated)', color: a.color }}>
                   {a.label}
                 </button>
               ))}
               {actionFeedback && (
-                <div className="text-[10px] mt-1 px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+                <div className="text-[16px] mt-1 px-3 py-1.5 rounded-lg flex items-center gap-1.5"
                   style={{ background: 'rgba(16,217,138,0.08)', color: '#10d98a' }}>
                   <CheckCircle size={11} />{actionFeedback}
                 </div>
@@ -1183,7 +1183,7 @@ function EmailBuilderPanel() {
         <div className="col-span-3 glass-card overflow-hidden flex flex-col">
           <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
             <span className="section-label">Canvas — Drag & Drop</span>
-            <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{blocks.length} blocks</span>
+            <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>{blocks.length} blocks</span>
           </div>
           <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
             {blocks.map((block, idx) => (
@@ -1194,11 +1194,11 @@ function EmailBuilderPanel() {
                   border: `1px solid ${selected === block.id ? 'rgba(0,217,255,0.3)' : 'var(--border-subtle)'}`,
                 }}>
                 <GripVertical size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-                <span className="text-[10px] w-16 px-1.5 py-0.5 rounded text-center font-medium shrink-0"
+                <span className="text-[16px] w-16 px-1.5 py-0.5 rounded text-center font-medium shrink-0"
                   style={{ background: 'var(--bg-overlay)', color: BLOCK_COLOR[block.type] }}>
                   {block.type}
                 </span>
-                <span className="flex-1 text-xs" style={{ color: 'var(--text-primary)' }}>{block.label}</span>
+                <span className="flex-1 text-base" style={{ color: 'var(--text-primary)' }}>{block.label}</span>
                 <div className="flex items-center gap-1 shrink-0">
                   <button onClick={e => { e.stopPropagation(); moveUp(idx); }} className="p-1 rounded hover:bg-white/[0.05]" style={{ color: 'var(--text-muted)' }}>
                     <ChevronUp size={11} />
@@ -1213,7 +1213,7 @@ function EmailBuilderPanel() {
               </div>
             ))}
             <button onClick={() => addBlock('text')}
-              className="flex items-center justify-center gap-2 py-3 rounded-xl text-xs border-2 border-dashed transition-all hover:bg-white/[0.02]"
+              className="flex items-center justify-center gap-2 py-3 rounded-xl text-base border-2 border-dashed transition-all hover:bg-white/[0.02]"
               style={{ borderColor: 'var(--border-dim)', color: 'var(--text-muted)' }}>
               <Plus size={12} />Add Block
             </button>
@@ -1252,7 +1252,7 @@ function SendTimePanel() {
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: 'Subscribers w/ AI Send Time', value: '12,408',  color: '#00d9ff' },
+          { label: 'Subscribers w/ AI Send Time', value: '12,408',  color: 'var(--cyan)' },
           { label: 'Avg Open Rate Lift',           value: '+18.4%',  color: '#10d98a' },
           { label: 'Timezones Covered',            value: '12',      color: '#7b93ff' },
           { label: 'Predictions Updated',          value: 'Daily',   color: '#ffb347' },
@@ -1267,8 +1267,8 @@ function SendTimePanel() {
       {/* Toggle */}
       <div className="glass-card p-4 flex items-center justify-between">
         <div>
-          <div className="text-sm font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>Predictive Send-Time Optimization</div>
-          <div className="text-xs" style={{ color: 'var(--text-muted)' }}>Sends each email at the individual subscriber's highest-engagement window based on 90-day open history</div>
+          <div className="text-base font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>Predictive Send-Time Optimization</div>
+          <div className="text-base" style={{ color: 'var(--text-muted)' }}>Sends each email at the individual subscriber's highest-engagement window based on 90-day open history</div>
         </div>
         <button onClick={() => setEnabled(v => !v)}
           className="w-11 h-6 rounded-full flex items-center px-0.5 shrink-0 transition-all"
@@ -1284,7 +1284,7 @@ function SendTimePanel() {
           <div className="flex flex-col gap-2">
             {BEST_WINDOWS.map(w => (
               <div key={w.day} className="flex items-center gap-3">
-                <span className="text-[11px] w-6 shrink-0 font-medium" style={{ color: 'var(--text-muted)' }}>{w.day}</span>
+                <span className="text-[16px] w-6 shrink-0 font-medium" style={{ color: 'var(--text-muted)' }}>{w.day}</span>
                 <div className="flex gap-2 flex-1">
                   {w.slots.map(s => (
                     <div key={s.time} className="flex-1 rounded-lg px-2 py-1.5 text-center"
@@ -1292,8 +1292,8 @@ function SendTimePanel() {
                         background: s.score >= 75 ? 'rgba(16,217,138,0.15)' : s.score >= 50 ? 'rgba(0,217,255,0.1)' : 'var(--bg-elevated)',
                         border: `1px solid ${s.score >= 75 ? 'rgba(16,217,138,0.2)' : 'var(--border-subtle)'}`,
                       }}>
-                      <div className="text-[9px] font-mono font-bold" style={{ color: s.score >= 75 ? '#10d98a' : s.score >= 50 ? '#00d9ff' : 'var(--text-muted)' }}>{s.score}</div>
-                      <div className="text-[9px]" style={{ color: 'var(--text-muted)' }}>{s.time}</div>
+                      <div className="text-[16px] font-mono font-bold" style={{ color: s.score >= 75 ? '#10d98a' : s.score >= 50 ? 'var(--cyan)' : 'var(--text-muted)' }}>{s.score}</div>
+                      <div className="text-[16px]" style={{ color: 'var(--text-muted)' }}>{s.time}</div>
                     </div>
                   ))}
                 </div>
@@ -1307,7 +1307,7 @@ function SendTimePanel() {
           <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
             <span className="section-label">Per-Subscriber Optimal Times</span>
           </div>
-          <table className="w-full text-xs">
+          <table className="w-full text-base">
             <thead style={{ background: 'var(--bg-elevated)' }}>
               <tr>
                 {['Subscriber', 'Optimal Time', 'Eng. Rate', 'TZ'].map(h => (
@@ -1321,7 +1321,7 @@ function SendTimePanel() {
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-elevated)')}
                   onMouseLeave={e => (e.currentTarget.style.background = '')}>
                   <td className="px-3 py-2.5 font-medium" style={{ color: 'var(--text-primary)' }}>{s.name}</td>
-                  <td className="px-3 py-2.5 font-mono" style={{ color: '#00d9ff' }}>{s.optimalTime}</td>
+                  <td className="px-3 py-2.5 font-mono" style={{ color: 'var(--cyan)' }}>{s.optimalTime}</td>
                   <td className="px-3 py-2.5">
                     <div className="flex items-center gap-2">
                       <div className="w-12 h-1.5 rounded-full" style={{ background: 'var(--bg-surface)' }}>
@@ -1330,7 +1330,7 @@ function SendTimePanel() {
                       <span style={{ color: 'var(--text-secondary)' }}>{s.engRate}%</span>
                     </div>
                   </td>
-                  <td className="px-3 py-2.5 font-mono text-[10px]" style={{ color: 'var(--text-muted)' }}>{s.tz}</td>
+                  <td className="px-3 py-2.5 font-mono text-[16px]" style={{ color: 'var(--text-muted)' }}>{s.tz}</td>
                 </tr>
               ))}
             </tbody>
@@ -1383,7 +1383,7 @@ function EmailABPanel() {
   const TYPE_COLOR: Record<ABTestType, string> = { subject: '#00d9ff', content: '#7b93ff', send_time: '#ffb347' };
   const STATUS_CFG: Record<ABTestStatus, { color: string; bg: string; label: string }> = {
     running:   { color: '#10d98a', bg: 'rgba(16,217,138,.1)', label: 'Running'   },
-    completed: { color: '#00d9ff', bg: 'rgba(0,217,255,.1)',  label: 'Completed' },
+    completed: { color: 'var(--cyan)', bg: 'rgba(0,217,255,.1)',  label: 'Completed' },
     draft:     { color: '#7b93ff', bg: 'rgba(123,147,255,.1)', label: 'Draft'    },
   };
 
@@ -1392,7 +1392,7 @@ function EmailABPanel() {
       <div className="grid grid-cols-4 gap-3">
         {[
           { label: 'Active Tests',      value: tests.filter(t => t.status === 'running').length.toString(), color: '#10d98a' },
-          { label: 'Completed (30d)',   value: tests.filter(t => t.status === 'completed').length.toString(), color: '#00d9ff' },
+          { label: 'Completed (30d)',   value: tests.filter(t => t.status === 'completed').length.toString(), color: 'var(--cyan)' },
           { label: 'Avg Confidence',    value: '79%', color: '#7b93ff' },
           { label: 'Avg Open Rate Lift', value: '+4.8%', color: '#ffb347' },
         ].map(s => (
@@ -1406,8 +1406,8 @@ function EmailABPanel() {
       <div className="glass-card overflow-hidden">
         <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
           <span className="section-label">A/B Tests</span>
-          <button onClick={addTest} className="text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5"
-            style={{ background: 'rgba(0,217,255,0.08)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
+          <button onClick={addTest} className="text-base px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5"
+            style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
             <Plus size={11} />New Test
           </button>
         </div>
@@ -1419,16 +1419,16 @@ function EmailABPanel() {
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: sc.bg, color: sc.color }}>{sc.label}</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: TYPE_COLOR[test.type] + '18', color: TYPE_COLOR[test.type] }}>{TYPE_LABEL[test.type]}</span>
-                    <span className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Started {test.started}</span>
+                    <span className="text-[16px] px-1.5 py-0.5 rounded" style={{ background: sc.bg, color: sc.color }}>{sc.label}</span>
+                    <span className="text-[16px] px-1.5 py-0.5 rounded" style={{ background: TYPE_COLOR[test.type] + '18', color: TYPE_COLOR[test.type] }}>{TYPE_LABEL[test.type]}</span>
+                    <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Started {test.started}</span>
                   </div>
-                  <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{test.name}</div>
+                  <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>{test.name}</div>
                 </div>
                 {test.confidence > 0 && (
                   <div className="text-right shrink-0">
-                    <div className="text-sm font-bold" style={{ color: test.confidence >= 95 ? '#10d98a' : test.confidence >= 75 ? '#ffb347' : 'var(--text-secondary)', fontFamily: 'DM Mono' }}>{test.confidence}%</div>
-                    <div className="text-[9px]" style={{ color: 'var(--text-muted)' }}>confidence</div>
+                    <div className="text-base font-bold" style={{ color: test.confidence >= 95 ? '#10d98a' : test.confidence >= 75 ? '#ffb347' : 'var(--text-secondary)', fontFamily: 'DM Mono' }}>{test.confidence}%</div>
+                    <div className="text-[16px]" style={{ color: 'var(--text-muted)' }}>confidence</div>
                   </div>
                 )}
               </div>
@@ -1444,21 +1444,21 @@ function EmailABPanel() {
                       <div key={v} className="rounded-xl p-3"
                         style={{ background: isWinner ? 'rgba(16,217,138,0.05)' : 'var(--bg-elevated)', border: `1px solid ${isWinner ? 'rgba(16,217,138,0.2)' : 'var(--border-subtle)'}` }}>
                         <div className="flex items-center gap-1.5 mb-1.5">
-                          <span className="text-[9px] w-4 h-4 rounded flex items-center justify-center font-bold"
+                          <span className="text-[16px] w-4 h-4 rounded flex items-center justify-center font-bold"
                             style={{ background: isWinner ? 'rgba(16,217,138,.2)' : 'rgba(var(--overlay-rgb),.08)', color: isWinner ? '#10d98a' : 'var(--text-muted)' }}>
                             {v}
                           </span>
-                          <span className="text-[10px] flex-1 truncate" style={{ color: 'var(--text-secondary)' }}>{label}</span>
+                          <span className="text-[16px] flex-1 truncate" style={{ color: 'var(--text-secondary)' }}>{label}</span>
                           {isWinner && <CheckCircle size={11} style={{ color: '#10d98a', flexShrink: 0 }} />}
                         </div>
                         <div className="flex gap-4">
                           <div>
-                            <div className="data-value text-sm font-bold" style={{ color: '#00d9ff', fontFamily: 'DM Mono' }}>{open.toFixed(1)}%</div>
-                            <div className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Open</div>
+                            <div className="data-value text-base font-bold" style={{ color: 'var(--cyan)', fontFamily: 'DM Mono' }}>{open.toFixed(1)}%</div>
+                            <div className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Open</div>
                           </div>
                           <div>
-                            <div className="data-value text-sm font-bold" style={{ color: '#10d98a', fontFamily: 'DM Mono' }}>{click.toFixed(1)}%</div>
-                            <div className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Click</div>
+                            <div className="data-value text-base font-bold" style={{ color: '#10d98a', fontFamily: 'DM Mono' }}>{click.toFixed(1)}%</div>
+                            <div className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Click</div>
                           </div>
                         </div>
                       </div>
@@ -1468,7 +1468,7 @@ function EmailABPanel() {
               )}
 
               {test.status === 'draft' && (
-                <div className="text-xs py-2" style={{ color: 'var(--text-muted)' }}>
+                <div className="text-base py-2" style={{ color: 'var(--text-muted)' }}>
                   {test.variantA} vs {test.variantB} · {(test.sampleSize / 1000).toFixed(0)}K sample size
                 </div>
               )}
@@ -1528,7 +1528,7 @@ function TransactionalPanel() {
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: 'Total Sent (30d)',   value: fmt(totalSent),              color: '#00d9ff' },
+          { label: 'Total Sent (30d)',   value: fmt(totalSent),              color: 'var(--cyan)' },
           { label: 'Active Templates',   value: active.length.toString(),     color: '#10d98a' },
           { label: 'Avg Delivery Rate',  value: avgDelivery.toFixed(1) + '%', color: '#7b93ff' },
           { label: 'Avg Open Rate',      value: avgOpen.toFixed(1) + '%',     color: '#ffb347' },
@@ -1543,12 +1543,12 @@ function TransactionalPanel() {
       <div className="glass-card overflow-hidden">
         <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
           <span className="section-label">Transactional Templates</span>
-          <button onClick={addTemplate} className="text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5"
-            style={{ background: 'rgba(0,217,255,0.08)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
+          <button onClick={addTemplate} className="text-base px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5"
+            style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
             <Plus size={11} />New Template
           </button>
         </div>
-        <table className="w-full text-xs">
+        <table className="w-full text-base">
           <thead style={{ background: 'var(--bg-elevated)' }}>
             <tr>
               {['Template', 'Trigger Event', 'Sent (30d)', 'Delivery', 'Open Rate', 'Status', ''].map(h => (
@@ -1565,7 +1565,7 @@ function TransactionalPanel() {
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-elevated)')}
                   onMouseLeave={e => (e.currentTarget.style.background = '')}>
                   <td className="px-4 py-2.5 font-medium" style={{ color: 'var(--text-primary)' }}>{t.name}</td>
-                  <td className="px-4 py-2.5 font-mono text-[10px]" style={{ color: 'var(--text-muted)' }}>{t.trigger}</td>
+                  <td className="px-4 py-2.5 font-mono text-[16px]" style={{ color: 'var(--text-muted)' }}>{t.trigger}</td>
                   <td className="px-4 py-2.5 font-bold" style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono' }}>{t.sent30d > 0 ? fmt(t.sent30d) : '—'}</td>
                   <td className="px-4 py-2.5" style={{ color: t.deliveryRate >= 99 ? '#10d98a' : t.deliveryRate >= 95 ? '#ffb347' : '#ff4444', fontFamily: 'DM Mono' }}>
                     {t.deliveryRate > 0 ? t.deliveryRate.toFixed(1) + '%' : '—'}
@@ -1574,7 +1574,7 @@ function TransactionalPanel() {
                     {t.openRate > 0 ? t.openRate.toFixed(1) + '%' : '—'}
                   </td>
                   <td className="px-4 py-2.5">
-                    <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: sc.bg, color: sc.color }}>{sc.label}</span>
+                    <span className="text-[16px] px-1.5 py-0.5 rounded" style={{ background: sc.bg, color: sc.color }}>{sc.label}</span>
                   </td>
                   <td className="px-4 py-2.5">
                     {t.status !== 'draft' && (
@@ -1606,7 +1606,7 @@ export default function EmailPage() {
         <main className="flex-1 overflow-hidden flex flex-col p-5 gap-4" style={{ minHeight: 0 }}>
           <div className="grid grid-cols-5 gap-3 shrink-0">
             {[
-              { label: 'Subscribers',   value: fmt(s.totalSubscribers),      color: '#00d9ff' },
+              { label: 'Subscribers',   value: fmt(s.totalSubscribers),      color: 'var(--cyan)' },
               { label: 'Active',        value: fmt(s.activeSubscribers),      color: '#10d98a' },
               { label: 'Revenue (30d)', value: c$(s.totalRevenue30d),         color: '#ffb347' },
               { label: 'Avg Open Rate', value: s.avgOpenRate.toFixed(1)+'%',  color: '#7b93ff' },
@@ -1624,7 +1624,7 @@ export default function EmailPage() {
               const Icon = t.icon;
               return (
                 <button key={t.key} onClick={() => setTab(t.key)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base transition-all"
                   style={{
                     background: tab === t.key ? 'var(--bg-elevated)' : 'transparent',
                     color: tab === t.key ? 'var(--text-primary)' : 'var(--text-muted)',

@@ -13,7 +13,7 @@ const fmt = (n: number) =>
 function DeltaPill({ v }: { v: number }) {
   const color = v >= 0 ? '#10d98a' : '#ff4444';
   return (
-    <span className='inline-flex items-center gap-0.5 text-[9px] font-mono font-semibold px-1.5 py-0.5 rounded-full ml-1'
+    <span className='inline-flex items-center gap-0.5 text-[16px] font-mono font-semibold px-1.5 py-0.5 rounded-full ml-1'
       style={{ background: color + '18', color, border: `1px solid ${color}28` }}>
       {v >= 0 ? '+' : ''}{v.toFixed(1)}%
     </span>
@@ -99,17 +99,17 @@ export default function CampaignTable({ onSelectCampaign, selected }: Props) {
             return (
               <button key={t.key}
                 onClick={() => setPlatform(t.key)}
-                className='flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap'
+                className='flex items-center gap-1.5 px-3 py-1.5 rounded-full text-base font-medium transition-all whitespace-nowrap'
                 style={{
                   background: isActive ? (cfg ? cfg.color + '18' : 'var(--bg-overlay)') : 'transparent',
                   color: isActive ? (cfg?.color ?? 'var(--text-primary)') : 'var(--text-muted)',
                   border: `1px solid ${isActive ? (cfg ? cfg.color + '35' : 'var(--border-bright)') : 'var(--border-subtle)'}`,
                 }}>
                 {cfg && (
-                  <span className='text-[9px] font-bold'>{cfg.icon}</span>
+                  <span className='text-[16px] font-bold'>{cfg.icon}</span>
                 )}
                 {t.label}
-                <span className='font-mono text-[9px] px-1 py-0.5 rounded-full'
+                <span className='font-mono text-[16px] px-1 py-0.5 rounded-full'
                   style={{
                     background: isActive ? (cfg ? cfg.color + '25' : 'rgba(var(--overlay-rgb),0.1)') : 'rgba(var(--overlay-rgb),0.06)',
                     color: isActive ? (cfg?.color ?? 'var(--text-primary)') : 'var(--text-muted)',
@@ -127,7 +127,7 @@ export default function CampaignTable({ onSelectCampaign, selected }: Props) {
             {STATUS_FILTERS.map(f => (
               <button key={f.key}
                 onClick={() => setStatus(f.key)}
-                className='px-2.5 py-1 rounded-md text-[11px] font-medium transition-all'
+                className='px-2.5 py-1 rounded-md text-[16px] font-medium transition-all'
                 style={{
                   background: status === f.key ? 'var(--bg-overlay)' : 'transparent',
                   color: status === f.key ? 'var(--text-primary)' : 'var(--text-muted)',
@@ -137,7 +137,7 @@ export default function CampaignTable({ onSelectCampaign, selected }: Props) {
               </button>
             ))}
           </div>
-          <span className='text-[10px] font-mono' style={{ color: 'var(--text-muted)' }}>
+          <span className='text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>
             {campaigns.length} campaigns
           </span>
         </div>
@@ -145,7 +145,7 @@ export default function CampaignTable({ onSelectCampaign, selected }: Props) {
 
       {/* Table */}
       <div className='overflow-auto flex-1'>
-        <table className='w-full text-xs data-table' style={{ borderCollapse: 'collapse', minWidth: 920 }}>
+        <table className='w-full text-base data-table' style={{ borderCollapse: 'collapse', minWidth: 920 }}>
           <thead>
             <tr style={{ background: 'var(--bg-elevated)' }}>
               <th className='text-left px-4 py-2.5 sticky left-0 font-medium section-label'
@@ -197,10 +197,10 @@ export default function CampaignTable({ onSelectCampaign, selected }: Props) {
                       {/* Colored dot instead of icon box */}
                       <div className='w-2 h-2 rounded-full shrink-0' style={{ background: pc.color }} />
                       <div className='min-w-0'>
-                        <div className='text-xs font-semibold truncate' style={{ color: 'var(--text-primary)', maxWidth: 200 }}>
+                        <div className='text-base font-semibold truncate' style={{ color: 'var(--text-primary)', maxWidth: 200 }}>
                           {camp.name}
                         </div>
-                        <div className='text-[10px] font-mono flex items-center gap-1.5 mt-0.5'
+                        <div className='text-[16px] font-mono flex items-center gap-1.5 mt-0.5'
                           style={{ color: 'var(--text-muted)' }}>
                           <span>{camp.adSets} ad sets</span>
                           <span>·</span>
@@ -209,7 +209,7 @@ export default function CampaignTable({ onSelectCampaign, selected }: Props) {
                           <span>{camp.store.split('.')[0]}</span>
                           {camp.autoRulesFired > 0 && (
                             <span className='flex items-center gap-0.5 px-1 py-0.5 rounded-full font-semibold'
-                              style={{ background: 'rgba(0,217,255,0.12)', color: '#00d9ff', fontSize: 9 }}>
+                              style={{ background: 'rgba(0,217,255,0.12)', color: 'var(--cyan)', fontSize: 16 }}>
                               <Zap size={7} />
                               {camp.autoRulesFired}
                             </span>
@@ -221,50 +221,50 @@ export default function CampaignTable({ onSelectCampaign, selected }: Props) {
 
                   {/* Status */}
                   <td className='px-3 py-3 text-center'>
-                    <span className='text-[9px] font-mono font-bold px-1.5 py-0.5 rounded'
+                    <span className='text-[16px] font-mono font-bold px-1.5 py-0.5 rounded'
                       style={{ background: sc.bg, color: sc.color }}>
                       {sc.label}
                     </span>
                   </td>
 
                   {/* Impressions */}
-                  <td className='px-3 py-3 text-right font-mono text-xs tabular-nums' style={{ color: 'var(--text-secondary)' }}>
+                  <td className='px-3 py-3 text-right font-mono text-base tabular-nums' style={{ color: 'var(--text-secondary)' }}>
                     {fmt(camp.impressions)}
                   </td>
                   {/* CTR */}
-                  <td className='px-3 py-3 text-right font-mono text-xs tabular-nums' style={{ color: 'var(--text-secondary)' }}>
+                  <td className='px-3 py-3 text-right font-mono text-base tabular-nums' style={{ color: 'var(--text-secondary)' }}>
                     {camp.ctr.toFixed(2)}%
                   </td>
                   {/* Spend */}
                   <td className='px-3 py-3 text-right'>
-                    <div className='font-mono text-xs tabular-nums' style={{ color: 'var(--text-secondary)' }}>
+                    <div className='font-mono text-base tabular-nums' style={{ color: 'var(--text-secondary)' }}>
                       {c$(camp.spendToDate)}
                     </div>
                     <DeltaPill v={camp.spendDelta} />
                   </td>
                   {/* Revenue */}
                   <td className='px-3 py-3 text-right'>
-                    <div className='font-mono text-xs font-bold tabular-nums' style={{ color: pc.color }}>
+                    <div className='font-mono text-base font-bold tabular-nums' style={{ color: pc.color }}>
                       {c$(camp.revenue)}
                     </div>
                     <DeltaPill v={camp.roasDelta} />
                   </td>
                   {/* ROAS */}
                   <td className='px-3 py-3 text-right'>
-                    <span className='font-mono text-xs font-bold tabular-nums' style={{ color: roasColor }}>
+                    <span className='font-mono text-base font-bold tabular-nums' style={{ color: roasColor }}>
                       {camp.roas.toFixed(2)}×
                     </span>
                   </td>
                   {/* Conversions */}
                   <td className='px-3 py-3 text-right'>
-                    <div className='font-mono text-xs tabular-nums' style={{ color: 'var(--text-secondary)' }}>
+                    <div className='font-mono text-base tabular-nums' style={{ color: 'var(--text-secondary)' }}>
                       {camp.conversions}
                     </div>
                     <DeltaPill v={camp.conversionsDelta} />
                   </td>
                   {/* CPA */}
                   <td className='px-3 py-3 text-right'>
-                    <span className='font-mono text-xs tabular-nums' style={{ color: cpaColor }}>
+                    <span className='font-mono text-base tabular-nums' style={{ color: cpaColor }}>
                       {c$(camp.cpa)}
                     </span>
                   </td>
@@ -275,13 +275,13 @@ export default function CampaignTable({ onSelectCampaign, selected }: Props) {
                         <div className='h-full rounded-full transition-all'
                           style={{ width: `${Math.min(camp.budgetPacing, 100)}%`, background: pacingColor }} />
                       </div>
-                      <span className='text-[9px] font-mono tabular-nums' style={{ color: 'var(--text-muted)' }}>
+                      <span className='text-[16px] font-mono tabular-nums' style={{ color: 'var(--text-muted)' }}>
                         {camp.budgetPacing}%
                       </span>
                     </div>
                   </td>
                   {/* Budget */}
-                  <td className='px-3 py-3 text-right font-mono text-xs tabular-nums' style={{ color: 'var(--text-muted)' }}>
+                  <td className='px-3 py-3 text-right font-mono text-base tabular-nums' style={{ color: 'var(--text-muted)' }}>
                     {c$(camp.dailyBudget)}
                   </td>
                 </tr>
@@ -290,13 +290,13 @@ export default function CampaignTable({ onSelectCampaign, selected }: Props) {
             {campaigns.length === 0 && (
               <tr>
                 <td colSpan={11} className='px-4 py-8 text-center'>
-                  <div className='text-xs font-medium' style={{ color: 'var(--text-primary)' }}>
+                  <div className='text-base font-medium' style={{ color: 'var(--text-primary)' }}>
                     {platform !== 'all' && !AD_PLATFORM_STARTED[platform as AdPlatform]
                       ? 'Not started on this platform yet'
                       : 'No campaigns match these filters'}
                   </div>
                   {platform !== 'all' && !AD_PLATFORM_STARTED[platform as AdPlatform] && (
-                    <div className='text-[11px] mt-1' style={{ color: 'var(--text-muted)' }}>
+                    <div className='text-[16px] mt-1' style={{ color: 'var(--text-muted)' }}>
                       No ad account has been connected for {AD_PLATFORM_CONFIG[platform as AdPlatform].label} yet.
                     </div>
                   )}
@@ -308,28 +308,28 @@ export default function CampaignTable({ onSelectCampaign, selected }: Props) {
           {/* Totals footer */}
           <tfoot>
             <tr className='border-t font-semibold' style={{ borderColor: 'var(--border-dim)', background: 'var(--bg-elevated)' }}>
-              <td className='px-4 py-2.5 sticky left-0 text-xs font-semibold'
+              <td className='px-4 py-2.5 sticky left-0 text-base font-semibold'
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}>
                 TOTAL ({campaigns.length} campaigns)
               </td>
               <td />
-              <td className='px-3 py-2.5 text-right font-mono text-xs tabular-nums' style={{ color: 'var(--text-secondary)' }}>
+              <td className='px-3 py-2.5 text-right font-mono text-base tabular-nums' style={{ color: 'var(--text-secondary)' }}>
                 {fmt(campaigns.reduce((s, c) => s + c.impressions, 0))}
               </td>
-              <td className='px-3 py-2.5 text-right text-xs' style={{ color: 'var(--text-muted)' }}>—</td>
-              <td className='px-3 py-2.5 text-right font-mono text-xs tabular-nums' style={{ color: 'var(--text-secondary)' }}>
+              <td className='px-3 py-2.5 text-right text-base' style={{ color: 'var(--text-muted)' }}>—</td>
+              <td className='px-3 py-2.5 text-right font-mono text-base tabular-nums' style={{ color: 'var(--text-secondary)' }}>
                 {c$(campaigns.reduce((s, c) => s + c.spendToDate, 0))}
               </td>
-              <td className='px-3 py-2.5 text-right font-mono text-xs font-bold tabular-nums' style={{ color: '#10d98a' }}>
+              <td className='px-3 py-2.5 text-right font-mono text-base font-bold tabular-nums' style={{ color: '#10d98a' }}>
                 {c$(campaigns.reduce((s, c) => s + c.revenue, 0))}
               </td>
-              <td className='px-3 py-2.5 text-right font-mono text-xs font-bold tabular-nums' style={{ color: '#10d98a' }}>
+              <td className='px-3 py-2.5 text-right font-mono text-base font-bold tabular-nums' style={{ color: '#10d98a' }}>
                 {campaigns.length === 0 ? '—' : (campaigns.reduce((s, c) => s + c.revenue, 0) / (campaigns.reduce((s, c) => s + c.spendToDate, 0) || 1)).toFixed(2) + '×'}
               </td>
-              <td className='px-3 py-2.5 text-right font-mono text-xs tabular-nums' style={{ color: 'var(--text-secondary)' }}>
+              <td className='px-3 py-2.5 text-right font-mono text-base tabular-nums' style={{ color: 'var(--text-secondary)' }}>
                 {campaigns.reduce((s, c) => s + c.conversions, 0)}
               </td>
-              <td className='px-3 py-2.5 text-right text-xs' style={{ color: 'var(--text-muted)' }}>—</td>
+              <td className='px-3 py-2.5 text-right text-base' style={{ color: 'var(--text-muted)' }}>—</td>
               <td /><td />
             </tr>
           </tfoot>

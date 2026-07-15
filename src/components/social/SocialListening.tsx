@@ -38,7 +38,7 @@ function SentimentAnalyticsPanel() {
     <div className="rounded-xl p-4 mb-4 flex flex-col gap-4"
       style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>Sentiment Analysis</span>
+        <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Sentiment Analysis</span>
         <span className="section-label">{totalMentions} mentions monitored</span>
       </div>
 
@@ -57,9 +57,9 @@ function SentimentAnalyticsPanel() {
           return (
             <div key={key} className="rounded-lg p-3" style={{ background: 'var(--bg-base)', border: `1px solid ${cfg.border}` }}>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] font-medium capitalize" style={{ color: cfg.color }}>{cfg.label}</span>
+                <span className="text-[16px] font-medium capitalize" style={{ color: cfg.color }}>{cfg.label}</span>
                 {delta !== 0 && (
-                  <span className="flex items-center gap-0.5 text-[9px] font-mono" style={{ color: deltaColor }}>
+                  <span className="flex items-center gap-0.5 text-[16px] font-mono" style={{ color: deltaColor }}>
                     <TrendIcon size={9} />{Math.abs(delta)}%
                   </span>
                 )}
@@ -75,7 +75,7 @@ function SentimentAnalyticsPanel() {
 
       {/* 4-week trend */}
       <div>
-        <div className="section-label mb-2 text-[10px]">4-Week Trend</div>
+        <div className="section-label mb-2 text-[16px]">4-Week Trend</div>
         <div className="flex gap-1 items-end h-12">
           {SENTIMENT_HISTORY.map((wk, i) => (
             <div key={wk.week} className="flex-1 flex flex-col gap-0.5 items-center">
@@ -88,7 +88,7 @@ function SentimentAnalyticsPanel() {
                   <div key={j} style={{ height: `${seg.pct * 0.36}px`, background: seg.color, borderRadius: 2, opacity: i === SENTIMENT_HISTORY.length - 1 ? 1 : 0.55 }} />
                 ))}
               </div>
-              <div className="text-[8px]" style={{ color: 'var(--text-muted)' }}>{wk.week}</div>
+              <div className="text-[16px]" style={{ color: 'var(--text-muted)' }}>{wk.week}</div>
             </div>
           ))}
         </div>
@@ -96,7 +96,7 @@ function SentimentAnalyticsPanel() {
           {(['positive', 'neutral', 'negative'] as const).map(k => (
             <div key={k} className="flex items-center gap-1">
               <div className="w-2 h-2 rounded-full" style={{ background: SENTIMENT_CONFIG[k].color }} />
-              <span className="text-[9px] capitalize" style={{ color: 'var(--text-muted)' }}>{k}</span>
+              <span className="text-[16px] capitalize" style={{ color: 'var(--text-muted)' }}>{k}</span>
             </div>
           ))}
         </div>
@@ -128,11 +128,11 @@ export default function SocialListening() {
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 rounded flex items-center justify-center"
             style={{ background: 'rgba(0,217,255,0.12)' }}>
-            <Search size={11} style={{ color: '#00d9ff' }} />
+            <Search size={11} style={{ color: 'var(--cyan)' }} />
           </div>
           <span className="section-label">Social Listening</span>
         </div>
-        <div className="flex items-center gap-1.5 text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
+        <div className="flex items-center gap-1.5 text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
           <div className="w-1.5 h-1.5 rounded-full live-dot" style={{ background: '#10d98a' }} />
           Live monitoring
         </div>
@@ -140,7 +140,7 @@ export default function SocialListening() {
 
       {/* Sentiment analytics toggle */}
       <button onClick={() => setShowAnalytics(v => !v)}
-        className="text-[10px] mb-3 flex items-center gap-1 px-2 py-1 rounded-lg transition-all"
+        className="text-[16px] mb-3 flex items-center gap-1 px-2 py-1 rounded-lg transition-all"
         style={{ color: '#7b93ff', background: 'rgba(123,147,255,.08)', border: '1px solid rgba(123,147,255,.2)' }}>
         {showAnalytics ? '▲' : '▼'} Sentiment Analysis
       </button>
@@ -150,10 +150,10 @@ export default function SocialListening() {
       <div className="flex flex-wrap gap-1.5 mb-4">
         {KEYWORDS.map(kw => (
           <span key={kw}
-            className="flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded"
+            className="flex items-center gap-1 text-[16px] font-mono px-2 py-0.5 rounded"
             style={{
               background: 'rgba(0,217,255,0.08)',
-              color: '#00d9ff',
+              color: 'var(--cyan)',
               border: '1px solid rgba(0,217,255,0.18)',
             }}>
             # {kw}
@@ -174,37 +174,37 @@ export default function SocialListening() {
               <div className="flex items-center justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2">
                   {/* Platform badge */}
-                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
+                  <span className="text-[16px] font-bold px-1.5 py-0.5 rounded"
                     style={{ background: pCfg.color + '18', color: pCfg.color }}>
                     {pCfg.label}
                   </span>
 
                   {/* Sentiment pill */}
                   <span
-                    className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded"
+                    className="flex items-center gap-1 text-[16px] font-mono px-1.5 py-0.5 rounded"
                     style={{ background: sCfg.bg, color: sCfg.color, border: `1px solid ${sCfg.border}` }}>
                     {sCfg.arrow} {sCfg.label}
                   </span>
 
-                  <span className="text-[9px] font-mono" style={{ color: 'var(--text-muted)' }} suppressHydrationWarning>
+                  <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }} suppressHydrationWarning>
                     {timeAgo(item.foundAt)}
                   </span>
                 </div>
 
                 {/* Reach metric */}
                 <div className="text-right shrink-0">
-                  <div className="data-value text-xs font-bold" style={{ color: 'var(--text-primary)' }}>
+                  <div className="data-value text-base font-bold" style={{ color: 'var(--text-primary)' }}>
                     {fmt(item.reach)}
                   </div>
-                  <div className="section-label" style={{ fontSize: 8 }}>reach</div>
+                  <div className="section-label" style={{ fontSize: 16 }}>reach</div>
                 </div>
               </div>
 
               {/* Author + content */}
-              <div className="text-xs font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>
+              <div className="text-base font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>
                 {item.author}
               </div>
-              <p className="text-xs leading-relaxed mb-2.5" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-base leading-relaxed mb-2.5" style={{ color: 'var(--text-secondary)' }}>
                 {item.content}
               </p>
 
@@ -212,8 +212,8 @@ export default function SocialListening() {
               <div className="flex items-center justify-between pt-2 border-t"
                 style={{ borderColor: 'var(--border-subtle)' }}>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
-                    Keyword: <span style={{ color: '#00d9ff' }}>#{item.keyword}</span>
+                  <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
+                    Keyword: <span style={{ color: 'var(--cyan)' }}>#{item.keyword}</span>
                   </span>
                   <a href={item.url} target="_blank" rel="noreferrer"
                     className="p-1 rounded transition-colors hover:bg-white/[0.06]"
@@ -224,17 +224,17 @@ export default function SocialListening() {
 
                 {item.sentiment !== 'negative' ? (
                   <button onClick={() => markActed(item.id)}
-                    className="text-[10px] font-medium px-2.5 py-1 rounded-full transition-all hover:brightness-110"
+                    className="text-[16px] font-medium px-2.5 py-1 rounded-full transition-all hover:brightness-110"
                     style={{
                       background: actedIds.has(item.id) ? 'rgba(16,217,138,0.12)' : 'rgba(0,217,255,0.10)',
-                      color: actedIds.has(item.id) ? '#10d98a' : '#00d9ff',
+                      color: actedIds.has(item.id) ? '#10d98a' : 'var(--cyan)',
                       border: `1px solid ${actedIds.has(item.id) ? 'rgba(16,217,138,0.25)' : 'rgba(0,217,255,0.2)'}`,
                     }}>
                     {actedIds.has(item.id) ? '✓ Engaged' : 'Engage'}
                   </button>
                 ) : (
                   <button onClick={() => markActed(item.id)}
-                    className="text-[10px] font-medium px-2.5 py-1 rounded-full transition-all hover:brightness-110"
+                    className="text-[16px] font-medium px-2.5 py-1 rounded-full transition-all hover:brightness-110"
                     style={{
                       background: actedIds.has(item.id) ? 'rgba(16,217,138,0.12)' : 'rgba(255,68,68,0.10)',
                       color: actedIds.has(item.id) ? '#10d98a' : '#ff4444',

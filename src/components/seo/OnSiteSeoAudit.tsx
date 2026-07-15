@@ -13,7 +13,7 @@ const STATUS_CONFIG: Record<AuditStatus, { icon: typeof CheckCircle; color: stri
 
 const CATEGORY_CONFIG: Record<AuditCategory, { label: string; icon: typeof Tag; color: string }> = {
   meta:      { label: 'Meta Tags', icon: Tag,      color: '#7b93ff' },
-  headings:  { label: 'Headings',  icon: Type,     color: '#00d9ff' },
+  headings:  { label: 'Headings',  icon: Type,     color: 'var(--cyan)' },
   content:   { label: 'Content',   icon: FileText,  color: '#ffb347' },
   technical: { label: 'Technical', icon: Code,      color: '#10d98a' },
   links:     { label: 'Links',     icon: Link2,     color: '#ff4444' },
@@ -60,7 +60,7 @@ export function OnSiteSeoAudit() {
       <div className='flex items-center justify-between mb-4'>
         <div>
           <div className='section-label mb-1'>On-Site SEO Audit</div>
-          <div className='text-sm font-semibold' style={{ color: 'var(--text-primary)' }}>
+          <div className='text-base font-semibold' style={{ color: 'var(--text-primary)' }}>
             {SEO_AUDIT_ITEMS.length} checks · Last run {lastRun}
           </div>
         </div>
@@ -68,10 +68,10 @@ export function OnSiteSeoAudit() {
         <button
           onClick={handleRunAudit}
           disabled={auditing}
-          className='flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all'
+          className='flex items-center gap-2 px-4 py-2 rounded-xl text-base font-semibold transition-all'
           style={{
             background: auditing ? 'rgba(0,217,255,0.08)' : '#00d9ff',
-            color: auditing ? '#00d9ff' : '#080b18',
+            color: auditing ? 'var(--cyan)' : '#080b18',
             border: auditing ? '1px solid rgba(0,217,255,0.3)' : 'none',
             opacity: auditing ? 0.75 : 1,
             cursor: auditing ? 'default' : 'pointer',
@@ -114,7 +114,7 @@ export function OnSiteSeoAudit() {
         <div className='flex-1 px-5 py-4' style={{ borderLeft: '1px solid var(--border-subtle)' }}>
           <div className='flex items-center justify-between mb-2'>
             <span className='section-label'>Health Score</span>
-            <span className='text-sm font-bold font-mono' style={{ color: healthPct >= 70 ? '#10d98a' : '#ffb347' }}>
+            <span className='text-base font-bold font-mono' style={{ color: healthPct >= 70 ? '#10d98a' : '#ffb347' }}>
               {healthPct}%
             </span>
           </div>
@@ -143,7 +143,7 @@ export function OnSiteSeoAudit() {
               <button
                 key={cat}
                 onClick={() => setCategoryFilter(cat)}
-                className='flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-mono transition-all'
+                className='flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[16px] font-mono transition-all'
                 style={{
                   background: active ? color + '18' : 'var(--bg-elevated)',
                   color: active ? color : 'var(--text-secondary)',
@@ -171,7 +171,7 @@ export function OnSiteSeoAudit() {
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
-                className='px-2.5 py-1 text-[11px] font-mono transition-all'
+                className='px-2.5 py-1 text-[16px] font-mono transition-all'
                 style={{
                   borderRadius: 6,
                   background: active ? color + '20' : 'transparent',
@@ -222,17 +222,17 @@ export function OnSiteSeoAudit() {
               {/* Content */}
               <div className='flex-1 min-w-0'>
                 <div className='flex items-center gap-2 flex-wrap mb-1'>
-                  <span className='text-xs font-medium' style={{ color: 'var(--text-primary)' }}>
+                  <span className='text-base font-medium' style={{ color: 'var(--text-primary)' }}>
                     {item.issue}
                   </span>
-                  <span className={`${IMPACT_BADGE[item.impact]} text-[9px] px-1.5 py-0.5 rounded-full font-mono`}>
+                  <span className={`${IMPACT_BADGE[item.impact]} text-[16px] px-1.5 py-0.5 rounded-full font-mono`}>
                     {item.impact.toUpperCase()}
                   </span>
                 </div>
-                <div className='text-[10px] font-mono mb-1' style={{ color: '#7b93ff' }}>
+                <div className='text-[16px] font-mono mb-1' style={{ color: '#7b93ff' }}>
                   {item.page}
                 </div>
-                <div className='text-[11px] leading-relaxed' style={{ color: 'var(--text-secondary)' }}>
+                <div className='text-[16px] leading-relaxed' style={{ color: 'var(--text-secondary)' }}>
                   {item.detail}
                 </div>
               </div>
@@ -240,7 +240,7 @@ export function OnSiteSeoAudit() {
               {/* Category badge */}
               <div className='shrink-0'>
                 <span
-                  className='flex items-center gap-1 text-[9px] px-2 py-1 rounded-lg font-mono whitespace-nowrap'
+                  className='flex items-center gap-1 text-[16px] px-2 py-1 rounded-lg font-mono whitespace-nowrap'
                   style={{ background: catCfg.color + '15', color: catCfg.color }}
                 >
                   <CatIcon size={9} />

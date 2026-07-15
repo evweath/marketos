@@ -68,7 +68,7 @@ export default function AlertStatsBar() {
       label: 'Fires This Month',
       value: s.total30d,
       Icon: Bell,
-      color: '#00d9ff',
+      color: 'var(--cyan)',
       bg: 'rgba(0,217,255,0.06)',
       border: 'rgba(0,217,255,0.15)',
       pulse: false,
@@ -111,7 +111,7 @@ export default function AlertStatsBar() {
                 style={{ background: card.color === 'var(--text-muted)' ? 'var(--bg-overlay)' : card.color + '20' }}>
                 <Icon size={10} style={{ color: card.color }} />
               </div>
-              <span className="section-label leading-tight" style={{ fontSize: 9 }}>{card.label}</span>
+              <span className="section-label leading-tight" style={{ fontSize: 16 }}>{card.label}</span>
             </div>
 
             {/* Value */}
@@ -125,7 +125,7 @@ export default function AlertStatsBar() {
 
             {/* Trend indicator */}
             {card.trend && (
-              <div className="mt-1 text-[9px] font-mono" style={{ color: card.color, opacity: 0.7 }}>
+              <div className="mt-1 text-[16px] font-mono" style={{ color: card.color, opacity: 0.7 }}>
                 {card.trend}
               </div>
             )}

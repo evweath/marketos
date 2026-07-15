@@ -37,10 +37,10 @@ function ToggleSwitch({ checked, onChange, label }: ToggleSwitchProps) {
   return (
     <button
       onClick={() => onChange(!checked)}
-      className="flex items-center gap-2 text-sm"
-      style={{ color: checked ? '#00d9ff' : 'var(--text-muted)' }}>
+      className="flex items-center gap-2 text-base"
+      style={{ color: checked ? 'var(--cyan)' : 'var(--text-muted)' }}>
       {checked
-        ? <ToggleRight size={22} style={{ color: '#00d9ff' }} />
+        ? <ToggleRight size={22} style={{ color: 'var(--cyan)' }} />
         : <ToggleLeft size={22} style={{ color: 'var(--text-muted)' }} />
       }
       {label}
@@ -72,7 +72,7 @@ function MatchQualityGauge({ score }: GaugeProps) {
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-lg font-semibold font-mono leading-none" style={{ color }}>{score}</span>
-          <span className="text-[9px]" style={{ color: 'var(--text-muted)' }}>/ 100</span>
+          <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>/ 100</span>
         </div>
       </div>
       <span className="section-label">Match Quality</span>
@@ -185,8 +185,8 @@ export function TrackingSettings() {
             <div className="flex items-center gap-3">
               <div className="text-lg">🔌</div>
               <div>
-                <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Meta Conversions API</div>
-                <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Server-side event forwarding for improved attribution</div>
+                <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Meta Conversions API</div>
+                <div className="text-base mt-0.5" style={{ color: 'var(--text-muted)' }}>Server-side event forwarding for improved attribution</div>
               </div>
             </div>
           </div>
@@ -202,7 +202,7 @@ export function TrackingSettings() {
                   type="text"
                   value={pixelId}
                   onChange={e => setPixelId(e.target.value)}
-                  className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+                  className="w-full text-base px-3 py-2 rounded-lg outline-none"
                   style={inputStyle}
                 />
               </div>
@@ -213,7 +213,7 @@ export function TrackingSettings() {
                     type={showToken ? 'text' : 'password'}
                     value={accessToken}
                     onChange={e => setAccessToken(e.target.value)}
-                    className="w-full text-sm px-3 py-2 pr-9 rounded-lg outline-none"
+                    className="w-full text-base px-3 py-2 pr-9 rounded-lg outline-none"
                     style={inputStyle}
                   />
                   <button
@@ -234,9 +234,9 @@ export function TrackingSettings() {
                   <button
                     key={event}
                     onClick={() => toggleEvent(event)}
-                    className="text-[10px] px-2 py-1.5 rounded-lg text-left font-mono transition-all"
+                    className="text-[16px] px-2 py-1.5 rounded-lg text-left font-mono transition-all"
                     style={selectedEvents.includes(event)
-                      ? { background: 'rgba(0,217,255,0.10)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.22)' }
+                      ? { background: 'rgba(0,217,255,0.10)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.22)' }
                       : { background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
                     {event}
                   </button>
@@ -248,20 +248,20 @@ export function TrackingSettings() {
             <div className="flex items-center gap-6 glass-card-elevated p-4">
               <MatchQualityGauge score={84} />
               <div className="flex flex-col gap-2 flex-1">
-                <div className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>Event Match Quality</div>
-                <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                <div className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>Event Match Quality</div>
+                <div className="text-base" style={{ color: 'var(--text-secondary)' }}>
                   Your current match quality score is <span style={{ color: '#10d98a' }}>84/100 (Good)</span>. Adding email and phone hashing can improve this to 90+.
                 </div>
                 <div className="flex items-center gap-2 mt-1">
                   <button
                     onClick={handleTestCapi}
                     disabled={capiTesting}
-                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium transition-all disabled:opacity-50"
+                    className="flex items-center gap-1.5 text-base px-3 py-1.5 rounded-lg font-medium transition-all disabled:opacity-50"
                     style={{ background: 'rgba(123,147,255,0.10)', color: '#7b93ff', border: '1px solid rgba(123,147,255,0.22)' }}>
                     {capiTesting ? <><Loader2 size={12} className="animate-spin" />Testing…</> : 'Send Test Event'}
                   </button>
                   {capiTestResult === 'success' && (
-                    <span className="flex items-center gap-1 text-xs" style={{ color: '#10d98a' }}>
+                    <span className="flex items-center gap-1 text-base" style={{ color: '#10d98a' }}>
                       <CheckCircle size={12} />Event received successfully
                     </span>
                   )}
@@ -272,10 +272,10 @@ export function TrackingSettings() {
             <div className="flex justify-end">
               <button
                 onClick={handleSaveCapi}
-                className="text-sm px-4 py-2 rounded-lg font-medium transition-all"
+                className="text-base px-4 py-2 rounded-lg font-medium transition-all"
                 style={capiSaved
                   ? { background: 'rgba(16,217,138,0.12)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.25)' }
-                  : { background: 'rgba(0,217,255,0.10)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
+                  : { background: 'rgba(0,217,255,0.10)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
                 {capiSaved ? '✓ Saved' : 'Save Changes'}
               </button>
             </div>
@@ -290,8 +290,8 @@ export function TrackingSettings() {
             <div className="flex items-center gap-3">
               <div className="text-lg">📡</div>
               <div>
-                <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Google Enhanced Conversions</div>
-                <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Send hashed customer data to improve Google Ads measurement</div>
+                <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Google Enhanced Conversions</div>
+                <div className="text-base mt-0.5" style={{ color: 'var(--text-muted)' }}>Send hashed customer data to improve Google Ads measurement</div>
               </div>
             </div>
           </div>
@@ -307,7 +307,7 @@ export function TrackingSettings() {
                   type="text"
                   value={conversionId}
                   onChange={e => setConversionId(e.target.value)}
-                  className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+                  className="w-full text-base px-3 py-2 rounded-lg outline-none"
                   style={inputStyle}
                 />
               </div>
@@ -317,7 +317,7 @@ export function TrackingSettings() {
                   type="text"
                   value={conversionLabel}
                   onChange={e => setConversionLabel(e.target.value)}
-                  className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+                  className="w-full text-base px-3 py-2 rounded-lg outline-none"
                   style={inputStyle}
                 />
               </div>
@@ -331,13 +331,13 @@ export function TrackingSettings() {
                   <button
                     key={field.id}
                     onClick={() => toggleField(field.id)}
-                    className="flex items-center gap-2 text-xs px-3 py-2 rounded-lg text-left transition-all"
+                    className="flex items-center gap-2 text-base px-3 py-2 rounded-lg text-left transition-all"
                     style={enhancedFields.includes(field.id)
-                      ? { background: 'rgba(0,217,255,0.08)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }
+                      ? { background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }
                       : { background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
                     <div className="w-3 h-3 rounded-sm border flex items-center justify-center flex-shrink-0"
                       style={{ borderColor: enhancedFields.includes(field.id) ? '#00d9ff' : 'var(--border-dim)', background: enhancedFields.includes(field.id) ? 'rgba(0,217,255,0.2)' : 'transparent' }}>
-                      {enhancedFields.includes(field.id) && <span style={{ fontSize: 8, color: '#00d9ff' }}>✓</span>}
+                      {enhancedFields.includes(field.id) && <span style={{ fontSize: 16, color: 'var(--cyan)' }}>✓</span>}
                     </div>
                     {field.label}
                   </button>
@@ -350,22 +350,22 @@ export function TrackingSettings() {
               <button
                 onClick={handleTestGoogle}
                 disabled={gTesting}
-                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium transition-all disabled:opacity-50"
+                className="flex items-center gap-1.5 text-base px-3 py-1.5 rounded-lg font-medium transition-all disabled:opacity-50"
                 style={{ background: 'rgba(123,147,255,0.10)', color: '#7b93ff', border: '1px solid rgba(123,147,255,0.22)' }}>
                 {gTesting ? <><Loader2 size={12} className="animate-spin" />Testing…</> : 'Send Test Conversion'}
               </button>
               {gTestResult === 'success' && (
-                <span className="flex items-center gap-1 text-xs" style={{ color: '#10d98a' }}>
+                <span className="flex items-center gap-1 text-base" style={{ color: '#10d98a' }}>
                   <CheckCircle size={12} />Conversion received
                 </span>
               )}
               <div className="ml-auto">
                 <button
                   onClick={handleSaveGoogle}
-                  className="text-sm px-4 py-2 rounded-lg font-medium transition-all"
+                  className="text-base px-4 py-2 rounded-lg font-medium transition-all"
                   style={gSaved
                     ? { background: 'rgba(16,217,138,0.12)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.25)' }
-                    : { background: 'rgba(0,217,255,0.10)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
+                    : { background: 'rgba(0,217,255,0.10)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
                   {gSaved ? '✓ Saved' : 'Save Changes'}
                 </button>
               </div>
@@ -377,8 +377,8 @@ export function TrackingSettings() {
       {/* UTM Parameter Defaults */}
       <div className="glass-card p-5">
         <div className="mb-4">
-          <div className="text-sm font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>UTM Parameter Defaults</div>
-          <div className="text-xs" style={{ color: 'var(--text-muted)' }}>Default UTM values applied to campaign links per channel</div>
+          <div className="text-base font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>UTM Parameter Defaults</div>
+          <div className="text-base" style={{ color: 'var(--text-muted)' }}>Default UTM values applied to campaign links per channel</div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -393,7 +393,7 @@ export function TrackingSettings() {
               {utmRows.map((row, idx) => (
                 <tr key={row.channel}>
                   <td className="py-2 pr-4">
-                    <span className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{row.channel}</span>
+                    <span className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>{row.channel}</span>
                   </td>
                   {(['source', 'medium', 'campaignTemplate'] as const).map(key => (
                     <td key={key} className="py-2 pr-4">
@@ -401,8 +401,8 @@ export function TrackingSettings() {
                         type="text"
                         value={row[key]}
                         onChange={e => updateUtmRow(idx, key, e.target.value)}
-                        className="w-full text-xs px-2.5 py-1.5 rounded-md outline-none"
-                        style={{ ...inputStyle, fontSize: 11 }}
+                        className="w-full text-base px-2.5 py-1.5 rounded-md outline-none"
+                        style={{ ...inputStyle, fontSize: 16 }}
                       />
                     </td>
                   ))}
@@ -414,10 +414,10 @@ export function TrackingSettings() {
         <div className="flex justify-end mt-4">
           <button
             onClick={handleSaveUtm}
-            className="text-sm px-4 py-2 rounded-lg font-medium transition-all"
+            className="text-base px-4 py-2 rounded-lg font-medium transition-all"
             style={utmSaved
               ? { background: 'rgba(16,217,138,0.12)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.25)' }
-              : { background: 'rgba(0,217,255,0.10)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
+              : { background: 'rgba(0,217,255,0.10)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
             {utmSaved ? '✓ Saved' : 'Save Defaults'}
           </button>
         </div>

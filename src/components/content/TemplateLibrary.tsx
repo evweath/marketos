@@ -81,7 +81,7 @@ export function TemplateLibrary() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>20,000+ Templates</h2>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-base mt-0.5" style={{ color: 'var(--text-secondary)' }}>
               {filtered.length} matching your filters
             </p>
           </div>
@@ -90,12 +90,12 @@ export function TemplateLibrary() {
               <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
               <input value={search} onChange={e => setSearch(e.target.value)}
                 placeholder="Search templates..."
-                className="pl-7 pr-3 py-2 rounded-lg text-xs outline-none w-48"
+                className="pl-7 pr-3 py-2 rounded-lg text-base outline-none w-48"
                 style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}
               />
             </div>
             <select value={sort} onChange={e => setSort(e.target.value as SortOption)}
-              className="px-3 py-2 rounded-lg text-xs outline-none"
+              className="px-3 py-2 rounded-lg text-base outline-none"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
               <option value="popular">Most Popular</option>
               <option value="performing">Best Performing</option>
@@ -107,20 +107,20 @@ export function TemplateLibrary() {
         {/* Category Pills */}
         <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
           <button onClick={() => setCategoryFilter('all')}
-            className="px-3 py-1.5 rounded-full text-[11px] whitespace-nowrap transition-all shrink-0"
+            className="px-3 py-1.5 rounded-full text-[16px] whitespace-nowrap transition-all shrink-0"
             style={{
               background: categoryFilter === 'all' ? 'rgba(0,217,255,0.12)' : 'var(--bg-elevated)',
-              color: categoryFilter === 'all' ? '#00d9ff' : 'var(--text-muted)',
+              color: categoryFilter === 'all' ? 'var(--cyan)' : 'var(--text-muted)',
               border: `1px solid ${categoryFilter === 'all' ? 'rgba(0,217,255,0.25)' : 'var(--border-subtle)'}`,
             }}>
             All Categories
           </button>
           {TEMPLATE_CATEGORIES.map(cat => (
             <button key={cat.id} onClick={() => setCategoryFilter(categoryFilter === cat.id ? 'all' : cat.id)}
-              className="px-3 py-1.5 rounded-full text-[11px] whitespace-nowrap transition-all shrink-0"
+              className="px-3 py-1.5 rounded-full text-[16px] whitespace-nowrap transition-all shrink-0"
               style={{
                 background: categoryFilter === cat.id ? 'rgba(0,217,255,0.12)' : 'var(--bg-elevated)',
-                color: categoryFilter === cat.id ? '#00d9ff' : 'var(--text-muted)',
+                color: categoryFilter === cat.id ? 'var(--cyan)' : 'var(--text-muted)',
                 border: `1px solid ${categoryFilter === cat.id ? 'rgba(0,217,255,0.25)' : 'var(--border-subtle)'}`,
               }}>
               {cat.name} <span className="opacity-50">{cat.count.toLocaleString()}</span>
@@ -134,10 +134,10 @@ export function TemplateLibrary() {
           <div className="flex gap-1">
             {(['all', 'google', 'meta', 'tiktok', 'instagram', 'youtube', 'linkedin', 'email'] as const).map(p => (
               <button key={p} onClick={() => setPlatformFilter(p)}
-                className="px-2.5 py-1 rounded-lg text-[10px] capitalize transition-all"
+                className="px-2.5 py-1 rounded-lg text-[16px] capitalize transition-all"
                 style={{
                   background: platformFilter === p ? (p === 'all' ? 'rgba(0,217,255,0.12)' : PLATFORM_BADGES[p]?.color + '20') : 'var(--bg-elevated)',
-                  color: platformFilter === p ? (p === 'all' ? '#00d9ff' : PLATFORM_BADGES[p]?.color) : 'var(--text-muted)',
+                  color: platformFilter === p ? (p === 'all' ? 'var(--cyan)' : PLATFORM_BADGES[p]?.color) : 'var(--text-muted)',
                   border: `1px solid ${platformFilter === p ? (p === 'all' ? 'rgba(0,217,255,0.25)' : PLATFORM_BADGES[p]?.color + '40') : 'var(--border-subtle)'}`,
                 }}>
                 {p === 'all' ? 'All' : PLATFORM_BADGES[p]?.label ?? p}
@@ -161,13 +161,13 @@ export function TemplateLibrary() {
                 <LayoutGrid size={20} color="rgba(255,255,255,0.3)" />
                 <div className="absolute bottom-2 left-2 flex gap-1 flex-wrap">
                   {template.platforms.slice(0, 2).map(p => (
-                    <span key={p} className="text-[8px] font-mono px-1 py-0.5 rounded"
+                    <span key={p} className="text-[16px] font-mono px-1 py-0.5 rounded"
                       style={{ background: 'rgba(0,0,0,0.4)', color: PLATFORM_BADGES[p]?.color ?? 'white' }}>
                       {PLATFORM_BADGES[p]?.label ?? p}
                     </span>
                   ))}
                   {template.platforms.length > 2 && (
-                    <span className="text-[8px] font-mono px-1 py-0.5 rounded"
+                    <span className="text-[16px] font-mono px-1 py-0.5 rounded"
                       style={{ background: 'rgba(0,0,0,0.4)', color: 'rgba(255,255,255,0.6)' }}>
                       +{template.platforms.length - 2}
                     </span>
@@ -177,18 +177,18 @@ export function TemplateLibrary() {
 
               {/* Info */}
               <div className="p-2.5">
-                <div className="text-[11px] font-medium mb-1" style={{ color: 'var(--text-primary)' }}>{template.name}</div>
+                <div className="text-[16px] font-medium mb-1" style={{ color: 'var(--text-primary)' }}>{template.name}</div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[9px]" style={{ color: 'var(--text-muted)' }}>{template.category}</span>
+                  <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>{template.category}</span>
                   <div className="flex items-center gap-1">
                     <Star size={9} fill="#ffb347" stroke="none" />
-                    <span className="text-[9px] font-mono" style={{ color: '#ffb347' }}>{template.rating}</span>
+                    <span className="text-[16px] font-mono" style={{ color: '#ffb347' }}>{template.rating}</span>
                   </div>
                 </div>
                 <div className="mt-2">
                   <button onClick={e => { e.stopPropagation(); setSelected(template); }}
-                    className="w-full py-1.5 rounded-lg text-[10px] font-medium transition-all hover:opacity-90"
-                    style={{ background: 'rgba(0,217,255,0.1)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
+                    className="w-full py-1.5 rounded-lg text-[16px] font-medium transition-all hover:opacity-90"
+                    style={{ background: 'rgba(0,217,255,0.1)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
                     Use Template
                   </button>
                 </div>
@@ -215,30 +215,30 @@ export function TemplateLibrary() {
               <LayoutGrid size={24} color="rgba(255,255,255,0.4)" />
             </div>
 
-            <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{selected.name}</h3>
-            <p className="text-[10px] leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>
+            <h3 className="text-base font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{selected.name}</h3>
+            <p className="text-[16px] leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>
               {selected.description}
             </p>
 
             <div className="space-y-2 mb-3">
               <div className="flex items-center justify-between">
                 <span className="section-label">Dimensions</span>
-                <span className="text-[10px] font-mono" style={{ color: 'var(--text-primary)' }}>{selected.dimensions}</span>
+                <span className="text-[16px] font-mono" style={{ color: 'var(--text-primary)' }}>{selected.dimensions}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="section-label">Category</span>
-                <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>{selected.category}</span>
+                <span className="text-[16px]" style={{ color: 'var(--text-secondary)' }}>{selected.category}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="section-label">Rating</span>
                 <div className="flex items-center gap-1">
                   <Star size={9} fill="#ffb347" stroke="none" />
-                  <span className="text-[10px] font-mono" style={{ color: '#ffb347' }}>{selected.rating}</span>
+                  <span className="text-[16px] font-mono" style={{ color: '#ffb347' }}>{selected.rating}</span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
                 <span className="section-label">Times Used</span>
-                <span className="text-[10px] font-mono" style={{ color: 'var(--text-primary)' }}>{selected.uses.toLocaleString()}</span>
+                <span className="text-[16px] font-mono" style={{ color: 'var(--text-primary)' }}>{selected.uses.toLocaleString()}</span>
               </div>
             </div>
 
@@ -246,7 +246,7 @@ export function TemplateLibrary() {
               <span className="section-label block mb-1.5">Platforms</span>
               <div className="flex flex-wrap gap-1">
                 {selected.platforms.map(p => (
-                  <span key={p} className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+                  <span key={p} className="text-[16px] font-mono px-1.5 py-0.5 rounded"
                     style={{ background: PLATFORM_BADGES[p]?.color + '18', color: PLATFORM_BADGES[p]?.color }}>
                     {PLATFORM_BADGES[p]?.label ?? p}
                   </span>
@@ -255,7 +255,7 @@ export function TemplateLibrary() {
             </div>
 
             <button onClick={() => { setCustomizing(true); setTimeout(() => setCustomizing(false), 2000); }}
-              className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold transition-all hover:opacity-90"
+              className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-base font-semibold transition-all hover:opacity-90"
               style={{ background: '#00d9ff', color: '#0a0e1a' }}>
               <ChevronRight size={13} />{customizing ? 'Opening Editor…' : 'Customize in Editor'}
             </button>

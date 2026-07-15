@@ -14,7 +14,7 @@ export default function DateRangePicker({ value, onChange }: Props) {
       {(Object.keys(DATE_RANGE_LABELS) as DateRange[]).map(r => (
         <button key={r}
           onClick={() => onChange(r)}
-          className="px-3 py-1.5 rounded text-xs transition-all"
+          className="px-3 py-1.5 rounded text-base transition-all"
           style={{
             background: value === r ? 'var(--bg-overlay)' : 'transparent',
             color: value === r ? 'var(--text-primary)' : 'var(--text-muted)',

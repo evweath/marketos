@@ -53,10 +53,10 @@ export default function Sidebar() {
           <Radio size={15} color="#080b18" strokeWidth={2.5} />
         </div>
         <div>
-          <div className="text-sm font-semibold leading-none tracking-tight" style={{ color: 'var(--text-primary)' }}>
+          <div className="text-base font-semibold leading-none tracking-tight" style={{ color: 'var(--text-primary)' }}>
             MarketOS
           </div>
-          <div className="text-[10px] mt-1 font-mono" style={{ color: 'var(--text-muted)' }}>
+          <div className="text-[16px] mt-1 font-mono" style={{ color: 'var(--text-muted)' }}>
             3 stores connected
           </div>
         </div>
@@ -86,10 +86,10 @@ export default function Sidebar() {
                   style={{ color: active ? 'var(--cyan)' : 'var(--text-secondary)' }}
                 />
               </div>
-              <span className="flex-1 text-[13px]">{label}</span>
+              <span className="flex-1 text-[16px]">{label}</span>
               {badge !== null && badgeColor && (
                 <span
-                  className="text-[10px] px-1.5 py-0.5 rounded-full font-mono font-semibold leading-none"
+                  className="text-[16px] px-1.5 py-0.5 rounded-full font-mono font-semibold leading-none"
                   style={{
                     background: active ? `${badgeColor}25` : `${badgeColor}18`,
                     color: active ? badgeColor : 'var(--text-muted)',
@@ -121,13 +121,13 @@ export default function Sidebar() {
               style={{ background: store.color }}
             />
             <span
-              className="text-xs truncate flex-1"
+              className="text-base truncate flex-1"
               style={{ color: 'var(--text-secondary)', fontWeight: 450 }}
             >
               {store.label}
             </span>
             <span
-              className="text-[9px] font-mono font-semibold"
+              className="text-[16px] font-mono font-semibold"
               style={{ color: store.status === 'degraded' ? '#ffb347' : '#10d98a' }}
             >
               {store.status === 'degraded' ? 'SLOW' : 'UP'}
@@ -148,7 +148,7 @@ export default function Sidebar() {
           >
             <Settings size={13} strokeWidth={1.8} style={{ color: 'var(--text-secondary)' }} />
           </div>
-          <span className="text-[13px]">Settings</span>
+          <span className="text-[16px]">Settings</span>
         </Link>
       </div>
     </aside>

@@ -8,7 +8,7 @@ import type { TeamMember, TeamRole } from '@/lib/settingsData';
 
 const ROLE_COLORS: Record<TeamRole, { bg: string; color: string; border: string }> = {
   admin:   { bg: 'rgba(123,147,255,0.12)', color: '#7b93ff', border: 'rgba(123,147,255,0.25)' },
-  editor:  { bg: 'rgba(0,217,255,0.10)',   color: '#00d9ff', border: 'rgba(0,217,255,0.22)'   },
+  editor:  { bg: 'rgba(0,217,255,0.10)',   color: 'var(--cyan)', border: 'rgba(0,217,255,0.22)'   },
   analyst: { bg: 'rgba(255,179,71,0.10)',  color: '#ffb347', border: 'rgba(255,179,71,0.25)'  },
   viewer:  { bg: 'rgba(var(--overlay-rgb),0.06)', color: 'var(--text-secondary)', border: 'var(--border-subtle)' },
 };
@@ -16,7 +16,7 @@ const ROLE_COLORS: Record<TeamRole, { bg: string; color: string; border: string 
 function RoleBadge({ role }: { role: TeamRole }) {
   const s = ROLE_COLORS[role];
   return (
-    <span className="text-[10px] px-2 py-0.5 rounded-full font-mono capitalize"
+    <span className="text-[16px] px-2 py-0.5 rounded-full font-mono capitalize"
       style={{ background: s.bg, color: s.color, border: `1px solid ${s.border}` }}>
       {role}
     </span>
@@ -26,7 +26,7 @@ function RoleBadge({ role }: { role: TeamRole }) {
 function StatusBadge({ status }: { status: TeamMember['status'] }) {
   if (status === 'active') {
     return (
-      <span className="text-[10px] px-2 py-0.5 rounded-full font-mono flex items-center gap-1 w-fit"
+      <span className="text-[16px] px-2 py-0.5 rounded-full font-mono flex items-center gap-1 w-fit"
         style={{ background: 'rgba(16,217,138,0.10)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.2)' }}>
         <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#10d98a' }} />Active
       </span>
@@ -34,14 +34,14 @@ function StatusBadge({ status }: { status: TeamMember['status'] }) {
   }
   if (status === 'invited') {
     return (
-      <span className="text-[10px] px-2 py-0.5 rounded-full font-mono"
+      <span className="text-[16px] px-2 py-0.5 rounded-full font-mono"
         style={{ background: 'rgba(255,179,71,0.10)', color: '#ffb347', border: '1px solid rgba(255,179,71,0.2)' }}>
         Invited
       </span>
     );
   }
   return (
-    <span className="text-[10px] px-2 py-0.5 rounded-full font-mono"
+    <span className="text-[16px] px-2 py-0.5 rounded-full font-mono"
       style={{ background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
       Inactive
     </span>
@@ -84,7 +84,7 @@ function RoleDropdown({ currentRole, memberId, onRoleChange }: RoleDropdownProps
     <div className="relative">
       <button
         onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-1.5 text-xs px-2 py-1 rounded-lg transition-all"
+        className="flex items-center gap-1.5 text-base px-2 py-1 rounded-lg transition-all"
         style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-secondary)' }}>
         <span className="capitalize">{currentRole}</span>
         <ChevronDown size={11} />
@@ -96,8 +96,8 @@ function RoleDropdown({ currentRole, memberId, onRoleChange }: RoleDropdownProps
             <button
               key={role}
               onClick={() => { onRoleChange(memberId, role); setOpen(false); }}
-              className="flex items-center justify-between w-full px-3 py-2 text-xs capitalize transition-all hover:bg-white/5"
-              style={{ color: role === currentRole ? '#00d9ff' : 'var(--text-secondary)' }}>
+              className="flex items-center justify-between w-full px-3 py-2 text-base capitalize transition-all hover:bg-white/5"
+              style={{ color: role === currentRole ? 'var(--cyan)' : 'var(--text-secondary)' }}>
               {role}
               {role === currentRole && <Check size={11} />}
             </button>
@@ -156,8 +156,8 @@ export function TeamSettings() {
       {/* Members table */}
       <div className="glass-card overflow-hidden">
         <div className="px-5 py-4 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
-          <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Team Members</div>
-          <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{members.length} members · {pendingInvites.length} pending invite{pendingInvites.length !== 1 ? 's' : ''}</div>
+          <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Team Members</div>
+          <div className="text-base mt-0.5" style={{ color: 'var(--text-muted)' }}>{members.length} members · {pendingInvites.length} pending invite{pendingInvites.length !== 1 ? 's' : ''}</div>
         </div>
         <table className="w-full">
           <thead>
@@ -175,17 +175,17 @@ export function TeamSettings() {
                 {/* Avatar + name */}
                 <td className="px-5 py-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0"
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-base font-semibold flex-shrink-0"
                       style={{ background: 'var(--bg-overlay)', color: 'var(--text-secondary)', border: '1px solid var(--border-dim)' }}>
                       {member.avatar}
                     </div>
-                    <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{member.name}</span>
+                    <span className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>{member.name}</span>
                   </div>
                 </td>
 
                 {/* Email */}
                 <td className="px-5 py-3">
-                  <span className="text-xs font-mono" style={{ color: 'var(--text-secondary)' }}>{member.email}</span>
+                  <span className="text-base font-mono" style={{ color: 'var(--text-secondary)' }}>{member.email}</span>
                 </td>
 
                 {/* Role */}
@@ -195,7 +195,7 @@ export function TeamSettings() {
 
                 {/* Last active */}
                 <td className="px-5 py-3">
-                  <span className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
+                  <span className="text-base font-mono" style={{ color: 'var(--text-muted)' }}>
                     {formatLastActive(member.lastActive)}
                   </span>
                 </td>
@@ -209,14 +209,14 @@ export function TeamSettings() {
                 <td className="px-5 py-3">
                   {removingId === member.id ? (
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Remove?</span>
+                      <span className="text-base" style={{ color: 'var(--text-secondary)' }}>Remove?</span>
                       <button onClick={() => handleRemoveConfirm(member.id)}
-                        className="text-xs px-2 py-0.5 rounded"
+                        className="text-base px-2 py-0.5 rounded"
                         style={{ background: 'rgba(255,68,68,0.12)', color: '#ff4444', border: '1px solid rgba(255,68,68,0.25)' }}>
                         Yes
                       </button>
                       <button onClick={() => setRemovingId(null)}
-                        className="text-xs px-2 py-0.5 rounded"
+                        className="text-base px-2 py-0.5 rounded"
                         style={{ background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
                         No
                       </button>
@@ -243,8 +243,8 @@ export function TeamSettings() {
       {/* Invite form */}
       <div className="glass-card p-5">
         <div className="flex items-center gap-2 mb-4">
-          <UserPlus size={15} style={{ color: '#00d9ff' }} />
-          <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Invite Team Member</div>
+          <UserPlus size={15} style={{ color: 'var(--cyan)' }} />
+          <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Invite Team Member</div>
         </div>
         <div className="flex items-end gap-3">
           <div className="flex-1">
@@ -254,7 +254,7 @@ export function TeamSettings() {
               placeholder="colleague@yourcompany.com"
               value={inviteEmail}
               onChange={e => setInviteEmail(e.target.value)}
-              className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+              className="w-full text-base px-3 py-2 rounded-lg outline-none"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}
             />
           </div>
@@ -263,7 +263,7 @@ export function TeamSettings() {
             <select
               value={inviteRole}
               onChange={e => setInviteRole(e.target.value as TeamRole)}
-              className="text-sm px-3 py-2 rounded-lg outline-none"
+              className="text-base px-3 py-2 rounded-lg outline-none"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
               {ROLES.map(r => <option key={r} value={r} className="capitalize">{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
             </select>
@@ -271,10 +271,10 @@ export function TeamSettings() {
           <button
             onClick={handleInvite}
             disabled={inviteSending || !inviteEmail.trim()}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-base font-medium transition-all disabled:opacity-50"
             style={inviteSent
               ? { background: 'rgba(16,217,138,0.12)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.25)' }
-              : { background: 'rgba(0,217,255,0.10)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
+              : { background: 'rgba(0,217,255,0.10)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
             {inviteSending ? 'Sending…' : inviteSent ? <><Check size={14} />Sent!</> : <><UserPlus size={14} />Send Invite</>}
           </button>
         </div>
@@ -283,8 +283,8 @@ export function TeamSettings() {
       {/* Permissions matrix */}
       <div className="glass-card overflow-hidden">
         <div className="px-5 py-4 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
-          <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Role Permissions</div>
-          <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Module access by role</div>
+          <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Role Permissions</div>
+          <div className="text-base mt-0.5" style={{ color: 'var(--text-muted)' }}>Module access by role</div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">

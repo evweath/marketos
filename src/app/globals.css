@@ -57,13 +57,20 @@
 [data-theme="light"] {
   color-scheme: light;
 
-  /* Core surfaces */
-  --bg-base:      #eef0f6;
-  --bg-surface:   #ffffff;
-  --bg-elevated:  #f4f5fa;
-  --bg-overlay:   #e9ebf3;
-  --bg-input:     #ffffff;
-  --bg-nav:       #ffffff;
+  /* Core surfaces — shifted one brightness step darker: the former
+     stark-white surfaces now sit at the former canvas gray, and every
+     other surface is darkened by that same white→gray delta. */
+  --bg-base:      #dde1ed;
+  --bg-surface:   #eef0f6;
+  --bg-elevated:  #e3e6f1;
+  --bg-overlay:   #d8dcea;
+  --bg-input:     #eef0f6;
+  --bg-nav:       #eef0f6;
+
+  /* Accent text colors, darkened for legibility on this theme's pale surfaces */
+  --cyan: #26268f;
+  --green: #047857;
+  --amber: #b45309;
 
   /* Borders */
   --border-subtle: rgba(15,23,42,0.08);
@@ -92,7 +99,7 @@ html, body {
   background-color: var(--bg-base);
   color: var(--text-primary);
   font-family: 'DM Sans', sans-serif;
-  font-size: calc(14px * var(--font-scale, 1));
+  font-size: calc(16px * var(--font-scale, 1));
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -178,13 +185,13 @@ html, body {
   background: #0f1528;
 }
 [data-theme="light"] .glass-card-interactive:hover {
-  background: #f7f8fc;
+  background: #e6e9f3;
 }
 
 /* ── Typography ────────────────────────────────────── */
 .section-label {
   font-family: 'DM Mono', monospace;
-  font-size: calc(10px * var(--font-scale, 1));
+  font-size: calc(16px * var(--font-scale, 1));
   font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -198,7 +205,7 @@ html, body {
 }
 
 .page-title {
-  font-size: calc(15px * var(--font-scale, 1));
+  font-size: calc(16px * var(--font-scale, 1));
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--text-primary);
@@ -212,10 +219,15 @@ html, body {
 .glow-purple { text-shadow: 0 0 24px rgba(123, 147, 255, 0.5); }
 
 /* ── Status badges ─────────────────────────────────── */
-.badge-critical { background: rgba(255,68,68,0.12);   color: #ff6464; border: 1px solid rgba(255,68,68,0.25);   border-radius: 5px; padding: 2px 7px; font-size: 10px; font-weight: 600; font-family: 'DM Mono', monospace; letter-spacing: 0.04em; }
-.badge-warning  { background: rgba(255,179,71,0.12);  color: #ffbe6a; border: 1px solid rgba(255,179,71,0.25);  border-radius: 5px; padding: 2px 7px; font-size: 10px; font-weight: 600; font-family: 'DM Mono', monospace; letter-spacing: 0.04em; }
-.badge-info     { background: rgba(123,147,255,0.12); color: #9cb1ff; border: 1px solid rgba(123,147,255,0.25); border-radius: 5px; padding: 2px 7px; font-size: 10px; font-weight: 600; font-family: 'DM Mono', monospace; letter-spacing: 0.04em; }
-.badge-ok       { background: rgba(16,217,138,0.12);  color: #3de8a4; border: 1px solid rgba(16,217,138,0.25);  border-radius: 5px; padding: 2px 7px; font-size: 10px; font-weight: 600; font-family: 'DM Mono', monospace; letter-spacing: 0.04em; }
+.badge-critical { background: rgba(255,68,68,0.12);   color: #ff6464; border: 1px solid rgba(255,68,68,0.25);   border-radius: 5px; padding: 2px 7px; font-size: 16px; font-weight: 600; font-family: 'DM Mono', monospace; letter-spacing: 0.04em; }
+.badge-warning  { background: rgba(255,179,71,0.12);  color: #ffbe6a; border: 1px solid rgba(255,179,71,0.25);  border-radius: 5px; padding: 2px 7px; font-size: 16px; font-weight: 600; font-family: 'DM Mono', monospace; letter-spacing: 0.04em; }
+.badge-info     { background: rgba(123,147,255,0.12); color: #9cb1ff; border: 1px solid rgba(123,147,255,0.25); border-radius: 5px; padding: 2px 7px; font-size: 16px; font-weight: 600; font-family: 'DM Mono', monospace; letter-spacing: 0.04em; }
+.badge-ok       { background: rgba(16,217,138,0.12);  color: #3de8a4; border: 1px solid rgba(16,217,138,0.25);  border-radius: 5px; padding: 2px 7px; font-size: 16px; font-weight: 600; font-family: 'DM Mono', monospace; letter-spacing: 0.04em; }
+
+/* Darkened badge text for legibility on the light theme's pale surfaces
+   (background tint stays the same rgba wash in both themes). */
+[data-theme="light"] .badge-warning { color: #d5620b; }
+[data-theme="light"] .badge-ok      { color: #0dab7e; }
 
 /* ── Form inputs ───────────────────────────────────── */
 input[type="text"],
@@ -233,7 +245,7 @@ textarea {
   border: 1px solid var(--border-dim);
   border-radius: 8px;
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: 16px;
   font-family: 'DM Sans', sans-serif;
   padding: 7px 11px;
   outline: none;
@@ -337,7 +349,7 @@ input[type="checkbox"]:focus {
   gap: 9px;
   padding: 7px 10px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 450;
   color: var(--text-secondary);
   cursor: pointer;
@@ -369,11 +381,11 @@ input[type="checkbox"]:focus {
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 16px;
 }
 .data-table th {
   font-family: 'DM Mono', monospace;
-  font-size: 10px;
+  font-size: 16px;
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -404,7 +416,7 @@ input[type="checkbox"]:focus {
 /* ── Inline code / mono ────────────────────────────── */
 code {
   font-family: 'DM Mono', monospace;
-  font-size: 12px;
+  font-size: 16px;
   background: var(--bg-elevated);
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
@@ -451,20 +463,20 @@ button { cursor: pointer; }
   border-radius: 8px !important;
   box-shadow: var(--shadow-elevated) !important;
   font-family: 'DM Sans', sans-serif !important;
-  font-size: 12px !important;
+  font-size: 16px !important;
   padding: 8px 12px !important;
 }
 .recharts-tooltip-label {
   color: var(--text-secondary) !important;
   font-family: 'DM Mono', monospace !important;
-  font-size: 10px !important;
+  font-size: 16px !important;
   letter-spacing: 0.08em !important;
   margin-bottom: 4px !important;
 }
 .recharts-cartesian-axis-tick text {
   fill: var(--text-muted) !important;
   font-family: 'DM Mono', monospace !important;
-  font-size: 10px !important;
+  font-size: 16px !important;
 }
 .recharts-cartesian-grid line {
   stroke: var(--border-subtle) !important;
@@ -472,7 +484,7 @@ button { cursor: pointer; }
 }
 .recharts-legend-item-text {
   color: var(--text-secondary) !important;
-  font-size: 11px !important;
+  font-size: 16px !important;
 }
 
 /* ── Appearance overrides (Settings → General → Appearance) ───────── */

@@ -129,7 +129,7 @@ function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: So
               <button
                 key={s.id}
                 onClick={() => setGridStoreIdx(i)}
-                className="px-2.5 py-1 rounded-md text-[11px] transition-all"
+                className="px-2.5 py-1 rounded-md text-[16px] transition-all"
                 style={{
                   background: gridStoreIdx === i ? 'var(--bg-elevated)' : 'transparent',
                   color: gridStoreIdx === i ? 'var(--text-primary)' : 'var(--text-muted)',
@@ -149,7 +149,7 @@ function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: So
                 <button
                   key={label}
                   onClick={() => setShowUpcoming(i === 1)}
-                  className="px-2.5 py-1 rounded-md text-[11px] transition-all"
+                  className="px-2.5 py-1 rounded-md text-[16px] transition-all"
                   style={{
                     background: active ? 'var(--bg-elevated)' : 'transparent',
                     color: active ? 'var(--text-primary)' : 'var(--text-muted)',
@@ -165,7 +165,7 @@ function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: So
           {/* Refresh button */}
           <button
             onClick={() => { setSelectedIdx(null); setCellOrder(Array.from({ length: GRID_SIZE }, (_, i) => i)); }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[16px] transition-all"
             style={{ background: 'var(--bg-surface)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
             <RefreshCw size={11} />
             Refresh Preview
@@ -199,15 +199,15 @@ function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: So
           }}>
             {/* Status bar */}
             <div style={{ height: 24, background: '#0a0e1a', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px' }}>
-              <span style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600 }}>9:41</span>
-              <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>●●● WiFi 🔋</span>
+              <span style={{ fontSize: 16, color: 'var(--text-muted)', fontWeight: 600 }}>9:41</span>
+              <span style={{ fontSize: 16, color: 'var(--text-muted)' }}>●●● WiFi 🔋</span>
             </div>
 
             {/* Instagram header */}
             <div style={{ padding: '8px 14px 12px', borderBottom: '1px solid #1e2538', display: 'flex', flexDirection: 'column', gap: 10 }}>
               {/* Username row */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 15, fontWeight: 700, color: 'white', fontFamily: 'system-ui' }}>
+                <span style={{ fontSize: 16, fontWeight: 700, color: 'white', fontFamily: 'system-ui' }}>
                   {currentStore.username}
                 </span>
                 <div style={{ display: 'flex', gap: 10, color: 'var(--text-muted)', fontSize: 18 }}>
@@ -235,8 +235,8 @@ function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: So
                     { label: 'Following', value: '284' },
                   ].map(s => (
                     <div key={s.label} style={{ textAlign: 'center' }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>{s.value}</div>
-                      <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{s.label}</div>
+                      <div style={{ fontSize: 16, fontWeight: 700, color: 'white' }}>{s.value}</div>
+                      <div style={{ fontSize: 16, color: 'var(--text-muted)' }}>{s.label}</div>
                     </div>
                   ))}
                 </div>
@@ -246,7 +246,7 @@ function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: So
               <button style={{
                 width: '100%', padding: '5px 0', borderRadius: 6,
                 background: 'transparent', border: '1px solid #3a4460',
-                color: 'white', fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                color: 'white', fontSize: 16, fontWeight: 600, cursor: 'pointer',
               }}>
                 Edit Profile
               </button>
@@ -260,10 +260,10 @@ function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: So
                   <Grid3X3 size={14} color='white' />
                 </div>
                 <div style={{ flex: 1, display: 'flex', justifyContent: 'center', padding: '8px 0' }}>
-                  <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>☰</span>
+                  <span style={{ fontSize: 16, color: 'var(--text-muted)' }}>☰</span>
                 </div>
                 <div style={{ flex: 1, display: 'flex', justifyContent: 'center', padding: '8px 0' }}>
-                  <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>♡</span>
+                  <span style={{ fontSize: 16, color: 'var(--text-muted)' }}>♡</span>
                 </div>
               </div>
 
@@ -307,7 +307,7 @@ function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: So
                           {(post.mediaType === 'carousel' || post.mediaType === 'video' || post.mediaType === 'reel') && (
                             <div style={{
                               position: 'absolute', top: 5, right: 5,
-                              fontSize: 9, color: 'white',
+                              fontSize: 16, color: 'white',
                               textShadow: '0 1px 3px rgba(0,0,0,0.8)',
                             }}>
                               {post.mediaType === 'carousel' ? '⧉' : post.mediaType === 'reel' ? '▶' : '🎬'}
@@ -336,11 +336,11 @@ function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: So
             <>
               {/* Platform badge */}
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                <span className="px-2 py-0.5 rounded-full text-[16px] font-semibold"
                   style={{ background: 'rgba(225,48,108,0.15)', color: '#E1306C', border: '1px solid rgba(225,48,108,0.3)' }}>
                   Instagram
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize"
+                <span className="px-2 py-0.5 rounded-full text-[16px] font-semibold capitalize"
                   style={{
                     background: `${STATUS_DOT[selectedPost.status]}20`,
                     color: STATUS_DOT[selectedPost.status],
@@ -363,7 +363,7 @@ function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: So
               {/* Caption */}
               <div>
                 <div className="section-label mb-1">Caption</div>
-                <p style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                <p style={{ fontSize: 16, color: 'var(--text-secondary)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                   {selectedPost.caption}
                 </p>
               </div>
@@ -371,7 +371,7 @@ function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: So
               {/* Scheduled date */}
               <div>
                 <div className="section-label mb-1">Scheduled</div>
-                <p style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 500 }}>
+                <p style={{ fontSize: 16, color: 'var(--text-primary)', fontWeight: 500 }}>
                   {new Date(selectedPost.scheduledFor).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                 </p>
               </div>
@@ -379,7 +379,7 @@ function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: So
               {/* Author */}
               <div>
                 <div className="section-label mb-1">Author</div>
-                <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{selectedPost.author}</p>
+                <p style={{ fontSize: 16, color: 'var(--text-secondary)' }}>{selectedPost.author}</p>
               </div>
 
               {/* Hashtags */}
@@ -388,7 +388,7 @@ function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: So
                   <div className="section-label mb-1.5">Hashtags</div>
                   <div className="flex flex-wrap gap-1">
                     {selectedPost.hashtags.slice(0, 5).map(tag => (
-                      <span key={tag} style={{ fontSize: 10, color: '#E1306C', background: 'rgba(225,48,108,0.1)', padding: '2px 6px', borderRadius: 10 }}>
+                      <span key={tag} style={{ fontSize: 16, color: '#E1306C', background: 'rgba(225,48,108,0.1)', padding: '2px 6px', borderRadius: 10 }}>
                         {tag}
                       </span>
                     ))}
@@ -400,7 +400,7 @@ function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: So
               <div className="flex flex-col gap-2 pt-1">
                 <button
                   onClick={() => onEditPost(selectedPost)}
-                  className="w-full py-2 rounded-lg text-xs font-semibold transition-all"
+                  className="w-full py-2 rounded-lg text-base font-semibold transition-all"
                   style={{ background: '#00d9ff', color: '#0a0e1a' }}>
                   Edit Post
                 </button>
@@ -408,7 +408,7 @@ function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: So
                   <button
                     onClick={() => moveCell('up')}
                     disabled={selectedIdx === 0}
-                    className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] transition-all"
+                    className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[16px] transition-all"
                     style={{
                       background: 'var(--bg-surface)',
                       color: selectedIdx === 0 ? 'var(--text-muted)' : 'var(--text-secondary)',
@@ -420,7 +420,7 @@ function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: So
                   <button
                     onClick={() => moveCell('down')}
                     disabled={selectedIdx === GRID_SIZE - 1}
-                    className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] transition-all"
+                    className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[16px] transition-all"
                     style={{
                       background: 'var(--bg-surface)',
                       color: selectedIdx === GRID_SIZE - 1 ? 'var(--text-muted)' : 'var(--text-secondary)',
@@ -436,11 +436,11 @@ function InstagramGridPreview({ onEditPost, onNewPost }: { onEditPost: (post: So
             /* Empty cell selected */
             <div style={{ textAlign: 'center', padding: '20px 0' }}>
               <div style={{ fontSize: 32, marginBottom: 8, color: 'var(--text-muted)' }}>+</div>
-              <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Empty slot</p>
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>Schedule a post to fill this position</p>
+              <p style={{ fontSize: 16, color: 'var(--text-muted)' }}>Empty slot</p>
+              <p style={{ fontSize: 16, color: 'var(--text-muted)', marginTop: 4 }}>Schedule a post to fill this position</p>
               <button
                 onClick={onNewPost}
-                className="mt-4 flex items-center gap-1.5 mx-auto px-3 py-1.5 rounded-xl text-xs font-medium"
+                className="mt-4 flex items-center gap-1.5 mx-auto px-3 py-1.5 rounded-xl text-base font-medium"
                 style={{ background: '#00d9ff', color: '#0a0e1a' }}>
                 <Plus size={11} /> New Post
               </button>
@@ -541,7 +541,7 @@ function PostApprovalsPanel() {
               <Icon size={14} style={{ color: cfg.color, flexShrink: 0 }} />
               <div>
                 <div className="data-value text-lg font-bold" style={{ color: cfg.color }}>{count}</div>
-                <div className="section-label text-[10px]">{cfg.label}</div>
+                <div className="section-label text-[16px]">{cfg.label}</div>
               </div>
             </div>
           );
@@ -549,7 +549,7 @@ function PostApprovalsPanel() {
       </div>
 
       {pending > 0 && (
-        <div className="rounded-xl px-3 py-2 flex items-center gap-2 text-xs" style={{ background: 'rgba(255,179,71,.08)', border: '1px solid rgba(255,179,71,.25)' }}>
+        <div className="rounded-xl px-3 py-2 flex items-center gap-2 text-base" style={{ background: 'rgba(255,179,71,.08)', border: '1px solid rgba(255,179,71,.25)' }}>
           <AlertCircle size={13} style={{ color: '#ffb347' }} />
           <span style={{ color: '#ffb347' }}>{pending} post{pending > 1 ? 's' : ''} awaiting your review</span>
         </div>
@@ -559,29 +559,29 @@ function PostApprovalsPanel() {
         <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
           {(['all', 'draft', 'review', 'approved', 'published', 'rejected'] as const).map(s => (
             <button key={s} onClick={() => setFilterStatus(s)}
-              className="px-2.5 py-1 rounded-md text-[11px] capitalize transition-all"
+              className="px-2.5 py-1 rounded-md text-[16px] capitalize transition-all"
               style={{ background: filterStatus === s ? 'var(--bg-elevated)' : 'transparent', color: filterStatus === s ? 'var(--text-primary)' : 'var(--text-muted)', border: filterStatus === s ? '1px solid var(--border-dim)' : '1px solid transparent' }}>
               {s}
             </button>
           ))}
         </div>
         <button onClick={() => setShowCsv(!showCsv)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
-          style={{ background: 'rgba(0,217,255,.1)', color: '#00d9ff', border: '1px solid rgba(0,217,255,.2)' }}>
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base font-medium"
+          style={{ background: 'rgba(0,217,255,.1)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,.2)' }}>
           <Upload size={12} /> Bulk CSV Import
         </button>
       </div>
 
       {showCsv && (
         <div className="glass-card p-4 flex flex-col gap-3">
-          <div className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>CSV Bulk Import</div>
-          <div className="section-label text-[10px]">Format: Title, Platforms (semicolon-separated), Scheduled Date (YYYY-MM-DD HH:MM), Content</div>
+          <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>CSV Bulk Import</div>
+          <div className="section-label text-[16px]">Format: Title, Platforms (semicolon-separated), Scheduled Date (YYYY-MM-DD HH:MM), Content</div>
           <textarea value={csvText} onChange={e => setCsvText(e.target.value)}
             placeholder={'title,platforms,scheduledFor,content\n"Summer Post","instagram;facebook","2026-05-20 10:00","Summer sale content..."'}
-            rows={5} className="w-full px-3 py-2 rounded-lg text-xs font-mono" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)', resize: 'none' }} />
+            rows={5} className="w-full px-3 py-2 rounded-lg text-base font-mono" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)', resize: 'none' }} />
           <div className="flex gap-2 justify-end">
-            <button onClick={() => setShowCsv(false)} className="px-3 py-1.5 rounded-lg text-xs" style={{ color: 'var(--text-muted)' }}>Cancel</button>
-            <button onClick={importCsv} disabled={!csvText.trim()} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: 'var(--accent-blue)', color: '#fff', opacity: csvText.trim() ? 1 : 0.5 }}>
+            <button onClick={() => setShowCsv(false)} className="px-3 py-1.5 rounded-lg text-base" style={{ color: 'var(--text-muted)' }}>Cancel</button>
+            <button onClick={importCsv} disabled={!csvText.trim()} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-base font-medium" style={{ background: 'var(--accent-blue)', color: '#fff', opacity: csvText.trim() ? 1 : 0.5 }}>
               <Upload size={11} /> Import Posts
             </button>
           </div>
@@ -597,8 +597,8 @@ function PostApprovalsPanel() {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{post.title}</span>
-                    <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full" style={{ color: cfg.color, background: cfg.bg }}>
+                    <span className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>{post.title}</span>
+                    <span className="flex items-center gap-1 text-base px-2 py-0.5 rounded-full" style={{ color: cfg.color, background: cfg.bg }}>
                       <Icon size={10} /> {cfg.label}
                     </span>
                   </div>
@@ -607,13 +607,13 @@ function PostApprovalsPanel() {
                     <span className="flex items-center gap-1 section-label"><Clock size={10} /> {post.scheduledFor}</span>
                     <div className="flex gap-1">
                       {post.platforms.map(p => (
-                        <span key={p} className="text-[9px] px-1.5 py-0.5 rounded-full font-medium capitalize" style={{ color: PLT_COLOR[p] || '#888', background: `${PLT_COLOR[p] || '#888'}18` }}>{p.replace('x-twitter', 'X')}</span>
+                        <span key={p} className="text-[16px] px-1.5 py-0.5 rounded-full font-medium capitalize" style={{ color: PLT_COLOR[p] || '#888', background: `${PLT_COLOR[p] || '#888'}18` }}>{p.replace('x-twitter', 'X')}</span>
                       ))}
                     </div>
                   </div>
-                  <p className="text-xs mt-2 line-clamp-2" style={{ color: 'var(--text-secondary)' }}>{post.content}</p>
+                  <p className="text-base mt-2 line-clamp-2" style={{ color: 'var(--text-secondary)' }}>{post.content}</p>
                   {post.rejectionNote && (
-                    <div className="mt-2 px-2 py-1.5 rounded-lg text-xs flex gap-1.5" style={{ background: 'rgba(255,68,68,.08)', color: '#ff4444' }}>
+                    <div className="mt-2 px-2 py-1.5 rounded-lg text-base flex gap-1.5" style={{ background: 'rgba(255,68,68,.08)', color: '#ff4444' }}>
                       <XCircle size={11} className="mt-0.5 shrink-0" />
                       {post.rejectionNote}
                     </div>
@@ -624,18 +624,18 @@ function PostApprovalsPanel() {
                     {rejectingId === post.id ? (
                       <div className="flex flex-col gap-2 w-56">
                         <input value={rejectNote} onChange={e => setRejectNote(e.target.value)} placeholder="Rejection reason..."
-                          className="px-2 py-1.5 rounded-lg text-xs" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
+                          className="px-2 py-1.5 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
                         <div className="flex gap-1.5">
-                          <button onClick={() => updateStatus(post.id, 'rejected', rejectNote)} className="flex-1 py-1 rounded-lg text-xs font-medium" style={{ background: 'rgba(255,68,68,.15)', color: '#ff4444' }}>Reject</button>
-                          <button onClick={() => setRejectingId(null)} className="flex-1 py-1 rounded-lg text-xs" style={{ color: 'var(--text-muted)' }}>Cancel</button>
+                          <button onClick={() => updateStatus(post.id, 'rejected', rejectNote)} className="flex-1 py-1 rounded-lg text-base font-medium" style={{ background: 'rgba(255,68,68,.15)', color: '#ff4444' }}>Reject</button>
+                          <button onClick={() => setRejectingId(null)} className="flex-1 py-1 rounded-lg text-base" style={{ color: 'var(--text-muted)' }}>Cancel</button>
                         </div>
                       </div>
                     ) : (
                       <>
-                        <button onClick={() => updateStatus(post.id, 'approved')} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: 'rgba(16,217,138,.12)', color: '#10d98a' }}>
+                        <button onClick={() => updateStatus(post.id, 'approved')} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-base font-medium" style={{ background: 'rgba(16,217,138,.12)', color: '#10d98a' }}>
                           <CheckCircle2 size={12} /> Approve
                         </button>
-                        <button onClick={() => setRejectingId(post.id)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs" style={{ background: 'rgba(255,68,68,.1)', color: '#ff4444' }}>
+                        <button onClick={() => setRejectingId(post.id)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-base" style={{ background: 'rgba(255,68,68,.1)', color: '#ff4444' }}>
                           <XCircle size={12} /> Reject
                         </button>
                       </>
@@ -643,7 +643,7 @@ function PostApprovalsPanel() {
                   </div>
                 )}
                 {post.status === 'approved' && (
-                  <button onClick={() => updateStatus(post.id, 'published')} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0" style={{ background: 'rgba(123,147,255,.12)', color: '#7b93ff' }}>
+                  <button onClick={() => updateStatus(post.id, 'published')} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-base font-medium shrink-0" style={{ background: 'rgba(123,147,255,.12)', color: '#7b93ff' }}>
                     <CheckSquare size={12} /> Mark Published
                   </button>
                 )}
@@ -654,7 +654,7 @@ function PostApprovalsPanel() {
         {visible.length === 0 && (
           <div className="glass-card p-8 text-center">
             <CheckCircle2 size={28} className="mx-auto mb-2" style={{ color: '#10d98a' }} />
-            <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>No posts in this state</div>
+            <div className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>No posts in this state</div>
           </div>
         )}
       </div>
@@ -725,23 +725,23 @@ function AIToolsPanel() {
           <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,0,0,.1)' }}>
             <Youtube size={14} style={{ color: '#ff0000' }} />
           </div>
-          <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>YouTube Description Generator</span>
+          <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>YouTube Description Generator</span>
           <span className="section-label">— SEO-optimized (D-17)</span>
         </div>
 
         <div className="grid grid-cols-3 gap-3">
           <input value={yt_topic} onChange={e => setYtTopic(e.target.value)} placeholder="Video topic or title..."
-            className="col-span-2 px-3 py-2 rounded-lg text-xs" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
+            className="col-span-2 px-3 py-2 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
           <select value={yt_tone} onChange={e => setYtTone(e.target.value as typeof yt_tone)}
-            className="px-3 py-2 rounded-lg text-xs" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+            className="px-3 py-2 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
             <option value="professional">Professional</option>
             <option value="conversational">Conversational</option>
             <option value="educational">Educational</option>
           </select>
           <input value={yt_kws} onChange={e => setYtKws(e.target.value)} placeholder="SEO keywords (comma-separated)..."
-            className="col-span-2 px-3 py-2 rounded-lg text-xs" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
+            className="col-span-2 px-3 py-2 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
           <button onClick={generateDescription} disabled={!yt_topic.trim() || yt_loading}
-            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium disabled:opacity-50"
+            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-base font-medium disabled:opacity-50"
             style={{ background: 'rgba(255,0,0,.12)', color: '#ff4d4d', border: '1px solid rgba(255,0,0,.2)' }}>
             <Wand2 size={12} />{yt_loading ? 'Generating…' : 'Generate'}
           </button>
@@ -750,9 +750,9 @@ function AIToolsPanel() {
         {yt_output && (
           <div className="relative">
             <textarea readOnly value={yt_output} rows={12}
-              className="w-full px-3 py-2 rounded-lg text-xs font-mono" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-secondary)', resize: 'none' }} />
+              className="w-full px-3 py-2 rounded-lg text-base font-mono" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-secondary)', resize: 'none' }} />
             <button onClick={() => { navigator.clipboard?.writeText(yt_output); }}
-              className="absolute top-2 right-2 text-[10px] px-2 py-1 rounded" style={{ background: 'var(--bg-elevated)', color: '#00d9ff' }}>
+              className="absolute top-2 right-2 text-[16px] px-2 py-1 rounded" style={{ background: 'var(--bg-elevated)', color: 'var(--cyan)' }}>
               Copy
             </button>
           </div>
@@ -765,7 +765,7 @@ function AIToolsPanel() {
           <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'rgba(123,147,255,.1)' }}>
             <Rocket size={14} style={{ color: '#7b93ff' }} />
           </div>
-          <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Auto-Boost Top Organic Posts</span>
+          <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Auto-Boost Top Organic Posts</span>
           <span className="section-label">— D-20</span>
           <div className="ml-auto flex items-center gap-2">
             <span className="section-label">Boost threshold: {boostThreshold}% engagement</span>
@@ -775,7 +775,7 @@ function AIToolsPanel() {
         </div>
 
         {eligible.length === 0 ? (
-          <div className="text-center py-6 text-xs" style={{ color: 'var(--text-muted)' }}>
+          <div className="text-center py-6 text-base" style={{ color: 'var(--text-muted)' }}>
             No posts above {boostThreshold}% engagement threshold. Lower the threshold to see more.
           </div>
         ) : (
@@ -788,20 +788,20 @@ function AIToolsPanel() {
                   <TrendingUp size={14} style={{ color: '#10d98a', flexShrink: 0 }} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                      <span className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>{post.caption.slice(0, 60)}…</span>
+                      <span className="text-base font-medium truncate" style={{ color: 'var(--text-primary)' }}>{post.caption.slice(0, 60)}…</span>
                     </div>
                     <div className="flex items-center gap-3 flex-wrap">
-                      <span className="text-[10px] font-medium" style={{ color: platColor }}>{post.platforms[0]}</span>
+                      <span className="text-[16px] font-medium" style={{ color: platColor }}>{post.platforms[0]}</span>
                       <span className="section-label">{(post.engagementRate ?? 0).toFixed(1)}% engagement · {(post.reach ?? 0).toLocaleString()} reach · {post.likes} likes</span>
                     </div>
                   </div>
                   {isBooted ? (
-                    <span className="text-[10px] flex items-center gap-1 px-2 py-1 rounded-lg" style={{ color: '#10d98a', background: 'rgba(16,217,138,.1)' }}>
+                    <span className="text-[16px] flex items-center gap-1 px-2 py-1 rounded-lg" style={{ color: '#10d98a', background: 'rgba(16,217,138,.1)' }}>
                       <CheckCircle2 size={10} /> Boosting
                     </span>
                   ) : (
                     <button onClick={() => boost(post.id)}
-                      className="flex items-center gap-1 text-[10px] px-2.5 py-1.5 rounded-lg font-medium"
+                      className="flex items-center gap-1 text-[16px] px-2.5 py-1.5 rounded-lg font-medium"
                       style={{ background: 'rgba(123,147,255,.12)', color: '#7b93ff', border: '1px solid rgba(123,147,255,.25)' }}>
                       <Rocket size={10} /> Boost to Paid
                     </button>
@@ -888,7 +888,7 @@ function DMAutomationPanel() {
       <div className="grid grid-cols-4 gap-3">
         {[
           { label: 'Active Rules',        value: rules.filter(r => r.status === 'active').length.toString(), color: '#10d98a' },
-          { label: 'Total Triggered',     value: totalTriggered.toLocaleString(),                            color: '#00d9ff' },
+          { label: 'Total Triggered',     value: totalTriggered.toLocaleString(),                            color: 'var(--cyan)' },
           { label: 'Conversions',         value: totalConversions.toLocaleString(),                          color: '#7b93ff' },
           { label: 'Conversion Rate',     value: convRate + '%',                                             color: '#ffb347' },
         ].map(s => (
@@ -900,9 +900,9 @@ function DMAutomationPanel() {
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>DM Automation Rules</span>
+        <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>DM Automation Rules</span>
         <button onClick={() => setShowCreate(!showCreate)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base font-medium"
           style={{ background: 'var(--accent-blue)', color: '#fff' }}>
           <Plus size={13} /> New Rule
         </button>
@@ -910,30 +910,30 @@ function DMAutomationPanel() {
 
       {showCreate && (
         <div className="glass-card p-4 flex flex-col gap-3">
-          <div className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>Create DM Rule</div>
+          <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Create DM Rule</div>
           <div className="grid grid-cols-3 gap-3">
             <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Rule name"
-              className="col-span-3 px-3 py-2 rounded-lg text-xs" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
+              className="col-span-3 px-3 py-2 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
             <select value={newPlatform} onChange={e => setNewPlatform(e.target.value as DMPlatform)}
-              className="px-3 py-2 rounded-lg text-xs" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+              className="px-3 py-2 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
               <option value="instagram">Instagram</option>
               <option value="facebook">Facebook</option>
               <option value="tiktok">TikTok</option>
             </select>
             <select value={newTrigger} onChange={e => setNewTrigger(e.target.value as DMTrigger)}
-              className="px-3 py-2 rounded-lg text-xs" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+              className="px-3 py-2 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
               {(Object.entries(TRIGGER_LABELS) as [DMTrigger, string][]).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
             <input value={newKeyword} onChange={e => setNewKeyword(e.target.value)} placeholder="Trigger keyword (optional)"
-              className="px-3 py-2 rounded-lg text-xs" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
+              className="px-3 py-2 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
           </div>
           <input value={newReply} onChange={e => setNewReply(e.target.value)} placeholder="Public comment reply (e.g., 'Check your DMs!')"
-            className="px-3 py-2 rounded-lg text-xs" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
+            className="px-3 py-2 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
           <textarea value={newDm} onChange={e => setNewDm(e.target.value)} placeholder="DM message to send..."
-            rows={3} className="px-3 py-2 rounded-lg text-xs w-full" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)', resize: 'none' }} />
+            rows={3} className="px-3 py-2 rounded-lg text-base w-full" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)', resize: 'none' }} />
           <div className="flex gap-2 justify-end">
-            <button onClick={() => setShowCreate(false)} className="px-3 py-1.5 rounded-lg text-xs" style={{ color: 'var(--text-muted)' }}>Cancel</button>
-            <button onClick={createRule} className="px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: 'var(--accent-blue)', color: '#fff' }}>Create Rule</button>
+            <button onClick={() => setShowCreate(false)} className="px-3 py-1.5 rounded-lg text-base" style={{ color: 'var(--text-muted)' }}>Cancel</button>
+            <button onClick={createRule} className="px-3 py-1.5 rounded-lg text-base font-medium" style={{ background: 'var(--accent-blue)', color: '#fff' }}>Create Rule</button>
           </div>
         </div>
       )}
@@ -950,8 +950,8 @@ function DMAutomationPanel() {
                   <div className="w-2 h-2 rounded-full shrink-0" style={{ background: rule.status === 'active' ? '#10d98a' : '#555e7a' }} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{rule.name}</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium capitalize" style={{ color: pColor, background: `${pColor}18` }}>{rule.platform}</span>
+                      <span className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>{rule.name}</span>
+                      <span className="text-[16px] px-1.5 py-0.5 rounded-full font-medium capitalize" style={{ color: pColor, background: `${pColor}18` }}>{rule.platform}</span>
                     </div>
                     <div className="flex items-center gap-3 flex-wrap">
                       <span className="section-label">{TRIGGER_LABELS[rule.trigger]}{rule.keyword ? ` → "${rule.keyword}"` : ''}</span>
@@ -961,7 +961,7 @@ function DMAutomationPanel() {
                   </div>
                 </button>
                 <div className="flex items-center gap-2 shrink-0">
-                  <button onClick={() => toggleStatus(rule.id)} className="text-xs px-2.5 py-1 rounded-lg font-medium" style={{ color: rule.status === 'active' ? '#ffb347' : '#10d98a', background: rule.status === 'active' ? 'rgba(255,179,71,.1)' : 'rgba(16,217,138,.1)' }}>
+                  <button onClick={() => toggleStatus(rule.id)} className="text-base px-2.5 py-1 rounded-lg font-medium" style={{ color: rule.status === 'active' ? '#ffb347' : '#10d98a', background: rule.status === 'active' ? 'rgba(255,179,71,.1)' : 'rgba(16,217,138,.1)' }}>
                     {rule.status === 'active' ? 'Pause' : 'Activate'}
                   </button>
                   <button onClick={() => deleteRule(rule.id)} className="p-1 rounded-lg" style={{ color: '#ff4444' }}>
@@ -974,16 +974,16 @@ function DMAutomationPanel() {
                   <div className="grid grid-cols-2 gap-3">
                     {rule.trigger === 'comment_keyword' && rule.replyMessage && (
                       <div className="rounded-xl p-3" style={{ background: 'var(--bg-base)' }}>
-                        <div className="section-label text-[10px] mb-1">Public Comment Reply</div>
-                        <div className="text-xs flex items-center gap-2">
+                        <div className="section-label text-[16px] mb-1">Public Comment Reply</div>
+                        <div className="text-base flex items-center gap-2">
                           <Hash size={10} style={{ color: '#7b93ff' }} />
                           <span style={{ color: 'var(--text-primary)' }}>{rule.replyMessage}</span>
                         </div>
                       </div>
                     )}
                     <div className="rounded-xl p-3 col-span-2" style={{ background: 'var(--bg-base)' }}>
-                      <div className="section-label text-[10px] mb-1 flex items-center gap-1"><ArrowRight size={10} /> DM Message</div>
-                      <p className="text-xs" style={{ color: 'var(--text-primary)' }}>{rule.dmMessage}</p>
+                      <div className="section-label text-[16px] mb-1 flex items-center gap-1"><ArrowRight size={10} /> DM Message</div>
+                      <p className="text-base" style={{ color: 'var(--text-primary)' }}>{rule.dmMessage}</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-3">
@@ -993,8 +993,8 @@ function DMAutomationPanel() {
                       { l: 'Conv. Rate', v: rate + '%', c: '#ffb347' },
                     ].map(s => (
                       <div key={s.l} className="rounded-lg p-2 text-center" style={{ background: 'var(--bg-base)' }}>
-                        <div className="section-label text-[10px]">{s.l}</div>
-                        <div className="text-sm font-bold mt-0.5" style={{ color: s.c }}>{s.v}</div>
+                        <div className="section-label text-[16px]">{s.l}</div>
+                        <div className="text-base font-bold mt-0.5" style={{ color: s.c }}>{s.v}</div>
                       </div>
                     ))}
                   </div>
@@ -1059,7 +1059,7 @@ export default function SocialPage() {
                 return (
                   <button key={t.key}
                     onClick={() => setTab(t.key)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all relative"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base transition-all relative"
                     style={{
                       background: tab === t.key ? 'var(--bg-elevated)' : 'transparent',
                       color: tab === t.key ? 'var(--text-primary)' : 'var(--text-muted)',
@@ -1069,7 +1069,7 @@ export default function SocialPage() {
                     <Icon size={13} />
                     {t.label}
                     {t.badge ? (
-                      <span className="text-[9px] px-1 py-0.5 rounded-full font-mono"
+                      <span className="text-[16px] px-1 py-0.5 rounded-full font-mono"
                         style={{ background: '#ff4444', color: 'white', minWidth: 16, textAlign: 'center' }}>
                         {t.badge}
                       </span>
@@ -1084,7 +1084,7 @@ export default function SocialPage() {
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setPlatformFilter('all')}
-                  className="px-2.5 py-1 rounded-lg text-[11px] transition-all"
+                  className="px-2.5 py-1 rounded-lg text-[16px] transition-all"
                   style={{ background: platformFilter === 'all' ? 'var(--bg-elevated)' : 'transparent', color: platformFilter === 'all' ? 'var(--text-primary)' : 'var(--text-muted)', border: platformFilter === 'all' ? '1px solid var(--border-dim)' : '1px solid transparent' }}>
                   All
                 </button>
@@ -1094,7 +1094,7 @@ export default function SocialPage() {
                   return (
                     <button key={p}
                       onClick={() => setPlatformFilter(p === platformFilter ? 'all' : p)}
-                      className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold transition-all"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-[16px] font-bold transition-all"
                       style={{ background: active ? cfg.color + '20' : 'var(--bg-elevated)', color: active ? cfg.color : 'var(--text-muted)', border: `1px solid ${active ? cfg.color + '40' : 'transparent'}` }}>
                       {cfg.label.charAt(0)}
                     </button>
@@ -1104,7 +1104,7 @@ export default function SocialPage() {
 
               <button
                 onClick={() => handleNewPost()}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-base font-medium transition-all"
                 style={{ background: '#00d9ff', color: '#0a0e1a' }}>
                 <Plus size={13} />
                 New Post

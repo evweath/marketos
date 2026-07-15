@@ -14,7 +14,7 @@ interface TypeConfig {
 }
 
 const TYPE_CONFIG: Record<AIInsight['type'], TypeConfig> = {
-  opportunity: { Icon: Lightbulb,    color: '#00d9ff', label: 'Opportunity', bg: 'rgba(0,217,255,0.055)'  },
+  opportunity: { Icon: Lightbulb,    color: 'var(--cyan)', label: 'Opportunity', bg: 'rgba(0,217,255,0.055)'  },
   anomaly:     { Icon: AlertTriangle, color: '#ff4444', label: 'Anomaly',     bg: 'rgba(255,68,68,0.055)'  },
   warning:     { Icon: AlertTriangle, color: '#ffb347', label: 'Warning',     bg: 'rgba(255,179,71,0.055)' },
   win:         { Icon: TrendingUp,    color: '#10d98a', label: 'Win',         bg: 'rgba(16,217,138,0.055)' },
@@ -69,7 +69,7 @@ function InsightCard({ insight }: { insight: AIInsight }) {
           {/* Badge row */}
           <div className="flex items-center gap-1.5 mb-1 flex-wrap">
             <span
-              className="text-[9px] font-mono px-1.5 py-0.5 rounded font-semibold"
+              className="text-[16px] font-mono px-1.5 py-0.5 rounded font-semibold"
               style={{ background: tc.color + '20', color: tc.color }}
             >
               {tc.label.toUpperCase()}
@@ -79,14 +79,14 @@ function InsightCard({ insight }: { insight: AIInsight }) {
             </span>
             {channelCfg && (
               <span
-                className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+                className="text-[16px] font-mono px-1.5 py-0.5 rounded"
                 style={{ background: channelCfg.color + '15', color: channelCfg.color }}
               >
                 {channelCfg.label}
               </span>
             )}
           </div>
-          <div className="text-sm font-medium leading-snug" style={{ color: 'var(--text-primary)' }}>
+          <div className="text-base font-medium leading-snug" style={{ color: 'var(--text-primary)' }}>
             {insight.title}
           </div>
         </div>
@@ -107,7 +107,7 @@ function InsightCard({ insight }: { insight: AIInsight }) {
       {expanded && (
         <div className="px-3.5 pb-3.5 animate-fade-up">
           <div className="h-px mb-3" style={{ background: `${tc.color}20` }} />
-          <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-base leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>
             {insight.detail}
           </p>
           {insight.action && (
@@ -117,7 +117,7 @@ function InsightCard({ insight }: { insight: AIInsight }) {
             >
               <div>
                 <div className="section-label mb-0.5">Recommended Action</div>
-                <p className="text-xs" style={{ color: 'var(--text-primary)' }}>{insight.action}</p>
+                <p className="text-base" style={{ color: 'var(--text-primary)' }}>{insight.action}</p>
               </div>
             </div>
           )}
@@ -158,7 +158,7 @@ export default function AIInsightsPanel() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className="px-2.5 py-1 rounded-full text-[11px] transition-all"
+              className="px-2.5 py-1 rounded-full text-[16px] transition-all"
               style={{
                 background: filter === f ? 'var(--bg-overlay)' : 'transparent',
                 color: filter === f ? 'var(--text-primary)' : 'var(--text-muted)',
@@ -185,7 +185,7 @@ export default function AIInsightsPanel() {
         style={{ borderColor: 'var(--border-subtle)' }}
       >
         <div className="w-1.5 h-1.5 rounded-full live-dot" style={{ background: '#7b93ff' }} />
-        <span className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
+        <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
           AI analysis updated · <span suppressHydrationWarning>{updatedAt ?? '—:—'}</span>
         </span>
       </div>

@@ -31,7 +31,7 @@ export default function AttributionPanel({ dateRange = '30d' }: { dateRange?: Da
     <div className="glass-card p-4">
       <div className="mb-3">
         <div className="section-label mb-1">Attribution Model</div>
-        <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>{MODEL_DESC[model]}</div>
+        <div className="text-base" style={{ color: 'var(--text-secondary)' }}>{MODEL_DESC[model]}</div>
       </div>
 
       {/* Segmented model selector — 2×2 grid pill container */}
@@ -43,7 +43,7 @@ export default function AttributionPanel({ dateRange = '30d' }: { dateRange?: Da
           <button
             key={m}
             onClick={() => setModel(m)}
-            className="px-2 py-1.5 rounded-[10px] text-[11px] text-center transition-all font-mono"
+            className="px-2 py-1.5 rounded-[10px] text-[16px] text-center transition-all font-mono"
             style={{
               background: model === m ? 'var(--bg-overlay)' : 'transparent',
               color: model === m ? 'var(--text-primary)' : 'var(--text-muted)',
@@ -66,7 +66,7 @@ export default function AttributionPanel({ dateRange = '30d' }: { dateRange?: Da
               <div className="flex items-center gap-2">
                 {/* Rank */}
                 <span
-                  className="text-[10px] font-mono w-4 text-right shrink-0"
+                  className="text-[16px] font-mono w-4 text-right shrink-0"
                   style={{ color: 'var(--text-muted)' }}
                 >
                   {i + 1}
@@ -77,13 +77,13 @@ export default function AttributionPanel({ dateRange = '30d' }: { dateRange?: Da
                   style={{ background: row.color, boxShadow: `0 0 5px ${row.color}60` }}
                 />
                 {/* Label */}
-                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                <span className="text-base" style={{ color: 'var(--text-secondary)' }}>
                   {row.label}
                 </span>
               </div>
               {/* Percentage */}
               <span
-                className="data-value text-xs font-semibold"
+                className="data-value text-base font-semibold"
                 style={{ color: row.color }}
               >
                 {row[model].toFixed(1)}%
@@ -109,7 +109,7 @@ export default function AttributionPanel({ dateRange = '30d' }: { dateRange?: Da
       </div>
 
       <div
-        className="mt-3 pt-3 border-t text-[10px] font-mono"
+        className="mt-3 pt-3 border-t text-[16px] font-mono"
         style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}
       >
         Based on {conversions.toLocaleString()} conversions · {DATE_RANGE_LABELS[dateRange].toLowerCase()}

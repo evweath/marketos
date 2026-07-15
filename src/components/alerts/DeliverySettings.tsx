@@ -85,9 +85,9 @@ function ChannelCard({ ch }: { ch: DeliveryChannelConfig }) {
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{ch.label}</div>
+          <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>{ch.label}</div>
           {ts && (
-            <div className="flex items-center gap-1 mt-0.5 text-[10px]">
+            <div className="flex items-center gap-1 mt-0.5 text-[16px]">
               <ts.Icon size={9} style={{ color: ts.color }} />
               <span style={{ color: ts.color }}>{ts.label}</span>
             </div>
@@ -112,10 +112,10 @@ function ChannelCard({ ch }: { ch: DeliveryChannelConfig }) {
       <button
         onClick={runTest}
         disabled={!enabled || testing}
-        className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium transition-all"
+        className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-base font-medium transition-all"
         style={{
           background: !enabled ? 'transparent' : testing ? 'rgba(0,217,255,0.04)' : 'rgba(0,217,255,0.06)',
-          color: !enabled ? 'var(--text-muted)' : '#00d9ff',
+          color: !enabled ? 'var(--text-muted)' : 'var(--cyan)',
           border: `1px solid ${!enabled ? 'transparent' : 'rgba(0,217,255,0.15)'}`,
           cursor: !enabled || testing ? 'not-allowed' : 'pointer',
         }}>
@@ -161,7 +161,7 @@ function QuietHoursPanel() {
           <div className="flex items-center gap-2">
             <input type="time" value={start} onChange={e => setStart(e.target.value)}
               className="flex-1" />
-            <span className="text-[11px] font-mono shrink-0" style={{ color: 'var(--text-muted)' }}>to</span>
+            <span className="text-[16px] font-mono shrink-0" style={{ color: 'var(--text-muted)' }}>to</span>
             <input type="time" value={end} onChange={e => setEnd(e.target.value)}
               className="flex-1" />
           </div>
@@ -170,7 +170,7 @@ function QuietHoursPanel() {
         {/* Timezone */}
         <div>
           <div className="section-label mb-1">Timezone</div>
-          <div className="text-xs px-2.5 py-2 rounded-lg font-mono"
+          <div className="text-base px-2.5 py-2 rounded-lg font-mono"
             style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
             {QUIET_HOURS.timezone}
           </div>
@@ -185,7 +185,7 @@ function QuietHoursPanel() {
               return (
                 <button key={d}
                   onClick={() => toggleDay(i)}
-                  className="w-8 h-8 rounded-lg text-[10px] font-semibold transition-all"
+                  className="w-8 h-8 rounded-lg text-[16px] font-semibold transition-all"
                   style={{
                     background: isActive ? 'rgba(123,147,255,0.15)' : 'var(--bg-elevated)',
                     color: isActive ? '#7b93ff' : 'var(--text-muted)',
@@ -200,7 +200,7 @@ function QuietHoursPanel() {
 
         {/* Critical bypass toggle */}
         <div className="flex items-center justify-between">
-          <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+          <span className="text-base" style={{ color: 'var(--text-secondary)' }}>
             Critical alerts bypass quiet hours
           </span>
           <Toggle on={exceptCrit} onChange={setExceptCrit} color="#ff4444" />
@@ -223,7 +223,7 @@ function DigestPanel() {
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 rounded flex items-center justify-center"
             style={{ background: 'rgba(0,217,255,0.12)' }}>
-            <Calendar size={11} style={{ color: '#00d9ff' }} />
+            <Calendar size={11} style={{ color: 'var(--cyan)' }} />
           </div>
           <span className="section-label">Alert Digest</span>
         </div>
@@ -238,10 +238,10 @@ function DigestPanel() {
             {(['daily', 'weekly'] as const).map(f => (
               <button key={f}
                 onClick={() => setFreq(f)}
-                className="flex-1 py-1.5 rounded-lg text-xs font-medium transition-all"
+                className="flex-1 py-1.5 rounded-lg text-base font-medium transition-all"
                 style={{
                   background: freq === f ? 'rgba(0,217,255,0.12)' : 'var(--bg-elevated)',
-                  color: freq === f ? '#00d9ff' : 'var(--text-muted)',
+                  color: freq === f ? 'var(--cyan)' : 'var(--text-muted)',
                   border: `1px solid ${freq === f ? 'rgba(0,217,255,0.25)' : 'var(--border-subtle)'}`,
                 }}>
                 {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -261,8 +261,8 @@ function DigestPanel() {
           <div className="section-label mb-1.5">Deliver Via</div>
           <div className="flex flex-wrap gap-1.5">
             {DIGEST_CONFIG.channels.map(ch => (
-              <span key={ch} className="text-[10px] font-mono px-2 py-0.5 rounded"
-                style={{ background: 'rgba(0,217,255,0.10)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
+              <span key={ch} className="text-[16px] font-mono px-2 py-0.5 rounded"
+                style={{ background: 'rgba(0,217,255,0.10)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
                 {ch}
               </span>
             ))}
@@ -274,7 +274,7 @@ function DigestPanel() {
           <div className="section-label mb-1.5">Include Categories</div>
           <div className="flex flex-wrap gap-1">
             {DIGEST_CONFIG.includeCategories.map(cat => (
-              <span key={cat} className="text-[10px] px-2 py-0.5 rounded"
+              <span key={cat} className="text-[16px] px-2 py-0.5 rounded"
                 style={{ background: 'var(--bg-overlay)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
                 {CATEGORY_CONFIG[cat].icon} {CATEGORY_CONFIG[cat].label}
               </span>

@@ -41,7 +41,7 @@ export default function AlertsPage() {
               return (
                 <button key={t.key}
                   onClick={() => setTab(t.key)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base transition-all"
                   style={{
                     background: tab === t.key ? 'var(--bg-elevated)' : 'transparent',
                     color: tab === t.key ? 'var(--text-primary)' : 'var(--text-muted)',
@@ -51,7 +51,7 @@ export default function AlertsPage() {
                   <Icon size={13} />
                   {t.label}
                   {t.badge ? (
-                    <span className="text-[9px] px-1.5 py-0.5 rounded-full font-mono"
+                    <span className="text-[16px] px-1.5 py-0.5 rounded-full font-mono"
                       style={{ background: '#ff4444', color: 'white', minWidth: 16, textAlign: 'center' }}>
                       {t.badge}
                     </span>

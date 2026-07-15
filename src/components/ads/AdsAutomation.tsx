@@ -90,12 +90,12 @@ export function AutomationRulesPanel() {
         <div className='flex items-center gap-2'>
           <Zap size={13} style={{ color: '#ffb347' }} />
           <span className='section-label'>Automation Rules</span>
-          <span className='text-[10px] font-mono px-1.5 py-0.5 rounded'
+          <span className='text-[16px] font-mono px-1.5 py-0.5 rounded'
             style={{ background: 'rgba(255,179,71,0.12)', color: '#ffb347' }}>
             {rules.filter(r => r.enabled).length}/{rules.length} active
           </span>
         </div>
-        <button onClick={addRule} className='text-xs px-3 py-1.5 rounded-lg font-medium'
+        <button onClick={addRule} className='text-base px-3 py-1.5 rounded-lg font-medium'
           style={{ background: 'rgba(255,179,71,0.08)', color: '#ffb347', border: '1px solid rgba(255,179,71,0.2)' }}>
           + New Rule
         </button>
@@ -119,23 +119,23 @@ export function AutomationRulesPanel() {
                 <div className='flex-1 min-w-0'>
                   {/* Badges row */}
                   <div className='flex items-center gap-1.5 mb-1.5 flex-wrap'>
-                    <span className='text-[9px] font-mono font-bold px-1.5 py-0.5 rounded'
+                    <span className='text-[16px] font-mono font-bold px-1.5 py-0.5 rounded'
                       style={{ background: pc.color + '18', color: pc.color, border: `1px solid ${pc.color}28` }}>
                       {pc.label}
                     </span>
-                    <span className='text-[9px] font-mono px-1.5 py-0.5 rounded'
+                    <span className='text-[16px] font-mono px-1.5 py-0.5 rounded'
                       style={{ background: sc + '18', color: sc }}>
                       {rule.status.toUpperCase()}
                     </span>
                   </div>
 
                   {/* Rule name */}
-                  <div className='text-xs font-semibold mb-1.5' style={{ color: 'var(--text-primary)' }}>
+                  <div className='text-base font-semibold mb-1.5' style={{ color: 'var(--text-primary)' }}>
                     {rule.name}
                   </div>
 
                   {/* IF / THEN / WHEN code blocks */}
-                  <div className='space-y-1 text-[10px] font-mono'>
+                  <div className='space-y-1 text-[16px] font-mono'>
                     <div className='flex gap-1.5'>
                       <span className='w-9 shrink-0 text-right' style={{ color: 'var(--text-muted)' }}>IF</span>
                       <span className='px-2 py-0.5 rounded'
@@ -146,7 +146,7 @@ export function AutomationRulesPanel() {
                     <div className='flex gap-1.5'>
                       <span className='w-9 shrink-0 text-right' style={{ color: 'var(--text-muted)' }}>THEN</span>
                       <span className='px-2 py-0.5 rounded'
-                        style={{ background: 'rgba(0,217,255,0.08)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.15)' }}>
+                        style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.15)' }}>
                         {rule.action}
                       </span>
                     </div>
@@ -159,13 +159,13 @@ export function AutomationRulesPanel() {
 
                 {/* Fire count + time */}
                 <div className='text-right shrink-0'>
-                  <div className='font-mono text-sm font-bold'
+                  <div className='font-mono text-base font-bold'
                     style={{ color: rule.fireCount > 0 ? '#ffb347' : 'var(--text-muted)' }}>
                     {rule.fireCount}
                   </div>
-                  <div className='section-label' style={{ fontSize: 9 }}>fires</div>
+                  <div className='section-label' style={{ fontSize: 16 }}>fires</div>
                   {rule.lastFired && (
-                    <div className='text-[9px] font-mono mt-1 flex items-center gap-0.5' style={{ color: 'var(--text-muted)' }} suppressHydrationWarning>
+                    <div className='text-[16px] font-mono mt-1 flex items-center gap-0.5' style={{ color: 'var(--text-muted)' }} suppressHydrationWarning>
                       <Clock size={8} />
                       {timeAgo(rule.lastFired)}
                     </div>
@@ -213,15 +213,15 @@ export function AccountHealthAudit() {
 
         {/* Score gauge */}
         <div className='flex items-center gap-3'>
-          <div className='flex items-center gap-1.5 text-xs font-mono'>
+          <div className='flex items-center gap-1.5 text-base font-mono'>
             {fails > 0 && (
-              <span className='px-1.5 py-0.5 rounded text-[10px] font-bold'
+              <span className='px-1.5 py-0.5 rounded text-[16px] font-bold'
                 style={{ background: 'rgba(255,68,68,0.12)', color: '#ff4444' }}>
                 {fails} fail
               </span>
             )}
             {warns > 0 && (
-              <span className='px-1.5 py-0.5 rounded text-[10px] font-bold'
+              <span className='px-1.5 py-0.5 rounded text-[16px] font-bold'
                 style={{ background: 'rgba(255,179,71,0.12)', color: '#ffb347' }}>
                 {warns} warn
               </span>
@@ -239,7 +239,7 @@ export function AccountHealthAudit() {
                 style={{ filter: `drop-shadow(0 0 4px ${scoreColor}60)` }}
               />
             </svg>
-            <span className='absolute inset-0 flex items-center justify-center font-mono text-[11px] font-bold'
+            <span className='absolute inset-0 flex items-center justify-center font-mono text-[16px] font-bold'
               style={{ color: 'var(--text-primary)' }}>
               {score}
             </span>
@@ -250,7 +250,7 @@ export function AccountHealthAudit() {
       {/* Platform filter */}
       <div className='flex items-center gap-1 mb-3 flex-wrap'>
         <button onClick={() => setPlatform('all')}
-          className='px-2.5 py-1 rounded-full text-[10px] font-medium transition-all'
+          className='px-2.5 py-1 rounded-full text-[16px] font-medium transition-all'
           style={{
             background: platform === 'all' ? 'var(--bg-overlay)' : 'transparent',
             color: platform === 'all' ? 'var(--text-primary)' : 'var(--text-muted)',
@@ -263,7 +263,7 @@ export function AccountHealthAudit() {
           const isActive = platform === p;
           return (
             <button key={p} onClick={() => setPlatform(p)}
-              className='px-2.5 py-1 rounded-full text-[10px] font-medium transition-all'
+              className='px-2.5 py-1 rounded-full text-[16px] font-medium transition-all'
               style={{
                 background: isActive ? cfg.color + '18' : 'transparent',
                 color: isActive ? cfg.color : 'var(--text-muted)',
@@ -296,13 +296,13 @@ export function AccountHealthAudit() {
               <Icon size={13} style={{ color: sc.color, marginTop: 1, flexShrink: 0 }} />
               <div className='flex-1 min-w-0'>
                 <div className='flex items-center gap-2 mb-0.5'>
-                  <span className='text-xs font-semibold' style={{ color: 'var(--text-primary)' }}>
+                  <span className='text-base font-semibold' style={{ color: 'var(--text-primary)' }}>
                     {check.check}
                   </span>
-                  <span className='text-[9px] font-mono' style={{ color: 'var(--text-muted)' }}>
+                  <span className='text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>
                     {check.category}
                   </span>
-                  <span className='text-[9px] font-mono ml-auto px-1.5 py-0.5 rounded'
+                  <span className='text-[16px] font-mono ml-auto px-1.5 py-0.5 rounded'
                     style={{
                       background: AD_PLATFORM_CONFIG[check.platform].color + '15',
                       color: AD_PLATFORM_CONFIG[check.platform].color,
@@ -310,7 +310,7 @@ export function AccountHealthAudit() {
                     {AD_PLATFORM_CONFIG[check.platform].icon}
                   </span>
                 </div>
-                <div className='text-[11px] leading-relaxed'
+                <div className='text-[16px] leading-relaxed'
                   style={{ color: check.status === 'pass' ? 'var(--text-muted)' : 'var(--text-secondary)' }}>
                   {check.detail}
                 </div>

@@ -63,7 +63,7 @@ export default function ChannelTable({ dateRange = '30d' }: { dateRange?: DateRa
     const good = inverse ? delta <= 0 : delta >= 0;
     return (
       <span
-        className="inline-flex items-center gap-0.5 text-[10px] font-mono ml-1"
+        className="inline-flex items-center gap-0.5 text-[16px] font-mono ml-1"
         style={{ color: good ? '#10d98a' : '#ff4444' }}
       >
         {good ? <TrendingUp size={8} /> : <TrendingDown size={8} />}
@@ -104,17 +104,17 @@ export default function ChannelTable({ dateRange = '30d' }: { dateRange?: DateRa
       >
         <div>
           <div className="section-label mb-0.5">Channel Performance</div>
-          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+          <div className="text-base" style={{ color: 'var(--text-secondary)' }}>
             All channels · {DATE_RANGE_LABELS[dateRange].toLowerCase()}
           </div>
         </div>
-        <div className="flex items-center gap-1 text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
+        <div className="flex items-center gap-1 text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
           sorted by {sortKey} {sortDir === 'desc' ? '↓' : '↑'}
         </div>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
+        <table className="w-full text-base" style={{ borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: 'var(--bg-elevated)' }}>
               {/* Channel sticky header */}
@@ -135,9 +135,9 @@ export default function ChannelTable({ dateRange = '30d' }: { dateRange?: DateRa
                     className="px-3 py-2.5 whitespace-nowrap cursor-pointer text-right transition-colors select-none"
                     style={{
                       background: isActive ? 'rgba(0,217,255,0.06)' : 'transparent',
-                      color: isActive ? '#00d9ff' : 'var(--text-muted)',
+                      color: isActive ? 'var(--cyan)' : 'var(--text-muted)',
                       fontFamily: 'DM Mono',
-                      fontSize: 10,
+                      fontSize: 16,
                       fontWeight: 500,
                       letterSpacing: '0.12em',
                       textTransform: 'uppercase',
@@ -190,7 +190,7 @@ export default function ChannelTable({ dateRange = '30d' }: { dateRange?: DateRa
                       />
                       {/* Icon chip */}
                       <div
-                        className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold shrink-0"
+                        className="w-6 h-6 rounded-md flex items-center justify-center text-[16px] font-bold shrink-0"
                         style={{ background: ch.color + '20', color: ch.color }}
                       >
                         {ch.icon}
@@ -234,7 +234,7 @@ export default function ChannelTable({ dateRange = '30d' }: { dateRange?: DateRa
               style={{ borderColor: 'var(--border-dim)', background: 'var(--bg-elevated)' }}
             >
               <td
-                className="px-4 py-2.5 sticky left-0 font-semibold tracking-widest text-[10px] font-mono"
+                className="px-4 py-2.5 sticky left-0 font-semibold tracking-widest text-[16px] font-mono"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', letterSpacing: '0.12em' }}
               >
                 TOTAL

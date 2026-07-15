@@ -52,7 +52,7 @@ function MessageCard({ msg, selected, onClick }: { msg: InboxMessage; selected: 
         {/* Avatar with platform-colored ring */}
         <div className="relative shrink-0">
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-[16px] font-bold"
             style={{
               background: pCfg.color + '22',
               color: pCfg.color,
@@ -69,35 +69,35 @@ function MessageCard({ msg, selected, onClick }: { msg: InboxMessage; selected: 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-1 mb-0.5">
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)', maxWidth: 110 }}>
+              <span className="text-base font-semibold truncate" style={{ color: 'var(--text-primary)', maxWidth: 110 }}>
                 {msg.author}
               </span>
-              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded shrink-0"
+              <span className="text-[16px] font-mono px-1.5 py-0.5 rounded shrink-0"
                 style={{ background: pCfg.color + '18', color: pCfg.color }}>
                 {pCfg.label}
               </span>
             </div>
-            <span className="text-[10px] font-mono shrink-0" style={{ color: 'var(--text-muted)' }} suppressHydrationWarning>
+            <span className="text-[16px] font-mono shrink-0" style={{ color: 'var(--text-muted)' }} suppressHydrationWarning>
               {timeAgo(msg.receivedAt)}
             </span>
           </div>
 
-          <p className="text-xs line-clamp-2 mb-1.5" style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+          <p className="text-base line-clamp-2 mb-1.5" style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>
             {msg.content}
           </p>
 
           <div className="flex items-center gap-2">
-            <span className="text-[9px] font-mono" style={{ color: 'var(--text-muted)' }}>
+            <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
               {tCfg.label}
             </span>
             {/* Sentiment pill */}
             <span
-              className="flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded"
+              className="flex items-center gap-0.5 text-[16px] px-1.5 py-0.5 rounded"
               style={{ background: sCfg.bg, color: sCfg.color }}>
               {sCfg.icon}
             </span>
             {msg.replied && (
-              <span className="ml-auto text-[9px] font-mono" style={{ color: '#10d98a' }}>✓ Replied</span>
+              <span className="ml-auto text-[16px] font-mono" style={{ color: '#10d98a' }}>✓ Replied</span>
             )}
           </div>
         </div>
@@ -138,7 +138,7 @@ export default function SocialInbox() {
           <div className="flex items-center gap-2 mb-2.5">
             <span className="section-label">Unified Inbox</span>
             {unread > 0 && (
-              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+              <span className="text-[16px] font-mono px-1.5 py-0.5 rounded"
                 style={{ background: 'rgba(255,68,68,0.15)', color: '#ff4444', border: '1px solid rgba(255,68,68,0.25)' }}>
                 {unread} new
               </span>
@@ -154,7 +154,7 @@ export default function SocialInbox() {
               return (
                 <button key={p}
                   onClick={() => setPlatformFilter(p)}
-                  className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] transition-all"
+                  className="flex items-center gap-1 px-2 py-1 rounded-full text-[16px] transition-all"
                   style={{
                     background: isActive
                       ? (color ? color + '20' : 'var(--bg-overlay)')
@@ -165,7 +165,7 @@ export default function SocialInbox() {
                       : '1px solid transparent',
                   }}>
                   {p === 'all' ? 'All' : (PLATFORM_CONFIG[p]?.label?.slice(0, 3) ?? p)}
-                  <span className="font-mono text-[8px]" style={{ color: 'inherit', opacity: 0.7 }}>
+                  <span className="font-mono text-[16px]" style={{ color: 'inherit', opacity: 0.7 }}>
                     {count}
                   </span>
                 </button>
@@ -188,12 +188,12 @@ export default function SocialInbox() {
           {/* Detail header */}
           <div className="px-4 py-3 border-b shrink-0" style={{ borderColor: 'var(--border-subtle)' }}>
             <div className="flex items-center gap-2 mb-0.5">
-              <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{selected.author}</span>
-              <span className="text-[10px] font-mono" style={{ color: PLATFORM_CONFIG[selected.platform].color }}>
+              <span className="font-semibold text-base" style={{ color: 'var(--text-primary)' }}>{selected.author}</span>
+              <span className="text-[16px] font-mono" style={{ color: PLATFORM_CONFIG[selected.platform].color }}>
                 {selected.authorHandle}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-[10px]">
+            <div className="flex items-center gap-2 text-[16px]">
               <span style={{ color: 'var(--text-muted)' }} suppressHydrationWarning>{timeAgo(selected.receivedAt)}</span>
               <span className="font-mono" style={{ color: PLATFORM_CONFIG[selected.platform].color }}>
                 via {PLATFORM_CONFIG[selected.platform].label}
@@ -205,19 +205,19 @@ export default function SocialInbox() {
             {/* Original message bubble */}
             <div>
               <div className="section-label mb-1.5">Message</div>
-              <div className="rounded-xl px-4 py-3 text-sm leading-relaxed"
+              <div className="rounded-xl px-4 py-3 text-base leading-relaxed"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}>
                 {selected.content}
               </div>
               {selected.postCaption && (
-                <div className="mt-1.5 text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
+                <div className="mt-1.5 text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
                   In response to: "{selected.postCaption}"
                 </div>
               )}
             </div>
 
             {/* Sentiment indicator */}
-            <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg text-xs"
+            <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg text-base"
               style={{
                 background: SENTIMENT_CONFIG[selected.sentiment].bg,
                 color: SENTIMENT_CONFIG[selected.sentiment].color,
@@ -240,7 +240,7 @@ export default function SocialInbox() {
                   onChange={e => setReplyText(e.target.value)}
                   rows={2}
                   placeholder="Write a reply..."
-                  className="flex-1 text-xs px-3 py-2.5 rounded-xl resize-none outline-none transition-colors"
+                  className="flex-1 text-base px-3 py-2.5 rounded-xl resize-none outline-none transition-colors"
                   style={{
                     background: 'var(--bg-elevated)',
                     color: 'var(--text-primary)',
@@ -250,7 +250,7 @@ export default function SocialInbox() {
                 <button
                   onClick={sendReply}
                   disabled={!replyText.trim()}
-                  className="px-3 py-2 rounded-xl text-xs font-semibold self-end transition-all"
+                  className="px-3 py-2 rounded-xl text-base font-semibold self-end transition-all"
                   style={{
                     background: replyText.trim() ? '#00d9ff' : 'var(--bg-elevated)',
                     color: replyText.trim() ? '#080b18' : 'var(--text-muted)',
@@ -261,7 +261,7 @@ export default function SocialInbox() {
               </div>
             </div>
           ) : (
-            <div className="p-4 border-t text-xs text-center shrink-0"
+            <div className="p-4 border-t text-base text-center shrink-0"
               style={{ borderColor: 'var(--border-subtle)', color: '#10d98a' }}>
               ✓ Already replied to this message
             </div>
@@ -271,7 +271,7 @@ export default function SocialInbox() {
         <div className="flex-1 flex items-center justify-center" style={{ color: 'var(--text-muted)' }}>
           <div className="text-center">
             <MessageSquare size={32} className="mx-auto mb-3 opacity-20" />
-            <div className="text-sm">Select a message to reply</div>
+            <div className="text-base">Select a message to reply</div>
           </div>
         </div>
       )}

@@ -80,22 +80,22 @@ function AlertDetail({ alert, onClose, onUpdateStatus }: {
           <sc.Icon size={14} style={{ color: sc.color, marginTop: 3, flexShrink: 0 }} />
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap mb-1">
-              <span className="badge-critical text-[9px]" style={
+              <span className="badge-critical text-[16px]" style={
                 alert.severity === 'warning' ? { background: 'rgba(255,179,71,0.12)', color: '#ffbe6a', borderColor: 'rgba(255,179,71,0.25)' }
                   : alert.severity === 'info' ? { background: 'rgba(123,147,255,0.12)', color: '#9cb1ff', borderColor: 'rgba(123,147,255,0.25)' }
                     : undefined
               }>
                 {alert.severity.toUpperCase()}
               </span>
-              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+              <span className="text-[16px] font-mono px-1.5 py-0.5 rounded"
                 style={{ background: stc.color + '18', color: stc.color }}>
                 {stc.label.toUpperCase()}
               </span>
-              <span className="text-[9px] font-mono" style={{ color: 'var(--text-muted)' }}>
+              <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
                 {cat.icon} {cat.label}
               </span>
             </div>
-            <h3 className="text-sm font-semibold leading-snug" style={{ color: 'var(--text-primary)' }}>
+            <h3 className="text-base font-semibold leading-snug" style={{ color: 'var(--text-primary)' }}>
               {alert.title}
             </h3>
           </div>
@@ -111,7 +111,7 @@ function AlertDetail({ alert, onClose, onUpdateStatus }: {
         {/* Detail text */}
         <div>
           <div className="section-label mb-1.5">Alert Detail</div>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+          <p className="text-base leading-relaxed" style={{ color: 'var(--text-secondary)', lineHeight: 1.7 }}>
             {alert.detail}
           </p>
         </div>
@@ -120,13 +120,13 @@ function AlertDetail({ alert, onClose, onUpdateStatus }: {
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded-xl p-3" style={{ background: sc.bg, border: `1px solid ${sc.border}` }}>
             <div className="section-label mb-1.5">Actual Value</div>
-            <div className="font-mono text-sm font-bold" style={{ color: sc.color }}>
+            <div className="font-mono text-base font-bold" style={{ color: sc.color }}>
               {alert.actualValue}
             </div>
           </div>
           <div className="rounded-xl p-3" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
             <div className="section-label mb-1.5">Threshold</div>
-            <div className="font-mono text-sm" style={{ color: 'var(--text-secondary)' }}>
+            <div className="font-mono text-base" style={{ color: 'var(--text-secondary)' }}>
               {alert.thresholdValue}
             </div>
           </div>
@@ -149,8 +149,8 @@ function AlertDetail({ alert, onClose, onUpdateStatus }: {
                     <ev.Icon size={9} style={{ color: ev.color }} />
                   </div>
                   <div className="flex-1 pb-0.5">
-                    <div className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{ev.label}</div>
-                    <div className="text-[10px] font-mono mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                    <div className="text-base font-medium" style={{ color: 'var(--text-secondary)' }}>{ev.label}</div>
+                    <div className="text-[16px] font-mono mt-0.5" style={{ color: 'var(--text-muted)' }}>
                       {fmtDate(ev.time)}
                     </div>
                   </div>
@@ -174,13 +174,13 @@ function AlertDetail({ alert, onClose, onUpdateStatus }: {
         {alert.actionTaken && (
           <div className="rounded-xl p-3" style={{ background: 'rgba(16,217,138,0.06)', border: '1px solid rgba(16,217,138,0.18)' }}>
             <div className="section-label mb-1" style={{ color: '#10d98a' }}>Action Taken</div>
-            <p className="text-xs" style={{ color: '#10d98a' }}>{alert.actionTaken}</p>
+            <p className="text-base" style={{ color: '#10d98a' }}>{alert.actionTaken}</p>
           </div>
         )}
 
         {/* Store */}
         {store && (
-          <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-muted)' }}>
+          <div className="flex items-center gap-2 text-base" style={{ color: 'var(--text-muted)' }}>
             <Store size={11} />
             {store.name} ({store.domain})
           </div>
@@ -191,17 +191,17 @@ function AlertDetail({ alert, onClose, onUpdateStatus }: {
       {alert.status === 'active' && (
         <div className="flex gap-2 p-4 border-t shrink-0" style={{ borderColor: 'var(--border-subtle)' }}>
           <button onClick={() => onUpdateStatus('acknowledged')}
-            className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all hover:brightness-110"
+            className="flex-1 py-2 rounded-lg text-base font-semibold transition-all hover:brightness-110"
             style={{ background: 'rgba(123,147,255,0.12)', color: '#7b93ff', border: '1px solid rgba(123,147,255,0.25)' }}>
             Acknowledge
           </button>
           <button onClick={() => onUpdateStatus('snoozed')}
-            className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all hover:brightness-110"
+            className="flex-1 py-2 rounded-lg text-base font-semibold transition-all hover:brightness-110"
             style={{ background: 'rgba(255,179,71,0.10)', color: '#ffb347', border: '1px solid rgba(255,179,71,0.22)' }}>
             Snooze 1h
           </button>
           <button onClick={() => onUpdateStatus('resolved')}
-            className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all hover:brightness-110"
+            className="flex-1 py-2 rounded-lg text-base font-semibold transition-all hover:brightness-110"
             style={{ background: 'rgba(16,217,138,0.12)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.22)' }}>
             Resolve
           </button>
@@ -237,43 +237,43 @@ function AlertRow({ alert, selected, onClick }: { alert: FiredAlert; selected: b
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-0.5">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+              <span className="text-[16px] font-mono px-1.5 py-0.5 rounded"
                 style={{ background: sc.color + '18', color: sc.color }}>
                 {alert.severity.toUpperCase()}
               </span>
-              <span className="text-[9px] font-mono" style={{ color: 'var(--text-muted)' }}>
+              <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
                 {cat.icon} {cat.label}
               </span>
               {!isActive && (
-                <span className="text-[9px] font-mono" style={{ color: stc.color }}>
+                <span className="text-[16px] font-mono" style={{ color: stc.color }}>
                   {stc.label}
                 </span>
               )}
             </div>
-            <span className="text-[10px] font-mono shrink-0" style={{ color: 'var(--text-muted)' }} suppressHydrationWarning>
+            <span className="text-[16px] font-mono shrink-0" style={{ color: 'var(--text-muted)' }} suppressHydrationWarning>
               {timeAgo(alert.firedAt)}
             </span>
           </div>
 
-          <div className="text-xs font-semibold mb-0.5 leading-snug"
+          <div className="text-base font-semibold mb-0.5 leading-snug"
             style={{ color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
             {alert.title}
           </div>
-          <div className="text-[11px] line-clamp-1 mb-1.5" style={{ color: 'var(--text-muted)' }}>
+          <div className="text-[16px] line-clamp-1 mb-1.5" style={{ color: 'var(--text-muted)' }}>
             {alert.detail}
           </div>
 
           {/* Actual vs Threshold monospace chips */}
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] px-1.5 py-0.5 rounded"
+            <span className="font-mono text-[16px] px-1.5 py-0.5 rounded"
               style={{ background: sc.color + '18', color: sc.color }}>
               {alert.actualValue}
             </span>
-            <span className="text-[9px] font-mono" style={{ color: 'var(--text-muted)' }}>
+            <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
               vs {alert.thresholdValue}
             </span>
             {alert.storeId && (
-              <span className="text-[9px] font-mono ml-auto" style={{ color: 'var(--text-muted)' }}>
+              <span className="text-[16px] font-mono ml-auto" style={{ color: 'var(--text-muted)' }}>
                 {STORES.find(s => s.id === alert.storeId)?.domain}
               </span>
             )}
@@ -351,7 +351,7 @@ export default function AlertFeed() {
               return (
                 <button key={t.key}
                   onClick={() => setStatusFilter(t.key)}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] transition-all"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[16px] transition-all"
                   style={{
                     background: isActive ? 'var(--bg-overlay)' : 'transparent',
                     color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
@@ -359,7 +359,7 @@ export default function AlertFeed() {
                   }}>
                   {t.label}
                   <span
-                    className="min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center font-mono text-[9px]"
+                    className="min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center font-mono text-[16px]"
                     style={{
                       background: tabColor ? tabColor + '20' : 'var(--bg-base)',
                       color: tabColor ?? 'var(--text-muted)',
@@ -376,7 +376,7 @@ export default function AlertFeed() {
             {SEV_FILTERS.map(f => (
               <button key={f.key}
                 onClick={() => setSevFilter(f.key)}
-                className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] transition-all"
+                className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[16px] transition-all"
                 style={{
                   background: sevFilter === f.key
                     ? (f.color ? f.color + '18' : 'var(--bg-overlay)')
@@ -405,7 +405,7 @@ export default function AlertFeed() {
           ))}
           {alerts.length === 0 && (
             <div className="flex items-center justify-center h-32" style={{ color: 'var(--text-muted)' }}>
-              <span className="text-sm">No alerts match this filter</span>
+              <span className="text-base">No alerts match this filter</span>
             </div>
           )}
         </div>

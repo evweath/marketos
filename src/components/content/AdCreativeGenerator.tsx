@@ -108,7 +108,7 @@ export function AdCreativeGenerator() {
         style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)' }}>
         {subTabs.map(({ key, label, icon: Icon }) => (
           <button key={key} onClick={() => setSubTab(key)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base transition-all"
             style={{
               background: subTab === key ? 'var(--bg-overlay)' : 'transparent',
               color: subTab === key ? 'var(--text-primary)' : 'var(--text-muted)',
@@ -124,7 +124,7 @@ export function AdCreativeGenerator() {
         {/* Form */}
         <div className="glass-card p-4 space-y-3 col-span-1">
           <div className="flex items-center gap-2 mb-2">
-            <Zap size={13} style={{ color: '#00d9ff' }} />
+            <Zap size={13} style={{ color: 'var(--cyan)' }} />
             <span className="section-label">Generate Creative</span>
           </div>
 
@@ -133,7 +133,7 @@ export function AdCreativeGenerator() {
             <input
               value={productName} onChange={e => setProductName(e.target.value)}
               placeholder="e.g. ProFry 3000 Commercial Fryer"
-              className="w-full px-3 py-2 rounded-lg text-xs outline-none transition-colors"
+              className="w-full px-3 py-2 rounded-lg text-base outline-none transition-colors"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}
             />
           </div>
@@ -141,7 +141,7 @@ export function AdCreativeGenerator() {
           <div>
             <label className="section-label block mb-1.5">Target Platform</label>
             <select value={platform} onChange={e => setPlatform(e.target.value as ContentPlatform)}
-              className="w-full px-3 py-2 rounded-lg text-xs outline-none"
+              className="w-full px-3 py-2 rounded-lg text-base outline-none"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
               {Object.entries(PLATFORM_CONFIG).map(([key, cfg]) => (
                 <option key={key} value={key}>{cfg.label}</option>
@@ -152,7 +152,7 @@ export function AdCreativeGenerator() {
           <div>
             <label className="section-label block mb-1.5">Ad Objective</label>
             <select value={objective} onChange={e => setObjective(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-xs outline-none"
+              className="w-full px-3 py-2 rounded-lg text-base outline-none"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
               <option value="awareness">Brand Awareness</option>
               <option value="traffic">Traffic</option>
@@ -167,7 +167,7 @@ export function AdCreativeGenerator() {
               value={sellingPoints} onChange={e => setSellingPoints(e.target.value)}
               placeholder="e.g. 40% faster heat recovery, 5-year warranty, NSF-certified..."
               rows={3}
-              className="w-full px-3 py-2 rounded-lg text-xs outline-none resize-none"
+              className="w-full px-3 py-2 rounded-lg text-base outline-none resize-none"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}
             />
           </div>
@@ -178,14 +178,14 @@ export function AdCreativeGenerator() {
               <input
                 value={ctaText} onChange={e => setCtaText(e.target.value)}
                 placeholder="Shop Now"
-                className="w-full px-3 py-2 rounded-lg text-xs outline-none"
+                className="w-full px-3 py-2 rounded-lg text-base outline-none"
                 style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}
               />
             </div>
             <div>
               <label className="section-label block mb-1.5">Store</label>
               <select value={store} onChange={e => setStore(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg text-xs outline-none"
+                className="w-full px-3 py-2 rounded-lg text-base outline-none"
                 style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
                 <option value="donut-equipment.com">Donut Equipment</option>
                 <option value="donut-supplies.com">Donut Supplies</option>
@@ -197,7 +197,7 @@ export function AdCreativeGenerator() {
           <button
             onClick={handleGenerate}
             disabled={generating || !productName.trim()}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold transition-all"
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-base font-semibold transition-all"
             style={{
               background: generating || !productName.trim() ? 'rgba(0,217,255,0.3)' : '#00d9ff',
               color: '#0a0e1a',
@@ -216,30 +216,30 @@ export function AdCreativeGenerator() {
               <div className="rounded-xl flex-1 min-h-48 flex items-center justify-center relative overflow-hidden"
                 style={{ background: generated.color, minHeight: 180 }}>
                 <div className="text-center">
-                  <div className="text-white/40 text-xs font-mono mb-1">{generated.size}</div>
-                  <div className="text-white/70 text-sm font-semibold">{generated.format}</div>
-                  <div className="text-white/40 text-xs mt-1">{generated.platform}</div>
+                  <div className="text-white/40 text-base font-mono mb-1">{generated.size}</div>
+                  <div className="text-white/70 text-base font-semibold">{generated.format}</div>
+                  <div className="text-white/40 text-base mt-1">{generated.platform}</div>
                 </div>
-                <div className="absolute top-2 right-2 text-[9px] font-mono px-1.5 py-0.5 rounded"
+                <div className="absolute top-2 right-2 text-[16px] font-mono px-1.5 py-0.5 rounded"
                   style={{ background: 'rgba(0,0,0,0.4)', color: 'rgba(255,255,255,0.7)' }}>
                   AI Generated
                 </div>
               </div>
               <div className="p-3 rounded-lg" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)' }}>
-                <div className="text-xs font-medium mb-1" style={{ color: 'var(--text-primary)' }}>{generated.name}</div>
+                <div className="text-base font-medium mb-1" style={{ color: 'var(--text-primary)' }}>{generated.name}</div>
                 <div className="flex gap-2 mt-2">
                   <button onClick={() => downloadCreative(generated)}
-                    className="flex items-center gap-1 px-2 py-1 rounded text-[10px] transition-colors hover:bg-white/5"
-                    style={{ color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
+                    className="flex items-center gap-1 px-2 py-1 rounded text-[16px] transition-colors hover:bg-white/5"
+                    style={{ color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
                     <Download size={10} />Download
                   </button>
                   <button onClick={() => flashAction('edit')}
-                    className="flex items-center gap-1 px-2 py-1 rounded text-[10px] transition-colors hover:bg-white/5"
+                    className="flex items-center gap-1 px-2 py-1 rounded text-[16px] transition-colors hover:bg-white/5"
                     style={{ color: '#7b93ff', border: '1px solid rgba(123,147,255,0.2)' }}>
                     <Edit3 size={10} />{previewAction === 'edit' ? 'Editing…' : 'Edit'}
                   </button>
                   <button onClick={() => flashAction('publish')}
-                    className="flex items-center gap-1 px-2 py-1 rounded text-[10px] transition-colors hover:bg-white/5"
+                    className="flex items-center gap-1 px-2 py-1 rounded text-[16px] transition-colors hover:bg-white/5"
                     style={{ color: '#10d98a', border: '1px solid rgba(16,217,138,0.2)' }}>
                     <Send size={10} />{previewAction === 'publish' ? 'Published!' : 'Publish'}
                   </button>
@@ -251,15 +251,15 @@ export function AdCreativeGenerator() {
               style={{ background: 'var(--bg-elevated)', border: '2px dashed var(--border-dim)' }}>
               {generating ? (
                 <div className="text-center">
-                  <Loader2 size={24} className="animate-spin mx-auto mb-2" style={{ color: '#00d9ff' }} />
-                  <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>AI is generating your creative...</div>
-                  <div className="text-[10px] mt-1" style={{ color: 'var(--text-muted)' }}>This takes about 2 seconds</div>
+                  <Loader2 size={24} className="animate-spin mx-auto mb-2" style={{ color: 'var(--cyan)' }} />
+                  <div className="text-base" style={{ color: 'var(--text-secondary)' }}>AI is generating your creative...</div>
+                  <div className="text-[16px] mt-1" style={{ color: 'var(--text-muted)' }}>This takes about 2 seconds</div>
                 </div>
               ) : (
                 <div className="text-center">
                   <Image size={24} className="mx-auto mb-2" style={{ color: 'var(--text-muted)' }} />
-                  <div className="text-xs" style={{ color: 'var(--text-muted)' }}>Fill out the form and click</div>
-                  <div className="text-xs" style={{ color: 'var(--text-muted)' }}>Generate Creative to see a preview</div>
+                  <div className="text-base" style={{ color: 'var(--text-muted)' }}>Fill out the form and click</div>
+                  <div className="text-base" style={{ color: 'var(--text-muted)' }}>Generate Creative to see a preview</div>
                 </div>
               )}
             </div>
@@ -278,8 +278,8 @@ export function AdCreativeGenerator() {
               { tip: 'Brand consistency', detail: 'Consistent brand elements (logo, color, font) across creatives build recognition and reduce CPA over time.' },
             ].map((item, i) => (
               <div key={i} className="p-2.5 rounded-lg" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                <div className="text-[10px] font-semibold mb-0.5" style={{ color: '#00d9ff' }}>{item.tip}</div>
-                <div className="text-[10px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{item.detail}</div>
+                <div className="text-[16px] font-semibold mb-0.5" style={{ color: 'var(--cyan)' }}>{item.tip}</div>
+                <div className="text-[16px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{item.detail}</div>
               </div>
             ))}
           </div>
@@ -292,7 +292,7 @@ export function AdCreativeGenerator() {
           <div className="flex items-center gap-2">
             <LayoutGrid size={13} style={{ color: 'var(--text-secondary)' }} />
             <span className="section-label">Recent Creatives</span>
-            <span className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
+            <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
               {filteredCreatives.length} items
             </span>
           </div>
@@ -334,11 +334,11 @@ function CreativeCard({ creative }: { creative: GeneratedCreative }) {
         <span className="text-white/60 text-lg font-bold" style={{ fontFamily: 'DM Mono' }}>
           {creative.thumbnailInitials}
         </span>
-        <div className="absolute top-1.5 left-1.5 text-[8px] font-mono px-1.5 py-0.5 rounded"
+        <div className="absolute top-1.5 left-1.5 text-[16px] font-mono px-1.5 py-0.5 rounded"
           style={{ background: sc.bg, color: sc.color }}>
           {sc.label}
         </div>
-        <div className="absolute top-1.5 right-1.5 text-[8px] font-mono px-1.5 py-0.5 rounded"
+        <div className="absolute top-1.5 right-1.5 text-[16px] font-mono px-1.5 py-0.5 rounded"
           style={{ background: pc.color + '22', color: pc.color }}>
           {pc.abbr}
         </div>
@@ -346,19 +346,19 @@ function CreativeCard({ creative }: { creative: GeneratedCreative }) {
 
       {/* Info */}
       <div className="p-2.5">
-        <div className="text-[11px] font-medium mb-1.5 truncate" style={{ color: 'var(--text-primary)' }}>
+        <div className="text-[16px] font-medium mb-1.5 truncate" style={{ color: 'var(--text-primary)' }}>
           {creative.name}
         </div>
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[9px] font-mono" style={{ color: 'var(--text-muted)' }}>{creative.size}</span>
-          <span className="text-[9px] font-mono" style={{ color: 'var(--text-muted)' }}>{creative.createdAt}</span>
+          <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>{creative.size}</span>
+          <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>{creative.createdAt}</span>
         </div>
 
         {/* Score bar */}
         <div className="mb-2">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Performance</span>
-            <span className="text-[9px] font-mono font-bold" style={{ color: scoreColor }}>
+            <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Performance</span>
+            <span className="text-[16px] font-mono font-bold" style={{ color: scoreColor }}>
               {creative.performanceScore}
             </span>
           </div>
@@ -371,17 +371,17 @@ function CreativeCard({ creative }: { creative: GeneratedCreative }) {
         {/* Actions */}
         <div className="flex gap-1">
           <button onClick={handleDownload}
-            className="flex-1 flex items-center justify-center gap-1 py-1 rounded text-[9px] transition-colors hover:bg-white/5"
-            style={{ color: '#00d9ff', border: '1px solid rgba(0,217,255,0.15)' }}>
+            className="flex-1 flex items-center justify-center gap-1 py-1 rounded text-[16px] transition-colors hover:bg-white/5"
+            style={{ color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.15)' }}>
             <Download size={9} />DL
           </button>
           <button onClick={() => { setEditing(true); setTimeout(() => setEditing(false), 2000); }}
-            className="flex-1 flex items-center justify-center gap-1 py-1 rounded text-[9px] transition-colors hover:bg-white/5"
+            className="flex-1 flex items-center justify-center gap-1 py-1 rounded text-[16px] transition-colors hover:bg-white/5"
             style={{ color: '#7b93ff', border: '1px solid rgba(123,147,255,0.15)' }}>
             <Edit3 size={9} />{editing ? '…' : 'Edit'}
           </button>
           <button onClick={() => setStarred(s => !s)}
-            className="flex-1 flex items-center justify-center gap-1 py-1 rounded text-[9px] transition-colors hover:bg-white/5"
+            className="flex-1 flex items-center justify-center gap-1 py-1 rounded text-[16px] transition-colors hover:bg-white/5"
             style={{ color: '#10d98a', border: '1px solid rgba(16,217,138,0.15)' }}>
             <Star size={9} fill={starred ? '#10d98a' : 'none'} />
           </button>

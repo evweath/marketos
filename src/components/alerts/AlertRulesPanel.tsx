@@ -70,8 +70,8 @@ function RuleCard({ rule }: { rule: AlertRule }) {
 
         {/* Category icon + severity badge */}
         <div className="flex items-center gap-1.5 shrink-0">
-          <span style={{ fontSize: 14 }}>{cat.icon}</span>
-          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+          <span style={{ fontSize: 16 }}>{cat.icon}</span>
+          <span className="text-[16px] font-mono px-1.5 py-0.5 rounded"
             style={{ background: sevColor + '18', color: sevColor }}>
             {rule.severity.toUpperCase()}
           </span>
@@ -79,10 +79,10 @@ function RuleCard({ rule }: { rule: AlertRule }) {
 
         {/* Rule name + IF condition */}
         <div className="flex-1 min-w-0">
-          <div className="text-xs font-semibold mb-0.5 truncate" style={{ color: 'var(--text-primary)' }}>
+          <div className="text-base font-semibold mb-0.5 truncate" style={{ color: 'var(--text-primary)' }}>
             {rule.name}
           </div>
-          <div className="text-[10px] font-mono flex items-center gap-1"
+          <div className="text-[16px] font-mono flex items-center gap-1"
             style={{ color: 'var(--text-muted)' }}>
             <span>IF</span>
             <span style={{ color: 'var(--text-secondary)' }}>
@@ -96,7 +96,7 @@ function RuleCard({ rule }: { rule: AlertRule }) {
         {/* Fire count badge */}
         <div className="shrink-0 text-right">
           <div
-            className="inline-flex items-center justify-center min-w-[28px] h-5 px-1.5 rounded-full font-mono text-[10px] font-bold"
+            className="inline-flex items-center justify-center min-w-[28px] h-5 px-1.5 rounded-full font-mono text-[16px] font-bold"
             style={{
               background: rule.fireCount30d > 0 ? sevColor + '18' : 'var(--bg-overlay)',
               color: rule.fireCount30d > 0 ? sevColor : 'var(--text-muted)',
@@ -104,13 +104,13 @@ function RuleCard({ rule }: { rule: AlertRule }) {
             }}>
             {rule.fireCount30d}
           </div>
-          <div className="section-label mt-0.5" style={{ fontSize: 8 }}>fires/30d</div>
+          <div className="section-label mt-0.5" style={{ fontSize: 16 }}>fires/30d</div>
         </div>
 
         {/* Delivery icons */}
         <div className="flex gap-0.5 shrink-0">
           {rule.channels.map(ch => (
-            <span key={ch} className="text-[11px]" title={ch}>{DELIVERY_ICONS[ch]}</span>
+            <span key={ch} className="text-[16px]" title={ch}>{DELIVERY_ICONS[ch]}</span>
           ))}
         </div>
 
@@ -130,22 +130,22 @@ function RuleCard({ rule }: { rule: AlertRule }) {
             {/* IF block */}
             <div className="rounded-lg p-2.5"
               style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)' }}>
-              <div className="text-[9px] font-mono font-bold mb-1.5" style={{ color: sevColor }}>IF</div>
-              <div className="font-mono text-[10px]" style={{ color: 'var(--text-secondary)' }}>
+              <div className="text-[16px] font-mono font-bold mb-1.5" style={{ color: sevColor }}>IF</div>
+              <div className="font-mono text-[16px]" style={{ color: 'var(--text-secondary)' }}>
                 {rule.metric}
               </div>
-              <div className="font-mono text-[10px]" style={{ color: 'var(--text-muted)' }}>
+              <div className="font-mono text-[16px]" style={{ color: 'var(--text-muted)' }}>
                 {rule.operator} {rule.threshold}{unitLabel}
               </div>
             </div>
             {/* THEN block */}
             <div className="rounded-lg p-2.5"
               style={{ background: 'rgba(0,217,255,0.04)', border: '1px solid rgba(0,217,255,0.12)' }}>
-              <div className="text-[9px] font-mono font-bold mb-1.5" style={{ color: '#00d9ff' }}>THEN</div>
-              <div className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>
+              <div className="text-[16px] font-mono font-bold mb-1.5" style={{ color: 'var(--cyan)' }}>THEN</div>
+              <div className="text-[16px]" style={{ color: 'var(--text-secondary)' }}>
                 Alert via {rule.channels.join(', ')}
               </div>
-              <div className="text-[9px] font-mono mt-0.5" style={{ color: 'var(--text-muted)' }}>
+              <div className="text-[16px] font-mono mt-0.5" style={{ color: 'var(--text-muted)' }}>
                 cooldown {cooldownLabel}
               </div>
             </div>
@@ -153,7 +153,7 @@ function RuleCard({ rule }: { rule: AlertRule }) {
 
           <div className="px-4 pb-4 pt-3 space-y-3">
             {/* Description */}
-            <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-base leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
               {rule.description}
             </p>
 
@@ -161,7 +161,7 @@ function RuleCard({ rule }: { rule: AlertRule }) {
             <div>
               <div className="section-label mb-1.5">Threshold</div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
+                <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
                   {rule.metric} {rule.operator}
                 </span>
                 {editing ? (
@@ -169,16 +169,16 @@ function RuleCard({ rule }: { rule: AlertRule }) {
                     type="number"
                     value={threshold}
                     onChange={e => setThreshold(e.target.value)}
-                    className="w-20 text-xs px-2 py-1 rounded outline-none font-mono"
+                    className="w-20 text-base px-2 py-1 rounded outline-none font-mono"
                     style={{ background: 'var(--bg-overlay)', color: 'var(--text-primary)', border: `1px solid ${sevColor}40` }}
                   />
                 ) : (
-                  <span className="font-mono text-xs font-bold" style={{ color: sevColor }}>{threshold}</span>
+                  <span className="font-mono text-base font-bold" style={{ color: sevColor }}>{threshold}</span>
                 )}
-                <span className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>{rule.unit}</span>
+                <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>{rule.unit}</span>
                 <button
                   onClick={() => setEditing(e => !e)}
-                  className="ml-auto flex items-center gap-1 text-[10px] px-2 py-1 rounded-lg transition-all"
+                  className="ml-auto flex items-center gap-1 text-[16px] px-2 py-1 rounded-lg transition-all"
                   style={{
                     background: editing ? 'rgba(16,217,138,0.12)' : 'var(--bg-overlay)',
                     color: editing ? '#10d98a' : 'var(--text-muted)',
@@ -191,7 +191,7 @@ function RuleCard({ rule }: { rule: AlertRule }) {
             </div>
 
             {/* Last fired + fire count */}
-            <div className="flex items-center gap-4 text-[10px]">
+            <div className="flex items-center gap-4 text-[16px]">
               {rule.lastFired ? (
                 <div className="flex items-center gap-1" style={{ color: 'var(--text-muted)' }} suppressHydrationWarning>
                   <Clock size={9} />
@@ -281,20 +281,20 @@ export default function AlertRulesPanel() {
               <Shield size={11} style={{ color: '#10d98a' }} />
             </div>
             <span className="section-label">Alert Rules</span>
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded"
+            <span className="text-[16px] font-mono px-1.5 py-0.5 rounded"
               style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
               {allRules.filter(r => r.enabled).length}/{allRules.length} active
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <label className="flex items-center gap-1.5 text-[11px] cursor-pointer select-none"
+            <label className="flex items-center gap-1.5 text-[16px] cursor-pointer select-none"
               style={{ color: 'var(--text-muted)' }}>
               <input type="checkbox" checked={showDisabled} onChange={e => setShowDisabled(e.target.checked)} />
               Show disabled
             </label>
             <button onClick={() => setAdding(a => !a)}
-              className="text-xs px-3 py-1.5 rounded-lg font-semibold transition-all hover:brightness-110"
-              style={{ background: 'rgba(0,217,255,0.10)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.22)' }}>
+              className="text-base px-3 py-1.5 rounded-lg font-semibold transition-all hover:brightness-110"
+              style={{ background: 'rgba(0,217,255,0.10)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.22)' }}>
               + New Rule
             </button>
           </div>
@@ -307,7 +307,7 @@ export default function AlertRulesPanel() {
             return (
               <button key={f.key}
                 onClick={() => setCatFilter(f.key)}
-                className="px-2 py-0.5 rounded-full text-[10px] transition-all"
+                className="px-2 py-0.5 rounded-full text-[16px] transition-all"
                 style={{
                   background: isActive ? 'var(--bg-overlay)' : 'transparent',
                   color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
@@ -327,7 +327,7 @@ export default function AlertRulesPanel() {
           <div className="rounded-xl p-3.5 space-y-2.5 animate-fade-up"
             style={{ background: 'var(--bg-elevated)', border: '1px solid rgba(0,217,255,0.25)' }}>
             <div className="flex items-center justify-between">
-              <span className="section-label" style={{ color: '#00d9ff' }}>New Rule</span>
+              <span className="section-label" style={{ color: 'var(--cyan)' }}>New Rule</span>
               <button onClick={resetForm}
                 className="p-1 rounded-lg transition-colors hover:bg-white/[0.06]"
                 style={{ color: 'var(--text-muted)' }}>
@@ -340,7 +340,7 @@ export default function AlertRulesPanel() {
               value={newName}
               onChange={e => setNewName(e.target.value)}
               placeholder="Rule name"
-              className="w-full text-xs px-2 py-1.5 rounded-lg outline-none"
+              className="w-full text-base px-2 py-1.5 rounded-lg outline-none"
               style={{ background: 'var(--bg-overlay)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
             />
 
@@ -348,7 +348,7 @@ export default function AlertRulesPanel() {
               <select
                 value={newCategory}
                 onChange={e => setNewCategory(e.target.value as AlertCategory)}
-                className="flex-1 text-xs px-2 py-1.5 rounded-lg outline-none"
+                className="flex-1 text-base px-2 py-1.5 rounded-lg outline-none"
                 style={{ background: 'var(--bg-overlay)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}>
                 {NEW_RULE_CATEGORIES.map(c => (
                   <option key={c} value={c}>{CATEGORY_CONFIG[c].icon} {CATEGORY_CONFIG[c].label}</option>
@@ -357,7 +357,7 @@ export default function AlertRulesPanel() {
               <select
                 value={newSeverity}
                 onChange={e => setNewSeverity(e.target.value as AlertRule['severity'])}
-                className="flex-1 text-xs px-2 py-1.5 rounded-lg outline-none"
+                className="flex-1 text-base px-2 py-1.5 rounded-lg outline-none"
                 style={{ background: 'var(--bg-overlay)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}>
                 <option value="critical">Critical</option>
                 <option value="warning">Warning</option>
@@ -371,16 +371,16 @@ export default function AlertRulesPanel() {
                 value={newMetric}
                 onChange={e => setNewMetric(e.target.value)}
                 placeholder="metric"
-                className="flex-1 text-xs px-2 py-1.5 rounded-lg outline-none font-mono"
+                className="flex-1 text-base px-2 py-1.5 rounded-lg outline-none font-mono"
                 style={{ background: 'var(--bg-overlay)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
               />
-              <span className="text-[10px] font-mono shrink-0" style={{ color: 'var(--text-muted)' }}>&gt;=</span>
+              <span className="text-[16px] font-mono shrink-0" style={{ color: 'var(--text-muted)' }}>&gt;=</span>
               <input
                 type="number"
                 value={newThreshold}
                 onChange={e => setNewThreshold(e.target.value)}
                 placeholder="0"
-                className="w-20 text-xs px-2 py-1.5 rounded-lg outline-none font-mono"
+                className="w-20 text-base px-2 py-1.5 rounded-lg outline-none font-mono"
                 style={{ background: 'var(--bg-overlay)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
               />
             </div>
@@ -388,16 +388,16 @@ export default function AlertRulesPanel() {
             <div className="flex gap-2 pt-0.5">
               <button onClick={addRule}
                 disabled={!newName.trim()}
-                className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all hover:brightness-110"
+                className="flex-1 py-1.5 rounded-lg text-base font-semibold transition-all hover:brightness-110"
                 style={{
-                  background: 'rgba(0,217,255,0.12)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.25)',
+                  background: 'rgba(0,217,255,0.12)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.25)',
                   opacity: newName.trim() ? 1 : 0.5,
                   cursor: newName.trim() ? 'pointer' : 'not-allowed',
                 }}>
                 Add Rule
               </button>
               <button onClick={resetForm}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                className="px-3 py-1.5 rounded-lg text-base font-medium transition-all"
                 style={{ background: 'var(--bg-overlay)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
                 Cancel
               </button>
@@ -408,7 +408,7 @@ export default function AlertRulesPanel() {
         {rules.map(rule => <RuleCard key={rule.id} rule={rule} />)}
         {rules.length === 0 && (
           <div className="flex items-center justify-center h-24" style={{ color: 'var(--text-muted)' }}>
-            <span className="text-sm">No rules match this filter</span>
+            <span className="text-base">No rules match this filter</span>
           </div>
         )}
       </div>

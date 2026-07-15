@@ -28,12 +28,12 @@ export default function ConversionFunnel({ conversions, storeColor }: Props) {
             <span className='font-mono text-2xl font-bold' style={{ color: overallColor }}>
               {conversions.overallRate.toFixed(1)}%
             </span>
-            <span className='text-xs' style={{ color: 'var(--text-muted)' }}>overall conversion</span>
+            <span className='text-base' style={{ color: 'var(--text-muted)' }}>overall conversion</span>
           </div>
         </div>
         <div className='text-right'>
           <div className='section-label mb-0.5'>AOV</div>
-          <span className='font-mono text-sm font-bold' style={{ color: storeColor }}>
+          <span className='font-mono text-base font-bold' style={{ color: storeColor }}>
             {formatCurrency(conversions.avgOrderValue)}
           </span>
         </div>
@@ -51,17 +51,17 @@ export default function ConversionFunnel({ conversions, storeColor }: Props) {
             <div key={step.label}>
               {/* Labels row */}
               <div className='flex items-center justify-between mb-1'>
-                <span className='text-xs font-mono'
+                <span className='text-base font-mono'
                   style={{ color: isFirst ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
                   {step.label}
                 </span>
                 <div className='flex items-center gap-3'>
                   {idx > 0 && (
-                    <span className='text-[10px] font-mono' style={{ color: dropColor }}>
+                    <span className='text-[16px] font-mono' style={{ color: dropColor }}>
                       ↓ {step.conversionRate.toFixed(1)}%
                     </span>
                   )}
-                  <span className='text-[11px] font-mono font-medium' style={{ color: 'var(--text-muted)' }}>
+                  <span className='text-[16px] font-mono font-medium' style={{ color: 'var(--text-muted)' }}>
                     {step.count.toLocaleString()}
                   </span>
                 </div>
@@ -92,7 +92,7 @@ export default function ConversionFunnel({ conversions, storeColor }: Props) {
             <TrendingUp size={10} style={{ color: 'var(--text-muted)' }} />
             <span className='section-label'>Revenue Today</span>
           </div>
-          <div className='font-mono text-sm font-bold' style={{ color: storeColor }}>
+          <div className='font-mono text-base font-bold' style={{ color: storeColor }}>
             {formatCurrency(conversions.revenueToday)}
           </div>
         </div>
@@ -101,7 +101,7 @@ export default function ConversionFunnel({ conversions, storeColor }: Props) {
             <ShoppingCart size={10} style={{ color: 'var(--text-muted)' }} />
             <span className='section-label'>Orders Today</span>
           </div>
-          <div className='font-mono text-sm font-bold' style={{ color: 'var(--text-primary)' }}>
+          <div className='font-mono text-base font-bold' style={{ color: 'var(--text-primary)' }}>
             {conversions.ordersToday}
           </div>
         </div>

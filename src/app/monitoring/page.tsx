@@ -88,7 +88,7 @@ function GeoDistribution({ storeId, storeColor }: { storeId: string; storeColor:
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <MapPin size={14} style={{ color: storeColor }} />
-        <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+        <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
           Geographic Distribution
         </h3>
         <span className="section-label ml-auto">{rows.reduce((s, r) => s + r.sessions, 0).toLocaleString()} total sessions</span>
@@ -120,8 +120,8 @@ function GeoDistribution({ storeId, storeColor }: { storeId: string; storeColor:
           }}>
             {/* Flag + Country */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 14, lineHeight: 1 }}>{row.flag}</span>
-              <span style={{ fontSize: 11, color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <span style={{ fontSize: 16, lineHeight: 1 }}>{row.flag}</span>
+              <span style={{ fontSize: 16, color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {row.country}
               </span>
             </div>
@@ -139,17 +139,17 @@ function GeoDistribution({ storeId, storeColor }: { storeId: string; storeColor:
             </div>
 
             {/* Sessions */}
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+            <div style={{ fontSize: 16, color: 'var(--text-secondary)', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
               {row.sessions.toLocaleString()}
             </div>
 
             {/* Pct */}
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+            <div style={{ fontSize: 16, color: 'var(--text-muted)', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
               {row.pct.toFixed(1)}%
             </div>
 
             {/* Revenue */}
-            <div style={{ fontSize: 11, color: 'var(--text-primary)', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>
+            <div style={{ fontSize: 16, color: 'var(--text-primary)', textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>
               {formatCurrency(row.revenue)}
             </div>
           </div>
@@ -176,21 +176,21 @@ function ShopifyFlowTracker({ storeId }: { storeId: string }) {
       {/* Header */}
       <div className="flex items-center gap-2 mb-1">
         <Zap size={14} style={{ color: '#ffb347' }} />
-        <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+        <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
           Shopify Flow Triggers
         </h3>
-        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold ml-1"
+        <span className="px-2 py-0.5 rounded-full text-[16px] font-semibold ml-1"
           style={{ background: 'rgba(255,179,71,0.15)', color: '#ffb347', border: '1px solid rgba(255,179,71,0.3)' }}>
           {totalToday} triggered today
         </span>
         <button
           onClick={handleViewAll}
-          className="ml-auto text-[11px] transition-all"
-          style={{ color: viewedAll ? '#10d98a' : '#00d9ff', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+          className="ml-auto text-[16px] transition-all"
+          style={{ color: viewedAll ? '#10d98a' : 'var(--cyan)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
           {viewedAll ? `Showing all ${flows.length}` : 'View All Flows'}
         </button>
       </div>
-      <p className="section-label mb-4" style={{ fontSize: 10 }}>
+      <p className="section-label mb-4" style={{ fontSize: 16 }}>
         {flows.length} active flow{flows.length !== 1 ? 's' : ''} configured for this store
       </p>
 
@@ -223,11 +223,11 @@ function ShopifyFlowTracker({ storeId }: { storeId: string }) {
             }}>
             {/* Name + trigger */}
             <div>
-              <div style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 500, marginBottom: 2 }}>
+              <div style={{ fontSize: 16, color: 'var(--text-primary)', fontWeight: 500, marginBottom: 2 }}>
                 {flow.name}
               </div>
-              <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{flow.trigger}</div>
-              <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2, fontStyle: 'italic' }}>{flow.outcomes}</div>
+              <div style={{ fontSize: 16, color: 'var(--text-muted)' }}>{flow.trigger}</div>
+              <div style={{ fontSize: 16, color: 'var(--text-muted)', marginTop: 2, fontStyle: 'italic' }}>{flow.outcomes}</div>
             </div>
 
             {/* Triggered today */}
@@ -237,10 +237,10 @@ function ShopifyFlowTracker({ storeId }: { storeId: string }) {
                 minWidth: 28,
                 padding: '2px 8px',
                 borderRadius: 12,
-                fontSize: 11,
+                fontSize: 16,
                 fontWeight: 700,
                 background: flow.triggeredToday > 0 ? 'rgba(0,217,255,0.12)' : 'var(--bg-surface)',
-                color: flow.triggeredToday > 0 ? '#00d9ff' : 'var(--text-muted)',
+                color: flow.triggeredToday > 0 ? 'var(--cyan)' : 'var(--text-muted)',
                 fontVariantNumeric: 'tabular-nums',
               }}>
                 {flow.triggeredToday}
@@ -248,12 +248,12 @@ function ShopifyFlowTracker({ storeId }: { storeId: string }) {
             </div>
 
             {/* Triggered 30d */}
-            <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>
+            <div style={{ textAlign: 'center', fontSize: 16, color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>
               {flow.triggered30d}
             </div>
 
             {/* Last triggered */}
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{flow.lastTriggered}</div>
+            <div style={{ fontSize: 16, color: 'var(--text-muted)' }}>{flow.lastTriggered}</div>
 
             {/* Status */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
@@ -262,7 +262,7 @@ function ShopifyFlowTracker({ storeId }: { storeId: string }) {
                 background: flow.status === 'active' ? '#10d98a' : '#ffb347',
                 flexShrink: 0,
               }} />
-              <span style={{ fontSize: 10, color: flow.status === 'active' ? '#10d98a' : '#ffb347', textTransform: 'capitalize' }}>
+              <span style={{ fontSize: 16, color: flow.status === 'active' ? '#10d98a' : '#ffb347', textTransform: 'capitalize' }}>
                 {flow.status}
               </span>
             </div>
@@ -303,12 +303,12 @@ function PriceChangeMonitor({ storeId, storeColor }: { storeId: string; storeCol
     <div className="glass-card" style={{ padding: '16px 20px' }}>
       <div className="flex items-center gap-2 mb-4">
         <DollarSign size={14} style={{ color: storeColor }} />
-        <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Product Pricing Changes</h3>
+        <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Product Pricing Changes</h3>
         <span className="section-label ml-auto">{changes.length} changes detected</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '140px 70px 70px 60px 70px 70px', gap: '0 12px', marginBottom: 6 }}>
         {['Product', 'SKU', 'Old Price', '', 'New Price', 'Changed'].map(h => (
-          <div key={h} className="section-label" style={{ fontSize: 10 }}>{h}</div>
+          <div key={h} className="section-label" style={{ fontSize: 16 }}>{h}</div>
         ))}
       </div>
       {changes.map(ch => {
@@ -316,14 +316,14 @@ function PriceChangeMonitor({ storeId, storeColor }: { storeId: string; storeCol
         const pctChange = (((ch.newPrice - ch.oldPrice) / ch.oldPrice) * 100).toFixed(1);
         return (
           <div key={ch.id} style={{ display: 'grid', gridTemplateColumns: '140px 70px 70px 60px 70px 70px', gap: '0 12px', alignItems: 'center', padding: '8px 0', borderTop: '1px solid var(--border-subtle)' }}>
-            <div style={{ fontSize: 11, color: 'var(--text-primary)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ch.product}</div>
-            <div style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'DM Mono' }}>{ch.sku}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)', textDecoration: 'line-through' }}>{formatCurrency(ch.oldPrice)}</div>
-            <div style={{ fontSize: 11, color: isUp ? '#ff4444' : '#10d98a', fontWeight: 600 }}>
+            <div style={{ fontSize: 16, color: 'var(--text-primary)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ch.product}</div>
+            <div style={{ fontSize: 16, color: 'var(--text-muted)', fontFamily: 'DM Mono' }}>{ch.sku}</div>
+            <div style={{ fontSize: 16, color: 'var(--text-secondary)', textDecoration: 'line-through' }}>{formatCurrency(ch.oldPrice)}</div>
+            <div style={{ fontSize: 16, color: isUp ? '#ff4444' : '#10d98a', fontWeight: 600 }}>
               {isUp ? '▲' : '▼'} {Math.abs(Number(pctChange))}%
             </div>
-            <div style={{ fontSize: 11, color: isUp ? '#ff4444' : '#10d98a', fontWeight: 700 }}>{formatCurrency(ch.newPrice)}</div>
-            <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{ch.changedAt}</div>
+            <div style={{ fontSize: 16, color: isUp ? '#ff4444' : '#10d98a', fontWeight: 700 }}>{formatCurrency(ch.newPrice)}</div>
+            <div style={{ fontSize: 16, color: 'var(--text-muted)' }}>{ch.changedAt}</div>
           </div>
         );
       })}
@@ -358,21 +358,21 @@ function SitemapMonitor({ storeId, storeColor }: { storeId: string; storeColor: 
     <div className="glass-card" style={{ padding: '16px 20px' }}>
       <div className="flex items-center gap-2 mb-4">
         <Globe size={14} style={{ color: storeColor }} />
-        <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>New Products Detected via Sitemap</h3>
-        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold ml-1"
+        <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>New Products Detected via Sitemap</h3>
+        <span className="px-2 py-0.5 rounded-full text-[16px] font-semibold ml-1"
           style={{ background: `${storeColor}18`, color: storeColor }}>{products.length} new</span>
         <span className="section-label ml-auto">Last crawl: 12m ago</span>
       </div>
       {products.length === 0 ? (
-        <div className="text-xs text-center py-4" style={{ color: 'var(--text-muted)' }}>No new products detected since last crawl.</div>
+        <div className="text-base text-center py-4" style={{ color: 'var(--text-muted)' }}>No new products detected since last crawl.</div>
       ) : (
         products.map(p => (
           <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: '1px solid var(--border-subtle)' }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 500, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
-              <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{p.category} · {p.url} · {p.detectedAt}</div>
+              <div style={{ fontSize: 16, color: 'var(--text-primary)', fontWeight: 500, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
+              <div style={{ fontSize: 16, color: 'var(--text-muted)' }}>{p.category} · {p.url} · {p.detectedAt}</div>
             </div>
-            {p.price && <div style={{ fontSize: 12, fontWeight: 600, color: storeColor, flexShrink: 0 }}>{formatCurrency(p.price)}</div>}
+            {p.price && <div style={{ fontSize: 16, fontWeight: 600, color: storeColor, flexShrink: 0 }}>{formatCurrency(p.price)}</div>}
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#10d98a', flexShrink: 0 }} title="New" />
           </div>
         ))
@@ -418,12 +418,12 @@ function LoadSpeedMonitor({ storeId, storeColor }: { storeId: string; storeColor
     <div className="glass-card" style={{ padding: '16px 20px' }}>
       <div className="flex items-center gap-2 mb-4">
         <Gauge size={14} style={{ color: storeColor }} />
-        <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Page Load Speed</h3>
+        <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Page Load Speed</h3>
         <span className="section-label ml-auto">Core Web Vitals</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px 60px 50px 50px', gap: '0 8px', marginBottom: 6 }}>
         {['Page', 'Desktop', 'Mobile', 'LCP', 'CLS', 'FID'].map(h => (
-          <div key={h} className="section-label" style={{ fontSize: 10 }}>{h}</div>
+          <div key={h} className="section-label" style={{ fontSize: 16 }}>{h}</div>
         ))}
       </div>
       {pages.map(pg => {
@@ -434,18 +434,18 @@ function LoadSpeedMonitor({ storeId, storeColor }: { storeId: string; storeColor
         const fidBad = pg.fid > 100;
         return (
           <div key={pg.page} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px 60px 50px 50px', gap: '0 8px', alignItems: 'center', padding: '7px 0', borderTop: '1px solid var(--border-subtle)' }}>
-            <div style={{ fontSize: 11, color: 'var(--text-primary)', fontFamily: 'DM Mono', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pg.page}</div>
-            <div style={{ fontSize: 11 }}>
+            <div style={{ fontSize: 16, color: 'var(--text-primary)', fontFamily: 'DM Mono', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pg.page}</div>
+            <div style={{ fontSize: 16 }}>
               <span style={{ color: dGrade.color, fontWeight: 600 }}>{pg.desktopMs}ms</span>
-              <span style={{ fontSize: 9, marginLeft: 3, color: dGrade.color }}>({dGrade.label})</span>
+              <span style={{ fontSize: 16, marginLeft: 3, color: dGrade.color }}>({dGrade.label})</span>
             </div>
-            <div style={{ fontSize: 11 }}>
+            <div style={{ fontSize: 16 }}>
               <span style={{ color: mGrade.color, fontWeight: 600 }}>{pg.mobileMs}ms</span>
-              <span style={{ fontSize: 9, marginLeft: 3, color: mGrade.color }}>({mGrade.label})</span>
+              <span style={{ fontSize: 16, marginLeft: 3, color: mGrade.color }}>({mGrade.label})</span>
             </div>
-            <div style={{ fontSize: 11, color: lcpBad ? '#ff4444' : '#10d98a', fontWeight: 600 }}>{pg.lcp}s</div>
-            <div style={{ fontSize: 11, color: clsBad ? '#ff4444' : '#10d98a', fontWeight: 600 }}>{pg.cls}</div>
-            <div style={{ fontSize: 11, color: fidBad ? '#ff4444' : '#10d98a', fontWeight: 600 }}>{pg.fid}ms</div>
+            <div style={{ fontSize: 16, color: lcpBad ? '#ff4444' : '#10d98a', fontWeight: 600 }}>{pg.lcp}s</div>
+            <div style={{ fontSize: 16, color: clsBad ? '#ff4444' : '#10d98a', fontWeight: 600 }}>{pg.cls}</div>
+            <div style={{ fontSize: 16, color: fidBad ? '#ff4444' : '#10d98a', fontWeight: 600 }}>{pg.fid}ms</div>
           </div>
         );
       })}
@@ -473,7 +473,7 @@ function CustomerJourneyTracker() {
     <div className="glass-card" style={{ padding: '16px 20px' }}>
       <div className="flex items-center gap-2 mb-4">
         <Route size={14} style={{ color: '#7b93ff' }} />
-        <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Customer Journey Tracking</h3>
+        <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Customer Journey Tracking</h3>
         <span className="section-label ml-auto">Top paths before purchase</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -484,28 +484,28 @@ function CustomerJourneyTracker() {
                 {journey.steps.map((step, si) => (
                   <span key={si} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <span style={{
-                      fontSize: 10, padding: '2px 8px', borderRadius: 12, fontWeight: 500,
+                      fontSize: 16, padding: '2px 8px', borderRadius: 12, fontWeight: 500,
                       background: `${STEP_COLORS[si % STEP_COLORS.length]}18`,
                       color: STEP_COLORS[si % STEP_COLORS.length],
                       border: `1px solid ${STEP_COLORS[si % STEP_COLORS.length]}30`,
                       whiteSpace: 'nowrap',
                     }}>{step}</span>
-                    {si < journey.steps.length - 1 && <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>→</span>}
+                    {si < journey.steps.length - 1 && <span style={{ fontSize: 16, color: 'var(--text-muted)' }}>→</span>}
                   </span>
                 ))}
               </div>
               <div style={{ display: 'flex', gap: 12, flexShrink: 0 }}>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>{journey.sessions.toLocaleString()}</div>
-                  <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>sessions</div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>{journey.sessions.toLocaleString()}</div>
+                  <div style={{ fontSize: 16, color: 'var(--text-muted)' }}>sessions</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#10d98a' }}>{journey.convRate}%</div>
-                  <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>conv.</div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: '#10d98a' }}>{journey.convRate}%</div>
+                  <div style={{ fontSize: 16, color: 'var(--text-muted)' }}>conv.</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)' }}>{journey.avgTime}</div>
-                  <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>avg time</div>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-secondary)' }}>{journey.avgTime}</div>
+                  <div style={{ fontSize: 16, color: 'var(--text-muted)' }}>avg time</div>
                 </div>
               </div>
             </div>
@@ -562,7 +562,7 @@ export default function MonitoringPage() {
           <div className="grid grid-cols-5 gap-3 mb-5">
             {[
               { label: 'Total Revenue Today', value: formatCurrency(totalRevenue), color: '#10d98a', mono: true },
-              { label: 'Total Orders',         value: totalOrders.toString(),       color: '#00d9ff', mono: true },
+              { label: 'Total Orders',         value: totalOrders.toString(),       color: 'var(--cyan)', mono: true },
               { label: 'Total Sessions',       value: totalSessions.toLocaleString(), color: 'var(--text-primary)', mono: true },
               { label: 'Abandoned Carts',      value: totalCarts.toString(),        color: '#ffb347', mono: true },
               { label: 'Cart Value at Risk',   value: formatCurrency(cartValue),    color: '#ff4444', mono: true },
@@ -593,7 +593,7 @@ export default function MonitoringPage() {
           {/* Selected store label */}
           <div className="flex items-center gap-2 mb-4">
             <div className="w-2 h-2 rounded-full" style={{ background: store.color }} />
-            <h2 className="text-sm font-semibold" style={{ color: store.color }}>
+            <h2 className="text-base font-semibold" style={{ color: store.color }}>
               {store.name}
             </h2>
             <span className="section-label">— {store.domain}</span>

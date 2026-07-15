@@ -11,7 +11,7 @@ interface Props {
 
 const CHANNEL_CONFIG: Record<string, { label: string; color: string }> = {
   'organic':     { label: 'Organic',    color: '#10d98a' },
-  'paid-google': { label: 'Google',     color: '#00d9ff' },
+  'paid-google': { label: 'Google',     color: 'var(--cyan)' },
   'email':       { label: 'Email',      color: '#ffb347' },
   'social':      { label: 'Social',     color: '#ff4444' },
   'direct':      { label: 'Direct',     color: '#7b93ff' },
@@ -23,7 +23,7 @@ export default function TransactionFeed({ transactions, storeColor }: Props) {
       <div className='glass-card p-4'>
         <div className='section-label mb-3'>Live Orders</div>
         <div className='flex items-center justify-center py-8' style={{ color: 'var(--text-muted)' }}>
-          <span className='text-sm'>No recent orders</span>
+          <span className='text-base'>No recent orders</span>
         </div>
       </div>
     );
@@ -37,10 +37,10 @@ export default function TransactionFeed({ transactions, storeColor }: Props) {
           <div className='section-label mb-1.5'>Live Orders</div>
           <div className='flex items-center gap-2'>
             <div className='w-1.5 h-1.5 rounded-full live-dot' style={{ background: storeColor }} />
-            <span className='font-mono text-sm font-bold' style={{ color: 'var(--text-primary)' }}>
+            <span className='font-mono text-base font-bold' style={{ color: 'var(--text-primary)' }}>
               {transactions.length}
             </span>
-            <span className='text-xs' style={{ color: 'var(--text-muted)' }}>recent orders</span>
+            <span className='text-base' style={{ color: 'var(--text-muted)' }}>recent orders</span>
           </div>
         </div>
         <Package size={14} style={{ color: 'var(--text-muted)' }} />
@@ -58,17 +58,17 @@ export default function TransactionFeed({ transactions, storeColor }: Props) {
               }}>
 
               {/* Order # */}
-              <span className='font-mono text-[11px] shrink-0 w-20 tabular-nums' style={{ color: 'var(--text-muted)' }}>
+              <span className='font-mono text-[16px] shrink-0 w-20 tabular-nums' style={{ color: 'var(--text-muted)' }}>
                 {tx.orderNumber}
               </span>
 
               {/* Customer */}
-              <span className='text-xs flex-1 truncate' style={{ color: 'var(--text-secondary)' }}>
+              <span className='text-base flex-1 truncate' style={{ color: 'var(--text-secondary)' }}>
                 {tx.customerName}
               </span>
 
               {/* Channel pill */}
-              <span className='text-[10px] font-mono font-medium px-2 py-0.5 rounded-full shrink-0'
+              <span className='text-[16px] font-mono font-medium px-2 py-0.5 rounded-full shrink-0'
                 style={{
                   background: ch.color + '18',
                   color: ch.color,
@@ -78,12 +78,12 @@ export default function TransactionFeed({ transactions, storeColor }: Props) {
               </span>
 
               {/* Amount */}
-              <span className='font-mono text-xs font-bold shrink-0' style={{ color: '#10d98a' }}>
+              <span className='font-mono text-base font-bold shrink-0' style={{ color: '#10d98a' }}>
                 {formatCurrency(tx.amount)}
               </span>
 
               {/* Time */}
-              <span className='font-mono text-[10px] shrink-0 tabular-nums'
+              <span className='font-mono text-[16px] shrink-0 tabular-nums'
                 style={{ color: 'var(--text-muted)', minWidth: 44, textAlign: 'right' }}>
                 {formatMinutesAgo(tx.minutesAgo)}
               </span>

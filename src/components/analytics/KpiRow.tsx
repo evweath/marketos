@@ -48,7 +48,7 @@ export default function KpiRow({ dateRange = '30d' }: { dateRange?: DateRange })
       delta: +7.3,
       deltaLabel: 'vs prior period',
       icon: BarChart2,
-      color: '#00d9ff',
+      color: 'var(--cyan)',
       subValue: `${currency(t.totalBudget)} budget`,
     },
     {
@@ -73,7 +73,7 @@ export default function KpiRow({ dateRange = '30d' }: { dateRange?: DateRange })
       delta: +8.4,
       deltaLabel: 'vs prior period',
       icon: MousePointer,
-      color: '#00d9ff',
+      color: 'var(--cyan)',
     },
     {
       label: 'Impressions',
@@ -151,20 +151,20 @@ export default function KpiRow({ dateRange = '30d' }: { dateRange?: DateRange })
             {/* Delta badge */}
             <div className="flex items-center gap-2">
               <span
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-mono font-medium"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[16px] font-mono font-medium"
                 style={{ background: deltaColor + '15', color: deltaColor, border: `1px solid ${deltaColor}28` }}
               >
                 {isGood ? <TrendingUp size={9} /> : <TrendingDown size={9} />}
                 {kpi.delta >= 0 ? '+' : ''}{kpi.delta.toFixed(1)}%
               </span>
-              <span className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
+              <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
                 {kpi.deltaLabel}
               </span>
             </div>
 
             {/* Sub-value */}
             {kpi.subValue && (
-              <div className="text-[10px] mt-1.5 font-mono" style={{ color: 'var(--text-muted)' }}>
+              <div className="text-[16px] mt-1.5 font-mono" style={{ color: 'var(--text-muted)' }}>
                 {kpi.subValue}
               </div>
             )}

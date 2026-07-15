@@ -52,7 +52,7 @@ export default function SeoPage() {
       delta: s.avgPositionDelta,
       deltaLabel: 'vs prior 30d',
       icon: Target,
-      color: '#00d9ff',
+      color: 'var(--cyan)',
       lowerIsBetter: true,
       deltaIsAbsolute: true,
     },
@@ -141,7 +141,7 @@ export default function SeoPage() {
                   </div>
 
                   <div
-                    className='flex items-center gap-1 text-[10px] font-mono'
+                    className='flex items-center gap-1 text-[16px] font-mono'
                     style={{ color: isGood ? '#10d98a' : '#ff4444' }}
                   >
                     {isGood ? <TrendingUp size={9} /> : <TrendingDown size={9} />}
@@ -170,7 +170,7 @@ export default function SeoPage() {
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className='flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium transition-all whitespace-nowrap'
+                  className='flex items-center gap-1.5 px-3.5 py-2 text-base font-medium transition-all whitespace-nowrap'
                   style={{
                     borderRadius: 7,
                     background: active ? 'var(--bg-overlay)' : 'transparent',
@@ -179,7 +179,7 @@ export default function SeoPage() {
                     cursor: 'pointer',
                   }}
                 >
-                  <TabIcon size={12} style={{ color: active ? '#00d9ff' : 'var(--text-muted)' }} />
+                  <TabIcon size={12} style={{ color: active ? 'var(--cyan)' : 'var(--text-muted)' }} />
                   {tab.label}
                 </button>
               );

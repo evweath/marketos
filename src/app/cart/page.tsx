@@ -103,15 +103,15 @@ function ExitIntentPanel() {
 
         {/* Left: Config */}
         <div className="glass-card p-4 space-y-5">
-          <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Popup Configuration</div>
+          <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Popup Configuration</div>
 
           {/* Enable toggle */}
           <div className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
             <div>
-              <div className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>Exit-Intent Popup</div>
-              <div className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Show popup when visitors attempt to leave</div>
+              <div className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>Exit-Intent Popup</div>
+              <div className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Show popup when visitors attempt to leave</div>
             </div>
-            <button onClick={() => setEnabled(e => !e)} className="flex items-center gap-1.5 text-xs font-medium transition-colors"
+            <button onClick={() => setEnabled(e => !e)} className="flex items-center gap-1.5 text-base font-medium transition-colors"
               style={{ color: enabled ? '#10d98a' : 'var(--text-muted)' }}>
               {enabled ? <ToggleRight size={24} style={{ color: '#10d98a' }} /> : <ToggleLeft size={24} />}
               {enabled ? 'Enabled' : 'Disabled'}
@@ -123,24 +123,24 @@ function ExitIntentPanel() {
             <div className="section-label">Popup Settings</div>
 
             <div className="space-y-2">
-              <label className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Headline</label>
+              <label className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Headline</label>
               <input value={headline} onChange={e => setHeadline(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg text-xs outline-none"
+                className="w-full px-3 py-2 rounded-lg text-base outline-none"
                 style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }} />
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Subheadline</label>
+              <label className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Subheadline</label>
               <input value={subheadline} onChange={e => setSubheadline(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg text-xs outline-none"
+                className="w-full px-3 py-2 rounded-lg text-base outline-none"
                 style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }} />
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
-                <label className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Offer Type</label>
+                <label className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Offer Type</label>
                 <select value={offerType} onChange={e => setOfferType(e.target.value as typeof offerType)}
-                  className="w-full px-2 py-2 rounded-lg text-xs outline-none"
+                  className="w-full px-2 py-2 rounded-lg text-base outline-none"
                   style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
                   <option value="none">No Discount</option>
                   <option value="pct">% Off</option>
@@ -150,34 +150,34 @@ function ExitIntentPanel() {
               </div>
               {(offerType === 'pct' || offerType === 'dollar') && (
                 <div className="space-y-1">
-                  <label className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                  <label className="text-[16px]" style={{ color: 'var(--text-muted)' }}>
                     {offerType === 'pct' ? 'Percent Off' : 'Dollar Off'}
                   </label>
                   <input type="number" value={discountAmt} onChange={e => setDiscountAmt(Number(e.target.value))}
-                    className="w-full px-2 py-2 rounded-lg text-xs outline-none"
+                    className="w-full px-2 py-2 rounded-lg text-base outline-none"
                     style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }} />
                 </div>
               )}
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Coupon Code</label>
+              <label className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Coupon Code</label>
               <input value={coupon} onChange={e => setCoupon(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg text-xs font-mono outline-none"
-                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: '#00d9ff' }} />
+                className="w-full px-3 py-2 rounded-lg text-base font-mono outline-none"
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--cyan)' }} />
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px]" style={{ color: 'var(--text-muted)' }}>CTA Button Text</label>
+              <label className="text-[16px]" style={{ color: 'var(--text-muted)' }}>CTA Button Text</label>
               <input value={ctaText} onChange={e => setCtaText(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg text-xs outline-none"
+                className="w-full px-3 py-2 rounded-lg text-base outline-none"
                 style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }} />
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Image / Graphic</label>
+              <label className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Image / Graphic</label>
               <select value={imageOption} onChange={e => setImageOption(e.target.value as typeof imageOption)}
-                className="w-full px-2 py-2 rounded-lg text-xs outline-none"
+                className="w-full px-2 py-2 rounded-lg text-base outline-none"
                 style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
                 <option value="none">None</option>
                 <option value="product">Product Image</option>
@@ -191,9 +191,9 @@ function ExitIntentPanel() {
             <div className="section-label">Trigger Settings</div>
 
             <div className="space-y-1">
-              <label className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Trigger Type</label>
+              <label className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Trigger Type</label>
               <select value={triggerType} onChange={e => setTriggerType(e.target.value as typeof triggerType)}
-                className="w-full px-2 py-2 rounded-lg text-xs outline-none"
+                className="w-full px-2 py-2 rounded-lg text-base outline-none"
                 style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
                 <option value="mouse">Mouse leaves viewport</option>
                 <option value="idle">Idle &gt; 30s</option>
@@ -204,28 +204,28 @@ function ExitIntentPanel() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Show after delay</label>
-                <span className="text-[10px] font-mono" style={{ color: '#00d9ff' }}>{delaySeconds}s</span>
+                <label className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Show after delay</label>
+                <span className="text-[16px] font-mono" style={{ color: 'var(--cyan)' }}>{delaySeconds}s</span>
               </div>
               <input type="range" min={0} max={30} value={delaySeconds} onChange={e => setDelaySeconds(Number(e.target.value))}
                 className="w-full" style={{ accentColor: '#00d9ff' }} />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Show on page types</label>
+              <label className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Show on page types</label>
               {([['product', 'Product pages'], ['cart', 'Cart page'], ['checkout', 'Checkout page']] as const).map(([k, label]) => (
                 <label key={k} className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={pageTypes[k]} onChange={() => togglePage(k)}
                     style={{ accentColor: '#00d9ff' }} />
-                  <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{label}</span>
+                  <span className="text-base" style={{ color: 'var(--text-secondary)' }}>{label}</span>
                 </label>
               ))}
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Frequency cap — don't show again for</label>
+              <label className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Frequency cap — don't show again for</label>
               <select value={freqCap} onChange={e => setFreqCap(Number(e.target.value))}
-                className="w-full px-2 py-2 rounded-lg text-xs outline-none"
+                className="w-full px-2 py-2 rounded-lg text-base outline-none"
                 style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
                 {[1, 3, 7, 14, 30].map(d => <option key={d} value={d}>{d} day{d !== 1 ? 's' : ''}</option>)}
               </select>
@@ -233,10 +233,10 @@ function ExitIntentPanel() {
           </div>
 
           <button onClick={handleSave}
-            className="w-full py-2 rounded-xl text-xs font-semibold transition-all"
+            className="w-full py-2 rounded-xl text-base font-semibold transition-all"
             style={{
               background: saved ? 'rgba(16,217,138,0.15)' : 'rgba(0,217,255,0.12)',
-              color: saved ? '#10d98a' : '#00d9ff',
+              color: saved ? '#10d98a' : 'var(--cyan)',
               border: `1px solid ${saved ? 'rgba(16,217,138,0.3)' : 'rgba(0,217,255,0.25)'}`,
             }}>
             {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Settings'}
@@ -245,7 +245,7 @@ function ExitIntentPanel() {
 
         {/* Right: Preview */}
         <div className="glass-card p-4 flex flex-col">
-          <div className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Live Preview</div>
+          <div className="text-base font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Live Preview</div>
 
           {/* Browser mockup */}
           <div className="flex-1 rounded-xl overflow-hidden flex flex-col" style={{ background: '#0a0e1a', border: '1px solid var(--border-dim)' }}>
@@ -254,7 +254,7 @@ function ExitIntentPanel() {
               <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#ff4444' }} />
               <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#ffb347' }} />
               <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#10d98a' }} />
-              <div className="flex-1 mx-3 h-4 rounded text-[9px] flex items-center px-2" style={{ background: 'var(--bg-overlay)', color: 'var(--text-muted)' }}>
+              <div className="flex-1 mx-3 h-4 rounded text-[16px] flex items-center px-2" style={{ background: 'var(--bg-overlay)', color: 'var(--text-muted)' }}>
                 yourstore.com/cart
               </div>
             </div>
@@ -271,35 +271,35 @@ function ExitIntentPanel() {
                     <X size={10} />
                   </button>
                   {/* Headline */}
-                  <div className="text-sm font-bold leading-snug pr-6" style={{ color: 'var(--text-primary)' }}>
+                  <div className="text-base font-bold leading-snug pr-6" style={{ color: 'var(--text-primary)' }}>
                     {headline || 'Your headline here'}
                   </div>
                   {/* Subheadline */}
-                  <div className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
+                  <div className="text-[16px]" style={{ color: 'var(--text-secondary)' }}>
                     {subheadline || 'Your subheadline here'}
                   </div>
                   {/* Discount */}
                   {discountLabel && (
                     <div className="text-center py-2">
-                      <span className="text-2xl font-black" style={{ color: '#00d9ff' }}>{discountLabel}</span>
+                      <span className="text-2xl font-black" style={{ color: 'var(--cyan)' }}>{discountLabel}</span>
                     </div>
                   )}
                   {/* Coupon */}
                   {coupon && (
                     <div className="text-center">
-                      <span className="px-3 py-1 rounded-lg text-xs font-mono font-bold tracking-widest"
-                        style={{ background: 'rgba(0,217,255,0.1)', color: '#00d9ff', border: '1px dashed rgba(0,217,255,0.4)' }}>
+                      <span className="px-3 py-1 rounded-lg text-base font-mono font-bold tracking-widest"
+                        style={{ background: 'rgba(0,217,255,0.1)', color: 'var(--cyan)', border: '1px dashed rgba(0,217,255,0.4)' }}>
                         {coupon}
                       </span>
                     </div>
                   )}
                   {/* CTA */}
-                  <button className="w-full py-2 rounded-xl text-xs font-bold"
+                  <button className="w-full py-2 rounded-xl text-base font-bold"
                     style={{ background: '#00d9ff', color: '#0a0e1a' }}>
                     {ctaText || 'Claim Discount'}
                   </button>
                   {/* No thanks */}
-                  <div className="text-center text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                  <div className="text-center text-[16px]" style={{ color: 'var(--text-muted)' }}>
                     No thanks, I'll pay full price
                   </div>
                 </div>
@@ -307,7 +307,7 @@ function ExitIntentPanel() {
             </div>
           </div>
 
-          <div className="mt-3 flex items-center gap-2 text-[10px]" style={{ color: 'var(--text-muted)' }}>
+          <div className="mt-3 flex items-center gap-2 text-[16px]" style={{ color: 'var(--text-muted)' }}>
             <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#10d98a' }} />
             Preview updates live as you edit settings
           </div>
@@ -316,12 +316,12 @@ function ExitIntentPanel() {
 
       {/* Stats */}
       <div className="glass-card p-4">
-        <div className="text-sm font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Exit-Intent Performance <span className="section-label font-normal ml-1">(30d)</span></div>
+        <div className="text-base font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Exit-Intent Performance <span className="section-label font-normal ml-1">(30d)</span></div>
         <div className="grid grid-cols-5 gap-3">
           {[
             { label: 'Popups Shown',        value: EI_STATS.shown.toLocaleString(),      color: '#7b93ff' },
-            { label: 'Emails Captured',     value: EI_STATS.captured.toLocaleString(),   color: '#00d9ff' },
-            { label: 'Capture Rate',        value: EI_STATS.captureRate + '%',           color: '#00d9ff' },
+            { label: 'Emails Captured',     value: EI_STATS.captured.toLocaleString(),   color: 'var(--cyan)' },
+            { label: 'Capture Rate',        value: EI_STATS.captureRate + '%',           color: 'var(--cyan)' },
             { label: 'Converted to Purchase', value: EI_STATS.recovered.toLocaleString(), color: '#10d98a' },
             { label: 'Revenue Recovered',   value: c$(EI_STATS.revenue),                 color: '#10d98a' },
           ].map(st => (
@@ -336,10 +336,10 @@ function ExitIntentPanel() {
       {/* A/B Testing */}
       <div className="glass-card p-4">
         <div className="flex items-center justify-between mb-4">
-          <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>A/B Testing</div>
+          <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>A/B Testing</div>
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#10d98a' }} />
-            <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Currently testing · started May 1, 2026</span>
+            <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Currently testing · started May 1, 2026</span>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -356,26 +356,26 @@ function ExitIntentPanel() {
             <div key={v.variant} className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: `1px solid ${v.winner ? 'rgba(16,217,138,0.3)' : 'var(--border-subtle)'}` }}>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded font-mono"
+                  <span className="text-[16px] font-bold px-2 py-0.5 rounded font-mono"
                     style={{ background: 'rgba(123,147,255,0.15)', color: '#7b93ff' }}>
                     Variant {v.variant}
                   </span>
-                  <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{v.label}</span>
+                  <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>{v.label}</span>
                 </div>
                 {v.winner && (
-                  <span className="text-[9px] px-2 py-0.5 rounded-full font-semibold"
+                  <span className="text-[16px] px-2 py-0.5 rounded-full font-semibold"
                     style={{ background: 'rgba(16,217,138,0.15)', color: '#10d98a' }}>
                     Winner
                   </span>
                 )}
               </div>
-              <div className="text-xs font-medium mb-1" style={{ color: 'var(--text-primary)' }}>{v.headline}</div>
-              <div className="text-[10px] mb-3" style={{ color: 'var(--text-muted)' }}>Offer: {v.offer}</div>
+              <div className="text-base font-medium mb-1" style={{ color: 'var(--text-primary)' }}>{v.headline}</div>
+              <div className="text-[16px] mb-3" style={{ color: 'var(--text-muted)' }}>Offer: {v.offer}</div>
               <div className="grid grid-cols-2 gap-2">
                 {[['Traffic', v.traffic, '#7b93ff'], ['Conv Rate', v.conv, '#10d98a']].map(([lbl, val, col]) => (
                   <div key={lbl as string}>
                     <div className="section-label mb-0.5">{lbl as string}</div>
-                    <div className="text-sm font-bold" style={{ color: col as string }}>{val as string}</div>
+                    <div className="text-base font-bold" style={{ color: col as string }}>{val as string}</div>
                   </div>
                 ))}
               </div>
@@ -496,7 +496,7 @@ function UpsellPanel() {
       <div className="grid grid-cols-4 gap-3">
         {[
           { label: 'Upsell Revenue (30d)', value: c$(UPSELL_STATS.upsellRevenue30d), color: '#10d98a' },
-          { label: 'Acceptance Rate',     value: UPSELL_STATS.acceptanceRate + '%',  color: '#00d9ff' },
+          { label: 'Acceptance Rate',     value: UPSELL_STATS.acceptanceRate + '%',  color: 'var(--cyan)' },
           { label: 'Avg Upsell Value',    value: c$(UPSELL_STATS.avgUpsellValue),    color: '#ffb347' },
           { label: 'Total Offers Sent',   value: UPSELL_STATS.totalOffers.toLocaleString(), color: '#7b93ff' },
         ].map(st => (
@@ -510,10 +510,10 @@ function UpsellPanel() {
       {/* Offers list */}
       <div className="glass-card p-4">
         <div className="flex items-center justify-between mb-4">
-          <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Active Upsell Offers</div>
+          <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Active Upsell Offers</div>
           <button onClick={() => { setAddOpen(o => !o); setEditingId(null); resetForm(); }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-            style={{ background: 'rgba(0,217,255,0.1)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base font-medium transition-all"
+            style={{ background: 'rgba(0,217,255,0.1)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
             <Plus size={12} />Add Offer
             {addOpen ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
           </button>
@@ -522,19 +522,19 @@ function UpsellPanel() {
         {/* Add offer form */}
         {addOpen && (
           <div className="mb-4 p-4 rounded-xl space-y-3" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)' }}>
-            <div className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{editingId ? 'Edit Upsell Offer' : 'New Upsell Offer'}</div>
+            <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>{editingId ? 'Edit Upsell Offer' : 'New Upsell Offer'}</div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Offer Name</label>
+                <label className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Offer Name</label>
                 <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="e.g. Pro Bundle Upgrade"
-                  className="w-full px-3 py-2 rounded-lg text-xs outline-none"
+                  className="w-full px-3 py-2 rounded-lg text-base outline-none"
                   style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }} />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Type</label>
+                <label className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Type</label>
                 <select value={newType} onChange={e => setNewType(e.target.value as UpsellType)}
-                  className="w-full px-2 py-2 rounded-lg text-xs outline-none"
+                  className="w-full px-2 py-2 rounded-lg text-base outline-none"
                   style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
                   <option value="upsell">Upsell</option>
                   <option value="cross-sell">Cross-sell</option>
@@ -545,9 +545,9 @@ function UpsellPanel() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Trigger Event</label>
+                <label className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Trigger Event</label>
                 <select value={newTrigger} onChange={e => setNewTrigger(e.target.value as typeof newTrigger)}
-                  className="w-full px-2 py-2 rounded-lg text-xs outline-none"
+                  className="w-full px-2 py-2 rounded-lg text-base outline-none"
                   style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
                   <option value="after">After purchase</option>
                   <option value="first">First purchase</option>
@@ -556,30 +556,30 @@ function UpsellPanel() {
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Product to Offer</label>
+                <label className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Product to Offer</label>
                 <input value={newProduct} onChange={e => setNewProduct(e.target.value)} placeholder="Product name"
-                  className="w-full px-3 py-2 rounded-lg text-xs outline-none"
+                  className="w-full px-3 py-2 rounded-lg text-base outline-none"
                   style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }} />
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1">
-                <label className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Original Price ($)</label>
+                <label className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Original Price ($)</label>
                 <input type="number" value={newOriginal} onChange={e => setNewOriginal(e.target.value)} placeholder="0"
-                  className="w-full px-3 py-2 rounded-lg text-xs outline-none"
+                  className="w-full px-3 py-2 rounded-lg text-base outline-none"
                   style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }} />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Discounted Price ($)</label>
+                <label className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Discounted Price ($)</label>
                 <input type="number" value={newDiscounted} onChange={e => setNewDiscounted(e.target.value)} placeholder="0"
-                  className="w-full px-3 py-2 rounded-lg text-xs outline-none"
+                  className="w-full px-3 py-2 rounded-lg text-base outline-none"
                   style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }} />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Display Timing</label>
+                <label className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Display Timing</label>
                 <select value={newTiming} onChange={e => setNewTiming(e.target.value as typeof newTiming)}
-                  className="w-full px-2 py-2 rounded-lg text-xs outline-none"
+                  className="w-full px-2 py-2 rounded-lg text-base outline-none"
                   style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
                   <option value="immediate">Immediately on confirmation</option>
                   <option value="email">Post-purchase email</option>
@@ -590,12 +590,12 @@ function UpsellPanel() {
 
             <div className="flex gap-2 justify-end">
               <button onClick={() => { setAddOpen(false); setEditingId(null); resetForm(); }}
-                className="px-4 py-1.5 rounded-lg text-xs"
+                className="px-4 py-1.5 rounded-lg text-base"
                 style={{ color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
                 Cancel
               </button>
               <button onClick={handleCreate}
-                className="px-4 py-1.5 rounded-lg text-xs font-semibold"
+                className="px-4 py-1.5 rounded-lg text-base font-semibold"
                 style={{ background: '#00d9ff', color: '#0a0e1a' }}>
                 {editingId ? 'Save Offer' : 'Create Offer'}
               </button>
@@ -613,20 +613,20 @@ function UpsellPanel() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[9px] px-2 py-0.5 rounded-full font-semibold capitalize"
+                      <span className="text-[16px] px-2 py-0.5 rounded-full font-semibold capitalize"
                         style={{ background: typeColor + '18', color: typeColor }}>
                         {offer.type}
                       </span>
-                      <span className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{offer.name}</span>
+                      <span className="text-base font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{offer.name}</span>
                     </div>
-                    <div className="text-[10px] mb-1.5" style={{ color: 'var(--text-muted)' }}>{offer.trigger}</div>
-                    <div className="text-[11px] font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>{offer.offerProduct}</div>
+                    <div className="text-[16px] mb-1.5" style={{ color: 'var(--text-muted)' }}>{offer.trigger}</div>
+                    <div className="text-[16px] font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>{offer.offerProduct}</div>
 
                     {/* Pricing */}
                     <div className="flex items-center gap-2">
-                      <span className="text-xs line-through" style={{ color: 'var(--text-muted)' }}>{c$(offer.originalPrice)}</span>
-                      <span className="text-sm font-bold" style={{ color: '#10d98a' }}>{c$(offer.offerPrice)}</span>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded font-semibold"
+                      <span className="text-base line-through" style={{ color: 'var(--text-muted)' }}>{c$(offer.originalPrice)}</span>
+                      <span className="text-base font-bold" style={{ color: '#10d98a' }}>{c$(offer.offerPrice)}</span>
+                      <span className="text-[16px] px-1.5 py-0.5 rounded font-semibold"
                         style={{ background: 'rgba(16,217,138,0.12)', color: '#10d98a' }}>
                         {offer.discount}
                       </span>
@@ -636,7 +636,7 @@ function UpsellPanel() {
                   {/* Metrics + controls */}
                   <div className="flex flex-col items-end gap-2 shrink-0">
                     {/* Status */}
-                    <span className="text-[9px] px-2 py-0.5 rounded-full font-semibold"
+                    <span className="text-[16px] px-2 py-0.5 rounded-full font-semibold"
                       style={{
                         background: offer.status === 'active' ? 'rgba(16,217,138,0.12)' : 'rgba(255,179,71,0.12)',
                         color: offer.status === 'active' ? '#10d98a' : '#ffb347',
@@ -646,8 +646,8 @@ function UpsellPanel() {
 
                     {/* Metrics */}
                     <div className="text-right space-y-0.5">
-                      <div className="text-[10px]"><span style={{ color: 'var(--text-muted)' }}>Accept Rate </span><span className="font-mono font-semibold" style={{ color: '#00d9ff' }}>{offer.acceptRate}%</span></div>
-                      <div className="text-[10px]"><span style={{ color: 'var(--text-muted)' }}>Revenue (30d) </span><span className="font-mono font-semibold" style={{ color: '#10d98a' }}>{c$(offer.revenue30d)}</span></div>
+                      <div className="text-[16px]"><span style={{ color: 'var(--text-muted)' }}>Accept Rate </span><span className="font-mono font-semibold" style={{ color: 'var(--cyan)' }}>{offer.acceptRate}%</span></div>
+                      <div className="text-[16px]"><span style={{ color: 'var(--text-muted)' }}>Revenue (30d) </span><span className="font-mono font-semibold" style={{ color: '#10d98a' }}>{c$(offer.revenue30d)}</span></div>
                     </div>
 
                     {/* Actions */}
@@ -667,7 +667,7 @@ function UpsellPanel() {
                         {offer.status === 'active' ? <PauseCircle size={11} /> : <PlayCircle size={11} />}
                       </button>
                       <button onClick={() => confirmDelete(offer.id)}
-                        className="px-2 py-1.5 rounded-lg text-[10px] font-medium transition-all"
+                        className="px-2 py-1.5 rounded-lg text-[16px] font-medium transition-all"
                         style={{
                           background: isDeleting ? 'rgba(255,68,68,0.15)' : 'rgba(255,68,68,0.08)',
                           color: '#ff4444',
@@ -736,7 +736,7 @@ function WatchlistsPanel() {
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: 'Total Watchers',     value: totalWatchers.toString(),           color: '#00d9ff' },
+          { label: 'Total Watchers',     value: totalWatchers.toString(),           color: 'var(--cyan)' },
           { label: 'Out of Stock',        value: outOfStock.length.toString(),       color: '#ff4444' },
           { label: 'Price Drop Alerts',   value: priceDrop.length.toString(),        color: '#10d98a' },
           { label: 'Notifications Sent',  value: products.reduce((s, p) => s + p.notificationsSent, 0).toString(), color: '#7b93ff' },
@@ -749,7 +749,7 @@ function WatchlistsPanel() {
       </div>
 
       {outOfStock.length > 0 && (
-        <div className="rounded-xl p-3 flex items-center gap-2 text-xs" style={{ background: 'rgba(255,68,68,.08)', border: '1px solid rgba(255,68,68,.25)' }}>
+        <div className="rounded-xl p-3 flex items-center gap-2 text-base" style={{ background: 'rgba(255,68,68,.08)', border: '1px solid rgba(255,68,68,.25)' }}>
           <AlertTriangle size={13} style={{ color: '#ff4444', flexShrink: 0 }} />
           <span style={{ color: '#ff4444' }}>
             {outOfStock.reduce((s, p) => s + p.watcherCount, 0)} customers are waiting for back-in-stock alerts — notify them when items restock to recover revenue.
@@ -758,11 +758,11 @@ function WatchlistsPanel() {
       )}
 
       <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Watchlist Products</span>
+        <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Watchlist Products</span>
         <div className="flex gap-1 p-1 rounded-lg ml-auto" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
           {(['all', 'out_of_stock', 'low_stock', 'in_stock'] as const).map(s => (
             <button key={s} onClick={() => setFilter(s)}
-              className="px-2.5 py-1 rounded-md text-[11px] capitalize transition-all"
+              className="px-2.5 py-1 rounded-md text-[16px] capitalize transition-all"
               style={{ background: filter === s ? 'var(--bg-elevated)' : 'transparent', color: filter === s ? 'var(--text-primary)' : 'var(--text-muted)', border: filter === s ? '1px solid var(--border-dim)' : '1px solid transparent' }}>
               {s === 'all' ? 'All' : s.replace(/_/g, ' ')}
             </button>
@@ -771,7 +771,7 @@ function WatchlistsPanel() {
       </div>
 
       <div className="glass-card overflow-hidden">
-        <table className="w-full text-xs">
+        <table className="w-full text-base">
           <thead style={{ background: 'var(--bg-elevated)' }}>
             <tr>
               {['Product', 'Store', 'Price', 'Target / Drop', 'Status', 'Watchers', 'Action'].map(h => (
@@ -790,13 +790,13 @@ function WatchlistsPanel() {
                   onMouseLeave={e => (e.currentTarget.style.background = '')}>
                   <td className="px-3 py-2.5 max-w-[180px]">
                     <div className="font-medium truncate" style={{ color: 'var(--text-primary)' }}>{p.name}</div>
-                    <div className="section-label text-[10px]">{p.sku}</div>
+                    <div className="section-label text-[16px]">{p.sku}</div>
                   </td>
                   <td className="px-3 py-2.5" style={{ color: 'var(--text-muted)' }}>{p.store}</td>
                   <td className="px-3 py-2.5 font-semibold" style={{ color: 'var(--text-primary)' }}>${p.currentPrice.toLocaleString()}</td>
                   <td className="px-3 py-2.5">
                     {isPriceDrop ? (
-                      <span className="flex items-center gap-1 text-xs font-medium" style={{ color: '#10d98a' }}>
+                      <span className="flex items-center gap-1 text-base font-medium" style={{ color: '#10d98a' }}>
                         <Tag size={10} /> -{savings}% (was ${p.originalPrice?.toLocaleString()})
                       </span>
                     ) : p.targetPrice ? (
@@ -804,7 +804,7 @@ function WatchlistsPanel() {
                     ) : <span className="section-label">—</span>}
                   </td>
                   <td className="px-3 py-2.5">
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ color: sc.color, background: `${sc.color}18` }}>{sc.label}</span>
+                    <span className="text-[16px] px-1.5 py-0.5 rounded-full font-medium" style={{ color: sc.color, background: `${sc.color}18` }}>{sc.label}</span>
                   </td>
                   <td className="px-3 py-2.5">
                     <span className="flex items-center gap-1" style={{ color: 'var(--text-primary)' }}>
@@ -813,10 +813,10 @@ function WatchlistsPanel() {
                   </td>
                   <td className="px-3 py-2.5">
                     {p.notificationsSent > 0 ? (
-                      <span className="text-[10px]" style={{ color: '#10d98a' }}>✓ {p.notificationsSent} notified</span>
+                      <span className="text-[16px]" style={{ color: '#10d98a' }}>✓ {p.notificationsSent} notified</span>
                     ) : (
                       <button onClick={() => notify(p.id)} disabled={p.stockStatus === 'out_of_stock'}
-                        className="text-[10px] px-2 py-1 rounded-lg font-medium disabled:opacity-40"
+                        className="text-[16px] px-2 py-1 rounded-lg font-medium disabled:opacity-40"
                         style={{ color: '#7b93ff', background: 'rgba(123,147,255,.1)' }}>
                         {p.stockStatus === 'out_of_stock' ? 'Awaiting Stock' : 'Send Alert'}
                       </button>
@@ -887,7 +887,7 @@ function CustomerInsightsPanel() {
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: 'Total Customer CLV',   value: c$(totalClv),                color: '#00d9ff' },
+          { label: 'Total Customer CLV',   value: c$(totalClv),                color: 'var(--cyan)' },
           { label: 'Avg CLV per Customer', value: c$(avgClv),                  color: '#7b93ff' },
           { label: 'Avg Repeat Rate',       value: avgRepeat + '%',             color: '#10d98a' },
           { label: 'High Churn Risk',       value: highRisk.toString(),         color: '#ff4444' },
@@ -900,18 +900,18 @@ function CustomerInsightsPanel() {
       </div>
 
       {highRisk > 0 && (
-        <div className="rounded-xl p-3 flex items-center gap-2 text-xs" style={{ background: 'rgba(255,68,68,.08)', border: '1px solid rgba(255,68,68,.25)' }}>
+        <div className="rounded-xl p-3 flex items-center gap-2 text-base" style={{ background: 'rgba(255,68,68,.08)', border: '1px solid rgba(255,68,68,.25)' }}>
           <AlertTriangle size={13} style={{ color: '#ff4444', flexShrink: 0 }} />
           <span style={{ color: '#ff4444' }}>{highRisk} high-churn-risk customers haven't ordered in 60+ days — consider a win-back campaign via Email/SMS.</span>
         </div>
       )}
 
       <div className="flex items-center gap-3">
-        <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Customer CLV & Churn Risk</span>
+        <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Customer CLV & Churn Risk</span>
         <div className="flex gap-1 p-1 rounded-lg" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
           {(['all', 'high', 'medium', 'low'] as const).map(f => (
             <button key={f} onClick={() => setChurnFilter(f)}
-              className="px-2.5 py-1 rounded-md text-[11px] capitalize transition-all"
+              className="px-2.5 py-1 rounded-md text-[16px] capitalize transition-all"
               style={{ background: churnFilter === f ? 'var(--bg-elevated)' : 'transparent', color: churnFilter === f ? 'var(--text-primary)' : 'var(--text-muted)', border: churnFilter === f ? '1px solid var(--border-dim)' : '1px solid transparent' }}>
               {f === 'all' ? 'All' : f + ' risk'}
             </button>
@@ -920,7 +920,7 @@ function CustomerInsightsPanel() {
         <div className="flex gap-1 p-1 rounded-lg ml-auto" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
           {([['clv', 'CLV'], ['churn', 'Risk'], ['days', 'Days Since Order']] as const).map(([key, label]) => (
             <button key={key} onClick={() => setSort(key)}
-              className="px-2.5 py-1 rounded-md text-[11px] transition-all"
+              className="px-2.5 py-1 rounded-md text-[16px] transition-all"
               style={{ background: sort === key ? 'var(--bg-elevated)' : 'transparent', color: sort === key ? 'var(--text-primary)' : 'var(--text-muted)', border: sort === key ? '1px solid var(--border-dim)' : '1px solid transparent' }}>
               {label}
             </button>
@@ -929,7 +929,7 @@ function CustomerInsightsPanel() {
       </div>
 
       <div className="glass-card overflow-hidden">
-        <table className="w-full text-xs">
+        <table className="w-full text-base">
           <thead style={{ background: 'var(--bg-elevated)' }}>
             <tr>
               {['Customer', 'Store', 'CLV', 'Orders', 'Avg Order', 'Last Order', 'Repeat Rate', 'Churn Risk', 'Next Order'].map(h => (
@@ -946,10 +946,10 @@ function CustomerInsightsPanel() {
                   onMouseLeave={e => (e.currentTarget.style.background = '')}>
                   <td className="px-3 py-2.5">
                     <div className="font-medium" style={{ color: 'var(--text-primary)' }}>{c.name}</div>
-                    <div className="section-label text-[10px]">{c.email}</div>
+                    <div className="section-label text-[16px]">{c.email}</div>
                   </td>
-                  <td className="px-3 py-2.5 text-[10px]" style={{ color: 'var(--text-muted)' }}>{c.store}</td>
-                  <td className="px-3 py-2.5 font-bold" style={{ color: '#00d9ff' }}>{c$(c.clv)}</td>
+                  <td className="px-3 py-2.5 text-[16px]" style={{ color: 'var(--text-muted)' }}>{c.store}</td>
+                  <td className="px-3 py-2.5 font-bold" style={{ color: 'var(--cyan)' }}>{c$(c.clv)}</td>
                   <td className="px-3 py-2.5" style={{ color: 'var(--text-secondary)' }}>{c.totalOrders}</td>
                   <td className="px-3 py-2.5" style={{ color: 'var(--text-secondary)' }}>{c$(c.avgOrderValue)}</td>
                   <td className="px-3 py-2.5" style={{ color: c.lastOrderDays > 60 ? '#ff4444' : c.lastOrderDays > 30 ? '#ffb347' : 'var(--text-secondary)' }}>
@@ -964,7 +964,7 @@ function CustomerInsightsPanel() {
                     </div>
                   </td>
                   <td className="px-3 py-2.5">
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ color: cc.color, background: `${cc.color}18` }}>{cc.label}</span>
+                    <span className="text-[16px] px-1.5 py-0.5 rounded-full font-medium" style={{ color: cc.color, background: `${cc.color}18` }}>{cc.label}</span>
                   </td>
                   <td className="px-3 py-2.5" style={{ color: c.predictedNextOrder ? '#7b93ff' : 'var(--text-muted)' }}>
                     {c.predictedNextOrder ? `~${c.predictedNextOrder}d` : <span style={{ color: '#ff4444' }}>At risk</span>}
@@ -1013,7 +1013,7 @@ export default function CartPage() {
             {[
               { label: 'Abandoned (30d)',    value: s.cartsAbandoned30d.toString(),   color: '#ffb347' },
               { label: 'Recovered (30d)',    value: s.cartsRecovered30d.toString(),    color: '#10d98a' },
-              { label: 'Recovery Rate',      value: s.recoveryRate.toFixed(1) + '%',  color: '#00d9ff' },
+              { label: 'Recovery Rate',      value: s.recoveryRate.toFixed(1) + '%',  color: 'var(--cyan)' },
               { label: 'Revenue Recovered',  value: c$(s.revenueRecovered30d),         color: '#10d98a' },
               { label: 'At Risk Right Now',  value: formatCurrency(s.totalCartValue),  color: '#ff4444' },
             ].map(st => (
@@ -1029,7 +1029,7 @@ export default function CartPage() {
             {[
               { label: 'Email Recovery Rate', value: s.emailRecoveryRate, Icon: Mail,          color: '#ffb347' },
               { label: 'SMS Recovery Rate',   value: s.smsRecoveryRate,   Icon: MessageSquare, color: '#10d98a' },
-              { label: 'Push Recovery Rate',  value: s.pushRecoveryRate,  Icon: Bell,          color: '#00d9ff' },
+              { label: 'Push Recovery Rate',  value: s.pushRecoveryRate,  Icon: Bell,          color: 'var(--cyan)' },
             ].map(ch => (
               <div key={ch.label} className="glass-card px-4 py-3 flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
@@ -1054,7 +1054,7 @@ export default function CartPage() {
               const Icon = t.icon;
               return (
                 <button key={t.key} onClick={() => setTab(t.key)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base transition-all"
                   style={{
                     background: tab === t.key ? 'var(--bg-elevated)' : 'transparent',
                     color: tab === t.key ? 'var(--text-primary)' : 'var(--text-muted)',
@@ -1062,7 +1062,7 @@ export default function CartPage() {
                     border: tab === t.key ? '1px solid var(--border-dim)' : '1px solid transparent',
                   }}>
                   <Icon size={13} />{t.label}
-                  {t.badge ? <span className="text-[9px] px-1.5 py-0.5 rounded-full font-mono"
+                  {t.badge ? <span className="text-[16px] px-1.5 py-0.5 rounded-full font-mono"
                     style={{ background: '#ffb347', color: '#0a0e1a' }}>{t.badge}</span> : null}
                 </button>
               );
@@ -1078,11 +1078,11 @@ export default function CartPage() {
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full live-dot-amber" style={{ background: '#ffb347' }} />
                     <span className="data-value text-xl font-bold" style={{ color: '#ffb347' }}>{liveCarts.length}</span>
-                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    <span className="text-base" style={{ color: 'var(--text-muted)' }}>
                       active carts · {formatCurrency(s.totalCartValue)} at risk
                     </span>
                   </div>
-                  <button onClick={triggerAllRecovery} className="text-xs px-3 py-1.5 rounded-lg font-medium"
+                  <button onClick={triggerAllRecovery} className="text-base px-3 py-1.5 rounded-lg font-medium"
                     style={{ background: 'rgba(255,179,71,0.1)', color: '#ffb347', border: '1px solid rgba(255,179,71,0.2)' }}>
                     Trigger All Recovery
                   </button>
@@ -1097,16 +1097,16 @@ export default function CartPage() {
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-0.5">
-                              <span className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{cart.customerName}</span>
-                              <span className="text-[9px] font-mono" style={{ color: urgent ? '#ff4444' : 'var(--text-muted)' }}>{formatMinutesAgo(cart.minutesAgo)}</span>
+                              <span className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>{cart.customerName}</span>
+                              <span className="text-[16px] font-mono" style={{ color: urgent ? '#ff4444' : 'var(--text-muted)' }}>{formatMinutesAgo(cart.minutesAgo)}</span>
                             </div>
-                            <div className="flex items-center gap-2 text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                            <div className="flex items-center gap-2 text-[16px]" style={{ color: 'var(--text-muted)' }}>
                               <MapPin size={9} />{cart.location}{store && <span>· {store.domain.split('.')[0]}</span>}
                               <span>· {cart.items.length} item{cart.items.length !== 1 ? 's' : ''}</span>
                             </div>
                           </div>
                           <div className="text-right shrink-0">
-                            <div className="data-value text-sm font-bold" style={{ color: '#ffb347' }}>{formatCurrency(cart.cartValue)}</div>
+                            <div className="data-value text-base font-bold" style={{ color: '#ffb347' }}>{formatCurrency(cart.cartValue)}</div>
                             <div className="flex items-center gap-1 mt-1 justify-end">
                               {[{ sent: cart.recoveryEmailSent, Icon: Mail }, { sent: cart.smsSent, Icon: MessageSquare }].map(({ sent, Icon }, i) => (
                                 <div key={i} className="p-1 rounded" style={{ background: sent ? 'rgba(16,217,138,0.1)' : 'rgba(123,147,255,0.1)', color: sent ? '#10d98a' : '#7b93ff' }}>
@@ -1116,7 +1116,7 @@ export default function CartPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="mt-1.5 pt-1.5 border-t text-[10px] truncate" style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}>
+                        <div className="mt-1.5 pt-1.5 border-t text-[16px] truncate" style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}>
                           {cart.items[0].name}{cart.items.length > 1 ? ` +${cart.items.length - 1} more` : ''}
                         </div>
                       </div>
@@ -1132,13 +1132,13 @@ export default function CartPage() {
                   <div key={seq.id} className="glass-card p-4">
                     <div className="flex items-center justify-between mb-4">
                       <div>
-                        <div className="text-sm font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>{seq.name}</div>
-                        <div className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
+                        <div className="text-base font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>{seq.name}</div>
+                        <div className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
                           {seq.steps.length} steps · {seq.store} · <span style={{ color: '#10d98a' }}>Active</span>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="data-value text-sm font-bold" style={{ color: '#10d98a' }}>{c$(seq.revenue30d)}</div>
+                        <div className="data-value text-base font-bold" style={{ color: '#10d98a' }}>{c$(seq.revenue30d)}</div>
                         <div className="section-label">recovered (30d)</div>
                       </div>
                     </div>
@@ -1153,22 +1153,22 @@ export default function CartPage() {
                                 <div className="w-5 h-5 rounded flex items-center justify-center" style={{ background: color + '20' }}>
                                   <Icon size={11} style={{ color }} />
                                 </div>
-                                <span className="text-[9px] font-mono" style={{ color }}>+{step.delay}</span>
+                                <span className="text-[16px] font-mono" style={{ color }}>+{step.delay}</span>
                               </div>
-                              <div className="text-[11px] font-medium mb-2 leading-snug" style={{ color: 'var(--text-secondary)' }}>{step.subject}</div>
+                              <div className="text-[16px] font-medium mb-2 leading-snug" style={{ color: 'var(--text-secondary)' }}>{step.subject}</div>
                               {[
                                 { label: 'Open', value: step.openRate + '%', color: step.openRate > 50 ? '#10d98a' : '#ffb347' },
-                                { label: 'Click', value: step.clickRate + '%', color: '#00d9ff' },
+                                { label: 'Click', value: step.clickRate + '%', color: 'var(--cyan)' },
                                 { label: 'Conv.', value: step.convRate + '%', color: '#7b93ff' },
                               ].map(m => (
-                                <div key={m.label} className="flex items-center justify-between text-[10px]">
+                                <div key={m.label} className="flex items-center justify-between text-[16px]">
                                   <span style={{ color: 'var(--text-muted)' }}>{m.label}</span>
                                   <span className="font-mono font-semibold" style={{ color: m.color }}>{m.value}</span>
                                 </div>
                               ))}
                             </div>
                             {i < seq.steps.length - 1 && (
-                              <div className="text-[10px] mt-6 shrink-0" style={{ color: 'var(--text-muted)' }}>→</div>
+                              <div className="text-[16px] mt-6 shrink-0" style={{ color: 'var(--text-muted)' }}>→</div>
                             )}
                           </div>
                         );
@@ -1191,11 +1191,11 @@ export default function CartPage() {
                        : r.channel === 'SMS' ? <MessageSquare size={11} style={{ color: CH_COLOR[r.channel] }} />
                        : <Bell size={11} style={{ color: CH_COLOR[r.channel] }} />}
                     </div>
-                    <span className="text-xs flex-1 truncate" style={{ color: 'var(--text-secondary)' }}>{r.customer}</span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded shrink-0"
+                    <span className="text-base flex-1 truncate" style={{ color: 'var(--text-secondary)' }}>{r.customer}</span>
+                    <span className="text-[16px] font-mono px-1.5 py-0.5 rounded shrink-0"
                       style={{ background: CH_COLOR[r.channel] + '18', color: CH_COLOR[r.channel] }}>via {r.channel}</span>
-                    <span className="data-value text-sm font-semibold shrink-0" style={{ color: '#10d98a' }}>{c$(r.value)}</span>
-                    <span className="text-[10px] font-mono shrink-0" style={{ color: 'var(--text-muted)', minWidth: 44 }}>{formatMinutesAgo(r.minutesAgo)}</span>
+                    <span className="data-value text-base font-semibold shrink-0" style={{ color: '#10d98a' }}>{c$(r.value)}</span>
+                    <span className="text-[16px] font-mono shrink-0" style={{ color: 'var(--text-muted)', minWidth: 44 }}>{formatMinutesAgo(r.minutesAgo)}</span>
                   </div>
                 ))}
               </div>

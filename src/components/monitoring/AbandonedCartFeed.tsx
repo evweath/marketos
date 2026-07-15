@@ -16,7 +16,7 @@ function CustomerAvatar({ name }: { name: string }) {
   const hue = name.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0) % 360;
   return (
     <div
-      className='w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0'
+      className='w-7 h-7 rounded-full flex items-center justify-center text-[16px] font-bold shrink-0'
       style={{
         background: `hsla(${hue},55%,35%,0.4)`,
         border: `1px solid hsla(${hue},55%,55%,0.3)`,
@@ -78,7 +78,7 @@ export default function AbandonedCartFeed({ carts: initialCarts, storeColor: _st
       <div className='glass-card p-4'>
         <div className='section-label mb-3'>Abandoned Carts — Live</div>
         <div className='flex items-center justify-center py-8' style={{ color: 'var(--text-muted)' }}>
-          <span className='text-sm'>No abandoned carts right now</span>
+          <span className='text-base'>No abandoned carts right now</span>
         </div>
       </div>
     );
@@ -97,7 +97,7 @@ export default function AbandonedCartFeed({ carts: initialCarts, storeColor: _st
             <span className='font-mono text-xl font-bold' style={{ color: '#ffb347' }}>
               {carts.length}
             </span>
-            <span className='text-xs' style={{ color: 'var(--text-muted)' }}>
+            <span className='text-base' style={{ color: 'var(--text-muted)' }}>
               active —{' '}
               <span style={{ color: '#ffb347' }}>{formatCurrency(totalValue)}</span>
               {' '}at risk
@@ -105,10 +105,10 @@ export default function AbandonedCartFeed({ carts: initialCarts, storeColor: _st
           </div>
         </div>
         <button onClick={triggerAllRecovery}
-          className='flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium transition-all'
+          className='flex items-center gap-1.5 text-base px-3 py-1.5 rounded-lg font-medium transition-all'
           style={{
             background: 'rgba(0,217,255,0.08)',
-            color: '#00d9ff',
+            color: 'var(--cyan)',
             border: '1px solid rgba(0,217,255,0.2)',
           }}>
           <Send size={11} />
@@ -129,14 +129,14 @@ export default function AbandonedCartFeed({ carts: initialCarts, storeColor: _st
 
                 <div className='flex-1 min-w-0'>
                   <div className='flex items-center gap-2 mb-0.5'>
-                    <span className='text-sm font-semibold truncate' style={{ color: 'var(--text-primary)' }}>
+                    <span className='text-base font-semibold truncate' style={{ color: 'var(--text-primary)' }}>
                       {cart.customerName}
                     </span>
-                    <span className='text-[10px] font-mono shrink-0' style={{ color: timeColor }}>
+                    <span className='text-[16px] font-mono shrink-0' style={{ color: timeColor }}>
                       {formatMinutesAgo(cart.minutesAgo)}
                     </span>
                   </div>
-                  <div className='flex items-center gap-2 text-[11px]' style={{ color: 'var(--text-muted)' }}>
+                  <div className='flex items-center gap-2 text-[16px]' style={{ color: 'var(--text-muted)' }}>
                     <MapPin size={9} />
                     <span>{cart.location}</span>
                     <span>·</span>
@@ -146,7 +146,7 @@ export default function AbandonedCartFeed({ carts: initialCarts, storeColor: _st
                 </div>
 
                 <div className='shrink-0 text-right'>
-                  <div className='font-mono text-sm font-bold mb-1' style={{ color: '#ffb347' }}>
+                  <div className='font-mono text-base font-bold mb-1' style={{ color: '#ffb347' }}>
                     {formatCurrency(cart.cartValue)}
                   </div>
                   <div className='flex items-center gap-1 justify-end'>
@@ -171,7 +171,7 @@ export default function AbandonedCartFeed({ carts: initialCarts, storeColor: _st
               {/* Item preview */}
               <div className='mt-2 pt-2 border-t' style={{ borderColor: 'var(--border-subtle)' }}>
                 {cart.items.slice(0, 2).map((item, i) => (
-                  <div key={i} className='flex items-center justify-between text-[11px] py-0.5'>
+                  <div key={i} className='flex items-center justify-between text-[16px] py-0.5'>
                     <span className='truncate' style={{ color: 'var(--text-secondary)', maxWidth: '70%' }}>
                       {item.qty > 1 && <span style={{ color: 'var(--text-muted)' }}>{item.qty}× </span>}
                       {item.name}
@@ -182,7 +182,7 @@ export default function AbandonedCartFeed({ carts: initialCarts, storeColor: _st
                   </div>
                 ))}
                 {cart.items.length > 2 && (
-                  <div className='text-[11px] pt-0.5' style={{ color: 'var(--text-muted)' }}>
+                  <div className='text-[16px] pt-0.5' style={{ color: 'var(--text-muted)' }}>
                     +{cart.items.length - 2} more item{cart.items.length - 2 !== 1 ? 's' : ''}
                   </div>
                 )}

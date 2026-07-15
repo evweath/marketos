@@ -97,21 +97,21 @@ export default function AlertBanner({ alerts }: Props) {
             {/* Body */}
             <div className='flex-1 min-w-0'>
               <div className='flex items-center gap-2 mb-0.5 flex-wrap'>
-                <span className='text-[10px] font-mono font-bold px-1.5 py-0.5 rounded'
+                <span className='text-[16px] font-mono font-bold px-1.5 py-0.5 rounded'
                   style={{ background: sc.color + '20', color: sc.color }}>
                   {sc.label}
                 </span>
                 {store && (
-                  <span className='text-[10px] font-mono' style={{ color: 'var(--text-muted)' }}>
+                  <span className='text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>
                     {store.domain}
                   </span>
                 )}
-                <span className='text-[10px] font-mono tabular-nums' style={{ color: 'var(--text-muted)' }} suppressHydrationWarning>
+                <span className='text-[16px] font-mono tabular-nums' style={{ color: 'var(--text-muted)' }} suppressHydrationWarning>
                   {timeAgo(alert.createdAt)}
                 </span>
               </div>
-              <div className='text-sm font-semibold' style={{ color: sc.color }}>{alert.title}</div>
-              <div className='text-xs mt-0.5' style={{ color: 'var(--text-secondary)' }}>{alert.message}</div>
+              <div className='text-base font-semibold' style={{ color: sc.color }}>{alert.title}</div>
+              <div className='text-base mt-0.5' style={{ color: 'var(--text-secondary)' }}>{alert.message}</div>
             </div>
 
             {/* Dismiss */}

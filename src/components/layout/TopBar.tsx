@@ -50,7 +50,7 @@ export default function TopBar({ title, subtitle, breadcrumbs }: TopBarProps) {
             {breadcrumbs.map((crumb, i) => (
               <span key={i} className="flex items-center gap-1">
                 <span
-                  className="text-[11px]"
+                  className="text-[16px]"
                   style={{
                     color: i === breadcrumbs.length - 1 ? 'var(--text-muted)' : 'var(--text-muted)',
                     fontFamily: 'DM Mono',
@@ -74,14 +74,14 @@ export default function TopBar({ title, subtitle, breadcrumbs }: TopBarProps) {
 
         <div className="flex items-center gap-2.5">
           <h1
-            className="text-[15px] font-semibold tracking-tight leading-none"
+            className="text-[16px] font-semibold tracking-tight leading-none"
             style={{ color: 'var(--text-primary)' }}
           >
             {title}
           </h1>
           {subtitle && (
             <span
-              className="text-[11px] px-2 py-0.5 rounded-md font-mono"
+              className="text-[16px] px-2 py-0.5 rounded-md font-mono"
               style={{
                 background: 'var(--bg-elevated)',
                 color: 'var(--text-secondary)',
@@ -110,7 +110,7 @@ export default function TopBar({ title, subtitle, breadcrumbs }: TopBarProps) {
             style={{ background: '#10d98a' }}
           />
           <span
-            className="text-[10px] font-mono font-semibold"
+            className="text-[16px] font-mono font-semibold"
             style={{ color: '#10d98a', letterSpacing: '0.08em' }}
           >
             LIVE
@@ -126,7 +126,7 @@ export default function TopBar({ title, subtitle, breadcrumbs }: TopBarProps) {
           }}
         >
           <span
-            className="data-value text-[12px] tabular-nums"
+            className="data-value text-[16px] tabular-nums"
             style={{ color: 'var(--text-secondary)' }}
           >
             {time}
@@ -167,7 +167,7 @@ export default function TopBar({ title, subtitle, breadcrumbs }: TopBarProps) {
           <Bell size={14} />
           {unacknowledgedAlerts.length > 0 && (
             <span
-              className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold leading-none"
+              className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[16px] font-bold leading-none"
               style={{
                 background: criticalCount > 0 ? '#ff4444' : '#ffb347',
                 color: '#080b18',

@@ -22,7 +22,7 @@ export default function SeoSnapshot({ snapshot }: Props) {
     <div className="glass-card p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="section-label">SEO Health</div>
-        <div className="flex items-center gap-2 text-[10px] font-mono">
+        <div className="flex items-center gap-2 text-[16px] font-mono">
           {errors > 0   && <span style={{ color: '#ff4444' }}>{errors} error{errors !== 1 ? 's' : ''}</span>}
           {warnings > 0 && <span style={{ color: '#ffb347' }}>{warnings} warn</span>}
           <span style={{ color: '#10d98a' }}>{ok} ok</span>
@@ -37,8 +37,8 @@ export default function SeoSnapshot({ snapshot }: Props) {
             <div key={metric.label} className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg"
               style={{ background: 'var(--bg-elevated)' }}>
               <Icon size={13} style={{ color: sc.color }} className="shrink-0" />
-              <span className="text-xs flex-1" style={{ color: 'var(--text-secondary)' }}>{metric.label}</span>
-              <span className="text-xs text-right" style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono', maxWidth: 160 }}>
+              <span className="text-base flex-1" style={{ color: 'var(--text-secondary)' }}>{metric.label}</span>
+              <span className="text-base text-right" style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono', maxWidth: 160 }}>
                 {metric.value}
               </span>
             </div>

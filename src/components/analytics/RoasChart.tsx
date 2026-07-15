@@ -20,7 +20,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   const ch = CHANNEL_METRICS.find(c => c.label === label || c.label.replace(' Ads', '').replace(' / ', '/') === label);
   return (
     <div
-      className="glass-card-elevated px-3 py-2.5 text-xs"
+      className="glass-card-elevated px-3 py-2.5 text-base"
       style={{ border: '1px solid var(--border-dim)', boxShadow: 'var(--shadow-float)' }}
     >
       <div className="font-mono font-semibold mb-1.5" style={{ color: 'var(--text-primary)' }}>{label}</div>
@@ -71,12 +71,12 @@ export default function RoasChart({ dateRange = '30d' }: { dateRange?: DateRange
       <div className="flex items-center justify-between mb-4">
         <div>
           <div className="section-label mb-1">ROAS by Channel</div>
-          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+          <div className="text-base" style={{ color: 'var(--text-secondary)' }}>
             Avg blended:{' '}
             <span className="font-mono" style={{ color: '#10d98a' }}>{avgRoas.toFixed(2)}×</span>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
+        <div className="flex items-center gap-1.5 text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
           <div
             className="w-8 h-px border-t border-dashed"
             style={{ borderColor: '#ffb347', opacity: 0.5 }}
@@ -102,7 +102,7 @@ export default function RoasChart({ dateRange = '30d' }: { dateRange?: DateRange
             <CartesianGrid stroke="rgba(var(--overlay-rgb),0.04)" strokeDasharray="4 4" vertical={false} />
             <XAxis
               dataKey="label"
-              tick={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'DM Mono' }}
+              tick={{ fill: 'var(--text-muted)', fontSize: 16, fontFamily: 'DM Mono' }}
               axisLine={false}
               tickLine={false}
             />
@@ -120,7 +120,7 @@ export default function RoasChart({ dateRange = '30d' }: { dateRange?: DateRange
                 value: `${avgRoas.toFixed(1)}×`,
                 position: 'insideTopRight',
                 fill: '#ffb347',
-                fontSize: 9,
+                fontSize: 16,
                 fontFamily: 'DM Mono',
                 opacity: 0.8,
               }}
@@ -146,7 +146,7 @@ export default function RoasChart({ dateRange = '30d' }: { dateRange?: DateRange
             style={{ background: z.color + '12', border: `1px solid ${z.color}28` }}
           >
             <div className="w-1.5 h-1.5 rounded-full" style={{ background: z.color }} />
-            <span className="text-[10px] font-mono" style={{ color: z.color }}>{z.label}</span>
+            <span className="text-[16px] font-mono" style={{ color: z.color }}>{z.label}</span>
           </div>
         ))}
       </div>

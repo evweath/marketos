@@ -61,20 +61,20 @@ export function BrandVoicePanel() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Mic size={14} style={{ color: '#7b93ff' }} />
-            <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Current Brand Voice</span>
+            <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Current Brand Voice</span>
           </div>
           <div className="flex items-center gap-2">
             {saved && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px]"
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[16px]"
                 style={{ background: 'rgba(16,217,138,0.12)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.25)' }}>
                 <Check size={10} />Saved
               </div>
             )}
-            <div className="flex items-center gap-1.5 text-[9px] font-mono" style={{ color: 'var(--text-muted)' }}>
+            <div className="flex items-center gap-1.5 text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
               <RefreshCw size={9} />Last trained {BRAND_VOICE_SETTINGS.lastTrained} · {BRAND_VOICE_SETTINGS.trainingDocs} docs
             </div>
             <button onClick={() => setEditing(!editing)}
-              className="px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all"
+              className="px-3 py-1.5 rounded-lg text-[16px] font-medium transition-all"
               style={{
                 background: editing ? 'rgba(123,147,255,0.15)' : 'var(--bg-elevated)',
                 color: editing ? '#7b93ff' : 'var(--text-secondary)',
@@ -89,13 +89,13 @@ export function BrandVoicePanel() {
           {/* Tone */}
           <div className="p-3 rounded-xl" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
             <div className="section-label mb-2">Tone</div>
-            <div className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>{toneLabel}</div>
+            <div className="text-base font-medium mb-1" style={{ color: 'var(--text-primary)' }}>{toneLabel}</div>
             <div className="h-1 rounded-full mt-2" style={{ background: 'var(--bg-overlay)' }}>
               <div className="h-full rounded-full" style={{ width: `${toneValue}%`, background: 'linear-gradient(to right, #7b93ff, #00d9ff)' }} />
             </div>
             <div className="flex justify-between mt-1">
-              <span className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Professional</span>
-              <span className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Casual</span>
+              <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Professional</span>
+              <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Casual</span>
             </div>
           </div>
 
@@ -104,7 +104,7 @@ export function BrandVoicePanel() {
             <div className="section-label mb-2">Personality Traits</div>
             <div className="flex flex-wrap gap-1">
               {traits.map(t => (
-                <span key={t} className="text-[10px] px-1.5 py-0.5 rounded"
+                <span key={t} className="text-[16px] px-1.5 py-0.5 rounded"
                   style={{ background: 'rgba(123,147,255,0.12)', color: '#7b93ff', border: '1px solid rgba(123,147,255,0.2)' }}>
                   {t}
                 </span>
@@ -115,7 +115,7 @@ export function BrandVoicePanel() {
           {/* Example Copy */}
           <div className="p-3 rounded-xl" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
             <div className="section-label mb-2">Example Copy</div>
-            <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-[16px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
               {BRAND_VOICE_SETTINGS.exampleCopy}
             </p>
           </div>
@@ -126,7 +126,7 @@ export function BrandVoicePanel() {
             <div className="section-label mb-2">Avoid These Words</div>
             <div className="flex flex-wrap gap-1">
               {avoidWords.map(w => (
-                <span key={w} className="text-[10px] px-1.5 py-0.5 rounded"
+                <span key={w} className="text-[16px] px-1.5 py-0.5 rounded"
                   style={{ background: 'rgba(255,68,68,0.1)', color: '#ff4444', border: '1px solid rgba(255,68,68,0.2)' }}>
                   {w}
                 </span>
@@ -137,7 +137,7 @@ export function BrandVoicePanel() {
             <div className="section-label mb-2">Preferred Words</div>
             <div className="flex flex-wrap gap-1">
               {useWords.map(w => (
-                <span key={w} className="text-[10px] px-1.5 py-0.5 rounded"
+                <span key={w} className="text-[16px] px-1.5 py-0.5 rounded"
                   style={{ background: 'rgba(16,217,138,0.1)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.2)' }}>
                   {w}
                 </span>
@@ -162,11 +162,11 @@ export function BrandVoicePanel() {
                 Tone: <span style={{ color: '#7b93ff' }}>{toneLabel}</span>
               </label>
               <div className="flex items-center gap-3">
-                <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Professional</span>
+                <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Professional</span>
                 <input type="range" min={0} max={100} value={toneValue}
                   onChange={e => setToneValue(Number(e.target.value))}
                   className="flex-1" style={{ accentColor: '#7b93ff' }} />
-                <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Casual</span>
+                <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Casual</span>
               </div>
             </div>
 
@@ -176,11 +176,11 @@ export function BrandVoicePanel() {
                 Formality: <span style={{ color: '#7b93ff' }}>{formalLabel}</span>
               </label>
               <div className="flex items-center gap-3">
-                <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Formal</span>
+                <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Formal</span>
                 <input type="range" min={0} max={100} value={formalityValue}
                   onChange={e => setFormalityValue(Number(e.target.value))}
                   className="flex-1" style={{ accentColor: '#7b93ff' }} />
-                <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Fun</span>
+                <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Fun</span>
               </div>
             </div>
           </div>
@@ -193,7 +193,7 @@ export function BrandVoicePanel() {
                 const active = traits.includes(opt);
                 return (
                   <button key={opt} onClick={() => toggleTrait(opt)}
-                    className="px-2.5 py-1 rounded-lg text-[10px] transition-all"
+                    className="px-2.5 py-1 rounded-lg text-[16px] transition-all"
                     style={{
                       background: active ? 'rgba(123,147,255,0.15)' : 'var(--bg-elevated)',
                       color: active ? '#7b93ff' : 'var(--text-muted)',
@@ -212,7 +212,7 @@ export function BrandVoicePanel() {
               <label className="section-label block mb-2">Words to Avoid</label>
               <div className="flex flex-wrap gap-1 mb-2 min-h-8">
                 {avoidWords.map(w => (
-                  <span key={w} className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded"
+                  <span key={w} className="flex items-center gap-1 text-[16px] px-1.5 py-0.5 rounded"
                     style={{ background: 'rgba(255,68,68,0.1)', color: '#ff4444', border: '1px solid rgba(255,68,68,0.2)' }}>
                     {w}
                     <button onClick={() => setAvoidWords(prev => prev.filter(x => x !== w))} className="opacity-60 hover:opacity-100">
@@ -225,7 +225,7 @@ export function BrandVoicePanel() {
                 <input value={avoidInput} onChange={e => setAvoidInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && addAvoidWord()}
                   placeholder="Add word..."
-                  className="flex-1 px-2 py-1.5 rounded-lg text-[11px] outline-none"
+                  className="flex-1 px-2 py-1.5 rounded-lg text-[16px] outline-none"
                   style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}
                 />
                 <button onClick={addAvoidWord} className="px-2 py-1.5 rounded-lg transition-colors hover:bg-white/5"
@@ -238,7 +238,7 @@ export function BrandVoicePanel() {
               <label className="section-label block mb-2">Preferred Words</label>
               <div className="flex flex-wrap gap-1 mb-2 min-h-8">
                 {useWords.map(w => (
-                  <span key={w} className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded"
+                  <span key={w} className="flex items-center gap-1 text-[16px] px-1.5 py-0.5 rounded"
                     style={{ background: 'rgba(16,217,138,0.1)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.2)' }}>
                     {w}
                     <button onClick={() => setUseWords(prev => prev.filter(x => x !== w))} className="opacity-60 hover:opacity-100">
@@ -251,7 +251,7 @@ export function BrandVoicePanel() {
                 <input value={useInput} onChange={e => setUseInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && addUseWord()}
                   placeholder="Add word..."
-                  className="flex-1 px-2 py-1.5 rounded-lg text-[11px] outline-none"
+                  className="flex-1 px-2 py-1.5 rounded-lg text-[16px] outline-none"
                   style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}
                 />
                 <button onClick={addUseWord} className="px-2 py-1.5 rounded-lg transition-colors hover:bg-white/5"
@@ -267,13 +267,13 @@ export function BrandVoicePanel() {
             <label className="section-label block mb-2">Example Copy</label>
             <textarea value={exampleCopy} onChange={e => setExampleCopy(e.target.value)}
               rows={3}
-              className="w-full px-3 py-2 rounded-lg text-xs outline-none resize-none"
+              className="w-full px-3 py-2 rounded-lg text-base outline-none resize-none"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}
             />
           </div>
 
           <button onClick={handleSave}
-            className="px-6 py-2.5 rounded-xl text-xs font-semibold transition-all hover:opacity-90"
+            className="px-6 py-2.5 rounded-xl text-base font-semibold transition-all hover:opacity-90"
             style={{ background: '#7b93ff', color: '#0a0e1a' }}>
             Save Brand Voice
           </button>
@@ -286,7 +286,7 @@ export function BrandVoicePanel() {
           <Upload size={13} style={{ color: '#ffb347' }} />
           <span className="section-label">Train on Content</span>
         </div>
-        <p className="text-[11px] mb-4 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+        <p className="text-[16px] mb-4 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
           Upload your brand guidelines, style documents, or example copy to fine-tune the AI to your brand voice.
           Supported formats: PDF, DOCX, TXT.
         </p>
@@ -301,14 +301,14 @@ export function BrandVoicePanel() {
             background: dragOver ? 'rgba(255,179,71,0.04)' : 'var(--bg-elevated)',
           }}>
           <Upload size={20} className="mb-3" style={{ color: dragOver ? '#ffb347' : 'var(--text-muted)' }} />
-          <div className="text-sm font-medium mb-1" style={{ color: dragOver ? '#ffb347' : 'var(--text-primary)' }}>
+          <div className="text-base font-medium mb-1" style={{ color: dragOver ? '#ffb347' : 'var(--text-primary)' }}>
             Drop files here to train your brand voice
           </div>
-          <div className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
+          <div className="text-base mb-3" style={{ color: 'var(--text-muted)' }}>
             PDF, DOCX, or TXT · Up to 50MB per file
           </div>
           <button onClick={() => { setBrowsing(true); setTimeout(() => setBrowsing(false), 1500); }}
-            className="px-4 py-2 rounded-lg text-xs font-medium transition-all hover:opacity-90"
+            className="px-4 py-2 rounded-lg text-base font-medium transition-all hover:opacity-90"
             style={{ background: 'rgba(255,179,71,0.12)', color: '#ffb347', border: '1px solid rgba(255,179,71,0.25)' }}>
             {browsing ? 'Opening…' : 'Browse Files'}
           </button>
@@ -325,11 +325,11 @@ export function BrandVoicePanel() {
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
               <div className="flex items-center gap-2">
                 <BookOpen size={11} style={{ color: 'var(--text-muted)' }} />
-                <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{doc.name}</span>
+                <span className="text-[16px]" style={{ color: 'var(--text-secondary)' }}>{doc.name}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[9px] font-mono" style={{ color: 'var(--text-muted)' }}>{doc.size}</span>
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+                <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>{doc.size}</span>
+                <span className="text-[16px] font-mono px-1.5 py-0.5 rounded"
                   style={{ background: 'rgba(16,217,138,0.1)', color: '#10d98a' }}>
                   {doc.status}
                 </span>

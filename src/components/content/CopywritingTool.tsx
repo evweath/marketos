@@ -164,7 +164,7 @@ export function CopywritingTool() {
           <div>
             <label className="section-label block mb-1.5">Copywriting Formula</label>
             <select value={formula} onChange={e => setFormula(e.target.value as Formula)}
-              className="w-full px-3 py-2 rounded-lg text-xs outline-none"
+              className="w-full px-3 py-2 rounded-lg text-base outline-none"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
               {(Object.keys(FORMULA_DESCRIPTIONS) as Formula[]).map(f => (
                 <option key={f} value={f}>{f} — {FORMULA_DESCRIPTIONS[f]}</option>
@@ -175,7 +175,7 @@ export function CopywritingTool() {
           <div>
             <label className="section-label block mb-1.5">Platform</label>
             <select value={platform} onChange={e => { setPlatform(e.target.value as Platform); setCharLimit(PLATFORM_CONFIG[e.target.value as Platform].charLimit); }}
-              className="w-full px-3 py-2 rounded-lg text-xs outline-none"
+              className="w-full px-3 py-2 rounded-lg text-base outline-none"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
               {(Object.entries(PLATFORM_CONFIG) as [Platform, { label: string; color: string; charLimit: number }][]).map(([k, v]) => (
                 <option key={k} value={k}>{v.label} (max {v.charLimit} chars)</option>
@@ -187,7 +187,7 @@ export function CopywritingTool() {
             <label className="section-label block mb-1.5">Product / Service</label>
             <input value={product} onChange={e => setProduct(e.target.value)}
               placeholder="e.g. ProFry 3000 Commercial Fryer"
-              className="w-full px-3 py-2 rounded-lg text-xs outline-none"
+              className="w-full px-3 py-2 rounded-lg text-base outline-none"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}
             />
           </div>
@@ -196,7 +196,7 @@ export function CopywritingTool() {
             <label className="section-label block mb-1.5">Key Benefit</label>
             <input value={benefit} onChange={e => setBenefit(e.target.value)}
               placeholder="e.g. 40% faster heat recovery"
-              className="w-full px-3 py-2 rounded-lg text-xs outline-none"
+              className="w-full px-3 py-2 rounded-lg text-base outline-none"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}
             />
           </div>
@@ -205,7 +205,7 @@ export function CopywritingTool() {
             <label className="section-label block mb-1.5">Target Audience</label>
             <input value={audience} onChange={e => setAudience(e.target.value)}
               placeholder="e.g. Bakery owners, 35-55, food service"
-              className="w-full px-3 py-2 rounded-lg text-xs outline-none"
+              className="w-full px-3 py-2 rounded-lg text-base outline-none"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}
             />
           </div>
@@ -215,7 +215,7 @@ export function CopywritingTool() {
             <div className="flex flex-wrap gap-1.5">
               {(['professional', 'casual', 'urgent', 'witty', 'empathetic'] as Tone[]).map(t => (
                 <button key={t} onClick={() => setTone(t)}
-                  className="px-2.5 py-1 rounded-lg text-[10px] capitalize transition-all"
+                  className="px-2.5 py-1 rounded-lg text-[16px] capitalize transition-all"
                   style={{
                     background: tone === t ? 'rgba(123,147,255,0.15)' : 'var(--bg-elevated)',
                     color: tone === t ? '#7b93ff' : 'var(--text-muted)',
@@ -232,12 +232,12 @@ export function CopywritingTool() {
             <div className="flex items-center gap-2">
               <input type="range" min={60} max={500} value={charLimit} onChange={e => setCharLimit(Number(e.target.value))}
                 className="flex-1 accent-purple-400" />
-              <span className="text-xs font-mono w-10 text-right" style={{ color: '#7b93ff' }}>{charLimit}</span>
+              <span className="text-base font-mono w-10 text-right" style={{ color: '#7b93ff' }}>{charLimit}</span>
             </div>
           </div>
 
           <button onClick={handleGenerate} disabled={generating}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold transition-all"
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-base font-semibold transition-all"
             style={{
               background: generating ? 'rgba(123,147,255,0.3)' : '#7b93ff',
               color: '#0a0e1a',
@@ -263,34 +263,34 @@ export function CopywritingTool() {
               <div key={variant.id} className="glass-card-elevated p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+                    <span className="text-[16px] font-mono px-1.5 py-0.5 rounded"
                       style={{ background: 'var(--bg-overlay)', color: 'var(--text-muted)' }}>
                       Variant {idx + 1}
                     </span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
+                    <span className="text-[16px] font-mono px-1.5 py-0.5 rounded"
                       style={{ background: sc.bg, color: sc.color }}>
                       {variant.strength}
                     </span>
                   </div>
-                  <span className="text-[9px] font-mono"
+                  <span className="text-[16px] font-mono"
                     style={{ color: isOverLimit ? '#ff4444' : 'var(--text-muted)' }}>
                     {variant.charCount} / {charLimit} chars
                   </span>
                 </div>
 
-                <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-primary)' }}>
+                <p className="text-base leading-relaxed mb-3" style={{ color: 'var(--text-primary)' }}>
                   {variant.text}
                 </p>
 
                 <div className="flex gap-2">
                   <button onClick={() => handleCopy(variant.id, variant.text)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] transition-all hover:bg-white/5"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[16px] transition-all hover:bg-white/5"
                     style={{ color: copied === variant.id ? '#10d98a' : 'var(--text-secondary)', border: `1px solid ${copied === variant.id ? 'rgba(16,217,138,0.3)' : 'var(--border-subtle)'}` }}>
                     {copied === variant.id ? <Check size={10} /> : <Copy size={10} />}
                     {copied === variant.id ? 'Copied!' : 'Copy'}
                   </button>
                   <button onClick={() => { setApplied(variant.id); setTimeout(() => setApplied(null), 2000); }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] transition-all hover:bg-white/5"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[16px] transition-all hover:bg-white/5"
                     style={{ color: applied === variant.id ? '#10d98a' : '#7b93ff', border: `1px solid ${applied === variant.id ? 'rgba(16,217,138,0.3)' : 'rgba(123,147,255,0.2)'}` }}>
                     <ChevronRight size={10} />{applied === variant.id ? 'Applied!' : 'Use This'}
                   </button>
@@ -313,18 +313,18 @@ export function CopywritingTool() {
             return (
               <div key={item.id} className="flex items-center gap-3 p-2.5 rounded-lg transition-colors hover:bg-white/3"
                 style={{ border: '1px solid var(--border-subtle)' }}>
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded shrink-0"
+                <span className="text-[16px] font-mono px-1.5 py-0.5 rounded shrink-0"
                   style={{ background: pc.color + '18', color: pc.color }}>
                   {pc.label}
                 </span>
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded shrink-0"
+                <span className="text-[16px] font-mono px-1.5 py-0.5 rounded shrink-0"
                   style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
                   {item.formula}
                 </span>
-                <span className="text-[11px] flex-1 truncate" style={{ color: 'var(--text-secondary)' }}>
+                <span className="text-[16px] flex-1 truncate" style={{ color: 'var(--text-secondary)' }}>
                   {item.text}
                 </span>
-                <span className="text-[9px] font-mono shrink-0" style={{ color: 'var(--text-muted)' }}>
+                <span className="text-[16px] font-mono shrink-0" style={{ color: 'var(--text-muted)' }}>
                   {item.generatedAt}
                 </span>
               </div>

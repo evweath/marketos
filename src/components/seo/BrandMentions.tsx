@@ -10,7 +10,7 @@ type SourceFilter = MentionSource | 'all';
 
 const SOURCE_CONFIG: Record<MentionSource, { label: string; color: string }> = {
   web:    { label: 'Web',    color: '#7b93ff' },
-  social: { label: 'Social', color: '#00d9ff' },
+  social: { label: 'Social', color: 'var(--cyan)' },
   news:   { label: 'News',   color: '#ffb347' },
 };
 
@@ -65,7 +65,7 @@ export function BrandMentions() {
             <Bot size={14} style={{ color: '#7b93ff' }} />
             <div className='section-label'>LLM Brand Visibility</div>
           </div>
-          <div className='flex items-center gap-1.5 text-[10px] font-mono' style={{ color: 'var(--text-muted)' }}>
+          <div className='flex items-center gap-1.5 text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>
             <div className='w-1.5 h-1.5 rounded-full live-dot' style={{ background: '#10d98a' }} />
             Checked today
           </div>
@@ -86,7 +86,7 @@ export function BrandMentions() {
                 {/* LLM avatar + status */}
                 <div className='flex items-center justify-between mb-3'>
                   <div
-                    className='w-9 h-9 rounded-xl flex items-center justify-center text-[11px] font-bold'
+                    className='w-9 h-9 rounded-xl flex items-center justify-center text-[16px] font-bold'
                     style={{ background: cfg.color + '20', color: cfg.color, fontFamily: 'DM Mono' }}
                   >
                     {cfg.initial}
@@ -97,7 +97,7 @@ export function BrandMentions() {
                 </div>
 
                 {/* LLM name */}
-                <div className='text-sm font-semibold mb-1' style={{ color: 'var(--text-primary)' }}>
+                <div className='text-base font-semibold mb-1' style={{ color: 'var(--text-primary)' }}>
                   {cfg.name}
                 </div>
 
@@ -106,34 +106,34 @@ export function BrandMentions() {
                     {/* Mentioned badge + rank */}
                     <div className='flex items-center gap-1.5 mb-2'>
                       <span
-                        className='text-[9px] px-1.5 py-0.5 rounded-full font-mono font-semibold'
+                        className='text-[16px] px-1.5 py-0.5 rounded-full font-mono font-semibold'
                         style={{ background: 'rgba(16,217,138,0.15)', color: '#10d98a' }}
                       >
                         Mentioned
                       </span>
                       {entry.rank !== null && (
                         <span
-                          className='text-[9px] px-1.5 py-0.5 rounded-full font-mono font-semibold'
+                          className='text-[16px] px-1.5 py-0.5 rounded-full font-mono font-semibold'
                           style={{ background: cfg.color + '20', color: cfg.color }}
                         >
                           #{entry.rank}
                         </span>
                       )}
                     </div>
-                    <div className='text-[10px] leading-relaxed' style={{ color: 'var(--text-secondary)' }}>
+                    <div className='text-[16px] leading-relaxed' style={{ color: 'var(--text-secondary)' }}>
                       {entry.context.length > 80 ? entry.context.slice(0, 80) + '…' : entry.context}
                     </div>
                   </>
                 ) : (
                   <span
-                    className='text-[9px] px-1.5 py-0.5 rounded-full font-mono font-semibold'
+                    className='text-[16px] px-1.5 py-0.5 rounded-full font-mono font-semibold'
                     style={{ background: 'rgba(255,68,68,0.12)', color: '#ff4444' }}
                   >
                     Not mentioned
                   </span>
                 )}
 
-                <div className='mt-3 text-[9px] font-mono' style={{ color: 'var(--text-muted)' }}>
+                <div className='mt-3 text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>
                   {new Date(entry.lastChecked).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
@@ -146,7 +146,7 @@ export function BrandMentions() {
       <div className='glass-card p-4'>
         <div className='flex items-center justify-between mb-3'>
           <div className='section-label'>Sentiment Overview</div>
-          <div className='flex items-center gap-3 text-[10px] font-mono'>
+          <div className='flex items-center gap-3 text-[16px] font-mono'>
             {(['web', 'social', 'news'] as MentionSource[]).map(s => (
               <span key={s} style={{ color: SOURCE_CONFIG[s].color }}>
                 {SOURCE_CONFIG[s].label}: {sourceCounts[s]}
@@ -170,11 +170,11 @@ export function BrandMentions() {
           ].map(seg => (
             <div key={seg.label} className='flex items-center gap-2'>
               <div className='w-2.5 h-2.5 rounded-full' style={{ background: seg.color }} />
-              <span className='text-[11px] font-semibold font-mono' style={{ color: seg.color }}>{seg.pct}%</span>
-              <span className='text-[10px]' style={{ color: 'var(--text-muted)' }}>{seg.label}</span>
+              <span className='text-[16px] font-semibold font-mono' style={{ color: seg.color }}>{seg.pct}%</span>
+              <span className='text-[16px]' style={{ color: 'var(--text-muted)' }}>{seg.label}</span>
             </div>
           ))}
-          <span className='ml-auto text-[10px] font-mono' style={{ color: 'var(--text-muted)' }}>
+          <span className='ml-auto text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>
             {total} total
           </span>
         </div>
@@ -197,7 +197,7 @@ export function BrandMentions() {
                 <button
                   key={f}
                   onClick={() => setSourceFilter(f)}
-                  className='px-2.5 py-1 text-[11px] font-mono transition-all'
+                  className='px-2.5 py-1 text-[16px] font-mono transition-all'
                   style={{
                     borderRadius: 6,
                     background: active ? color + '18' : 'transparent',
@@ -238,33 +238,33 @@ export function BrandMentions() {
                     {/* Badges row */}
                     <div className='flex items-center gap-2 mb-2 flex-wrap'>
                       <span
-                        className='text-[9px] px-2 py-0.5 rounded-full font-mono font-semibold'
+                        className='text-[16px] px-2 py-0.5 rounded-full font-mono font-semibold'
                         style={{ background: srcCfg.color + '18', color: srcCfg.color }}
                       >
                         {mention.platform}
                       </span>
                       <span
-                        className='text-[9px] px-2 py-0.5 rounded-full font-mono font-semibold'
+                        className='text-[16px] px-2 py-0.5 rounded-full font-mono font-semibold'
                         style={{ background: sCfg.color + '14', color: sCfg.color }}
                       >
                         {sCfg.label}
                       </span>
-                      <span className='text-[11px] font-medium' style={{ color: 'var(--text-secondary)' }}>
+                      <span className='text-[16px] font-medium' style={{ color: 'var(--text-secondary)' }}>
                         {mention.author}
                       </span>
-                      <span className='text-[10px] font-mono ml-auto' style={{ color: 'var(--text-muted)' }}>
+                      <span className='text-[16px] font-mono ml-auto' style={{ color: 'var(--text-muted)' }}>
                         {mention.timeAgo}
                       </span>
                     </div>
 
                     {/* Content */}
-                    <p className='text-[11px] leading-relaxed mb-2.5' style={{ color: 'var(--text-secondary)' }}>
+                    <p className='text-[16px] leading-relaxed mb-2.5' style={{ color: 'var(--text-secondary)' }}>
                       {mention.content}
                     </p>
 
                     {/* Footer */}
                     <div className='flex items-center justify-between'>
-                      <span className='text-[10px] font-mono' style={{ color: 'var(--text-muted)' }}>
+                      <span className='text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>
                         Reach: <span className='font-semibold' style={{ color: 'var(--text-secondary)' }}>{fmt(mention.reach)}</span>
                       </span>
                       <div className='flex items-center gap-1.5'>
@@ -279,7 +279,7 @@ export function BrandMentions() {
                         </a>
                         {responded[mention.id] ? (
                           <span
-                            className='flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-mono'
+                            className='flex items-center gap-1 px-2.5 py-1 rounded-lg text-[16px] font-mono'
                             style={{
                               background: 'rgba(16,217,138,0.12)',
                               color: '#10d98a',
@@ -291,10 +291,10 @@ export function BrandMentions() {
                         ) : (
                           <button
                             onClick={() => setResponded(prev => ({ ...prev, [mention.id]: true }))}
-                            className='flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-mono transition-all'
+                            className='flex items-center gap-1 px-2.5 py-1 rounded-lg text-[16px] font-mono transition-all'
                             style={{
                               background: mention.sentiment === 'negative' ? 'rgba(255,68,68,0.1)' : 'rgba(0,217,255,0.08)',
-                              color: mention.sentiment === 'negative' ? '#ff4444' : '#00d9ff',
+                              color: mention.sentiment === 'negative' ? '#ff4444' : 'var(--cyan)',
                               border: `1px solid ${mention.sentiment === 'negative' ? 'rgba(255,68,68,0.2)' : 'rgba(0,217,255,0.15)'}`,
                             }}
                           >

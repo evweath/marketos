@@ -74,24 +74,24 @@ export default function SettingsPage() {
                     className='w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group'
                     style={{
                       background: active ? 'var(--bg-elevated)' : 'transparent',
-                      borderLeft: active ? '3px solid #00d9ff' : '3px solid transparent',
+                      borderLeft: active ? '3px solid var(--cyan)' : '3px solid transparent',
                       paddingLeft: active ? 'calc(0.75rem - 0px)' : '0.75rem',
                     }}
                   >
                     <Icon
                       size={15}
                       strokeWidth={1.8}
-                      style={{ color: active ? '#00d9ff' : 'var(--text-muted)', flexShrink: 0 }}
+                      style={{ color: active ? 'var(--cyan)' : 'var(--text-muted)', flexShrink: 0 }}
                     />
                     <div className='flex flex-col min-w-0'>
                       <span
-                        className='text-sm leading-tight font-medium'
-                        style={{ color: active ? '#00d9ff' : 'var(--text-secondary)' }}
+                        className='text-base leading-tight font-medium'
+                        style={{ color: active ? 'var(--cyan)' : 'var(--text-secondary)' }}
                       >
                         {label}
                       </span>
                       <span
-                        className='text-[10px] leading-tight mt-0.5 truncate font-mono'
+                        className='text-[16px] leading-tight mt-0.5 truncate font-mono'
                         style={{ color: active ? 'rgba(0,217,255,0.55)' : 'var(--text-muted)' }}
                       >
                         {desc}
@@ -109,7 +109,7 @@ export default function SettingsPage() {
                 <h2 className='text-base font-semibold mb-0.5' style={{ color: 'var(--text-primary)' }}>
                   {title}
                 </h2>
-                <p className='text-xs' style={{ color: 'var(--text-muted)' }}>
+                <p className='text-base' style={{ color: 'var(--text-muted)' }}>
                   {description}
                 </p>
               </div>

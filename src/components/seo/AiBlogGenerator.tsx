@@ -124,7 +124,7 @@ function ScoreGauge({ score }: { score: number }) {
       </svg>
       <div className='absolute text-center'>
         <div className='font-bold text-2xl leading-none' style={{ fontFamily: 'DM Mono', color }}>{score}</div>
-        <div className='text-[9px] mt-0.5 font-mono uppercase tracking-wide' style={{ color: 'var(--text-muted)' }}>SEO</div>
+        <div className='text-[16px] mt-0.5 font-mono uppercase tracking-wide' style={{ color: 'var(--text-muted)' }}>SEO</div>
       </div>
     </div>
   );
@@ -135,8 +135,8 @@ function ScoreBar({ label, score }: { label: string; score: number }) {
   return (
     <div>
       <div className='flex items-center justify-between mb-1'>
-        <span className='text-[11px]' style={{ color: 'var(--text-secondary)' }}>{label}</span>
-        <span className='text-[11px] font-mono font-semibold' style={{ color }}>{score}</span>
+        <span className='text-[16px]' style={{ color: 'var(--text-secondary)' }}>{label}</span>
+        <span className='text-[16px] font-mono font-semibold' style={{ color }}>{score}</span>
       </div>
       <div className='h-2.5 rounded-full overflow-hidden' style={{ background: 'var(--bg-overlay)' }}>
         <div className='h-full rounded-full transition-all' style={{ width: `${score}%`, background: color }} />
@@ -290,10 +290,10 @@ export function AiBlogGenerator() {
             value={topic}
             onChange={e => setTopic(e.target.value)}
             placeholder='e.g. commercial donut fryer maintenance'
-            className='w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all'
+            className='w-full px-3 py-2.5 rounded-xl text-base outline-none transition-all'
             style={{
               ...SELECT_STYLE,
-              fontSize: 13,
+              fontSize: 16,
             }}
             onKeyDown={e => e.key === 'Enter' && handleGenerate()}
           />
@@ -307,7 +307,7 @@ export function AiBlogGenerator() {
               <select
                 value={store}
                 onChange={e => setStore(e.target.value as StoreId)}
-                className='w-full px-3 py-2 rounded-xl text-sm appearance-none outline-none'
+                className='w-full px-3 py-2 rounded-xl text-base appearance-none outline-none'
                 style={SELECT_STYLE}
               >
                 {STORE_OPTIONS.map(o => (
@@ -324,7 +324,7 @@ export function AiBlogGenerator() {
               <select
                 value={tone}
                 onChange={e => setTone(e.target.value as Tone)}
-                className='w-full px-3 py-2 rounded-xl text-sm appearance-none outline-none'
+                className='w-full px-3 py-2 rounded-xl text-base appearance-none outline-none'
                 style={SELECT_STYLE}
               >
                 {TONE_OPTIONS.map(o => (
@@ -347,7 +347,7 @@ export function AiBlogGenerator() {
               <button
                 key={wc}
                 onClick={() => setWordCount(wc)}
-                className='px-4 py-1.5 text-xs font-mono transition-all'
+                className='px-4 py-1.5 text-base font-mono transition-all'
                 style={{
                   borderRadius: 7,
                   background: wordCount === wc ? 'rgba(123,147,255,0.2)' : 'transparent',
@@ -366,10 +366,10 @@ export function AiBlogGenerator() {
         <button
           onClick={handleGenerate}
           disabled={generating || !topic.trim()}
-          className='w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all'
+          className='w-full py-3 rounded-xl text-base font-semibold flex items-center justify-center gap-2 transition-all'
           style={{
             background: generating || !topic.trim() ? 'rgba(0,217,255,0.08)' : '#00d9ff',
-            color: generating || !topic.trim() ? '#00d9ff' : '#080b18',
+            color: generating || !topic.trim() ? 'var(--cyan)' : '#080b18',
             border: generating || !topic.trim() ? '1px solid rgba(0,217,255,0.25)' : 'none',
             opacity: !topic.trim() ? 0.5 : 1,
             cursor: generating || !topic.trim() ? 'default' : 'pointer',
@@ -392,23 +392,23 @@ export function AiBlogGenerator() {
                   <input
                     value={generated.title}
                     onChange={e => setGenerated(g => g && { ...g, title: e.target.value })}
-                    className='w-full text-sm font-semibold mb-2 leading-snug px-3 py-2 rounded-lg outline-none'
+                    className='w-full text-base font-semibold mb-2 leading-snug px-3 py-2 rounded-lg outline-none'
                     style={{ ...SELECT_STYLE, color: 'var(--text-primary)' }}
                   />
                   <textarea
                     value={generated.metaDescription}
                     onChange={e => setGenerated(g => g && { ...g, metaDescription: e.target.value })}
                     rows={3}
-                    className='w-full text-xs leading-relaxed px-3 py-2 rounded-lg outline-none resize-none'
+                    className='w-full text-base leading-relaxed px-3 py-2 rounded-lg outline-none resize-none'
                     style={{ ...SELECT_STYLE, color: 'var(--text-secondary)' }}
                   />
                 </>
               ) : (
                 <>
-                  <div className='text-sm font-semibold mb-2 leading-snug' style={{ color: 'var(--text-primary)' }}>
+                  <div className='text-base font-semibold mb-2 leading-snug' style={{ color: 'var(--text-primary)' }}>
                     {generated.title}
                   </div>
-                  <div className='text-xs leading-relaxed' style={{ color: 'var(--text-secondary)' }}>
+                  <div className='text-base leading-relaxed' style={{ color: 'var(--text-secondary)' }}>
                     {generated.metaDescription}
                   </div>
                 </>
@@ -428,7 +428,7 @@ export function AiBlogGenerator() {
             ].map(chip => (
               <span
                 key={chip.label}
-                className='text-[10px] font-mono px-2 py-0.5 rounded-full'
+                className='text-[16px] font-mono px-2 py-0.5 rounded-full'
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
               >
                 {chip.label}
@@ -449,7 +449,7 @@ export function AiBlogGenerator() {
           {/* Content preview toggle */}
           <button
             onClick={() => setShowContent(s => !s)}
-            className='w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-mono mb-3 transition-colors hover:bg-white/5'
+            className='w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-base font-mono mb-3 transition-colors hover:bg-white/5'
             style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
           >
             <span>{showContent ? 'Hide' : 'Preview'} full article</span>
@@ -458,7 +458,7 @@ export function AiBlogGenerator() {
 
           {showContent && (
             <div
-              className='rounded-xl p-4 mb-4 overflow-y-auto text-xs leading-relaxed whitespace-pre-wrap'
+              className='rounded-xl p-4 mb-4 overflow-y-auto text-base leading-relaxed whitespace-pre-wrap'
               style={{
                 background: 'var(--bg-elevated)',
                 border: '1px solid var(--border-subtle)',
@@ -474,7 +474,7 @@ export function AiBlogGenerator() {
           <div className='flex gap-2'>
             <button
               onClick={() => setEditing(e => !e)}
-              className='flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-medium transition-all'
+              className='flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-base font-medium transition-all'
               style={editing
                 ? { background: 'rgba(123,147,255,0.15)', color: '#7b93ff', border: '1px solid rgba(123,147,255,0.3)' }
                 : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-dim)' }}
@@ -486,7 +486,7 @@ export function AiBlogGenerator() {
                 setPrevBlogs(prev => [{ ...generated, generatedAt: 'Just now' }, ...prev.filter(b => b.id !== generated.id)]);
                 setGenerated(null);
               }}
-              className='flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold transition-all'
+              className='flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-base font-semibold transition-all'
               style={{ background: '#10d98a', color: '#080b18' }}
             >
               <Upload size={12} />Publish
@@ -510,7 +510,7 @@ export function AiBlogGenerator() {
               >
                 {/* SEO score badge */}
                 <div
-                  className='w-11 h-11 rounded-xl flex items-center justify-center shrink-0 font-bold text-sm'
+                  className='w-11 h-11 rounded-xl flex items-center justify-center shrink-0 font-bold text-base'
                   style={{ background: color + '18', color, fontFamily: 'DM Mono', border: `1px solid ${color}30` }}
                 >
                   {blog.seoScore}
@@ -518,10 +518,10 @@ export function AiBlogGenerator() {
 
                 {/* Info */}
                 <div className='flex-1 min-w-0'>
-                  <div className='text-xs font-medium truncate mb-1' style={{ color: 'var(--text-primary)' }}>
+                  <div className='text-base font-medium truncate mb-1' style={{ color: 'var(--text-primary)' }}>
                     {blog.title}
                   </div>
-                  <div className='flex items-center gap-2 flex-wrap text-[10px] font-mono' style={{ color: 'var(--text-muted)' }}>
+                  <div className='flex items-center gap-2 flex-wrap text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>
                     <span>{storeLabel}</span>
                     <span>·</span>
                     <span>{blog.wordCount.toLocaleString()}w</span>
@@ -536,14 +536,14 @@ export function AiBlogGenerator() {
                 <div className='flex gap-1.5 shrink-0'>
                   <button
                     onClick={() => handleEditFromList(blog)}
-                    className='flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-mono transition-all hover:bg-white/5'
+                    className='flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[16px] font-mono transition-all hover:bg-white/5'
                     style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
                   >
                     <Edit2 size={10} />Edit
                   </button>
                   <button
                     onClick={() => handlePublish(blog)}
-                    className='flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold font-mono transition-all'
+                    className='flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[16px] font-semibold font-mono transition-all'
                     style={{ background: 'rgba(16,217,138,0.12)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.25)' }}
                   >
                     <Upload size={10} />Publish

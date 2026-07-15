@@ -21,7 +21,7 @@ const CHANGE_TYPE_CONFIG: Record<ChangeType, ChangeTypeConfig> = {
   'product-removed': { icon: Minus,         label: 'Product Removed', color: '#ff4444' },
   'out-of-stock':    { icon: AlertTriangle, label: 'Out of Stock',    color: '#ff4444' },
   'content':         { icon: FileText,      label: 'Content Change',  color: '#7b93ff' },
-  'seo':             { icon: Search,        label: 'SEO Change',      color: '#00d9ff' },
+  'seo':             { icon: Search,        label: 'SEO Change',      color: 'var(--cyan)' },
 };
 
 const SEVERITY_BADGE_CLASS = {
@@ -46,23 +46,23 @@ export default function PageChangeLog({ changes }: Props) {
       <div className='flex items-center justify-between mb-4'>
         <div>
           <div className='section-label mb-1'>Page Change Log</div>
-          <div className='text-xs' style={{ color: 'var(--text-secondary)' }}>
+          <div className='text-base' style={{ color: 'var(--text-secondary)' }}>
             {changes.length} change{changes.length !== 1 ? 's' : ''} detected — all 3 stores
           </div>
         </div>
         <div className='flex items-center gap-1.5'>
           {criticalCount > 0 && (
-            <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${SEVERITY_BADGE_CLASS.critical}`}>
+            <span className={`text-[16px] font-mono px-2 py-0.5 rounded ${SEVERITY_BADGE_CLASS.critical}`}>
               {criticalCount} critical
             </span>
           )}
           {warningCount > 0 && (
-            <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${SEVERITY_BADGE_CLASS.warning}`}>
+            <span className={`text-[16px] font-mono px-2 py-0.5 rounded ${SEVERITY_BADGE_CLASS.warning}`}>
               {warningCount} warning
             </span>
           )}
           {infoCount > 0 && (
-            <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${SEVERITY_BADGE_CLASS.info}`}>
+            <span className={`text-[16px] font-mono px-2 py-0.5 rounded ${SEVERITY_BADGE_CLASS.info}`}>
               {infoCount} info
             </span>
           )}
@@ -100,25 +100,25 @@ export default function PageChangeLog({ changes }: Props) {
                   <div className='min-w-0'>
                     {/* Title + type badge */}
                     <div className='flex items-center gap-2 mb-0.5 flex-wrap'>
-                      <span className='text-xs font-semibold' style={{ color: 'var(--text-primary)' }}>
+                      <span className='text-base font-semibold' style={{ color: 'var(--text-primary)' }}>
                         {change.pageTitle}
                       </span>
-                      <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${SEVERITY_BADGE_CLASS[change.severity]}`}>
+                      <span className={`text-[16px] font-mono px-1.5 py-0.5 rounded ${SEVERITY_BADGE_CLASS[change.severity]}`}>
                         {tc.label}
                       </span>
                     </div>
                     {/* Description */}
-                    <div className='text-[11px] mb-1' style={{ color: 'var(--text-secondary)' }}>
+                    <div className='text-[16px] mb-1' style={{ color: 'var(--text-secondary)' }}>
                       {change.description}
                     </div>
                     {/* URL in code style */}
-                    <div className='font-mono text-[10px] truncate'
-                      style={{ color: '#00d9ff', opacity: 0.75 }}>
+                    <div className='font-mono text-[16px] truncate'
+                      style={{ color: 'var(--cyan)', opacity: 0.75 }}>
                       {change.url}
                     </div>
                   </div>
                   {/* Timestamp */}
-                  <div className='font-mono text-[10px] shrink-0 tabular-nums'
+                  <div className='font-mono text-[16px] shrink-0 tabular-nums'
                     style={{ color: 'var(--text-muted)', textAlign: 'right', marginTop: 1 }}
                     suppressHydrationWarning>
                     {timeAgo(change.detectedAt)}

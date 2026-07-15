@@ -40,11 +40,11 @@ export default function SpendBudgetChart({ dateRange = '30d' }: { dateRange?: Da
       <div className="flex items-center justify-between mb-4">
         <div>
           <div className="section-label mb-1">Budget Utilization</div>
-          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+          <div className="text-base" style={{ color: 'var(--text-secondary)' }}>
             Spend ({DATE_RANGE_LABELS[dateRange].toLowerCase()}) vs. monthly budget per channel
           </div>
         </div>
-        <div className="flex items-center gap-3 text-[11px]">
+        <div className="flex items-center gap-3 text-[16px]">
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full" style={{ background: 'rgba(var(--overlay-rgb),0.5)' }} />
             <span style={{ color: 'var(--text-muted)' }}>Spent</span>
@@ -70,10 +70,10 @@ export default function SpendBudgetChart({ dateRange = '30d' }: { dateRange?: Da
                     className="w-2 h-2 rounded-full shrink-0"
                     style={{ background: d.color, boxShadow: `0 0 5px ${d.color}50` }}
                   />
-                  <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+                  <span className="text-base font-medium" style={{ color: 'var(--text-secondary)' }}>
                     {d.label}
                   </span>
-                  <span className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
+                  <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
                     {currency(d.spend)} / {currency(d.budget)}
                   </span>
                 </div>

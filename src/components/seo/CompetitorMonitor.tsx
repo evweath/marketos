@@ -73,15 +73,15 @@ export function CompetitorMonitor() {
       <div className='flex items-center justify-between'>
         <div>
           <div className='section-label mb-1'>Competitor Monitor</div>
-          <div className='text-sm font-semibold' style={{ color: 'var(--text-primary)' }}>
+          <div className='text-base font-semibold' style={{ color: 'var(--text-primary)' }}>
             {competitors.length} competitors · {totalChangesThisWeek} changes this week
           </div>
         </div>
         <button
           onClick={() => setAdding(a => !a)}
-          className='flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium transition-all'
+          className='flex items-center gap-2 px-3 py-1.5 rounded-xl text-base font-medium transition-all'
           style={adding
-            ? { background: 'rgba(0,217,255,0.12)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.25)' }
+            ? { background: 'rgba(0,217,255,0.12)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.25)' }
             : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-dim)' }}
         >
           <Plus size={12} />Add Competitor
@@ -95,7 +95,7 @@ export function CompetitorMonitor() {
           style={{ border: '1px solid rgba(0,217,255,0.25)' }}
         >
           <div className='flex items-center justify-between'>
-            <span className='section-label' style={{ color: '#00d9ff' }}>New Competitor</span>
+            <span className='section-label' style={{ color: 'var(--cyan)' }}>New Competitor</span>
             <button onClick={resetForm} style={{ color: 'var(--text-muted)' }}>
               <X size={13} />
             </button>
@@ -106,7 +106,7 @@ export function CompetitorMonitor() {
               value={newName}
               onChange={e => setNewName(e.target.value)}
               placeholder='Competitor name'
-              className='flex-1 text-xs px-2.5 py-1.5 rounded-lg outline-none'
+              className='flex-1 text-base px-2.5 py-1.5 rounded-lg outline-none'
               style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
             />
             <input
@@ -114,7 +114,7 @@ export function CompetitorMonitor() {
               value={newDomain}
               onChange={e => setNewDomain(e.target.value)}
               placeholder='domain.com'
-              className='flex-1 text-xs px-2.5 py-1.5 rounded-lg outline-none font-mono'
+              className='flex-1 text-base px-2.5 py-1.5 rounded-lg outline-none font-mono'
               style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
             />
           </div>
@@ -122,9 +122,9 @@ export function CompetitorMonitor() {
             <button
               onClick={addCompetitor}
               disabled={!newName.trim() || !newDomain.trim()}
-              className='flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all'
+              className='flex-1 py-1.5 rounded-lg text-base font-semibold transition-all'
               style={{
-                background: 'rgba(0,217,255,0.12)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.25)',
+                background: 'rgba(0,217,255,0.12)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.25)',
                 opacity: newName.trim() && newDomain.trim() ? 1 : 0.5,
                 cursor: newName.trim() && newDomain.trim() ? 'pointer' : 'not-allowed',
               }}
@@ -133,7 +133,7 @@ export function CompetitorMonitor() {
             </button>
             <button
               onClick={resetForm}
-              className='px-3 py-1.5 rounded-lg text-xs font-medium transition-all'
+              className='px-3 py-1.5 rounded-lg text-base font-medium transition-all'
               style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
             >
               Cancel
@@ -151,17 +151,17 @@ export function CompetitorMonitor() {
             style={{ borderLeft: '3px solid rgba(255,68,68,0.4)' }}
           >
             <div className='flex items-center justify-between mb-1.5'>
-              <span className='text-xs font-semibold truncate' style={{ color: 'var(--text-primary)', maxWidth: '65%' }}>
+              <span className='text-base font-semibold truncate' style={{ color: 'var(--text-primary)', maxWidth: '65%' }}>
                 {comp.displayName}
               </span>
               <span
-                className='text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold'
+                className='text-[16px] px-2 py-0.5 rounded-full font-mono font-semibold'
                 style={{ background: 'rgba(255,68,68,0.14)', color: '#ff4444' }}
               >
                 {comp.weeklyChanges} this wk
               </span>
             </div>
-            <div className='text-[10px] font-mono' style={{ color: 'var(--text-muted)' }}>
+            <div className='text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>
               {comp.totalChanges} total · <span style={{ color: '#7b93ff' }}>{comp.domain}</span>
             </div>
           </div>
@@ -180,17 +180,17 @@ export function CompetitorMonitor() {
             <div className='flex items-start justify-between mb-3'>
               <div>
                 <div className='flex items-center gap-2.5 mb-1'>
-                  <span className='text-sm font-semibold' style={{ color: 'var(--text-primary)' }}>
+                  <span className='text-base font-semibold' style={{ color: 'var(--text-primary)' }}>
                     {comp.displayName}
                   </span>
                   <span
-                    className='text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold'
+                    className='text-[16px] px-2 py-0.5 rounded-full font-mono font-semibold'
                     style={{ background: 'rgba(255,68,68,0.12)', color: '#ff4444' }}
                   >
                     {comp.weeklyChanges} changes this week
                   </span>
                 </div>
-                <div className='flex items-center gap-1.5 text-[10px] font-mono' style={{ color: 'var(--text-muted)' }}>
+                <div className='flex items-center gap-1.5 text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>
                   <Clock size={9} />
                   <span>Checked {lastChecked}</span>
                   <span>·</span>
@@ -198,7 +198,7 @@ export function CompetitorMonitor() {
                 </div>
               </div>
               <div
-                className='text-[11px] px-2.5 py-1 rounded-lg font-mono'
+                className='text-[16px] px-2.5 py-1 rounded-lg font-mono'
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
               >
                 {comp.totalChanges} total
@@ -223,11 +223,11 @@ export function CompetitorMonitor() {
                   <button
                     key={tab.key}
                     onClick={() => setTab(comp.id, tab.key)}
-                    className='flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium transition-all'
+                    className='flex items-center gap-1.5 px-3 py-1.5 text-[16px] font-medium transition-all'
                     style={{
                       borderRadius: 6,
                       background: active ? 'rgba(0,217,255,0.12)' : 'transparent',
-                      color: active ? '#00d9ff' : 'var(--text-secondary)',
+                      color: active ? 'var(--cyan)' : 'var(--text-secondary)',
                       border: active ? '1px solid rgba(0,217,255,0.25)' : '1px solid transparent',
                     }}
                   >
@@ -235,10 +235,10 @@ export function CompetitorMonitor() {
                     {tab.label}
                     {count > 0 && (
                       <span
-                        className='text-[9px] px-1.5 py-0.5 rounded-full font-mono font-semibold'
+                        className='text-[16px] px-1.5 py-0.5 rounded-full font-mono font-semibold'
                         style={{
                           background: active ? 'rgba(0,217,255,0.2)' : 'rgba(var(--overlay-rgb),0.06)',
-                          color: active ? '#00d9ff' : 'var(--text-muted)',
+                          color: active ? 'var(--cyan)' : 'var(--text-muted)',
                         }}
                       >
                         {count}
@@ -252,7 +252,7 @@ export function CompetitorMonitor() {
             {/* Change items */}
             {tabChanges.length === 0 ? (
               <div
-                className='py-6 text-center text-xs rounded-xl'
+                className='py-6 text-center text-base rounded-xl'
                 style={{ color: 'var(--text-muted)', background: 'var(--bg-elevated)' }}
               >
                 No {activeTab} changes detected this period.
@@ -272,25 +272,25 @@ export function CompetitorMonitor() {
                     <div className='flex items-start justify-between gap-2 mb-2.5'>
                       <div className='flex-1'>
                         <div className='flex items-center gap-2 mb-1 flex-wrap'>
-                          <span className='text-xs font-medium' style={{ color: 'var(--text-primary)' }}>
+                          <span className='text-base font-medium' style={{ color: 'var(--text-primary)' }}>
                             {change.what}
                           </span>
-                          <span className={`${SEVERITY_BADGE[change.severity]} text-[9px] px-1.5 py-0.5 rounded-full font-mono`}>
+                          <span className={`${SEVERITY_BADGE[change.severity]} text-[16px] px-1.5 py-0.5 rounded-full font-mono`}>
                             {change.severity.toUpperCase()}
                           </span>
                         </div>
-                        <div className='text-[10px] font-mono' style={{ color: '#7b93ff' }}>
+                        <div className='text-[16px] font-mono' style={{ color: '#7b93ff' }}>
                           {change.page}
                         </div>
                       </div>
-                      <div className='text-[10px] font-mono shrink-0' style={{ color: 'var(--text-muted)' }}>
+                      <div className='text-[16px] font-mono shrink-0' style={{ color: 'var(--text-muted)' }}>
                         {formatTime(change.detectedAt)}
                       </div>
                     </div>
 
                     {/* Old → New value with strikethrough */}
                     {(change.oldValue || change.newValue) && (
-                      <div className='flex items-center gap-2 text-[11px] font-mono'>
+                      <div className='flex items-center gap-2 text-[16px] font-mono'>
                         {change.oldValue && (
                           <span
                             className='px-2 py-0.5 rounded'

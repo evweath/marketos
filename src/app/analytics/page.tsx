@@ -47,10 +47,10 @@ function ShareableReportsPanel({ onClose, reports, onCreate }: { onClose: () => 
         onClick={e => e.stopPropagation()}>
         <div className='flex items-center justify-between'>
           <div>
-            <div className='text-sm font-semibold' style={{ color: 'var(--text-primary)' }}>Shareable Reports</div>
-            <div className='text-xs' style={{ color: 'var(--text-muted)' }}>Looker Studio · Google Slides exports</div>
+            <div className='text-base font-semibold' style={{ color: 'var(--text-primary)' }}>Shareable Reports</div>
+            <div className='text-base' style={{ color: 'var(--text-muted)' }}>Looker Studio · Google Slides exports</div>
           </div>
-          <button onClick={onClose} className='text-xs px-2.5 py-1 rounded-lg' style={{ color: 'var(--text-muted)', background: 'var(--bg-elevated)' }}>✕</button>
+          <button onClick={onClose} className='text-base px-2.5 py-1 rounded-lg' style={{ color: 'var(--text-muted)', background: 'var(--bg-elevated)' }}>✕</button>
         </div>
 
         <div className='flex flex-col gap-2'>
@@ -58,9 +58,9 @@ function ShareableReportsPanel({ onClose, reports, onCreate }: { onClose: () => 
             <div key={r.id} className='rounded-xl px-4 py-3 flex items-center gap-3'
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
               <div className='flex-1 min-w-0'>
-                <div className='text-xs font-medium mb-0.5' style={{ color: 'var(--text-primary)' }}>{r.name}</div>
-                <div className='flex items-center gap-2 text-[10px]'>
-                  <span className='px-1.5 py-0.5 rounded' style={{ background: r.platform === 'Looker Studio' ? 'rgba(0,217,255,.1)' : 'rgba(123,147,255,.1)', color: r.platform === 'Looker Studio' ? '#00d9ff' : '#7b93ff' }}>{r.platform}</span>
+                <div className='text-base font-medium mb-0.5' style={{ color: 'var(--text-primary)' }}>{r.name}</div>
+                <div className='flex items-center gap-2 text-[16px]'>
+                  <span className='px-1.5 py-0.5 rounded' style={{ background: r.platform === 'Looker Studio' ? 'rgba(0,217,255,.1)' : 'rgba(123,147,255,.1)', color: r.platform === 'Looker Studio' ? 'var(--cyan)' : '#7b93ff' }}>{r.platform}</span>
                   <span style={{ color: 'var(--text-muted)' }}>Updated {r.lastUpdated} · {r.views} views</span>
                   {r.live && <span className='px-1.5 py-0.5 rounded' style={{ background: 'rgba(16,217,138,.1)', color: '#10d98a' }}>Live</span>}
                 </div>
@@ -73,7 +73,7 @@ function ShareableReportsPanel({ onClose, reports, onCreate }: { onClose: () => 
                 </button>
                 <a href={r.shareUrl} target='_blank' rel='noreferrer'
                   className='p-1.5 rounded-lg transition-all'
-                  style={{ background: 'var(--bg-base)', color: '#00d9ff' }}>
+                  style={{ background: 'var(--bg-base)', color: 'var(--cyan)' }}>
                   <ExternalLink size={13} />
                 </a>
               </div>
@@ -82,9 +82,9 @@ function ShareableReportsPanel({ onClose, reports, onCreate }: { onClose: () => 
         </div>
 
         <div className='pt-2 border-t flex items-center justify-between' style={{ borderColor: 'var(--border-subtle)' }}>
-          <span className='text-xs' style={{ color: 'var(--text-muted)' }}>Connected: Google Looker Studio, Google Slides</span>
-          <button onClick={onCreate} className='text-xs px-3 py-1.5 rounded-lg font-medium'
-            style={{ background: 'rgba(0,217,255,0.1)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.25)' }}>
+          <span className='text-base' style={{ color: 'var(--text-muted)' }}>Connected: Google Looker Studio, Google Slides</span>
+          <button onClick={onCreate} className='text-base px-3 py-1.5 rounded-lg font-medium'
+            style={{ background: 'rgba(0,217,255,0.1)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.25)' }}>
             + Create Report
           </button>
         </div>
@@ -142,10 +142,10 @@ export default function AnalyticsPage() {
         <main className="flex-1 overflow-y-auto p-5">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-sm font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>
+              <h2 className="text-base font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>
                 Marketing Performance — All 3 Stores
               </h2>
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-base" style={{ color: 'var(--text-muted)' }}>
                 Google Ads · Meta Ads · TikTok · YouTube · X/Twitter · LinkedIn · Email · Organic
               </p>
             </div>
@@ -153,13 +153,13 @@ export default function AnalyticsPage() {
               <DateRangePicker value={dateRange} onChange={setDateRange} />
               <div className="flex items-center gap-1.5">
                 <button onClick={() => setShowReports(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all hover:bg-white/5"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base transition-all hover:bg-white/5"
                   style={{ border: '1px solid var(--border-dim)', color: 'var(--text-secondary)' }}>
                   <Share2 size={12} />Share
                 </button>
                 <button onClick={handleExport}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all"
-                  style={{ background: 'rgba(0,217,255,0.1)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}>
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base transition-all"
+                  style={{ background: 'rgba(0,217,255,0.1)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
                   <Download size={12} />Export Report
                 </button>
               </div>

@@ -86,7 +86,7 @@ const STATUS_CONFIG: Record<ABStatus, { label: string; color: string; bg: string
   running:      { label: 'Running',      color: '#10d98a', bg: 'rgba(16,217,138,.12)' },
   winner_found: { label: 'Winner Found', color: '#7b93ff', bg: 'rgba(123,147,255,.12)' },
   paused:       { label: 'Paused',       color: '#ffb347', bg: 'rgba(255,179,71,.12)'  },
-  scheduled:    { label: 'Scheduled',    color: '#00d9ff', bg: 'rgba(0,217,255,.12)'   },
+  scheduled:    { label: 'Scheduled',    color: 'var(--cyan)', bg: 'rgba(0,217,255,.12)'   },
 };
 
 function ABTestingPanel() {
@@ -130,7 +130,7 @@ function ABTestingPanel() {
           { label: 'Active Tests',    value: running.toString(),  color: '#10d98a' },
           { label: 'Winner Found',    value: winners.toString(),  color: '#7b93ff' },
           { label: 'Paused Tests',    value: paused.toString(),   color: '#ffb347' },
-          { label: 'Total Tests',     value: tests.length.toString(), color: '#00d9ff' },
+          { label: 'Total Tests',     value: tests.length.toString(), color: 'var(--cyan)' },
         ].map(s => (
           <div key={s.label} className="glass-card px-4 py-3">
             <div className="section-label mb-1">{s.label}</div>
@@ -140,9 +140,9 @@ function ABTestingPanel() {
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>A/B Tests</span>
+        <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>A/B Tests</span>
         <button onClick={() => setShowCreate(!showCreate)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base font-medium"
           style={{ background: 'var(--accent-blue)', color: '#fff' }}>
           <Plus size={13} /> New Test
         </button>
@@ -150,21 +150,21 @@ function ABTestingPanel() {
 
       {showCreate && (
         <div className="glass-card p-4 flex flex-col gap-3">
-          <div className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>Create A/B Test</div>
+          <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Create A/B Test</div>
           <div className="grid grid-cols-3 gap-3">
             <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Test name"
-              className="px-3 py-2 rounded-lg text-xs" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
+              className="px-3 py-2 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
             <input value={newCampaign} onChange={e => setNewCampaign(e.target.value)} placeholder="Campaign"
-              className="px-3 py-2 rounded-lg text-xs" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
+              className="px-3 py-2 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
             <select value={newPlatform} onChange={e => setNewPlatform(e.target.value as 'Meta' | 'Google')}
-              className="px-3 py-2 rounded-lg text-xs" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+              className="px-3 py-2 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
               <option value="Meta">Meta</option>
               <option value="Google">Google</option>
             </select>
           </div>
           <div className="flex gap-2 justify-end">
-            <button onClick={() => setShowCreate(false)} className="px-3 py-1.5 rounded-lg text-xs" style={{ color: 'var(--text-muted)' }}>Cancel</button>
-            <button onClick={createTest} className="px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: 'var(--accent-blue)', color: '#fff' }}>Create</button>
+            <button onClick={() => setShowCreate(false)} className="px-3 py-1.5 rounded-lg text-base" style={{ color: 'var(--text-muted)' }}>Cancel</button>
+            <button onClick={createTest} className="px-3 py-1.5 rounded-lg text-base font-medium" style={{ background: 'var(--accent-blue)', color: '#fff' }}>Create</button>
           </div>
         </div>
       )}
@@ -181,14 +181,14 @@ function ABTestingPanel() {
               <button className="w-full px-4 py-3 flex items-center gap-3 text-left" onClick={() => setExpanded(isOpen ? null : test.id)}>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{test.name}</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full" style={{ color: st.color, background: st.bg }}>{st.label}</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full" style={{ color: '#00d9ff', background: 'rgba(0,217,255,.1)' }}>{test.platform}</span>
+                    <span className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>{test.name}</span>
+                    <span className="text-base px-2 py-0.5 rounded-full" style={{ color: st.color, background: st.bg }}>{st.label}</span>
+                    <span className="text-base px-2 py-0.5 rounded-full" style={{ color: 'var(--cyan)', background: 'rgba(0,217,255,.1)' }}>{test.platform}</span>
                   </div>
                   <div className="section-label">{test.campaign} · Optimizing for {test.metric} · {test.confidence}% confidence</div>
                 </div>
                 {test.status === 'winner_found' && winner && (
-                  <div className="flex items-center gap-1 text-xs" style={{ color: '#10d98a' }}>
+                  <div className="flex items-center gap-1 text-base" style={{ color: '#10d98a' }}>
                     <Trophy size={13} /> Winner: {winner.label}
                   </div>
                 )}
@@ -203,11 +203,11 @@ function ABTestingPanel() {
                       return (
                         <div key={v.id} className="rounded-xl p-3 flex flex-col gap-2 relative"
                           style={{ background: 'var(--bg-base)', border: `1px solid ${isW ? '#10d98a44' : isPaused ? '#ff444444' : 'var(--border-dim)'}` }}>
-                          {isW && <div className="absolute top-2 right-2 flex items-center gap-1 text-xs" style={{ color: '#10d98a' }}><Trophy size={11} /> Winner</div>}
-                          {isPaused && <div className="absolute top-2 right-2 flex items-center gap-1 text-xs" style={{ color: '#ff4444' }}><Pause size={11} /> Auto-Paused</div>}
+                          {isW && <div className="absolute top-2 right-2 flex items-center gap-1 text-base" style={{ color: '#10d98a' }}><Trophy size={11} /> Winner</div>}
+                          {isPaused && <div className="absolute top-2 right-2 flex items-center gap-1 text-base" style={{ color: '#ff4444' }}><Pause size={11} /> Auto-Paused</div>}
                           <div>
-                            <div className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>{v.label}</div>
-                            <div className="text-xs mt-0.5" style={{ color: 'var(--text-primary)' }}>{v.name}</div>
+                            <div className="text-base font-semibold" style={{ color: 'var(--text-secondary)' }}>{v.label}</div>
+                            <div className="text-base mt-0.5" style={{ color: 'var(--text-primary)' }}>{v.name}</div>
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             {[
@@ -217,14 +217,14 @@ function ABTestingPanel() {
                               { l: 'ROAS',         v: v.spend > 0 ? v.roas + '×' : '—' },
                             ].map(s => (
                               <div key={s.l}>
-                                <div className="section-label text-[10px]">{s.l}</div>
-                                <div className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{s.v}</div>
+                                <div className="section-label text-[16px]">{s.l}</div>
+                                <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>{s.v}</div>
                               </div>
                             ))}
                           </div>
                           {test.status === 'running' && !isPaused && (
                             <button onClick={() => pauseVariant(test.id, v.id)}
-                              className="flex items-center gap-1 text-[10px] mt-1 self-start px-2 py-1 rounded-md"
+                              className="flex items-center gap-1 text-[16px] mt-1 self-start px-2 py-1 rounded-md"
                               style={{ color: '#ff4444', background: 'rgba(255,68,68,.1)' }}>
                               <Pause size={10} /> Auto-Pause
                             </button>
@@ -237,7 +237,7 @@ function ABTestingPanel() {
                     <div className="flex-1 rounded-full h-1.5" style={{ background: 'var(--bg-elevated)' }}>
                       <div className="h-1.5 rounded-full transition-all" style={{ width: pct(test.confidence), background: test.confidence >= 95 ? '#10d98a' : test.confidence >= 70 ? '#ffb347' : '#7b93ff' }} />
                     </div>
-                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{test.confidence}% statistical confidence {test.confidence >= 95 ? '✓' : test.confidence >= 70 ? '(approaching)' : '(low)'}</span>
+                    <span className="text-base" style={{ color: 'var(--text-muted)' }}>{test.confidence}% statistical confidence {test.confidence >= 95 ? '✓' : test.confidence >= 70 ? '(approaching)' : '(low)'}</span>
                   </div>
                 </div>
               )}
@@ -286,7 +286,7 @@ function AudienceOverlapPanel() {
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: 'Total Overlaps',  value: visible.length.toString(),      color: '#00d9ff' },
+          { label: 'Total Overlaps',  value: visible.length.toString(),      color: 'var(--cyan)' },
           { label: 'High Impact',     value: highCount.toString(),             color: '#ff4444' },
           { label: 'Meta Overlaps',   value: visible.filter(o => o.platform === 'Meta').length.toString(),   color: '#7b93ff' },
           { label: 'Google Overlaps', value: visible.filter(o => o.platform === 'Google').length.toString(), color: '#10d98a' },
@@ -299,11 +299,11 @@ function AudienceOverlapPanel() {
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Audience Overlap Detection</span>
+        <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Audience Overlap Detection</span>
         <div className="flex gap-1 p-1 rounded-lg" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
           {(['all', 'Meta', 'Google'] as const).map(f => (
             <button key={f} onClick={() => setFilter(f)}
-              className="px-3 py-1 rounded-md text-xs transition-all"
+              className="px-3 py-1 rounded-md text-base transition-all"
               style={{ background: filter === f ? 'var(--bg-elevated)' : 'transparent', color: filter === f ? 'var(--text-primary)' : 'var(--text-muted)', border: filter === f ? '1px solid var(--border-dim)' : '1px solid transparent' }}>
               {f === 'all' ? 'All Platforms' : f}
             </button>
@@ -312,7 +312,7 @@ function AudienceOverlapPanel() {
       </div>
 
       {highCount > 0 && (
-        <div className="rounded-xl p-3 flex items-center gap-2 text-xs" style={{ background: 'rgba(255,68,68,.08)', border: '1px solid rgba(255,68,68,.25)' }}>
+        <div className="rounded-xl p-3 flex items-center gap-2 text-base" style={{ background: 'rgba(255,68,68,.08)', border: '1px solid rgba(255,68,68,.25)' }}>
           <AlertTriangle size={14} style={{ color: '#ff4444', flexShrink: 0 }} />
           <span style={{ color: '#ff4444' }}>{highCount} high-impact overlap{highCount > 1 ? 's' : ''} detected — these audiences are competing against each other in the same auction, inflating your CPMs.</span>
         </div>
@@ -324,28 +324,28 @@ function AudienceOverlapPanel() {
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs px-1.5 py-0.5 rounded-full font-medium" style={{ color: IMPACT_COLOR[ov.impact], background: `${IMPACT_COLOR[ov.impact]}18` }}>{ov.impact.toUpperCase()} IMPACT</span>
-                  <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ color: '#00d9ff', background: 'rgba(0,217,255,.1)' }}>{ov.platform}</span>
+                  <span className="text-base px-1.5 py-0.5 rounded-full font-medium" style={{ color: IMPACT_COLOR[ov.impact], background: `${IMPACT_COLOR[ov.impact]}18` }}>{ov.impact.toUpperCase()} IMPACT</span>
+                  <span className="text-base px-1.5 py-0.5 rounded-full" style={{ color: 'var(--cyan)', background: 'rgba(0,217,255,.1)' }}>{ov.platform}</span>
                   <span className="text-lg font-bold ml-auto" style={{ color: IMPACT_COLOR[ov.impact] }}>{ov.overlapPct}%</span>
                   <span className="section-label">overlap</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 mb-2">
                   <div className="rounded-lg p-2" style={{ background: 'var(--bg-base)' }}>
-                    <div className="section-label text-[10px]">Audience 1 · {ov.campaign1}</div>
-                    <div className="text-xs font-medium mt-0.5" style={{ color: 'var(--text-primary)' }}>{ov.set1}</div>
+                    <div className="section-label text-[16px]">Audience 1 · {ov.campaign1}</div>
+                    <div className="text-base font-medium mt-0.5" style={{ color: 'var(--text-primary)' }}>{ov.set1}</div>
                   </div>
                   <div className="rounded-lg p-2" style={{ background: 'var(--bg-base)' }}>
-                    <div className="section-label text-[10px]">Audience 2 · {ov.campaign2}</div>
-                    <div className="text-xs font-medium mt-0.5" style={{ color: 'var(--text-primary)' }}>{ov.set2}</div>
+                    <div className="section-label text-[16px]">Audience 2 · {ov.campaign2}</div>
+                    <div className="text-base font-medium mt-0.5" style={{ color: 'var(--text-primary)' }}>{ov.set2}</div>
                   </div>
                 </div>
-                <div className="flex items-start gap-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                <div className="flex items-start gap-1.5 text-base" style={{ color: 'var(--text-secondary)' }}>
                   <CheckCircle2 size={12} className="mt-0.5 shrink-0" style={{ color: '#10d98a' }} />
                   {ov.recommendation}
                 </div>
               </div>
               <button onClick={() => setDismissed(prev => new Set(Array.from(prev).concat(ov.id)))}
-                className="text-xs px-2 py-1 rounded-lg shrink-0" style={{ color: 'var(--text-muted)', background: 'var(--bg-base)' }}>
+                className="text-base px-2 py-1 rounded-lg shrink-0" style={{ color: 'var(--text-muted)', background: 'var(--bg-base)' }}>
                 Dismiss
               </button>
             </div>
@@ -354,7 +354,7 @@ function AudienceOverlapPanel() {
         {visible.length === 0 && (
           <div className="glass-card p-8 text-center">
             <CheckCircle2 size={32} className="mx-auto mb-2" style={{ color: '#10d98a' }} />
-            <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>No overlaps detected</div>
+            <div className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>No overlaps detected</div>
             <div className="section-label mt-1">All audiences are clean — no internal auction competition.</div>
           </div>
         )}
@@ -389,6 +389,7 @@ const SUGGESTIONS = [
 ];
 
 const MATCH_COLOR: Record<MatchType, string> = { exact: '#7b93ff', phrase: '#00d9ff', broad: '#ffb347' };
+const MATCH_TEXT_COLOR: Record<MatchType, string> = { exact: '#7b93ff', phrase: 'var(--cyan)', broad: 'var(--amber)' };
 
 function NegativeKeywordsPanel() {
   const [keywords, setKeywords] = usePersistentState<NegKeyword[]>('ads.negativeKeywords', INITIAL_NEG_KWS);
@@ -438,7 +439,7 @@ function NegativeKeywordsPanel() {
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: 'Total Neg. Keywords', value: keywords.length.toString(),           color: '#00d9ff' },
+          { label: 'Total Neg. Keywords', value: keywords.length.toString(),           color: 'var(--cyan)' },
           { label: 'Impressions Blocked',  value: fmt(totalBlocked),                    color: '#10d98a' },
           { label: 'Exact Match',          value: keywords.filter(k => k.matchType === 'exact').length.toString(),  color: '#7b93ff' },
           { label: 'Phrase / Broad',       value: keywords.filter(k => k.matchType !== 'exact').length.toString(), color: '#ffb347' },
@@ -453,42 +454,42 @@ function NegativeKeywordsPanel() {
       {/* Add keyword */}
       <div className="glass-card p-4 flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>Add Negative Keywords</span>
-          <button onClick={() => setShowBulk(!showBulk)} className="text-xs px-2 py-1 rounded-lg" style={{ color: '#00d9ff', background: 'rgba(0,217,255,.1)' }}>Bulk Import</button>
+          <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Add Negative Keywords</span>
+          <button onClick={() => setShowBulk(!showBulk)} className="text-base px-2 py-1 rounded-lg" style={{ color: 'var(--cyan)', background: 'rgba(0,217,255,.1)' }}>Bulk Import</button>
         </div>
         {showBulk ? (
           <div className="flex flex-col gap-2">
             <textarea value={bulkText} onChange={e => setBulkText(e.target.value)} placeholder="One keyword per line..."
-              rows={4} className="px-3 py-2 rounded-lg text-xs w-full" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)', resize: 'none' }} />
+              rows={4} className="px-3 py-2 rounded-lg text-base w-full" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)', resize: 'none' }} />
             <div className="flex gap-2 items-center">
               <select value={newMatch} onChange={e => setNewMatch(e.target.value as MatchType)}
-                className="px-2 py-1.5 rounded-lg text-xs flex-1" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+                className="px-2 py-1.5 rounded-lg text-base flex-1" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
                 <option value="exact">Exact Match</option>
                 <option value="phrase">Phrase Match</option>
                 <option value="broad">Broad Match</option>
               </select>
               <select value={newCampaign} onChange={e => setNewCampaign(e.target.value)}
-                className="px-2 py-1.5 rounded-lg text-xs flex-[2]" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+                className="px-2 py-1.5 rounded-lg text-base flex-[2]" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
                 {CAMPAIGNS_GOOGLE.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
-              <button onClick={addBulk} className="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap" style={{ background: 'var(--accent-blue)', color: '#fff' }}>Import {bulkText.split('\n').filter(l => l.trim()).length}</button>
+              <button onClick={addBulk} className="px-3 py-1.5 rounded-lg text-base font-medium whitespace-nowrap" style={{ background: 'var(--accent-blue)', color: '#fff' }}>Import {bulkText.split('\n').filter(l => l.trim()).length}</button>
             </div>
           </div>
         ) : (
           <div className="flex gap-2 items-center">
             <input value={newKw} onChange={e => setNewKw(e.target.value)} onKeyDown={e => e.key === 'Enter' && addKeyword()} placeholder="Enter negative keyword..."
-              className="flex-1 px-3 py-2 rounded-lg text-xs" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
+              className="flex-1 px-3 py-2 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
             <select value={newMatch} onChange={e => setNewMatch(e.target.value as MatchType)}
-              className="px-2 py-1.5 rounded-lg text-xs" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+              className="px-2 py-1.5 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
               <option value="exact">Exact</option>
               <option value="phrase">Phrase</option>
               <option value="broad">Broad</option>
             </select>
             <select value={newCampaign} onChange={e => setNewCampaign(e.target.value)}
-              className="px-2 py-1.5 rounded-lg text-xs" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+              className="px-2 py-1.5 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
               {CAMPAIGNS_GOOGLE.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
-            <button onClick={addKeyword} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: 'var(--accent-blue)', color: '#fff' }}>
+            <button onClick={addKeyword} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-base font-medium" style={{ background: 'var(--accent-blue)', color: '#fff' }}>
               <Plus size={12} /> Add
             </button>
           </div>
@@ -499,22 +500,22 @@ function NegativeKeywordsPanel() {
       <div className="glass-card p-4 flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <RefreshCw size={13} style={{ color: '#7b93ff' }} />
-          <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>AI Suggestions</span>
+          <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>AI Suggestions</span>
           <span className="section-label">— based on search term reports</span>
         </div>
         <div className="flex flex-col gap-2">
           {SUGGESTIONS.filter(s => !keywords.find(k => k.keyword === s.keyword)).map(s => (
             <div key={s.keyword} className="flex items-center gap-3 rounded-lg p-2.5" style={{ background: 'var(--bg-base)' }}>
-              <span className="text-xs px-1.5 py-0.5 rounded font-mono font-medium" style={{ color: MATCH_COLOR[s.matchType], background: `${MATCH_COLOR[s.matchType]}18` }}>[{s.matchType}]</span>
-              <span className="text-xs font-medium flex-1" style={{ color: 'var(--text-primary)' }}>{s.keyword}</span>
-              <span className="text-xs flex-[2]" style={{ color: 'var(--text-muted)' }}>{s.reason}</span>
-              <button onClick={() => addSuggestion(s)} className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg" style={{ color: '#10d98a', background: 'rgba(16,217,138,.1)' }}>
+              <span className="text-base px-1.5 py-0.5 rounded font-mono font-medium" style={{ color: MATCH_COLOR[s.matchType], background: `${MATCH_COLOR[s.matchType]}18` }}>[{s.matchType}]</span>
+              <span className="text-base font-medium flex-1" style={{ color: 'var(--text-primary)' }}>{s.keyword}</span>
+              <span className="text-base flex-[2]" style={{ color: 'var(--text-muted)' }}>{s.reason}</span>
+              <button onClick={() => addSuggestion(s)} className="flex items-center gap-1 text-base px-2 py-1 rounded-lg" style={{ color: '#10d98a', background: 'rgba(16,217,138,.1)' }}>
                 <Plus size={11} /> Add
               </button>
             </div>
           ))}
           {SUGGESTIONS.filter(s => !keywords.find(k => k.keyword === s.keyword)).length === 0 && (
-            <div className="text-xs text-center py-2" style={{ color: 'var(--text-muted)' }}>All suggestions have been added.</div>
+            <div className="text-base text-center py-2" style={{ color: 'var(--text-muted)' }}>All suggestions have been added.</div>
           )}
         </div>
       </div>
@@ -522,15 +523,15 @@ function NegativeKeywordsPanel() {
       {/* Keyword list */}
       <div className="glass-card overflow-hidden">
         <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-          <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>Keyword List <span className="font-normal text-[11px]" style={{ color: 'var(--text-muted)' }}>({visible.length})</span></span>
+          <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Keyword List <span className="font-normal text-[16px]" style={{ color: 'var(--text-muted)' }}>({visible.length})</span></span>
           <select value={filterCampaign} onChange={e => setFilterCampaign(e.target.value)}
-            className="px-2 py-1 rounded-lg text-xs" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+            className="px-2 py-1 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
             <option value="all">All Campaigns</option>
             {CAMPAIGNS_GOOGLE.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
         <div className="overflow-y-auto" style={{ maxHeight: 340 }}>
-          <table className="w-full text-xs">
+          <table className="w-full text-base">
             <thead style={{ background: 'var(--bg-elevated)', position: 'sticky', top: 0 }}>
               <tr>
                 {['Keyword', 'Match Type', 'Campaign', 'Added', 'Impressions Blocked', ''].map(h => (
@@ -545,7 +546,7 @@ function NegativeKeywordsPanel() {
                   onMouseLeave={e => (e.currentTarget.style.background = '')}>
                   <td className="px-3 py-2 font-mono font-medium" style={{ color: 'var(--text-primary)' }}>{k.keyword}</td>
                   <td className="px-3 py-2">
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-medium" style={{ color: MATCH_COLOR[k.matchType], background: `${MATCH_COLOR[k.matchType]}18` }}>{k.matchType}</span>
+                    <span className="px-1.5 py-0.5 rounded text-[16px] font-medium" style={{ color: MATCH_COLOR[k.matchType], background: `${MATCH_COLOR[k.matchType]}18` }}>{k.matchType}</span>
                   </td>
                   <td className="px-3 py-2 max-w-[200px] truncate" style={{ color: 'var(--text-secondary)' }}>{k.campaign}</td>
                   <td className="px-3 py-2" style={{ color: 'var(--text-muted)' }}>{k.addedDate}</td>
@@ -581,7 +582,7 @@ export default function AdsPage() {
 
           <div className="grid grid-cols-5 gap-3 shrink-0">
             {[
-              { label: 'Total Spend',        value: c$(t.totalSpend),                               color: '#00d9ff' },
+              { label: 'Total Spend',        value: c$(t.totalSpend),                               color: 'var(--cyan)' },
               { label: 'Total Revenue',      value: c$(t.totalRevenue),                             color: '#10d98a' },
               { label: 'Blended ROAS',       value: (t.totalRevenue / t.totalSpend).toFixed(2) + '×', color: '#7b93ff' },
               { label: 'Total Conversions',  value: t.totalConversions.toLocaleString(),             color: '#ffb347' },
@@ -600,7 +601,7 @@ export default function AdsPage() {
               const Icon = t.icon;
               return (
                 <button key={t.key} onClick={() => setTab(t.key)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base transition-all"
                   style={{
                     background: tab === t.key ? 'var(--bg-elevated)' : 'transparent',
                     color: tab === t.key ? 'var(--text-primary)' : 'var(--text-muted)',

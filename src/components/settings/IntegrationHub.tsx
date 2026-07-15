@@ -31,7 +31,7 @@ interface CardState {
 function StatusBadge({ status, notStarted }: { status: IntegrationStatus; notStarted?: boolean }) {
   if (status === 'connected') {
     return (
-      <span className='badge-ok text-[10px] px-2 py-0.5 rounded-full font-mono flex items-center gap-1'>
+      <span className='badge-ok text-[16px] px-2 py-0.5 rounded-full font-mono flex items-center gap-1'>
         <span className='w-1.5 h-1.5 rounded-full inline-block' style={{ background: '#10d98a' }} />
         Connected
       </span>
@@ -39,7 +39,7 @@ function StatusBadge({ status, notStarted }: { status: IntegrationStatus; notSta
   }
   if (status === 'error') {
     return (
-      <span className='badge-critical text-[10px] px-2 py-0.5 rounded-full font-mono flex items-center gap-1'>
+      <span className='badge-critical text-[16px] px-2 py-0.5 rounded-full font-mono flex items-center gap-1'>
         <span className='w-1.5 h-1.5 rounded-full inline-block' style={{ background: '#ff4444' }} />
         Error
       </span>
@@ -47,7 +47,7 @@ function StatusBadge({ status, notStarted }: { status: IntegrationStatus; notSta
   }
   return (
     <span
-      className='text-[10px] px-2 py-0.5 rounded-full font-mono flex items-center gap-1'
+      className='text-[16px] px-2 py-0.5 rounded-full font-mono flex items-center gap-1'
       style={{ background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
     >
       <span className='w-1.5 h-1.5 rounded-full inline-block' style={{ background: 'var(--text-muted)' }} />
@@ -115,10 +115,10 @@ function IntegrationCard({ integration, statuses, onStatusChange }: IntegrationC
             {integration.icon}
           </div>
           <div>
-            <div className='text-sm font-semibold leading-tight' style={{ color: 'var(--text-primary)' }}>
+            <div className='text-base font-semibold leading-tight' style={{ color: 'var(--text-primary)' }}>
               {integration.name}
             </div>
-            <div className='text-[10px] mt-0.5 font-mono capitalize' style={{ color: 'var(--text-muted)' }}>
+            <div className='text-[16px] mt-0.5 font-mono capitalize' style={{ color: 'var(--text-muted)' }}>
               {integration.category}
             </div>
           </div>
@@ -127,14 +127,14 @@ function IntegrationCard({ integration, statuses, onStatusChange }: IntegrationC
       </div>
 
       {/* Description */}
-      <p className='text-xs leading-relaxed flex-1' style={{ color: 'var(--text-secondary)' }}>
+      <p className='text-base leading-relaxed flex-1' style={{ color: 'var(--text-secondary)' }}>
         {integration.description}
       </p>
 
       {/* Manage panel — inline details */}
       {isConnected && managing && (
         <div
-          className='flex flex-col gap-1.5 p-3 rounded-xl text-[10px] font-mono'
+          className='flex flex-col gap-1.5 p-3 rounded-xl text-[16px] font-mono'
           style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-secondary)' }}
         >
           <div className='flex items-center justify-between'>
@@ -162,11 +162,11 @@ function IntegrationCard({ integration, statuses, onStatusChange }: IntegrationC
           className='flex items-center justify-between px-2.5 py-1.5 rounded-lg'
           style={{ background: 'rgba(16,217,138,0.06)', border: '1px solid rgba(16,217,138,0.15)' }}
         >
-          <span className='text-[10px] font-mono truncate' style={{ color: 'var(--text-secondary)' }}>
+          <span className='text-[16px] font-mono truncate' style={{ color: 'var(--text-secondary)' }}>
             {integration.accountName}
           </span>
           {integration.lastSync && (
-            <span className='text-[10px] font-mono shrink-0 ml-2' style={{ color: 'var(--text-muted)' }}>
+            <span className='text-[16px] font-mono shrink-0 ml-2' style={{ color: 'var(--text-muted)' }}>
               <span suppressHydrationWarning>Synced {formatSyncTime(integration.lastSync)}</span>
             </span>
           )}
@@ -184,7 +184,7 @@ function IntegrationCard({ integration, statuses, onStatusChange }: IntegrationC
             placeholder='API Key'
             value={state.apiKey}
             onChange={e => setState(s => ({ ...s, apiKey: e.target.value }))}
-            className='w-full text-xs px-2.5 py-2 rounded-lg outline-none'
+            className='w-full text-base px-2.5 py-2 rounded-lg outline-none'
             style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)', fontFamily: 'DM Mono' }}
           />
           <input
@@ -192,13 +192,13 @@ function IntegrationCard({ integration, statuses, onStatusChange }: IntegrationC
             placeholder='Secret / Access Token'
             value={state.secret}
             onChange={e => setState(s => ({ ...s, secret: e.target.value }))}
-            className='w-full text-xs px-2.5 py-2 rounded-lg outline-none'
+            className='w-full text-base px-2.5 py-2 rounded-lg outline-none'
             style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)', fontFamily: 'DM Mono' }}
           />
           <div className='flex gap-2'>
             <button
               onClick={handleTest}
-              className='flex-1 text-xs py-2 rounded-lg font-semibold transition-all'
+              className='flex-1 text-base py-2 rounded-lg font-semibold transition-all'
               style={{ background: '#00d9ff', color: '#080b18' }}
             >
               Test Connection
@@ -216,15 +216,15 @@ function IntegrationCard({ integration, statuses, onStatusChange }: IntegrationC
 
       {/* Testing state */}
       {state.connectState === 'testing' && (
-        <div className='flex items-center gap-2 text-xs' style={{ color: 'var(--text-secondary)' }}>
-          <Loader2 size={12} className='animate-spin' style={{ color: '#00d9ff' }} />
+        <div className='flex items-center gap-2 text-base' style={{ color: 'var(--text-secondary)' }}>
+          <Loader2 size={12} className='animate-spin' style={{ color: 'var(--cyan)' }} />
           Testing connection…
         </div>
       )}
 
       {/* Success state */}
       {state.connectState === 'success' && (
-        <div className='flex items-center gap-2 text-xs font-medium' style={{ color: '#10d98a' }}>
+        <div className='flex items-center gap-2 text-base font-medium' style={{ color: '#10d98a' }}>
           <CheckCircle size={12} />
           Connection verified
         </div>
@@ -237,9 +237,9 @@ function IntegrationCard({ integration, statuses, onStatusChange }: IntegrationC
             <>
               <button
                 onClick={() => setManaging(m => !m)}
-                className='flex-1 text-xs py-2 rounded-lg font-medium transition-all'
+                className='flex-1 text-base py-2 rounded-lg font-medium transition-all'
                 style={managing
-                  ? { background: 'rgba(0,217,255,0.10)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }
+                  ? { background: 'rgba(0,217,255,0.10)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }
                   : { background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
               >
                 {managing ? 'Hide Details' : 'Manage'}
@@ -247,7 +247,7 @@ function IntegrationCard({ integration, statuses, onStatusChange }: IntegrationC
               {hovered && (
                 <button
                   onClick={handleDisconnect}
-                  className='text-xs px-3 py-2 rounded-lg font-medium transition-all'
+                  className='text-base px-3 py-2 rounded-lg font-medium transition-all'
                   style={{ background: 'rgba(255,68,68,0.1)', color: '#ff4444', border: '1px solid rgba(255,68,68,0.25)' }}
                 >
                   Disconnect
@@ -258,8 +258,8 @@ function IntegrationCard({ integration, statuses, onStatusChange }: IntegrationC
           {isDisconnected && (
             <button
               onClick={handleConnect}
-              className='flex-1 text-xs py-2 rounded-lg font-medium transition-all'
-              style={{ background: 'rgba(0,217,255,0.10)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}
+              className='flex-1 text-base py-2 rounded-lg font-medium transition-all'
+              style={{ background: 'rgba(0,217,255,0.10)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}
             >
               Connect
             </button>
@@ -267,7 +267,7 @@ function IntegrationCard({ integration, statuses, onStatusChange }: IntegrationC
           {isError && (
             <button
               onClick={handleConnect}
-              className='flex-1 text-xs py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5'
+              className='flex-1 text-base py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5'
               style={{ background: 'rgba(255,68,68,0.10)', color: '#ff4444', border: '1px solid rgba(255,68,68,0.25)' }}
             >
               <AlertCircle size={11} />Reconnect
@@ -345,14 +345,14 @@ function WorkflowBuilder() {
     <div className='flex flex-col gap-4 pt-2'>
       <div className='flex items-center gap-2'>
         <Zap size={15} style={{ color: '#ffb347' }} />
-        <span className='text-sm font-semibold' style={{ color: 'var(--text-primary)' }}>Automation Workflows</span>
+        <span className='text-base font-semibold' style={{ color: 'var(--text-primary)' }}>Automation Workflows</span>
         <span className='section-label'>— Zapier &amp; Make (I-09)</span>
       </div>
 
       <div className='grid grid-cols-4 gap-3'>
         {[
           { label: 'Active Workflows', value: workflows.filter(w => w.status === 'active').length.toString(), color: '#10d98a' },
-          { label: 'Runs (30d)',        value: totalRuns.toLocaleString(),                                       color: '#00d9ff' },
+          { label: 'Runs (30d)',        value: totalRuns.toLocaleString(),                                       color: 'var(--cyan)' },
           { label: 'Zapier Workflows',  value: workflows.filter(w => w.platform === 'zapier').length.toString(), color: '#ff6640' },
           { label: 'Make Workflows',    value: workflows.filter(w => w.platform === 'make').length.toString(),   color: '#7b93ff' },
         ].map(s => (
@@ -367,14 +367,14 @@ function WorkflowBuilder() {
         <div className='flex gap-1 p-1 rounded-lg' style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
           {(['all', 'zapier', 'make'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
-              className='px-2.5 py-1 rounded-md text-xs capitalize transition-all'
+              className='px-2.5 py-1 rounded-md text-base capitalize transition-all'
               style={{ background: tab === t ? 'var(--bg-elevated)' : 'transparent', color: tab === t ? 'var(--text-primary)' : 'var(--text-muted)', border: tab === t ? '1px solid var(--border-dim)' : '1px solid transparent' }}>
               {t === 'all' ? 'All Platforms' : t.charAt(0).toUpperCase() + t.slice(1)}
             </button>
           ))}
         </div>
         <button onClick={() => setShowCreate(!showCreate)}
-          className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium'
+          className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base font-medium'
           style={{ background: 'rgba(255,102,64,.12)', color: '#ff6640', border: '1px solid rgba(255,102,64,.25)' }}>
           <Plus size={12} /> New Workflow
         </button>
@@ -382,34 +382,34 @@ function WorkflowBuilder() {
 
       {showCreate && (
         <div className='rounded-xl p-4 flex flex-col gap-3' style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)' }}>
-          <div className='text-xs font-semibold' style={{ color: 'var(--text-primary)' }}>Create Workflow</div>
+          <div className='text-base font-semibold' style={{ color: 'var(--text-primary)' }}>Create Workflow</div>
           <div className='grid grid-cols-3 gap-3'>
             <input value={newName} onChange={e => setNewName(e.target.value)} placeholder='Workflow name'
-              className='col-span-2 px-3 py-2 rounded-lg text-xs' style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
+              className='col-span-2 px-3 py-2 rounded-lg text-base' style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
             <select value={newPlatform} onChange={e => setNewPlatform(e.target.value as WFPlatform)}
-              className='px-3 py-2 rounded-lg text-xs' style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+              className='px-3 py-2 rounded-lg text-base' style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
               <option value='zapier'>Zapier</option>
               <option value='make'>Make</option>
             </select>
             <select value={newTrigger} onChange={e => setNewTrigger(e.target.value)}
-              className='px-3 py-2 rounded-lg text-xs' style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+              className='px-3 py-2 rounded-lg text-base' style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
               {ZAPIER_TRIGGERS.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
             <div className='flex items-center justify-center'><ArrowRight size={14} style={{ color: 'var(--text-muted)' }} /></div>
             <select value={newAction} onChange={e => setNewAction(e.target.value)}
-              className='px-3 py-2 rounded-lg text-xs' style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+              className='px-3 py-2 rounded-lg text-base' style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
               {ZAPIER_ACTIONS.map(a => <option key={a} value={a}>{a}</option>)}
             </select>
           </div>
           <div className='flex gap-2 justify-end'>
-            <button onClick={() => setShowCreate(false)} className='px-3 py-1.5 rounded-lg text-xs' style={{ color: 'var(--text-muted)' }}>Cancel</button>
-            <button onClick={createWorkflow} className='px-3 py-1.5 rounded-lg text-xs font-medium' style={{ background: 'rgba(255,102,64,.12)', color: '#ff6640' }}>Create</button>
+            <button onClick={() => setShowCreate(false)} className='px-3 py-1.5 rounded-lg text-base' style={{ color: 'var(--text-muted)' }}>Cancel</button>
+            <button onClick={createWorkflow} className='px-3 py-1.5 rounded-lg text-base font-medium' style={{ background: 'rgba(255,102,64,.12)', color: '#ff6640' }}>Create</button>
           </div>
         </div>
       )}
 
       <div className='rounded-xl overflow-hidden' style={{ border: '1px solid var(--border-subtle)' }}>
-        <table className='w-full text-xs'>
+        <table className='w-full text-base'>
           <thead style={{ background: 'var(--bg-elevated)' }}>
             <tr>
               {['Workflow', 'Platform', 'Trigger → Action', 'Runs (30d)', 'Last Run', 'Status', ''].map(h => (
@@ -426,7 +426,7 @@ function WorkflowBuilder() {
                   onMouseLeave={e => (e.currentTarget.style.background = '')}>
                   <td className='px-3 py-2.5 font-medium' style={{ color: 'var(--text-primary)' }}>{wf.name}</td>
                   <td className='px-3 py-2.5'>
-                    <span className='text-[10px] px-1.5 py-0.5 rounded font-medium capitalize'
+                    <span className='text-[16px] px-1.5 py-0.5 rounded font-medium capitalize'
                       style={{ color: wf.platform === 'zapier' ? '#ff6640' : '#7b93ff', background: wf.platform === 'zapier' ? 'rgba(255,102,64,.1)' : 'rgba(123,147,255,.1)' }}>
                       {wf.platform}
                     </span>
@@ -439,11 +439,11 @@ function WorkflowBuilder() {
                   <td className='px-3 py-2.5 font-mono' style={{ color: 'var(--text-secondary)' }}>{wf.runsLast30d.toLocaleString()}</td>
                   <td className='px-3 py-2.5' style={{ color: 'var(--text-muted)' }}>{wf.lastRun}</td>
                   <td className='px-3 py-2.5'>
-                    <span className='text-[10px] px-1.5 py-0.5 rounded-full' style={{ color: sc.color, background: sc.bg }}>{sc.label}</span>
+                    <span className='text-[16px] px-1.5 py-0.5 rounded-full' style={{ color: sc.color, background: sc.bg }}>{sc.label}</span>
                   </td>
                   <td className='px-3 py-2.5'>
                     <div className='flex items-center gap-1'>
-                      <button onClick={() => toggleStatus(wf.id)} className='text-[10px] px-2 py-1 rounded' style={{ color: wf.status === 'active' ? '#ffb347' : '#10d98a', background: wf.status === 'active' ? 'rgba(255,179,71,.08)' : 'rgba(16,217,138,.08)' }}>
+                      <button onClick={() => toggleStatus(wf.id)} className='text-[16px] px-2 py-1 rounded' style={{ color: wf.status === 'active' ? '#ffb347' : '#10d98a', background: wf.status === 'active' ? 'rgba(255,179,71,.08)' : 'rgba(16,217,138,.08)' }}>
                         {wf.status === 'active' ? 'Pause' : 'Run'}
                       </button>
                       <button onClick={() => deleteWf(wf.id)} className='p-1 rounded' style={{ color: '#ff4444' }}>
@@ -516,10 +516,10 @@ export function IntegrationHub() {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className='text-xs px-3 py-1.5 rounded-full transition-all'
+                className='text-base px-3 py-1.5 rounded-full transition-all'
                 style={
                   active
-                    ? { background: 'rgba(0,217,255,0.12)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.28)' }
+                    ? { background: 'rgba(0,217,255,0.12)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.28)' }
                     : { background: 'transparent', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }
                 }
               >
@@ -537,7 +537,7 @@ export function IntegrationHub() {
             placeholder='Search integrations…'
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className='text-xs pl-8 pr-3 py-1.5 rounded-lg outline-none w-52'
+            className='text-base pl-8 pr-3 py-1.5 rounded-lg outline-none w-52'
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}
           />
         </div>
@@ -547,7 +547,7 @@ export function IntegrationHub() {
       {filtered.length === 0 ? (
         <div className='text-center py-16' style={{ color: 'var(--text-muted)' }}>
           <div className='text-3xl mb-3'>🔍</div>
-          <div className='text-sm'>No integrations match your search</div>
+          <div className='text-base'>No integrations match your search</div>
         </div>
       ) : (
         <div className='grid grid-cols-3 gap-3'>

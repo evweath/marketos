@@ -23,11 +23,11 @@ export default function PlatformStatsBar() {
               {/* Platform icon + name */}
               <div className="flex items-center gap-2">
                 <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-[16px] font-bold shrink-0"
                   style={{ background: cfg.color + '22', color: cfg.color, boxShadow: `0 0 0 1px ${cfg.color}30` }}>
                   {cfg.label.charAt(0)}
                 </div>
-                <span className="text-xs font-semibold truncate" style={{ color: cfg.color }}>
+                <span className="text-base font-semibold truncate" style={{ color: cfg.color }}>
                   {cfg.label}
                 </span>
               </div>
@@ -35,7 +35,7 @@ export default function PlatformStatsBar() {
               {stat.started === false ? (
                 <div className="flex-1 flex items-center justify-center py-2">
                   <span
-                    className="text-[10px] px-2 py-0.5 rounded-full font-mono"
+                    className="text-[16px] px-2 py-0.5 rounded-full font-mono"
                     style={{ background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
                   >
                     Not Started
@@ -52,7 +52,7 @@ export default function PlatformStatsBar() {
                   </div>
 
                   {/* Delta */}
-                  <div className="flex items-center gap-1 text-[10px] font-mono"
+                  <div className="flex items-center gap-1 text-[16px] font-mono"
                     style={{ color: positive ? '#10d98a' : '#ff4444' }}>
                     {positive
                       ? <TrendingUp size={10} />
@@ -64,17 +64,17 @@ export default function PlatformStatsBar() {
                   <div className="grid grid-cols-2 gap-1.5 mt-auto">
                     <div className="rounded-lg px-1.5 py-1.5 text-center"
                       style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                      <div className="text-[11px] font-bold font-mono leading-none" style={{ color: engColor }}>
+                      <div className="text-[16px] font-bold font-mono leading-none" style={{ color: engColor }}>
                         {stat.avgEngagementRate}%
                       </div>
-                      <div className="section-label mt-0.5" style={{ fontSize: 8 }}>Eng.</div>
+                      <div className="section-label mt-0.5" style={{ fontSize: 16 }}>Eng.</div>
                     </div>
                     <div className="rounded-lg px-1.5 py-1.5 text-center"
                       style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                      <div className="text-[11px] font-bold font-mono leading-none" style={{ color: 'var(--text-primary)' }}>
+                      <div className="text-[16px] font-bold font-mono leading-none" style={{ color: 'var(--text-primary)' }}>
                         {stat.postsThisMonth}
                       </div>
-                      <div className="section-label mt-0.5" style={{ fontSize: 8 }}>Posts</div>
+                      <div className="section-label mt-0.5" style={{ fontSize: 16 }}>Posts</div>
                     </div>
                   </div>
                 </>

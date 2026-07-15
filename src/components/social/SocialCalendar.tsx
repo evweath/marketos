@@ -91,7 +91,7 @@ export default function SocialCalendar({ posts, onSelectPost, onNewPost, filterP
           {STATUS_LABELS.map(s => (
             <div key={s} className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full" style={{ background: STATUS_COLORS[s] }} />
-              <span className="text-[10px] font-mono capitalize" style={{ color: 'var(--text-muted)' }}>{s}</span>
+              <span className="text-[16px] font-mono capitalize" style={{ color: 'var(--text-muted)' }}>{s}</span>
             </div>
           ))}
         </div>
@@ -133,7 +133,7 @@ export default function SocialCalendar({ posts, onSelectPost, onNewPost, filterP
               {/* Day number */}
               <div className="flex items-center justify-between mb-0.5">
                 <span
-                  className="flex items-center justify-center font-mono text-[11px]"
+                  className="flex items-center justify-center font-mono text-[16px]"
                   style={{
                     width: 20,
                     height: 20,
@@ -148,7 +148,7 @@ export default function SocialCalendar({ posts, onSelectPost, onNewPost, filterP
                   <button
                     onClick={e => { e.stopPropagation(); onNewPost(new Date(year, month, day)); }}
                     className="opacity-0 group-hover:opacity-100 transition-all w-4 h-4 rounded flex items-center justify-center hover:bg-white/10"
-                    style={{ color: '#00d9ff' }}>
+                    style={{ color: 'var(--cyan)' }}>
                     <Plus size={9} />
                   </button>
                 )}
@@ -162,7 +162,7 @@ export default function SocialCalendar({ posts, onSelectPost, onNewPost, filterP
                   return (
                     <button key={post.id}
                       onClick={e => { e.stopPropagation(); onSelectPost(post); }}
-                      className="w-full text-left px-1.5 py-0.5 rounded text-[10px] truncate transition-all hover:brightness-125 flex items-center gap-1"
+                      className="w-full text-left px-1.5 py-0.5 rounded text-[16px] truncate transition-all hover:brightness-125 flex items-center gap-1"
                       style={{
                         background: STATUS_COLORS[post.status] + '18',
                         borderLeft: `2px solid ${STATUS_COLORS[post.status]}`,
@@ -175,7 +175,7 @@ export default function SocialCalendar({ posts, onSelectPost, onNewPost, filterP
                   );
                 })}
                 {dayPosts.length > MAX_SHOWN && (
-                  <span className="text-[9px] font-mono px-1.5" style={{ color: 'var(--text-muted)' }}>
+                  <span className="text-[16px] font-mono px-1.5" style={{ color: 'var(--text-muted)' }}>
                     +{dayPosts.length - MAX_SHOWN} more
                   </span>
                 )}
@@ -184,7 +184,7 @@ export default function SocialCalendar({ posts, onSelectPost, onNewPost, filterP
               {/* Empty hover state */}
               {dayPosts.length === 0 && !isPast && (
                 <div className="flex-1 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="text-[9px] font-mono" style={{ color: 'var(--text-muted)' }}>+ New Post</span>
+                  <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>+ New Post</span>
                 </div>
               )}
             </div>

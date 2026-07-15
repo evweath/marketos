@@ -90,7 +90,7 @@ function PhotoStudioPanel() {
       {/* Stats */}
       <div className='grid grid-cols-4 gap-3'>
         {[
-          { label: 'Photos Processed (30d)', value: '1,248', color: '#00d9ff' },
+          { label: 'Photos Processed (30d)', value: '1,248', color: 'var(--cyan)' },
           { label: 'Backgrounds Removed',    value: '842',   color: '#10d98a' },
           { label: 'AI Styles Applied',       value: '406',   color: '#7b93ff' },
           { label: 'Avg Processing Time',     value: '8s',    color: '#ffb347' },
@@ -110,19 +110,19 @@ function PhotoStudioPanel() {
             <div className='rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-2 py-8 mb-3 cursor-pointer hover:bg-white/[0.02] transition-colors'
               style={{ borderColor: 'var(--border-dim)' }}>
               <Upload size={20} style={{ color: 'var(--text-muted)' }} />
-              <div className='text-xs text-center' style={{ color: 'var(--text-secondary)' }}>
+              <div className='text-base text-center' style={{ color: 'var(--text-secondary)' }}>
                 Drop images here or<br />
-                <span style={{ color: '#00d9ff' }}>browse files</span>
+                <span style={{ color: 'var(--cyan)' }}>browse files</span>
               </div>
-              <div className='text-[10px]' style={{ color: 'var(--text-muted)' }}>JPG, PNG, WebP · max 10 MB</div>
+              <div className='text-[16px]' style={{ color: 'var(--text-muted)' }}>JPG, PNG, WebP · max 10 MB</div>
             </div>
 
             <div className='flex flex-col gap-2 mb-3'>
-              <div className='text-xs font-medium mb-1' style={{ color: 'var(--text-primary)' }}>Mode</div>
+              <div className='text-base font-medium mb-1' style={{ color: 'var(--text-primary)' }}>Mode</div>
               {([['bg_remove', 'Background Removal'], ['style', 'AI Style Transfer']] as const).map(([k, l]) => (
                 <button key={k} onClick={() => setMode(k)}
-                  className='flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all text-left'
-                  style={{ background: mode === k ? 'rgba(0,217,255,0.08)' : 'var(--bg-elevated)', color: mode === k ? '#00d9ff' : 'var(--text-secondary)', border: `1px solid ${mode === k ? 'rgba(0,217,255,0.3)' : 'transparent'}` }}>
+                  className='flex items-center gap-2 px-3 py-2 rounded-lg text-base transition-all text-left'
+                  style={{ background: mode === k ? 'rgba(0,217,255,0.08)' : 'var(--bg-elevated)', color: mode === k ? 'var(--cyan)' : 'var(--text-secondary)', border: `1px solid ${mode === k ? 'rgba(0,217,255,0.3)' : 'transparent'}` }}>
                   {mode === k ? <CheckCircle size={12} /> : <div className='w-3 h-3 rounded-full' style={{ border: '1px solid var(--border-dim)' }} />}
                   {l}
                 </button>
@@ -131,11 +131,11 @@ function PhotoStudioPanel() {
 
             {mode === 'style' && (
               <div>
-                <div className='text-xs font-medium mb-2' style={{ color: 'var(--text-primary)' }}>Style Preset</div>
+                <div className='text-base font-medium mb-2' style={{ color: 'var(--text-primary)' }}>Style Preset</div>
                 <div className='flex flex-wrap gap-1.5'>
                   {STYLE_PRESETS.map(s => (
                     <button key={s} onClick={() => setActiveStyle(s)}
-                      className='text-[10px] px-2 py-1 rounded-lg transition-all'
+                      className='text-[16px] px-2 py-1 rounded-lg transition-all'
                       style={{ background: activeStyle === s ? 'rgba(123,147,255,0.12)' : 'var(--bg-elevated)', color: activeStyle === s ? '#7b93ff' : 'var(--text-muted)', border: `1px solid ${activeStyle === s ? 'rgba(123,147,255,0.3)' : 'transparent'}` }}>
                       {s}
                     </button>
@@ -144,8 +144,8 @@ function PhotoStudioPanel() {
               </div>
             )}
 
-            <button onClick={runJob} className='w-full mt-3 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-2'
-              style={{ background: 'rgba(0,217,255,0.1)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.25)' }}>
+            <button onClick={runJob} className='w-full mt-3 py-2 rounded-xl text-base font-medium flex items-center justify-center gap-2'
+              style={{ background: 'rgba(0,217,255,0.1)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.25)' }}>
               <Wand2 size={12} />
               {mode === 'bg_remove' ? 'Remove Background' : 'Apply AI Style'}
             </button>
@@ -157,12 +157,12 @@ function PhotoStudioPanel() {
           <div className='px-4 py-3 border-b flex items-center justify-between' style={{ borderColor: 'var(--border-subtle)' }}>
             <span className='section-label'>Recent Jobs</span>
             {pending.length > 0 && (
-              <span className='text-[10px] px-2 py-0.5 rounded-full' style={{ background: 'rgba(0,217,255,.1)', color: '#00d9ff' }}>
+              <span className='text-[16px] px-2 py-0.5 rounded-full' style={{ background: 'rgba(0,217,255,.1)', color: 'var(--cyan)' }}>
                 {pending.length} processing
               </span>
             )}
           </div>
-          <table className='w-full text-xs'>
+          <table className='w-full text-base'>
             <thead style={{ background: 'var(--bg-elevated)' }}>
               <tr>
                 {['Filename', 'Original Size', 'Result', 'Processed'].map(h => (
@@ -177,10 +177,10 @@ function PhotoStudioPanel() {
                   <td className='px-4 py-2.5 font-mono' style={{ color: 'var(--text-muted)' }}>{job.original}</td>
                   <td className='px-4 py-2.5'>
                     {job.result === 'pending'
-                      ? <span className='text-[10px] px-1.5 py-0.5 rounded' style={{ background: 'rgba(255,179,71,.1)', color: '#ffb347' }}>Processing</span>
+                      ? <span className='text-[16px] px-1.5 py-0.5 rounded' style={{ background: 'rgba(255,179,71,.1)', color: '#ffb347' }}>Processing</span>
                       : job.result === 'bg_removed'
-                        ? <span className='text-[10px] px-1.5 py-0.5 rounded' style={{ background: 'rgba(16,217,138,.1)', color: '#10d98a' }}>BG Removed</span>
-                        : <span className='text-[10px] px-1.5 py-0.5 rounded' style={{ background: 'rgba(123,147,255,.1)', color: '#7b93ff' }}>{job.style}</span>
+                        ? <span className='text-[16px] px-1.5 py-0.5 rounded' style={{ background: 'rgba(16,217,138,.1)', color: '#10d98a' }}>BG Removed</span>
+                        : <span className='text-[16px] px-1.5 py-0.5 rounded' style={{ background: 'rgba(123,147,255,.1)', color: '#7b93ff' }}>{job.style}</span>
                     }
                   </td>
                   <td className='px-4 py-2.5'>
@@ -198,7 +198,7 @@ function PhotoStudioPanel() {
                             a.click();
                             URL.revokeObjectURL(url);
                           }}
-                          className='p-1 rounded hover:bg-white/[0.05]' style={{ color: '#00d9ff' }}>
+                          className='p-1 rounded hover:bg-white/[0.05]' style={{ color: 'var(--cyan)' }}>
                           <Download size={11} />
                         </button>
                       )}
@@ -266,7 +266,7 @@ function VideoToolsPanel() {
       {/* Stats */}
       <div className='grid grid-cols-4 gap-3'>
         {[
-          { label: 'Videos Created (30d)', value: '84',   color: '#00d9ff' },
+          { label: 'Videos Created (30d)', value: '84',   color: 'var(--cyan)' },
           { label: 'Avg Render Time',       value: '42s',  color: '#10d98a' },
           { label: 'Auto-Captions Added',   value: '71',   color: '#7b93ff' },
           { label: 'Platforms Covered',     value: '4',    color: '#ffb347' },
@@ -288,7 +288,7 @@ function VideoToolsPanel() {
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
               {([['t2v', 'Text-to-Video'], ['edit', 'AI Edit Footage']] as const).map(([k, l]) => (
                 <button key={k} onClick={() => setVideoMode(k)}
-                  className='flex-1 px-2 py-1.5 rounded-lg text-[11px] transition-all'
+                  className='flex-1 px-2 py-1.5 rounded-lg text-[16px] transition-all'
                   style={{ background: videoMode === k ? 'var(--bg-overlay)' : 'transparent', color: videoMode === k ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: videoMode === k ? 500 : 400 }}>
                   {l}
                 </button>
@@ -298,31 +298,31 @@ function VideoToolsPanel() {
             {videoMode === 't2v' ? (
               <div className='flex flex-col gap-3'>
                 <div>
-                  <label className='text-[10px] section-label block mb-1.5'>Script / Prompt</label>
+                  <label className='text-[16px] section-label block mb-1.5'>Script / Prompt</label>
                   <textarea rows={4} value={t2vPrompt} onChange={e => setT2vPrompt(e.target.value)}
                     placeholder='Describe your video: products, mood, messaging…'
-                    className='w-full px-3 py-2 rounded-xl text-xs resize-none'
+                    className='w-full px-3 py-2 rounded-xl text-base resize-none'
                     style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
                 </div>
                 <div className='grid grid-cols-2 gap-2'>
                   <div>
-                    <label className='text-[10px] section-label block mb-1.5'>Platform</label>
+                    <label className='text-[16px] section-label block mb-1.5'>Platform</label>
                     <select value={t2vPlatform} onChange={e => setT2vPlatform(e.target.value)}
-                      className='w-full px-2 py-1.5 rounded-lg text-xs'
+                      className='w-full px-2 py-1.5 rounded-lg text-base'
                       style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
                       {['TikTok', 'YouTube', 'Instagram', 'LinkedIn'].map(p => <option key={p}>{p}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className='text-[10px] section-label block mb-1.5'>Length</label>
+                    <label className='text-[16px] section-label block mb-1.5'>Length</label>
                     <select value={t2vLen} onChange={e => setT2vLen(e.target.value)}
-                      className='w-full px-2 py-1.5 rounded-lg text-xs'
+                      className='w-full px-2 py-1.5 rounded-lg text-base'
                       style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
                       {['0:15', '0:30', '0:60', '2:00', '5:00'].map(l => <option key={l}>{l}</option>)}
                     </select>
                   </div>
                 </div>
-                <label className='flex items-center gap-2 text-xs cursor-pointer' style={{ color: 'var(--text-secondary)' }}>
+                <label className='flex items-center gap-2 text-base cursor-pointer' style={{ color: 'var(--text-secondary)' }}>
                   <Captions size={12} style={{ color: '#7b93ff' }} />
                   Auto-generate captions
                   <input type='checkbox' defaultChecked className='ml-auto' />
@@ -333,8 +333,8 @@ function VideoToolsPanel() {
                 <div className='rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-2 py-8 cursor-pointer hover:bg-white/[0.02] transition-colors'
                   style={{ borderColor: 'var(--border-dim)' }}>
                   <Upload size={18} style={{ color: 'var(--text-muted)' }} />
-                  <div className='text-xs text-center' style={{ color: 'var(--text-secondary)' }}>Upload footage<br /><span style={{ color: '#00d9ff' }}>browse files</span></div>
-                  <div className='text-[10px]' style={{ color: 'var(--text-muted)' }}>MP4, MOV · max 500 MB</div>
+                  <div className='text-base text-center' style={{ color: 'var(--text-secondary)' }}>Upload footage<br /><span style={{ color: 'var(--cyan)' }}>browse files</span></div>
+                  <div className='text-[16px]' style={{ color: 'var(--text-muted)' }}>MP4, MOV · max 500 MB</div>
                 </div>
                 <div className='flex flex-col gap-2'>
                   {[
@@ -343,7 +343,7 @@ function VideoToolsPanel() {
                     { label: 'Remove filler words', checked: false },
                     { label: 'AI scene cut optimization', checked: true },
                   ].map(opt => (
-                    <label key={opt.label} className='flex items-center gap-2 text-xs cursor-pointer' style={{ color: 'var(--text-secondary)' }}>
+                    <label key={opt.label} className='flex items-center gap-2 text-base cursor-pointer' style={{ color: 'var(--text-secondary)' }}>
                       <input type='checkbox' defaultChecked={opt.checked} />
                       {opt.label}
                     </label>
@@ -352,8 +352,8 @@ function VideoToolsPanel() {
               </div>
             )}
 
-            <button onClick={createVideo} className='w-full mt-3 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-2'
-              style={{ background: 'rgba(0,217,255,0.1)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.25)' }}>
+            <button onClick={createVideo} className='w-full mt-3 py-2 rounded-xl text-base font-medium flex items-center justify-center gap-2'
+              style={{ background: 'rgba(0,217,255,0.1)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.25)' }}>
               {videoMode === 't2v' ? <><Wand2 size={12} />Generate Video</> : <><Scissors size={12} />Process Footage</>}
             </button>
           </div>
@@ -364,12 +364,12 @@ function VideoToolsPanel() {
           <div className='px-4 py-3 border-b flex items-center justify-between' style={{ borderColor: 'var(--border-subtle)' }}>
             <span className='section-label'>Recent Videos</span>
             {jobs.filter(j => j.status === 'rendering').length > 0 && (
-              <span className='text-[10px] px-2 py-0.5 rounded-full' style={{ background: 'rgba(0,217,255,.1)', color: '#00d9ff' }}>
+              <span className='text-[16px] px-2 py-0.5 rounded-full' style={{ background: 'rgba(0,217,255,.1)', color: 'var(--cyan)' }}>
                 {jobs.filter(j => j.status === 'rendering').length} rendering
               </span>
             )}
           </div>
-          <table className='w-full text-xs'>
+          <table className='w-full text-base'>
             <thead style={{ background: 'var(--bg-elevated)' }}>
               <tr>
                 {['Title', 'Type', 'Platform', 'Duration', 'Status', ''].map(h => (
@@ -382,7 +382,7 @@ function VideoToolsPanel() {
                 <tr key={job.id} className='border-b hover:bg-white/[0.02] transition-colors' style={{ borderColor: 'var(--border-subtle)' }}>
                   <td className='px-4 py-2.5 font-medium max-w-[160px] truncate' style={{ color: 'var(--text-primary)' }}>{job.title}</td>
                   <td className='px-4 py-2.5'>
-                    <span className='text-[10px] px-1.5 py-0.5 rounded' style={{ background: job.type === 'text_to_video' ? 'rgba(0,217,255,.1)' : 'rgba(123,147,255,.1)', color: job.type === 'text_to_video' ? '#00d9ff' : '#7b93ff' }}>
+                    <span className='text-[16px] px-1.5 py-0.5 rounded' style={{ background: job.type === 'text_to_video' ? 'rgba(0,217,255,.1)' : 'rgba(123,147,255,.1)', color: job.type === 'text_to_video' ? 'var(--cyan)' : '#7b93ff' }}>
                       {job.type === 'text_to_video' ? 'Text→Video' : 'AI Edit'}
                     </span>
                   </td>
@@ -390,10 +390,10 @@ function VideoToolsPanel() {
                   <td className='px-4 py-2.5 font-mono' style={{ color: 'var(--text-muted)' }}>{job.duration}</td>
                   <td className='px-4 py-2.5'>
                     {job.status === 'rendering'
-                      ? <span className='text-[10px] px-1.5 py-0.5 rounded' style={{ background: 'rgba(255,179,71,.1)', color: '#ffb347' }}>Rendering</span>
+                      ? <span className='text-[16px] px-1.5 py-0.5 rounded' style={{ background: 'rgba(255,179,71,.1)', color: '#ffb347' }}>Rendering</span>
                       : job.status === 'done'
-                        ? <span className='text-[10px] px-1.5 py-0.5 rounded' style={{ background: 'rgba(16,217,138,.1)', color: '#10d98a' }}>Done</span>
-                        : <span className='text-[10px] px-1.5 py-0.5 rounded' style={{ background: 'rgba(123,147,255,.1)', color: '#7b93ff' }}>Draft</span>
+                        ? <span className='text-[16px] px-1.5 py-0.5 rounded' style={{ background: 'rgba(16,217,138,.1)', color: '#10d98a' }}>Done</span>
+                        : <span className='text-[16px] px-1.5 py-0.5 rounded' style={{ background: 'rgba(123,147,255,.1)', color: '#7b93ff' }}>Draft</span>
                     }
                   </td>
                   <td className='px-4 py-2.5'>
@@ -402,7 +402,7 @@ function VideoToolsPanel() {
                         <button
                           onClick={() => { setPlayingId(job.id); setTimeout(() => setPlayingId(null), 1500); }}
                           className='p-1 rounded hover:bg-white/[0.05]'
-                          style={{ color: playingId === job.id ? '#10d98a' : '#00d9ff' }}>
+                          style={{ color: playingId === job.id ? '#10d98a' : 'var(--cyan)' }}>
                           <Play size={11} />
                         </button>
                         <button
@@ -440,7 +440,7 @@ export default function ContentPage() {
     {
       label: 'Creatives Generated (30d)',
       value: CONTENT_STATS.creativesGenerated30d.toLocaleString(),
-      color: '#00d9ff',
+      color: 'var(--cyan)',
       delta: 12.4,
       deltaLabel: 'vs prior 30d',
     },
@@ -497,7 +497,7 @@ export default function ContentPage() {
                     {card.value}
                   </div>
                   <div
-                    className='flex items-center gap-1 text-[10px] font-mono'
+                    className='flex items-center gap-1 text-[16px] font-mono'
                     style={{ color: positive ? '#10d98a' : '#ff4444' }}
                   >
                     {positive ? <TrendingUp size={9} /> : <TrendingDown size={9} />}
@@ -527,7 +527,7 @@ export default function ContentPage() {
                 <button
                   key={t.key}
                   onClick={() => setTab(t.key)}
-                  className='flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium transition-all whitespace-nowrap shrink-0'
+                  className='flex items-center gap-1.5 px-3.5 py-2 text-base font-medium transition-all whitespace-nowrap shrink-0'
                   style={{
                     borderRadius: 7,
                     background: active ? 'var(--bg-overlay)' : 'transparent',
@@ -537,7 +537,7 @@ export default function ContentPage() {
                     cursor: 'pointer',
                   }}
                 >
-                  <Icon size={12} style={{ color: active ? '#00d9ff' : 'var(--text-muted)' }} />
+                  <Icon size={12} style={{ color: active ? 'var(--cyan)' : 'var(--text-muted)' }} />
                   {t.label}
                 </button>
               );

@@ -67,15 +67,15 @@ function ConnectionRow({ connKey, connection, label, icon, placeholder, onChange
   return (
     <div className='rounded-lg p-3' style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
       <div className='flex items-center gap-2.5'>
-        <span className='text-sm' style={{ width: 18, textAlign: 'center' }}>{icon}</span>
+        <span className='text-base' style={{ width: 18, textAlign: 'center' }}>{icon}</span>
         <div className='flex-1 min-w-0'>
-          <div className='text-xs font-medium' style={{ color: 'var(--text-primary)' }}>{label}</div>
+          <div className='text-base font-medium' style={{ color: 'var(--text-primary)' }}>{label}</div>
           {isAttached && (
-            <div className='text-[10px] font-mono mt-0.5' style={{ color: 'var(--text-muted)' }}>{connection.accountId}</div>
+            <div className='text-[16px] font-mono mt-0.5' style={{ color: 'var(--text-muted)' }}>{connection.accountId}</div>
           )}
         </div>
         <span
-          className='text-[10px] px-2 py-0.5 rounded-full font-mono flex-shrink-0'
+          className='text-[16px] px-2 py-0.5 rounded-full font-mono flex-shrink-0'
           style={{ background: style.bg, color: style.color, border: `1px solid ${style.border}` }}
         >
           {style.label}
@@ -89,14 +89,14 @@ function ConnectionRow({ connKey, connection, label, icon, placeholder, onChange
             placeholder={placeholder}
             value={draftId}
             onChange={e => setDraftId(e.target.value)}
-            className='flex-1 text-[11px] px-2.5 py-1.5 rounded-lg outline-none'
+            className='flex-1 text-[16px] px-2.5 py-1.5 rounded-lg outline-none'
             style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)', fontFamily: 'DM Mono' }}
           />
           <button
             onClick={handleConnect}
             disabled={connecting || !draftId.trim()}
-            className='flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all disabled:opacity-50 flex-shrink-0'
-            style={{ background: 'rgba(0,217,255,0.1)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.2)' }}
+            className='flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[16px] font-medium transition-all disabled:opacity-50 flex-shrink-0'
+            style={{ background: 'rgba(0,217,255,0.1)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}
           >
             {connecting ? <><Loader2 size={11} className='animate-spin' />Connecting…</> : <><Plug size={11} />Connect</>}
           </button>
@@ -106,14 +106,14 @@ function ConnectionRow({ connKey, connection, label, icon, placeholder, onChange
           <button
             onClick={handleTest}
             disabled={testing}
-            className='flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all disabled:opacity-60'
-            style={{ background: 'rgba(0,217,255,0.08)', color: '#00d9ff', border: '1px solid rgba(0,217,255,0.18)' }}
+            className='flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[16px] font-medium transition-all disabled:opacity-60'
+            style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.18)' }}
           >
             {testing ? <><Loader2 size={11} className='animate-spin' />Testing…</> : 'Test Connection'}
           </button>
           <button
             onClick={handleDisconnect}
-            className='flex items-center gap-1 ml-auto px-2.5 py-1.5 rounded-lg text-[11px] transition-all'
+            className='flex items-center gap-1 ml-auto px-2.5 py-1.5 rounded-lg text-[16px] transition-all'
             style={{ background: 'rgba(var(--overlay-rgb),0.04)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
           >
             <Unplug size={11} />Disconnect

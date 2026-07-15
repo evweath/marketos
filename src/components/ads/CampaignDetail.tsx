@@ -57,24 +57,24 @@ export default function CampaignDetail({ campaign: c, onClose }: Props) {
         <div className='min-w-0 flex-1'>
           <div className='flex items-center gap-2 mb-1.5 flex-wrap'>
             {/* Platform badge */}
-            <div className='flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold'
+            <div className='flex items-center gap-1 px-2 py-0.5 rounded text-[16px] font-mono font-bold'
               style={{ background: pc.color + '20', color: pc.color, border: `1px solid ${pc.color}30` }}>
               <span>{pc.icon}</span>
               <span>{pc.label}</span>
             </div>
             {/* Status badge */}
-            <span className='text-[9px] font-mono font-bold px-1.5 py-0.5 rounded'
+            <span className='text-[16px] font-mono font-bold px-1.5 py-0.5 rounded'
               style={{ background: sc.bg, color: sc.color }}>
               {sc.label}
             </span>
-            <span className='text-[10px] font-mono' style={{ color: 'var(--text-muted)' }}>{c.store}</span>
+            <span className='text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>{c.store}</span>
           </div>
-          <h3 className='text-sm font-bold leading-snug' style={{ color: 'var(--text-primary)' }}>{c.name}</h3>
+          <h3 className='text-base font-bold leading-snug' style={{ color: 'var(--text-primary)' }}>{c.name}</h3>
         </div>
         <div className='flex items-center gap-1.5 ml-2 shrink-0'>
           <button onClick={togglePause}
             title={isPaused ? 'Resume campaign' : 'Pause campaign'}
-            className='p-1.5 rounded-lg text-xs transition-all'
+            className='p-1.5 rounded-lg text-base transition-all'
             style={isPaused
               ? { background: 'rgba(16,217,138,0.1)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.2)' }
               : { background: 'rgba(255,179,71,0.1)', color: '#ffb347', border: '1px solid rgba(255,179,71,0.2)' }}>
@@ -101,11 +101,11 @@ export default function CampaignDetail({ campaign: c, onClose }: Props) {
                   <span className='section-label'>{m.label}</span>
                   <Icon size={10} style={{ color: 'var(--text-muted)' }} />
                 </div>
-                <div className='font-mono text-sm font-bold tabular-nums' style={{ color: m.color as string }}>
+                <div className='font-mono text-base font-bold tabular-nums' style={{ color: m.color as string }}>
                   {m.value}
                 </div>
                 {m.delta !== undefined && (
-                  <div className='flex items-center gap-0.5 text-[10px] font-mono'
+                  <div className='flex items-center gap-0.5 text-[16px] font-mono'
                     style={{ color: m.delta >= 0 ? '#10d98a' : '#ff4444' }}>
                     {m.delta >= 0 ? <TrendingUp size={9} /> : <TrendingDown size={9} />}
                     {m.delta >= 0 ? '+' : ''}{m.delta.toFixed(1)}%
@@ -120,7 +120,7 @@ export default function CampaignDetail({ campaign: c, onClose }: Props) {
         <div>
           <div className='section-label mb-2'>Budget & Pacing</div>
           <div className='rounded-xl p-3' style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-            <div className='flex items-center justify-between mb-2 text-xs'>
+            <div className='flex items-center justify-between mb-2 text-base'>
               <span style={{ color: 'var(--text-secondary)' }}>Spend to date</span>
               <span className='font-mono font-semibold' style={{ color: 'var(--text-primary)' }}>
                 {c$(c.spendToDate)} / {c$(c.totalBudget)}
@@ -134,7 +134,7 @@ export default function CampaignDetail({ campaign: c, onClose }: Props) {
                   background: `linear-gradient(90deg, ${pacingBarColor}cc, ${pacingBarColor})`,
                 }} />
             </div>
-            <div className='flex items-center justify-between text-[10px] font-mono'>
+            <div className='flex items-center justify-between text-[16px] font-mono'>
               <span style={{ color: 'var(--text-muted)' }}>Daily: {c$(c.dailyBudget)}</span>
               <span style={{ color: pacingBarColor }}>Pacing: {c.budgetPacing}%</span>
             </div>
@@ -156,14 +156,14 @@ export default function CampaignDetail({ campaign: c, onClose }: Props) {
                     style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                     <div className='flex items-start justify-between gap-2 mb-2'>
                       <div className='min-w-0'>
-                        <div className='text-xs font-semibold truncate' style={{ color: 'var(--text-primary)' }}>
+                        <div className='text-base font-semibold truncate' style={{ color: 'var(--text-primary)' }}>
                           {as.name}
                         </div>
-                        <div className='text-[10px] font-mono truncate' style={{ color: 'var(--text-muted)' }}>
+                        <div className='text-[16px] font-mono truncate' style={{ color: 'var(--text-muted)' }}>
                           {as.audience}
                         </div>
                       </div>
-                      <span className='text-[9px] font-mono font-bold px-1.5 py-0.5 rounded shrink-0'
+                      <span className='text-[16px] font-mono font-bold px-1.5 py-0.5 rounded shrink-0'
                         style={{ background: asc.bg, color: asc.color }}>{asc.label}</span>
                     </div>
                     <div className='grid grid-cols-4 gap-1.5'>
@@ -175,11 +175,11 @@ export default function CampaignDetail({ campaign: c, onClose }: Props) {
                       ].map(m => (
                         <div key={m.label} className='text-center rounded-lg py-1.5'
                           style={{ background: 'var(--bg-overlay)' }}>
-                          <div className='font-mono text-[11px] font-semibold'
+                          <div className='font-mono text-[16px] font-semibold'
                             style={{ color: m.highlight ? '#10d98a' : m.warn ? '#ff4444' : 'var(--text-primary)' }}>
                             {m.value}
                           </div>
-                          <div className='section-label' style={{ fontSize: 9 }}>{m.label}</div>
+                          <div className='section-label' style={{ fontSize: 16 }}>{m.label}</div>
                         </div>
                       ))}
                     </div>
@@ -210,26 +210,26 @@ export default function CampaignDetail({ campaign: c, onClose }: Props) {
                     }}>
                     <div className='flex items-center justify-between mb-2'>
                       <div className='flex items-center gap-2'>
-                        <span className='text-xs font-semibold'
+                        <span className='text-base font-semibold'
                           style={{ color: isLoser ? 'var(--text-muted)' : 'var(--text-primary)', textDecoration: isLoser ? 'line-through' : 'none' }}>
                           {cr.name}
                         </span>
                         {cr.isControl && (
-                          <span className='text-[9px] font-mono px-1.5 py-0.5 rounded'
+                          <span className='text-[16px] font-mono px-1.5 py-0.5 rounded'
                             style={{ background: 'rgba(123,147,255,0.15)', color: '#7b93ff' }}>
                             CONTROL
                           </span>
                         )}
                         {isWinner && (
-                          <span className='text-[9px] font-mono px-1.5 py-0.5 rounded font-bold'
+                          <span className='text-[16px] font-mono px-1.5 py-0.5 rounded font-bold'
                             style={{ background: 'rgba(255,215,0,0.15)', color: '#ffd700', border: '1px solid rgba(255,215,0,0.25)' }}>
                             WINNER
                           </span>
                         )}
                       </div>
                       <div className='flex items-center gap-1.5'>
-                        <span className='text-[9px] font-mono' style={{ color: 'var(--text-muted)' }}>{cr.daysRunning}d</span>
-                        <span className='text-[9px] font-mono px-1.5 py-0.5 rounded font-bold'
+                        <span className='text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>{cr.daysRunning}d</span>
+                        <span className='text-[16px] font-mono px-1.5 py-0.5 rounded font-bold'
                           style={{ background: crColor + '18', color: crColor }}>
                           {cr.status.toUpperCase()}
                         </span>
@@ -243,11 +243,11 @@ export default function CampaignDetail({ campaign: c, onClose }: Props) {
                         { label: 'Conv', value: String(cr.conversions),                         good: false        },
                       ].map(m => (
                         <div key={m.label} className='text-center rounded py-1' style={{ background: 'var(--bg-overlay)' }}>
-                          <div className='font-mono text-[11px] font-semibold'
+                          <div className='font-mono text-[16px] font-semibold'
                             style={{ color: m.good ? '#10d98a' : 'var(--text-primary)' }}>
                             {m.value}
                           </div>
-                          <div className='section-label' style={{ fontSize: 8 }}>{m.label}</div>
+                          <div className='section-label' style={{ fontSize: 16 }}>{m.label}</div>
                         </div>
                       ))}
                     </div>
@@ -260,7 +260,7 @@ export default function CampaignDetail({ campaign: c, onClose }: Props) {
 
         {/* Ad Frequency warning */}
         {c.frequency && (
-          <div className='rounded-xl p-3 text-xs'
+          <div className='rounded-xl p-3 text-base'
             style={{
               background: c.frequency > 4.5 ? 'rgba(255,68,68,0.06)' : 'var(--bg-elevated)',
               border: `1px solid ${c.frequency > 4.5 ? 'rgba(255,68,68,0.2)' : 'var(--border-subtle)'}`,
@@ -273,7 +273,7 @@ export default function CampaignDetail({ campaign: c, onClose }: Props) {
               </span>
             </div>
             {c.frequency > 4.5 && (
-              <div className='mt-1.5 text-[11px]' style={{ color: '#ff4444' }}>
+              <div className='mt-1.5 text-[16px]' style={{ color: '#ff4444' }}>
                 High frequency — creative fatigue likely. Refresh or expand audience.
               </div>
             )}
@@ -282,7 +282,7 @@ export default function CampaignDetail({ campaign: c, onClose }: Props) {
 
         {/* Quality Score */}
         {c.qualityScore && (
-          <div className='rounded-xl p-3 text-xs'
+          <div className='rounded-xl p-3 text-base'
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
             <div className='flex items-center justify-between mb-2'>
               <span style={{ color: 'var(--text-secondary)' }}>Google Quality Score</span>

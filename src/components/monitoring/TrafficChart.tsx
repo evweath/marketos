@@ -21,7 +21,7 @@ interface TooltipProps {
 const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className='glass-card-elevated px-3 py-2 text-xs' style={{ border: '1px solid var(--border-dim)' }}>
+    <div className='glass-card-elevated px-3 py-2 text-base' style={{ border: '1px solid var(--border-dim)' }}>
       <div className='font-mono font-medium mb-1' style={{ color: 'var(--text-primary)' }}>{label}</div>
       {payload.map(p => (
         <div key={p.dataKey} className='flex items-center gap-2'>
@@ -47,15 +47,15 @@ export default function TrafficChart({ traffic, storeColor }: Props) {
             <span className='font-mono text-xl font-bold stat-count' style={{ color: 'var(--text-primary)' }}>
               {traffic.sessionsToday.toLocaleString()}
             </span>
-            <span className='text-xs' style={{ color: 'var(--text-muted)' }}>sessions today</span>
-            <span className='text-xs font-mono flex items-center gap-0.5'
+            <span className='text-base' style={{ color: 'var(--text-muted)' }}>sessions today</span>
+            <span className='text-base font-mono flex items-center gap-0.5'
               style={{ color: traffic.sessionsDelta >= 0 ? '#10d98a' : '#ff4444' }}>
               {traffic.sessionsDelta >= 0 ? '▲' : '▼'} {Math.abs(traffic.sessionsDelta)}% vs yesterday
             </span>
           </div>
         </div>
 
-        <div className='flex items-center gap-4 text-xs'>
+        <div className='flex items-center gap-4 text-base'>
           <div className='text-right'>
             <div className='section-label mb-0.5'>Bounce Rate</div>
             <div className='font-mono font-semibold'
@@ -66,11 +66,11 @@ export default function TrafficChart({ traffic, storeColor }: Props) {
           <div className='flex flex-col gap-1' style={{ color: 'var(--text-secondary)' }}>
             <div className='flex items-center gap-1.5'>
               <Monitor size={11} />
-              <span className='font-mono text-[11px]'>{traffic.desktopPercent}% desktop</span>
+              <span className='font-mono text-[16px]'>{traffic.desktopPercent}% desktop</span>
             </div>
             <div className='flex items-center gap-1.5'>
               <Smartphone size={11} />
-              <span className='font-mono text-[11px]'>{traffic.mobilePercent}% mobile</span>
+              <span className='font-mono text-[16px]'>{traffic.mobilePercent}% mobile</span>
             </div>
           </div>
         </div>
@@ -89,7 +89,7 @@ export default function TrafficChart({ traffic, storeColor }: Props) {
             <CartesianGrid strokeDasharray='3 6' stroke='rgba(var(--overlay-rgb),0.04)' vertical={false} />
             <XAxis
               dataKey='date'
-              tick={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'DM Mono, monospace' }}
+              tick={{ fill: 'var(--text-muted)', fontSize: 16, fontFamily: 'DM Mono, monospace' }}
               axisLine={false}
               tickLine={false}
             />
@@ -117,14 +117,14 @@ export default function TrafficChart({ traffic, storeColor }: Props) {
           {traffic.sources.map(src => (
             <div key={src.source} className='flex items-center gap-2.5'>
               <div className='w-2 h-2 rounded-full shrink-0' style={{ background: src.color }} />
-              <span className='text-xs w-20 shrink-0 truncate' style={{ color: 'var(--text-secondary)' }}>
+              <span className='text-base w-20 shrink-0 truncate' style={{ color: 'var(--text-secondary)' }}>
                 {src.source}
               </span>
               <div className='flex-1 h-1.5 rounded-full overflow-hidden' style={{ background: 'var(--bg-overlay)' }}>
                 <div className='h-full rounded-full transition-all duration-500'
                   style={{ width: `${src.value}%`, background: src.color }} />
               </div>
-              <span className='font-mono text-[11px] w-8 text-right shrink-0' style={{ color: 'var(--text-primary)' }}>
+              <span className='font-mono text-[16px] w-8 text-right shrink-0' style={{ color: 'var(--text-primary)' }}>
                 {src.value}%
               </span>
             </div>
