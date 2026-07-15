@@ -7,9 +7,9 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { usePersistentState } from '@/lib/usePersistentState';
-import { FIRED_ALERTS, CATEGORY_CONFIG } from '@/lib/alertData';
+import { CATEGORY_CONFIG } from '@/lib/alertData';
 import type { FiredAlert, AlertSeverity, AlertStatus, AlertCategory } from '@/lib/alertData';
-import { STORES } from '@/lib/mockData';
+import { useStores } from '@/lib/storeScope';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -60,10 +60,11 @@ function AlertDetail({ alert, onClose, onUpdateStatus }: {
   onClose: () => void;
   onUpdateStatus: (status: AlertStatus) => void;
 }) {
+  const [stores] = useStores();
   const sc = SEV_CONFIG[alert.severity];
   const stc = STATUS_CONFIG[alert.status];
   const cat = CATEGORY_CONFIG[alert.category];
-  const store = alert.storeId ? STORES.find(s => s.id === alert.storeId) : null;
+  const store = alert.storeId ? stores.find(s => s.id === alert.storeId) : null;
 
   const timeline = [
     { Icon: Bell,        label: 'Alert fired',                                             time: alert.firedAt,        color: sc.color    },
@@ -214,6 +215,7 @@ function AlertDetail({ alert, onClose, onUpdateStatus }: {
 // ─── Feed Row ─────────────────────────────────────────────────────────────────
 
 function AlertRow({ alert, selected, onClick }: { alert: FiredAlert; selected: boolean; onClick: () => void }) {
+  const [stores] = useStores();
   const sc = SEV_CONFIG[alert.severity];
   const stc = STATUS_CONFIG[alert.status];
   const cat = CATEGORY_CONFIG[alert.category];
@@ -274,7 +276,7 @@ function AlertRow({ alert, selected, onClick }: { alert: FiredAlert; selected: b
             </span>
             {alert.storeId && (
               <span className="text-[16px] font-mono ml-auto" style={{ color: 'var(--text-muted)' }}>
-                {STORES.find(s => s.id === alert.storeId)?.domain}
+                {stores.find(s => s.id === alert.storeId)?.domain}
               </span>
             )}
           </div>
@@ -304,7 +306,7 @@ const SEV_FILTERS: { key: AlertSeverity | 'all'; label: string; color?: string }
 export default function AlertFeed() {
   const [statusFilter, setStatusFilter] = useState<AlertStatus | 'all'>('all');
   const [sevFilter, setSevFilter] = useState<AlertSeverity | 'all'>('all');
-  const [allAlerts, setAllAlerts] = usePersistentState<FiredAlert[]>('alerts.list', FIRED_ALERTS);
+  const [allAlerts, setAllAlerts] = usePersistentState<FiredAlert[]>('alerts.list', []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const selected = selectedId ? allAlerts.find(a => a.id === selectedId) ?? null : null;

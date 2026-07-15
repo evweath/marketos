@@ -1,55 +1,71 @@
 import type {
-  Store, TrafficMetrics, ConversionMetrics,
-  AbandonedCart, Transaction, PageChange, Alert, SeoSnapshot
+  Store, StoreStatus, TrafficMetrics, ConversionMetrics,
+  AbandonedCart, Transaction, PageChange, SeoSnapshot
 } from '@/types';
+import { usePersistentState } from './usePersistentState';
+import { useStores } from './storeScope';
 
-// ─── Stores ──────────────────────────────────────────────────────────────────
+// ─── Store health (monitoring) ─────────────────────────────────────────────
+//
+// Store *identity* (id/name/domain/color) lives in storeScope.ts, shared with
+// Settings and every store-scoped page. Store *health* (uptime, response
+// time, SSL, load speed) is monitoring-specific and starts unknown for every
+// store until a health check actually runs — merged together for consumers
+// via useMonitoringStores() below.
 
-export const STORES: Store[] = [
-  {
-    id: 'donut-equipment',
-    name: 'Donut Equipment',
-    domain: 'donut-equipment.com',
-    url: 'https://donut-equipment.com',
-    color: '#00d9ff',
-    status: 'online',
-    responseTime: 312,
-    uptime7d: 99.94,
-    sslDaysLeft: 87,
-    loadSpeed: 1840,
+export interface StoreHealth {
+  status: StoreStatus;
+  responseTime: number;   // ms
+  uptime7d: number;       // percentage 0-100
+  sslDaysLeft: number;
+  loadSpeed: number;      // ms
+  lastChecked: string | null;
+}
+
+export const DEFAULT_STORE_HEALTH: StoreHealth = {
+  status: 'pending', responseTime: 0, uptime7d: 0, sslDaysLeft: 0, loadSpeed: 0, lastChecked: null,
+};
+
+export const SAMPLE_STORE_HEALTH: Record<string, StoreHealth> = {
+  'donut-equipment': {
+    status: 'online', responseTime: 312, uptime7d: 99.94, sslDaysLeft: 87, loadSpeed: 1840,
     lastChecked: new Date(Date.now() - 2 * 60000).toISOString(),
   },
-  {
-    id: 'donut-supplies',
-    name: 'Donut Supplies',
-    domain: 'donut-supplies.com',
-    url: 'https://donut-supplies.com',
-    color: '#ffb347',
-    status: 'degraded',
-    responseTime: 1247,
-    uptime7d: 98.71,
-    sslDaysLeft: 14,
-    loadSpeed: 3210,
+  'donut-supplies': {
+    status: 'degraded', responseTime: 1247, uptime7d: 98.71, sslDaysLeft: 14, loadSpeed: 3210,
     lastChecked: new Date(Date.now() - 1 * 60000).toISOString(),
   },
-  {
-    id: 'bakery-wholesalers',
-    name: 'Bakery Wholesalers',
-    domain: 'bakerywholesalers.com',
-    url: 'https://bakerywholesalers.com',
-    color: '#10d98a',
-    status: 'online',
-    responseTime: 284,
-    uptime7d: 100,
-    sslDaysLeft: 234,
-    loadSpeed: 1560,
+  'bakery-wholesalers': {
+    status: 'online', responseTime: 284, uptime7d: 100, sslDaysLeft: 234, loadSpeed: 1560,
     lastChecked: new Date(Date.now() - 3 * 60000).toISOString(),
   },
-];
+};
+
+/** Live store list (identity + connections) merged with persisted health data — the single source Monitoring/Alerts read store info from. */
+export function useMonitoringStores(): Store[] {
+  const [stores] = useStores();
+  const [health] = usePersistentState<Record<string, StoreHealth>>('monitoring.storeHealth', {});
+  return stores.map(s => ({
+    id: s.id,
+    name: s.name,
+    domain: s.domain,
+    url: `https://${s.domain}`,
+    color: s.color,
+    ...(health[s.id] ?? DEFAULT_STORE_HEALTH),
+  }));
+}
 
 // ─── Traffic ─────────────────────────────────────────────────────────────────
+//
+// SAMPLE_* below seeds Settings → Data → "Load Sample Data"; the app's live
+// state (read via usePersistentState('monitoring.traffic', {})) starts empty.
 
-export const TRAFFIC: Record<string, TrafficMetrics> = {
+export const DEFAULT_TRAFFIC: TrafficMetrics = {
+  storeId: '', currentSessions: 0, sessionsToday: 0, sessionsDelta: 0, bounceRate: 0,
+  avgSessionDuration: 0, mobilePercent: 0, desktopPercent: 0, daily: [], sources: [],
+};
+
+export const SAMPLE_TRAFFIC: Record<string, TrafficMetrics> = {
   'donut-equipment': {
     storeId: 'donut-equipment',
     currentSessions: 47,
@@ -132,7 +148,11 @@ export const TRAFFIC: Record<string, TrafficMetrics> = {
 
 // ─── Conversion Funnels ──────────────────────────────────────────────────────
 
-export const CONVERSIONS: Record<string, ConversionMetrics> = {
+export const DEFAULT_CONVERSIONS: ConversionMetrics = {
+  storeId: '', funnel: [], overallRate: 0, avgOrderValue: 0, revenueToday: 0, ordersToday: 0,
+};
+
+export const SAMPLE_CONVERSIONS: Record<string, ConversionMetrics> = {
   'donut-equipment': {
     storeId: 'donut-equipment',
     funnel: [
@@ -179,7 +199,7 @@ export const CONVERSIONS: Record<string, ConversionMetrics> = {
 
 // ─── Abandoned Carts ─────────────────────────────────────────────────────────
 
-export const ABANDONED_CARTS: AbandonedCart[] = [
+export const SAMPLE_ABANDONED_CARTS: AbandonedCart[] = [
   {
     id: 'ac-001',
     storeId: 'donut-equipment',
@@ -260,7 +280,7 @@ export const ABANDONED_CARTS: AbandonedCart[] = [
 
 // ─── Recent Transactions ─────────────────────────────────────────────────────
 
-export const TRANSACTIONS: Transaction[] = [
+export const SAMPLE_TRANSACTIONS: Transaction[] = [
   { id: 't-001', storeId: 'donut-equipment',  orderNumber: '#DE-8821', customerName: 'Riverside Donuts LLC',      amount: 4720.00, itemCount: 2, channel: 'paid-google', minutesAgo: 3  },
   { id: 't-002', storeId: 'bakery-wholesalers', orderNumber: '#BW-3347', customerName: 'Golden Grain Bakeries',   amount: 8940.00, itemCount: 7, channel: 'email',       minutesAgo: 7  },
   { id: 't-003', storeId: 'donut-supplies',   orderNumber: '#DS-2209', customerName: 'Sweet Rings Co.',           amount: 612.40,  itemCount: 5, channel: 'organic',     minutesAgo: 12 },
@@ -273,7 +293,7 @@ export const TRANSACTIONS: Transaction[] = [
 
 // ─── Page Change Log ─────────────────────────────────────────────────────────
 
-export const PAGE_CHANGES: PageChange[] = [
+export const SAMPLE_PAGE_CHANGES: PageChange[] = [
   {
     id: 'pc-001',
     storeId: 'donut-supplies',
@@ -336,59 +356,11 @@ export const PAGE_CHANGES: PageChange[] = [
   },
 ];
 
-// ─── Active Alerts ────────────────────────────────────────────────────────────
-
-export const ALERTS: Alert[] = [
-  {
-    id: 'a-001',
-    storeId: 'donut-supplies',
-    severity: 'critical',
-    title: 'SSL Certificate Expiring Soon',
-    message: 'donut-supplies.com SSL certificate expires in 14 days. Renew immediately to prevent browser warnings.',
-    createdAt: new Date(Date.now() - 2 * 3600000).toISOString(),
-    acknowledged: false,
-  },
-  {
-    id: 'a-002',
-    storeId: 'donut-supplies',
-    severity: 'warning',
-    title: 'High Response Time Detected',
-    message: 'donut-supplies.com response time averaging 1,247ms (threshold: 800ms). Check server load.',
-    createdAt: new Date(Date.now() - 45 * 60000).toISOString(),
-    acknowledged: false,
-  },
-  {
-    id: 'a-003',
-    storeId: 'donut-supplies',
-    severity: 'critical',
-    title: 'Product Out of Stock',
-    message: 'Cake Donut Mix (Bulk 50lb) went out of stock. High-demand item — reorder recommended.',
-    createdAt: new Date(Date.now() - 112 * 60000).toISOString(),
-    acknowledged: false,
-  },
-  {
-    id: 'a-004',
-    storeId: 'donut-equipment',
-    severity: 'info',
-    title: 'New Product Detected',
-    message: 'AutoFryer XL 40L added to /collections/fryers on donut-equipment.com.',
-    createdAt: new Date(Date.now() - 37 * 60000).toISOString(),
-    acknowledged: true,
-  },
-  {
-    id: 'a-005',
-    storeId: null,
-    severity: 'warning',
-    title: 'Price Increases Detected',
-    message: '2 price increases detected across donut-supplies.com and bakerywholesalers.com in the last 6 hours.',
-    createdAt: new Date(Date.now() - 6 * 3600000).toISOString(),
-    acknowledged: false,
-  },
-];
-
 // ─── SEO Snapshots ────────────────────────────────────────────────────────────
 
-export const SEO_SNAPSHOTS: Record<string, SeoSnapshot> = {
+export const DEFAULT_SEO_SNAPSHOT = (storeId: string): SeoSnapshot => ({ storeId, metrics: [] });
+
+export const SAMPLE_SEO_SNAPSHOTS: Record<string, SeoSnapshot> = {
   'donut-equipment': {
     storeId: 'donut-equipment',
     metrics: [
@@ -438,6 +410,6 @@ export function formatCurrency(value: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
 }
 
-export function getStoreById(id: string): Store | undefined {
-  return STORES.find(s => s.id === id);
+export function getStoreById(stores: Store[], id: string): Store | undefined {
+  return stores.find(s => s.id === id);
 }

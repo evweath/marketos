@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { Alert } from '@/types';
-import { formatMinutesAgo, getStoreById } from '@/lib/mockData';
+import { formatMinutesAgo, useMonitoringStores } from '@/lib/mockData';
 import { X, AlertTriangle, Info, AlertCircle } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -56,6 +56,7 @@ function timeAgo(iso: string): string {
 }
 
 export default function AlertBanner({ alerts }: Props) {
+  const stores = useMonitoringStores();
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const active = alerts.filter(a => !a.acknowledged && !dismissed.has(a.id));
 
@@ -74,7 +75,7 @@ export default function AlertBanner({ alerts }: Props) {
       {sorted.map(alert => {
         const sc = SEVERITY_CONFIG[alert.severity];
         const Icon = sc.Icon;
-        const store = alert.storeId ? getStoreById(alert.storeId) : null;
+        const store = alert.storeId ? stores.find(s => s.id === alert.storeId) : null;
 
         return (
           <div key={alert.id}

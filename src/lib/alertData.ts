@@ -64,14 +64,14 @@ export interface FiredAlert {
   actionTaken?: string;
 }
 
+// Identity/config only — whether a channel is enabled, its destination, and
+// its last test result are per-deployment state, not structural data, so
+// they live in persisted state (see DeliverySettings.tsx) rather than here.
 export interface DeliveryChannelConfig {
   channel: DeliveryChannel;
   label: string;
   icon: string;
   color: string;
-  enabled: boolean;
-  destination: string;         // email address, phone, webhook URL, etc.
-  testStatus?: 'ok' | 'error' | 'untested';
 }
 
 export interface DigestConfig {
@@ -123,8 +123,12 @@ function daysAgo(n: number): string {
 }
 
 // ─── Alert Rules ──────────────────────────────────────────────────────────────
+//
+// SAMPLE_* arrays below are not the app's live data — the app boots empty
+// (see src/lib/sampleDataRegistry.ts). They seed Settings → Data → "Load
+// Sample Data" for demoing/verifying the alert system with realistic content.
 
-export const ALERT_RULES: AlertRule[] = [
+export const SAMPLE_ALERT_RULES: AlertRule[] = [
   // Budget
   {
     id: 'rule-001', name: 'Daily Budget Overage (Any Channel)', category: 'budget', enabled: true, severity: 'critical',
@@ -281,7 +285,7 @@ export const ALERT_RULES: AlertRule[] = [
 
 // ─── Fired Alert History ──────────────────────────────────────────────────────
 
-export const FIRED_ALERTS: FiredAlert[] = [
+export const SAMPLE_FIRED_ALERTS: FiredAlert[] = [
   // Active / unacknowledged
   {
     id: 'fa-001', ruleId: 'rule-017', ruleName: 'SSL Certificate — 14-Day Critical',
@@ -412,18 +416,19 @@ export const FIRED_ALERTS: FiredAlert[] = [
 
 // ─── Delivery Channel Config ──────────────────────────────────────────────────
 
-export const DELIVERY_CHANNELS: DeliveryChannelConfig[] = [
-  { channel: 'email',  label: 'Email',      icon: '✉',  color: '#ffb347', enabled: true,  destination: 'marketing@donut-equipment.com', testStatus: 'ok'       },
-  { channel: 'sms',    label: 'SMS',        icon: '📱', color: '#10d98a', enabled: true,  destination: '+1 (918) 555-0142',              testStatus: 'ok'       },
-  { channel: 'slack',  label: 'Slack',      icon: '💬', color: '#4A154B', enabled: true,  destination: '#marketing-alerts',              testStatus: 'ok'       },
-  { channel: 'teams',  label: 'MS Teams',   icon: '🔷', color: '#5b5fc7', enabled: true,  destination: 'MarketOS Alerts webhook',        testStatus: 'ok'       },
-  { channel: 'push',   label: 'Push / App', icon: '🔔', color: '#00d9ff', enabled: false, destination: 'Not configured',                testStatus: 'untested' },
+export const DELIVERY_CHANNEL_LIST: DeliveryChannelConfig[] = [
+  { channel: 'email',  label: 'Email',      icon: '✉',  color: '#ffb347' },
+  { channel: 'sms',    label: 'SMS',        icon: '📱', color: '#10d98a' },
+  { channel: 'slack',  label: 'Slack',      icon: '💬', color: '#4A154B' },
+  { channel: 'teams',  label: 'MS Teams',   icon: '🔷', color: '#5b5fc7' },
+  { channel: 'push',   label: 'Push / App', icon: '🔔', color: '#00d9ff' },
 ];
 
 // ─── Quiet Hours Config ───────────────────────────────────────────────────────
+// Off by default — a real deployment opts in and picks its own hours.
 
 export const QUIET_HOURS: QuietHoursConfig = {
-  enabled: true,
+  enabled: false,
   start: '22:00',
   end: '07:00',
   timezone: 'America/Chicago',
@@ -432,9 +437,10 @@ export const QUIET_HOURS: QuietHoursConfig = {
 };
 
 // ─── Digest Config ────────────────────────────────────────────────────────────
+// Off by default — same reasoning as Quiet Hours above.
 
 export const DIGEST_CONFIG: DigestConfig = {
-  enabled: true,
+  enabled: false,
   frequency: 'daily',
   sendAt: '08:00',
   channels: ['email', 'slack'],
@@ -442,17 +448,21 @@ export const DIGEST_CONFIG: DigestConfig = {
 };
 
 // ─── Computed Stats ───────────────────────────────────────────────────────────
+// Computed from whatever rules/alerts currently exist (empty by default, or
+// seeded via Load Sample Data) rather than hardcoded.
 
-export const ALERT_STATS = {
-  totalActive:        FIRED_ALERTS.filter(a => a.status === 'active').length,
-  totalAcknowledged:  FIRED_ALERTS.filter(a => a.status === 'acknowledged').length,
-  totalResolved:      FIRED_ALERTS.filter(a => a.status === 'resolved').length,
-  totalSnoozed:       FIRED_ALERTS.filter(a => a.status === 'snoozed').length,
-  criticalActive:     FIRED_ALERTS.filter(a => a.status === 'active' && a.severity === 'critical').length,
-  warningActive:      FIRED_ALERTS.filter(a => a.status === 'active' && a.severity === 'warning').length,
-  total30d:           ALERT_RULES.reduce((s, r) => s + r.fireCount30d, 0),
-  rulesEnabled:       ALERT_RULES.filter(r => r.enabled).length,
-  rulesTotal:         ALERT_RULES.length,
-};
+export function computeAlertStats(rules: AlertRule[], alerts: FiredAlert[]) {
+  return {
+    totalActive:        alerts.filter(a => a.status === 'active').length,
+    totalAcknowledged:  alerts.filter(a => a.status === 'acknowledged').length,
+    totalResolved:      alerts.filter(a => a.status === 'resolved').length,
+    totalSnoozed:       alerts.filter(a => a.status === 'snoozed').length,
+    criticalActive:     alerts.filter(a => a.status === 'active' && a.severity === 'critical').length,
+    warningActive:      alerts.filter(a => a.status === 'active' && a.severity === 'warning').length,
+    total30d:           rules.reduce((s, r) => s + r.fireCount30d, 0),
+    rulesEnabled:       rules.filter(r => r.enabled).length,
+    rulesTotal:         rules.length,
+  };
+}
 
 export type AlertTab = 'feed' | 'rules' | 'delivery' | 'digest';

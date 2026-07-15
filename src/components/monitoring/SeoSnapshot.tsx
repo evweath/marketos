@@ -29,6 +29,10 @@ export default function SeoSnapshot({ snapshot }: Props) {
         </div>
       </div>
 
+      {snapshot.metrics.length === 0 && (
+        <div className="text-base text-center py-4" style={{ color: 'var(--text-muted)' }}>No SEO checks yet for this store.</div>
+      )}
+
       <div className="space-y-1.5">
         {snapshot.metrics.map(metric => {
           const sc = STATUS_CONFIG[metric.status];

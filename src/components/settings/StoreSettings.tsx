@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { usePersistentState } from '@/lib/usePersistentState';
 import { RefreshCw, ExternalLink, Plus, CheckCircle, Loader2, Webhook, Eye, EyeOff, Save, X, KeyRound, Download, Plug, Wifi, XCircle } from 'lucide-react';
-import { TRAFFIC, CONVERSIONS } from '@/lib/mockData';
+import type { TrafficMetrics, ConversionMetrics } from '@/types';
 import {
   INITIAL_STORE_CONNECTIONS,
   emptyConnections,
@@ -43,9 +43,9 @@ function maskToken(value: string): string {
   return value.slice(0, 6) + '••••' + value.slice(-4);
 }
 
-function downloadAnalyticsCsv(store: StoreData) {
-  const traffic = TRAFFIC[store.id];
-  const conversions = CONVERSIONS[store.id];
+function downloadAnalyticsCsv(store: StoreData, allTraffic: Record<string, TrafficMetrics>, allConversions: Record<string, ConversionMetrics>) {
+  const traffic = allTraffic[store.id];
+  const conversions = allConversions[store.id];
   const daily = traffic?.daily ?? [];
   const rows: string[] = [];
 
@@ -134,6 +134,8 @@ interface StoreCardProps {
 }
 
 function StoreCard({ store, savedCreds, onSaveCreds, connections, onChangeConnection }: StoreCardProps) {
+  const [allTraffic]     = usePersistentState<Record<string, TrafficMetrics>>('monitoring.traffic', {});
+  const [allConversions] = usePersistentState<Record<string, ConversionMetrics>>('monitoring.conversions', {});
   const [syncing, setSyncing]         = useState(false);
   const [justSynced, setJustSynced]   = useState(false);
   const [editing, setEditing]         = useState(false);
@@ -407,7 +409,7 @@ function StoreCard({ store, savedCreds, onSaveCreds, connections, onChangeConnec
           {testing ? <><Loader2 size={12} className='animate-spin' />Testing…</> : <><Wifi size={12} />Test Connection</>}
         </button>
         <button
-          onClick={() => downloadAnalyticsCsv(store)}
+          onClick={() => downloadAnalyticsCsv(store, allTraffic, allConversions)}
           className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base font-medium transition-all'
           style={{ background: 'rgba(var(--overlay-rgb),0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
         >

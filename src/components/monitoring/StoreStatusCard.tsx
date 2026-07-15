@@ -16,6 +16,7 @@ const STATUS_CONFIG = {
   online:   { label: 'ONLINE',   dotClass: 'live-dot',       color: '#10d98a', bg: 'rgba(16,217,138,0.08)',  border: 'rgba(16,217,138,0.2)'  },
   degraded: { label: 'DEGRADED', dotClass: 'live-dot-amber', color: '#ffb347', bg: 'rgba(255,179,71,0.08)',  border: 'rgba(255,179,71,0.2)'  },
   down:     { label: 'DOWN',     dotClass: 'live-dot-red',   color: '#ff4444', bg: 'rgba(255,68,68,0.08)',   border: 'rgba(255,68,68,0.2)'   },
+  pending:  { label: 'PENDING',  dotClass: '',               color: 'var(--text-muted)', bg: 'rgba(var(--overlay-rgb),0.05)', border: 'var(--border-subtle)' },
 };
 
 interface MetricCellProps {
@@ -45,14 +46,15 @@ function MetricCell({ icon, iconColor, label, value, valueColor }: MetricCellPro
 
 export default function StoreStatusCard({ store, traffic, conversions, isSelected, onSelect }: Props) {
   const sc = STATUS_CONFIG[store.status];
-  const sslWarning = store.sslDaysLeft <= 30;
-  const sslCritical = store.sslDaysLeft <= 14;
-  const speedWarning = store.loadSpeed > 2500;
+  const pending = store.status === 'pending';
+  const sslWarning = !pending && store.sslDaysLeft <= 30;
+  const sslCritical = !pending && store.sslDaysLeft <= 14;
+  const speedWarning = !pending && store.loadSpeed > 2500;
 
-  const responseColor = store.responseTime > 800 ? '#ffb347' : '#10d98a';
-  const uptimeColor = store.uptime7d >= 99.9 ? '#10d98a' : store.uptime7d >= 99 ? '#ffb347' : '#ff4444';
-  const sslColor = sslCritical ? '#ff4444' : sslWarning ? '#ffb347' : '#10d98a';
-  const loadColor = speedWarning ? '#ffb347' : 'var(--text-primary)';
+  const responseColor = pending ? 'var(--text-muted)' : store.responseTime > 800 ? '#ffb347' : '#10d98a';
+  const uptimeColor = pending ? 'var(--text-muted)' : store.uptime7d >= 99.9 ? '#10d98a' : store.uptime7d >= 99 ? '#ffb347' : '#ff4444';
+  const sslColor = pending ? 'var(--text-muted)' : sslCritical ? '#ff4444' : sslWarning ? '#ffb347' : '#10d98a';
+  const loadColor = pending ? 'var(--text-muted)' : speedWarning ? '#ffb347' : 'var(--text-primary)';
 
   return (
     <button
@@ -105,28 +107,28 @@ export default function StoreStatusCard({ store, traffic, conversions, isSelecte
           icon={<Zap size={9} />}
           iconColor='#00d9ff'
           label='Response'
-          value={`${store.responseTime}ms`}
+          value={pending ? '—' : `${store.responseTime}ms`}
           valueColor={responseColor}
         />
         <MetricCell
           icon={<Activity size={9} />}
           iconColor='#10d98a'
           label='7d Uptime'
-          value={`${store.uptime7d.toFixed(2)}%`}
+          value={pending ? '—' : `${store.uptime7d.toFixed(2)}%`}
           valueColor={uptimeColor}
         />
         <MetricCell
           icon={<Shield size={9} />}
           iconColor={sslColor}
           label='SSL'
-          value={`${store.sslDaysLeft}d`}
+          value={pending ? '—' : `${store.sslDaysLeft}d`}
           valueColor={sslColor}
         />
         <MetricCell
           icon={<Clock size={9} />}
           iconColor='#7b93ff'
           label='Load'
-          value={`${(store.loadSpeed / 1000).toFixed(1)}s`}
+          value={pending ? '—' : `${(store.loadSpeed / 1000).toFixed(1)}s`}
           valueColor={loadColor}
         />
       </div>

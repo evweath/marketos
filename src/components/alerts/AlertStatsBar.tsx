@@ -1,12 +1,16 @@
 'use client';
 
-import { ALERT_STATS } from '@/lib/alertData';
+import { computeAlertStats } from '@/lib/alertData';
+import type { AlertRule, FiredAlert } from '@/lib/alertData';
+import { usePersistentState } from '@/lib/usePersistentState';
 import {
   AlertCircle, AlertTriangle, CheckCircle, BellOff, Bell, Shield,
 } from 'lucide-react';
 
 export default function AlertStatsBar() {
-  const s = ALERT_STATS;
+  const [rules]  = usePersistentState<AlertRule[]>('alerts.rules', []);
+  const [alerts] = usePersistentState<FiredAlert[]>('alerts.list', []);
+  const s = computeAlertStats(rules, alerts);
 
   const cards = [
     {

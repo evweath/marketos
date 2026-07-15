@@ -8,18 +8,23 @@ import AlertFeed from '@/components/alerts/AlertFeed';
 import AlertRulesPanel from '@/components/alerts/AlertRulesPanel';
 import DeliverySettings from '@/components/alerts/DeliverySettings';
 import { Bell, Shield, Settings } from 'lucide-react';
-import { ALERT_STATS } from '@/lib/alertData';
+import { computeAlertStats } from '@/lib/alertData';
+import type { AlertRule, FiredAlert } from '@/lib/alertData';
+import { usePersistentState } from '@/lib/usePersistentState';
 
 type Tab = 'feed' | 'rules' | 'delivery';
 
-const TABS: { key: Tab; label: string; icon: any; badge?: number }[] = [
-  { key: 'feed',     label: 'Alert Feed',        icon: Bell,     badge: ALERT_STATS.totalActive },
-  { key: 'rules',    label: 'Rules',             icon: Shield                                    },
-  { key: 'delivery', label: 'Delivery & Config', icon: Settings                                  },
+const TABS: { key: Tab; label: string; icon: any }[] = [
+  { key: 'feed',     label: 'Alert Feed',        icon: Bell     },
+  { key: 'rules',    label: 'Rules',             icon: Shield   },
+  { key: 'delivery', label: 'Delivery & Config', icon: Settings },
 ];
 
 export default function AlertsPage() {
   const [tab, setTab] = useState<Tab>('feed');
+  const [rules]  = usePersistentState<AlertRule[]>('alerts.rules', []);
+  const [alerts] = usePersistentState<FiredAlert[]>('alerts.list', []);
+  const stats = computeAlertStats(rules, alerts);
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-base)' }}>
@@ -27,7 +32,7 @@ export default function AlertsPage() {
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <TopBar
           title="Alerts"
-          subtitle={`${ALERT_STATS.criticalActive} critical · ${ALERT_STATS.warningActive} warnings`}
+          subtitle={`${stats.criticalActive} critical · ${stats.warningActive} warnings`}
           breadcrumbs={['MarketOS', 'Alerts']}
         />
         <main className="flex-1 overflow-hidden flex flex-col p-5 gap-4" style={{ minHeight: 0 }}>
@@ -38,6 +43,7 @@ export default function AlertsPage() {
             style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', width: 'fit-content' }}>
             {TABS.map(t => {
               const Icon = t.icon;
+              const badge = t.key === 'feed' && stats.totalActive > 0 ? stats.totalActive : null;
               return (
                 <button key={t.key}
                   onClick={() => setTab(t.key)}
@@ -50,10 +56,10 @@ export default function AlertsPage() {
                   }}>
                   <Icon size={13} />
                   {t.label}
-                  {t.badge ? (
+                  {badge ? (
                     <span className="text-[16px] px-1.5 py-0.5 rounded-full font-mono"
                       style={{ background: '#ff4444', color: 'white', minWidth: 16, textAlign: 'center' }}>
-                      {t.badge}
+                      {badge}
                     </span>
                   ) : null}
                 </button>

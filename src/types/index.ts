@@ -1,6 +1,8 @@
 // ─── Store / Uptime ─────────────────────────────────────────────────────────
 
-export type StoreStatus = 'online' | 'degraded' | 'down';
+// 'pending' = no health check has run for this store yet (e.g. just added,
+// no monitoring connection configured) — distinct from a real down/degraded reading.
+export type StoreStatus = 'online' | 'degraded' | 'down' | 'pending';
 
 export interface Store {
   id: string;
@@ -13,7 +15,7 @@ export interface Store {
   uptime7d: number;       // percentage 0-100
   sslDaysLeft: number;
   loadSpeed: number;      // ms (Largest Contentful Paint proxy)
-  lastChecked: string;    // ISO string
+  lastChecked: string | null;    // ISO string, null if never checked
 }
 
 // ─── Traffic ─────────────────────────────────────────────────────────────────

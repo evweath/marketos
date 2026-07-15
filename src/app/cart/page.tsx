@@ -4,7 +4,9 @@ import { useState } from 'react';
 import Sidebar from '@/components/layout/Sidebar';
 import TopBar from '@/components/layout/TopBar';
 import { usePersistentState } from '@/lib/usePersistentState';
-import { ABANDONED_CARTS, formatCurrency, formatMinutesAgo, getStoreById } from '@/lib/mockData';
+import { formatCurrency, formatMinutesAgo } from '@/lib/mockData';
+import { useStores } from '@/lib/storeScope';
+import type { AbandonedCart } from '@/types';
 import {
   ShoppingCart, Mail, MessageSquare, Bell, TrendingUp, BarChart2, MapPin,
   MousePointer, Gift, ToggleLeft, ToggleRight, X, ChevronDown, ChevronUp,
@@ -13,12 +15,6 @@ import {
 } from 'lucide-react';
 
 const c$ = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
-
-const RECOVERY_STATS = {
-  cartsAbandoned30d: 847, cartsRecovered30d: 94, recoveryRate: 11.1,
-  revenueRecovered30d: 48420, totalCartValue: ABANDONED_CARTS.reduce((s, c) => s + c.cartValue, 0),
-  emailRecoveryRate: 8.4, smsRecoveryRate: 14.2, pushRecoveryRate: 4.1,
-};
 
 const SEQUENCES = [
   {
@@ -985,8 +981,22 @@ type Tab = 'live' | 'sequences' | 'recovered' | 'exitintent' | 'upsell' | 'watch
 
 export default function CartPage() {
   const [tab, setTab] = useState<Tab>('live');
-  const [liveCarts, setLiveCarts] = usePersistentState('cart.liveCarts', ABANDONED_CARTS);
-  const s = RECOVERY_STATS;
+  const [stores] = useStores();
+  // Shared with Site Monitoring's Abandoned Cart Feed — same underlying records.
+  const [liveCarts, setLiveCarts] = usePersistentState<AbandonedCart[]>('monitoring.abandonedCarts', []);
+
+  // Recovery tracking (status/stage, recovered revenue, per-channel rates) isn't
+  // modeled yet — zeroed honestly rather than fabricated until that data exists.
+  const s = {
+    cartsAbandoned30d: liveCarts.length,
+    cartsRecovered30d: 0,
+    recoveryRate: 0,
+    revenueRecovered30d: 0,
+    totalCartValue: liveCarts.reduce((sum, c) => sum + c.cartValue, 0),
+    emailRecoveryRate: 0,
+    smsRecoveryRate: 0,
+    pushRecoveryRate: 0,
+  };
 
   const triggerAllRecovery = () =>
     setLiveCarts(prev => prev.map(cart => ({ ...cart, recoveryEmailSent: true, smsSent: true })));
@@ -1087,9 +1097,16 @@ export default function CartPage() {
                     Trigger All Recovery
                   </button>
                 </div>
+                {liveCarts.length === 0 && (
+                  <div className="rounded-xl p-8 text-center" style={{ background: 'var(--bg-elevated)', border: '1px dashed var(--border-dim)' }}>
+                    <ShoppingCart size={22} className="mx-auto mb-2" style={{ color: 'var(--text-muted)' }} />
+                    <div className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>No abandoned carts yet</div>
+                    <div className="text-[16px] mt-1" style={{ color: 'var(--text-muted)' }}>Connect a store's Shopify checkout events to start tracking abandoned carts here.</div>
+                  </div>
+                )}
                 <div className="space-y-2">
                   {liveCarts.map(cart => {
-                    const store = getStoreById(cart.storeId);
+                    const store = stores.find(st => st.id === cart.storeId);
                     const urgent = cart.minutesAgo < 15;
                     return (
                       <div key={cart.id} className="rounded-xl p-3"

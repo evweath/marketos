@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Bell, RefreshCw, ChevronRight, Sun, Moon } from 'lucide-react';
-import { ALERTS } from '@/lib/mockData';
+import { usePersistentState } from '@/lib/usePersistentState';
+import type { FiredAlert } from '@/lib/alertData';
 import { useTheme } from '@/lib/ThemeProvider';
 
 interface TopBarProps {
@@ -15,8 +16,9 @@ export default function TopBar({ title, subtitle, breadcrumbs }: TopBarProps) {
   const [time, setTime] = useState('');
   const [rotating, setRotating] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const [alerts] = usePersistentState<FiredAlert[]>('alerts.list', []);
 
-  const unacknowledgedAlerts = ALERTS.filter(a => !a.acknowledged);
+  const unacknowledgedAlerts = alerts.filter(a => a.status === 'active');
   const criticalCount = unacknowledgedAlerts.filter(a => a.severity === 'critical').length;
 
   useEffect(() => {

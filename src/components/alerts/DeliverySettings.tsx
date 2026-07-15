@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { usePersistentState } from '@/lib/usePersistentState';
-import { DELIVERY_CHANNELS, QUIET_HOURS, DIGEST_CONFIG, CATEGORY_CONFIG } from '@/lib/alertData';
+import { DELIVERY_CHANNEL_LIST, QUIET_HOURS, DIGEST_CONFIG, CATEGORY_CONFIG } from '@/lib/alertData';
 import type { DeliveryChannelConfig } from '@/lib/alertData';
 import { CheckCircle, XCircle, AlertCircle, Send, Moon, Calendar, Loader2 } from 'lucide-react';
 
@@ -49,23 +49,34 @@ function Toggle({ on, onChange, color = '#10d98a' }: { on: boolean; onChange: (v
 // ─── Channel Card ─────────────────────────────────────────────────────────────
 
 function ChannelCard({ ch }: { ch: DeliveryChannelConfig }) {
-  const [enabled, setEnabled] = usePersistentState(`alerts.channelEnabled.${ch.channel}`, ch.enabled);
+  const [enabled, setEnabled] = usePersistentState(`alerts.channelEnabled.${ch.channel}`, false);
+  const [destination, setDestination] = usePersistentState(`alerts.channelDestination.${ch.channel}`, '');
+  const [savedTestStatus, setSavedTestStatus] = usePersistentState<'ok' | 'error' | 'untested'>(`alerts.channelTestStatus.${ch.channel}`, 'untested');
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<'ok' | 'error' | null>(null);
 
   const ts = testResult
     ? TEST_STATUS_CONFIG[testResult]
-    : ch.testStatus
-      ? TEST_STATUS_CONFIG[ch.testStatus]
-      : null;
+    : TEST_STATUS_CONFIG[savedTestStatus];
 
   const iconBg = CHANNEL_ICON_BG[ch.channel] ?? 'rgba(123,147,255,0.12)';
   const iconColor = CHANNEL_ICON_COLOR[ch.channel] ?? '#7b93ff';
 
+  const DESTINATION_PLACEHOLDER: Record<string, string> = {
+    email: 'alerts@yourdomain.com',
+    sms:   '+1 (555) 555-0100',
+    slack: '#channel-name',
+    teams: 'Teams webhook URL',
+    push:  'Not configurable',
+  };
+
   const runTest = async () => {
     setTesting(true);
+    setTestResult(null);
     await new Promise(r => setTimeout(r, 1000));
-    setTestResult('ok');
+    const ok = destination.trim().length > 0;
+    setTestResult(ok ? 'ok' : 'error');
+    setSavedTestStatus(ok ? 'ok' : 'error');
     setTesting(false);
   };
 
@@ -102,8 +113,10 @@ function ChannelCard({ ch }: { ch: DeliveryChannelConfig }) {
         <div className="section-label mb-1">Destination</div>
         <input
           type="text"
-          defaultValue={ch.destination}
-          disabled={!enabled}
+          value={destination}
+          onChange={e => setDestination(e.target.value)}
+          placeholder={DESTINATION_PLACEHOLDER[ch.channel] ?? 'Destination'}
+          disabled={!enabled || ch.channel === 'push'}
           className="w-full"
         />
       </div>
@@ -123,6 +136,14 @@ function ChannelCard({ ch }: { ch: DeliveryChannelConfig }) {
           ? <><Loader2 size={11} className="animate-spin" /> Sending...</>
           : <><Send size={11} /> Send Test</>}
       </button>
+
+      {testResult && (
+        <div className="mt-2 text-[16px]" style={{ color: testResult === 'ok' ? '#10d98a' : '#ff6464' }}>
+          {testResult === 'ok'
+            ? 'Test message sent successfully.'
+            : `No destination configured for ${ch.label} — enter one above and try again.`}
+        </div>
+      )}
     </div>
   );
 }
@@ -295,7 +316,7 @@ export default function DeliverySettings() {
       <div>
         <div className="section-label mb-3">Notification Channels</div>
         <div className="grid grid-cols-3 gap-3">
-          {DELIVERY_CHANNELS.map(ch => <ChannelCard key={ch.channel} ch={ch} />)}
+          {DELIVERY_CHANNEL_LIST.map(ch => <ChannelCard key={ch.channel} ch={ch} />)}
         </div>
       </div>
 

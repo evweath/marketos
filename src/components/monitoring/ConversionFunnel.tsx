@@ -10,6 +10,16 @@ interface Props {
 }
 
 export default function ConversionFunnel({ conversions, storeColor }: Props) {
+  if (conversions.funnel.length === 0) {
+    return (
+      <div className='glass-card p-4 flex flex-col items-center justify-center text-center' style={{ minHeight: 220 }}>
+        <ShoppingCart size={22} className='mb-2' style={{ color: 'var(--text-muted)' }} />
+        <div className='text-base font-medium' style={{ color: 'var(--text-primary)' }}>No funnel data yet</div>
+        <div className='text-[16px] mt-1' style={{ color: 'var(--text-muted)' }}>Connect this store's analytics to see its conversion funnel.</div>
+      </div>
+    );
+  }
+
   const maxCount = conversions.funnel[0].count;
 
   const overallColor = conversions.overallRate >= 3

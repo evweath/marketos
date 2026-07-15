@@ -1,4 +1,6 @@
 import { SAMPLE_CAMPAIGNS, SAMPLE_AD_SETS, SAMPLE_CREATIVES, SAMPLE_AUTOMATION_RULES, SAMPLE_HEALTH_CHECKS } from './campaignData';
+import { SAMPLE_ALERT_RULES, SAMPLE_FIRED_ALERTS } from './alertData';
+import { SAMPLE_STORE_HEALTH, SAMPLE_TRAFFIC, SAMPLE_CONVERSIONS, SAMPLE_ABANDONED_CARTS, SAMPLE_TRANSACTIONS, SAMPLE_PAGE_CHANGES, SAMPLE_SEO_SNAPSHOTS } from './mockData';
 
 // ─── Sample data registry ──────────────────────────────────────────────────
 //
@@ -28,6 +30,15 @@ const REGISTRY: SampleDataEntry[] = [
   { key: 'ads.creatives',        sample: SAMPLE_CREATIVES,        empty: [] },
   { key: 'ads.automationRules',  sample: SAMPLE_AUTOMATION_RULES, empty: [] },
   { key: 'ads.healthChecks',     sample: SAMPLE_HEALTH_CHECKS,    empty: [] },
+  { key: 'alerts.rules',         sample: SAMPLE_ALERT_RULES,      empty: [] },
+  { key: 'alerts.list',          sample: SAMPLE_FIRED_ALERTS,     empty: [] },
+  { key: 'monitoring.storeHealth', sample: SAMPLE_STORE_HEALTH,  empty: {} },
+  { key: 'monitoring.traffic',     sample: SAMPLE_TRAFFIC,       empty: {} },
+  { key: 'monitoring.conversions', sample: SAMPLE_CONVERSIONS,   empty: {} },
+  { key: 'monitoring.abandonedCarts', sample: SAMPLE_ABANDONED_CARTS, empty: [] },
+  { key: 'monitoring.transactions',   sample: SAMPLE_TRANSACTIONS,    empty: [] },
+  { key: 'monitoring.pageChanges',    sample: SAMPLE_PAGE_CHANGES,    empty: [] },
+  { key: 'monitoring.seoSnapshots',   sample: SAMPLE_SEO_SNAPSHOTS,   empty: {} },
 ];
 
 function storageKey(key: string): string {
