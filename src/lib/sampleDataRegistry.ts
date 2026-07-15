@@ -5,6 +5,7 @@ import { SAMPLE_CHANNEL_METRICS, SAMPLE_TIME_SERIES, SAMPLE_ATTRIBUTION, SAMPLE_
 import { SAMPLE_SOCIAL_POSTS, SAMPLE_INBOX_MESSAGES, SAMPLE_LISTENING_ITEMS, SAMPLE_PLATFORM_STATS, SAMPLE_APPROVAL_POSTS, SAMPLE_DM_RULES, emptyPlatformStats } from './socialData';
 import { SAMPLE_EMAIL_FLOWS, SAMPLE_EMAIL_CAMPAIGNS, SAMPLE_SEGMENTS, SAMPLE_DELIVERABILITY } from './emailData';
 import { SAMPLE_GENERATED_CREATIVES, SAMPLE_COMPETITOR_ADS, SAMPLE_PERFORMANCE_SCORES, SAMPLE_CAMPAIGN_BRIEFS, SAMPLE_BRAND_VOICE_SETTINGS, DEFAULT_BRAND_VOICE_SETTINGS } from './contentData';
+import { SAMPLE_KEYWORD_RANKINGS, SAMPLE_GSC_METRICS, SAMPLE_SEO_AUDIT_ITEMS, SAMPLE_COMPETITOR_DATA, SAMPLE_BRAND_MENTIONS, SAMPLE_LLM_VISIBILITY, SAMPLE_PREVIOUS_BLOGS, emptyLlmVisibility } from './seoData';
 
 // ─── Sample data registry ──────────────────────────────────────────────────
 //
@@ -74,6 +75,13 @@ const REGISTRY: SampleDataEntry[] = [
       { name: 'Email_Copy_Examples.txt', size: '124 KB', status: 'Trained' },
       { name: 'Social_Media_Style_Guide.pdf', size: '1.8 MB', status: 'Trained' },
     ], empty: [] },
+  { key: 'seo.keywordRankings',    sample: SAMPLE_KEYWORD_RANKINGS,   empty: [] },
+  { key: 'seo.gscMetrics',         sample: SAMPLE_GSC_METRICS,        empty: [] },
+  { key: 'seo.auditItems',         sample: SAMPLE_SEO_AUDIT_ITEMS,    empty: [] },
+  { key: 'seo.competitors',        sample: SAMPLE_COMPETITOR_DATA,    empty: [] },
+  { key: 'seo.brandMentions',      sample: SAMPLE_BRAND_MENTIONS,     empty: [] },
+  { key: 'seo.llmVisibility',      sample: SAMPLE_LLM_VISIBILITY,     empty: emptyLlmVisibility() },
+  { key: 'seo.blogs',              sample: SAMPLE_PREVIOUS_BLOGS,     empty: [] },
 ];
 
 function storageKey(key: string): string {

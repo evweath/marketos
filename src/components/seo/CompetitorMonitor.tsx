@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Plus, Clock, ArrowRight, Package, FileText, DollarSign, X } from 'lucide-react';
 import { usePersistentState } from '@/lib/usePersistentState';
-import { COMPETITOR_DATA } from '@/lib/seoData';
 import type { CompetitorChangeType, CompetitorData } from '@/lib/seoData';
 
 type ChangeTab = CompetitorChangeType;
@@ -30,10 +29,8 @@ function formatTime(iso: string): string {
 }
 
 export function CompetitorMonitor() {
-  const [competitors, setCompetitors] = usePersistentState<CompetitorData[]>('seo.competitors', COMPETITOR_DATA);
-  const [activeTabs, setActiveTabs] = useState<Record<string, ChangeTab>>(() =>
-    Object.fromEntries(COMPETITOR_DATA.map(c => [c.id, 'price']))
-  );
+  const [competitors, setCompetitors] = usePersistentState<CompetitorData[]>('seo.competitors', []);
+  const [activeTabs, setActiveTabs] = useState<Record<string, ChangeTab>>({});
   const [adding, setAdding]           = useState(false);
   const [newName, setNewName]         = useState('');
   const [newDomain, setNewDomain]     = useState('');
@@ -139,6 +136,12 @@ export function CompetitorMonitor() {
               Cancel
             </button>
           </div>
+        </div>
+      )}
+
+      {competitors.length === 0 && (
+        <div className='text-base text-center py-10' style={{ color: 'var(--text-muted)' }}>
+          No competitors tracked yet — click Add Competitor to start monitoring.
         </div>
       )}
 

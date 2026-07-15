@@ -43,7 +43,8 @@ function genTrend(endRank: number, startRank: number): TrendPoint[] {
   return points;
 }
 
-export const KEYWORD_RANKINGS: KeywordRanking[] = [
+// SAMPLE_* below seeds Settings → Data → "Load Sample Data"; the app boots empty.
+export const SAMPLE_KEYWORD_RANKINGS: KeywordRanking[] = [
   {
     id: 'kw-001', keyword: 'commercial donut fryer', store: 'donut-equipment',
     rank: 2, previousRank: 5, change: +3, searchVolume: 8400, difficulty: 52, cpc: 3.40,
@@ -196,7 +197,7 @@ function genGscSeries(days: number, baseClicks: number, baseImpressions: number)
   return result;
 }
 
-export const GSC_METRICS: GscStoreMetrics[] = [
+export const SAMPLE_GSC_METRICS: GscStoreMetrics[] = [
   {
     store: 'donut-equipment',
     '7d': {
@@ -307,7 +308,7 @@ export interface SeoAuditItem {
   detail: string;
 }
 
-export const SEO_AUDIT_ITEMS: SeoAuditItem[] = [
+export const SAMPLE_SEO_AUDIT_ITEMS: SeoAuditItem[] = [
   {
     id: 'audit-001', category: 'meta', status: 'error', impact: 'high',
     page: '/products/industrial-mixers',
@@ -467,7 +468,7 @@ export interface CompetitorData {
   changes: CompetitorChange[];
 }
 
-export const COMPETITOR_DATA: CompetitorData[] = [
+export const SAMPLE_COMPETITOR_DATA: CompetitorData[] = [
   {
     id: 'comp-001',
     domain: 'bakeryequipmentpro.com',
@@ -574,7 +575,7 @@ export interface BrandMention {
   timeAgo: string;
 }
 
-export const BRAND_MENTIONS: BrandMention[] = [
+export const SAMPLE_BRAND_MENTIONS: BrandMention[] = [
   {
     id: 'bm-001', source: 'social', platform: 'Reddit', author: 'u/BakeryNerd_PDX',
     content: 'Just got our new commercial donut fryer from donut-equipment.com — setup took 20 minutes and the output is incredible. 150 donuts/hr without breaking a sweat.',
@@ -669,7 +670,14 @@ export interface LlmVisibilityEntry {
   lastChecked: string;
 }
 
-export const LLM_VISIBILITY: LlmVisibilityEntry[] = [
+// Untrained default — no LLM visibility check has run yet.
+export function emptyLlmVisibility(): LlmVisibilityEntry[] {
+  return (['ChatGPT', 'Gemini', 'Claude', 'Perplexity'] as LlmProvider[]).map(llm => ({
+    llm, mentioned: false, rank: null, context: '', queryTested: '', lastChecked: '',
+  }));
+}
+
+export const SAMPLE_LLM_VISIBILITY: LlmVisibilityEntry[] = [
   {
     llm: 'ChatGPT',
     mentioned: true,
@@ -715,27 +723,101 @@ export interface SeoStats {
   totalImpressions30d: number;
   avgCtr: number;
   organicRevenue30d: number;
-  avgPositionDelta: number;
-  totalKeywordsDelta: number;
-  top3Delta: number;
-  top10Delta: number;
-  clicksDelta: number;
-  revenueDelta: number;
 }
 
-export const SEO_STATS: SeoStats = {
-  avgPosition: 7.4,
-  totalKeywords: 248,
-  top3Count: 31,
-  top10Count: 94,
-  totalClicks30d: 41100,
-  totalImpressions30d: 1048400,
-  avgCtr: 3.92,
-  organicRevenue30d: 112480,
-  avgPositionDelta: -1.3,
-  totalKeywordsDelta: +18,
-  top3Delta: +4,
-  top10Delta: +11,
-  clicksDelta: +11.4,
-  revenueDelta: +10.1,
-};
+export function computeSeoStats(keywords: KeywordRanking[], gscMetrics: GscStoreMetrics[]): SeoStats {
+  const totalClicks30d = gscMetrics.reduce((s, m) => s + m['30d'].clicks, 0);
+  const totalImpressions30d = gscMetrics.reduce((s, m) => s + m['30d'].impressions, 0);
+  return {
+    avgPosition: keywords.length > 0 ? Math.round((keywords.reduce((s, k) => s + k.rank, 0) / keywords.length) * 10) / 10 : 0,
+    totalKeywords: keywords.length,
+    top3Count: keywords.filter(k => k.rank <= 3).length,
+    top10Count: keywords.filter(k => k.rank <= 10).length,
+    totalClicks30d,
+    totalImpressions30d,
+    avgCtr: totalImpressions30d > 0 ? Math.round((totalClicks30d / totalImpressions30d) * 10000) / 100 : 0,
+    // No attribution/revenue model exists for organic search — stays zero until one does.
+    organicRevenue30d: 0,
+  };
+}
+
+// ─── AI Blog Generator ────────────────────────────────────────────────────────
+
+export type BlogTone = 'informative' | 'conversational' | 'persuasive' | 'technical';
+
+export interface SeoScoreBreakdown {
+  titleOptimization: number;
+  keywordDensity: number;
+  readability: number;
+  internalLinks: number;
+  metaDescription: number;
+}
+
+export interface GeneratedBlog {
+  id: string;
+  title: string;
+  metaDescription: string;
+  store: StoreId;
+  wordCount: number;
+  readingTime: number;
+  seoScore: number;
+  breakdown: SeoScoreBreakdown;
+  content: string;
+  generatedAt: string;
+  tone: BlogTone;
+}
+
+export const SAMPLE_PREVIOUS_BLOGS: GeneratedBlog[] = [
+  {
+    id: 'blog-001',
+    title: 'How to Choose the Right Commercial Donut Fryer for Your Bakery',
+    metaDescription: 'Discover the key factors for selecting a commercial donut fryer — capacity, oil recovery, and energy efficiency — with expert recommendations for every production volume.',
+    store: 'donut-equipment',
+    wordCount: 1480,
+    readingTime: 6,
+    seoScore: 94,
+    breakdown: { titleOptimization: 96, keywordDensity: 91, readability: 94, internalLinks: 88, metaDescription: 100 },
+    content: '',
+    generatedAt: 'May 9, 2026',
+    tone: 'informative',
+  },
+  {
+    id: 'blog-002',
+    title: '7 Bulk Donut Mix Brands Compared: Quality, Price & Yield',
+    metaDescription: 'We tested 7 wholesale donut mix brands head-to-head. See which delivers the best rise, flavor, and cost-per-dozen for high-volume bakeries.',
+    store: 'donut-supplies',
+    wordCount: 1620,
+    readingTime: 7,
+    seoScore: 88,
+    breakdown: { titleOptimization: 90, keywordDensity: 84, readability: 92, internalLinks: 82, metaDescription: 94 },
+    content: '',
+    generatedAt: 'May 6, 2026',
+    tone: 'informative',
+  },
+  {
+    id: 'blog-003',
+    title: 'Bakery Supply Chain 2026: Why Wholesale Sourcing Beats Retail',
+    metaDescription: 'Switching to wholesale bakery ingredients can cut costs by 35-50%. Here\'s a step-by-step guide to transitioning your procurement strategy.',
+    store: 'bakery-wholesalers',
+    wordCount: 1920,
+    readingTime: 8,
+    seoScore: 91,
+    breakdown: { titleOptimization: 93, keywordDensity: 88, readability: 90, internalLinks: 92, metaDescription: 96 },
+    content: '',
+    generatedAt: 'May 3, 2026',
+    tone: 'persuasive',
+  },
+  {
+    id: 'blog-004',
+    title: 'Donut Glazing Machine Setup: A Step-by-Step Technical Guide',
+    metaDescription: 'Complete installation and calibration guide for commercial donut glazing machines. Includes belt speed settings, temperature profiles, and maintenance schedule.',
+    store: 'donut-equipment',
+    wordCount: 980,
+    readingTime: 4,
+    seoScore: 82,
+    breakdown: { titleOptimization: 85, keywordDensity: 78, readability: 86, internalLinks: 74, metaDescription: 90 },
+    content: '',
+    generatedAt: 'Apr 28, 2026',
+    tone: 'technical',
+  },
+];

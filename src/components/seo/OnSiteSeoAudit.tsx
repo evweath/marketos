@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { CheckCircle, AlertTriangle, XCircle, RefreshCw, Tag, FileText, Code, Link2, Type } from 'lucide-react';
-import { SEO_AUDIT_ITEMS } from '@/lib/seoData';
-import type { AuditCategory, AuditStatus, ImpactLevel } from '@/lib/seoData';
+import { usePersistentState } from '@/lib/usePersistentState';
+import type { AuditCategory, AuditStatus, ImpactLevel, SeoAuditItem } from '@/lib/seoData';
 
 const STATUS_CONFIG: Record<AuditStatus, { icon: typeof CheckCircle; color: string; label: string; badge: string }> = {
   ok:   { icon: CheckCircle,   color: '#10d98a', label: 'OK',      badge: 'badge-ok'      },
@@ -31,17 +31,18 @@ const CATEGORIES: (AuditCategory | 'all')[] = ['all', 'meta', 'headings', 'conte
 const STATUSES: (AuditStatus | 'all')[] = ['all', 'error', 'warn', 'ok'];
 
 export function OnSiteSeoAudit() {
+  const [auditItems] = usePersistentState<SeoAuditItem[]>('seo.auditItems', []);
   const [categoryFilter, setCategoryFilter] = useState<AuditCategory | 'all'>('all');
   const [statusFilter, setStatusFilter]     = useState<AuditStatus | 'all'>('all');
   const [auditing, setAuditing]             = useState(false);
-  const [lastRun, setLastRun]               = useState('May 11, 2026 08:30');
+  const [lastRun, setLastRun]               = useState<string | null>(null);
 
-  const errorCount = SEO_AUDIT_ITEMS.filter(i => i.status === 'error').length;
-  const warnCount  = SEO_AUDIT_ITEMS.filter(i => i.status === 'warn').length;
-  const okCount    = SEO_AUDIT_ITEMS.filter(i => i.status === 'ok').length;
-  const healthPct  = Math.round((okCount / SEO_AUDIT_ITEMS.length) * 100);
+  const errorCount = auditItems.filter(i => i.status === 'error').length;
+  const warnCount  = auditItems.filter(i => i.status === 'warn').length;
+  const okCount    = auditItems.filter(i => i.status === 'ok').length;
+  const healthPct  = auditItems.length > 0 ? Math.round((okCount / auditItems.length) * 100) : 0;
 
-  const filtered = SEO_AUDIT_ITEMS
+  const filtered = auditItems
     .filter(i => categoryFilter === 'all' || i.category === categoryFilter)
     .filter(i => statusFilter === 'all' || i.status === statusFilter)
     .sort((a, b) => IMPACT_ORDER[a.impact] - IMPACT_ORDER[b.impact]);
@@ -50,7 +51,7 @@ export function OnSiteSeoAudit() {
     setAuditing(true);
     setTimeout(() => {
       setAuditing(false);
-      setLastRun('May 11, 2026 ' + new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }));
+      setLastRun(new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }));
     }, 2000);
   };
 
@@ -61,7 +62,7 @@ export function OnSiteSeoAudit() {
         <div>
           <div className='section-label mb-1'>On-Site SEO Audit</div>
           <div className='text-base font-semibold' style={{ color: 'var(--text-primary)' }}>
-            {SEO_AUDIT_ITEMS.length} checks · Last run {lastRun}
+            {auditItems.length} checks · {lastRun ? `Last run ${lastRun}` : 'Never run'}
           </div>
         </div>
         {/* Primary cyan button with spinner */}
@@ -191,7 +192,9 @@ export function OnSiteSeoAudit() {
       <div className='space-y-2'>
         {filtered.length === 0 && (
           <div className='text-center py-10' style={{ color: 'var(--text-muted)' }}>
-            No audit items match the selected filters.
+            {auditItems.length === 0
+              ? 'No audit has been run yet — click Run New Audit to scan your stores.'
+              : 'No audit items match the selected filters.'}
           </div>
         )}
         {filtered.map(item => {

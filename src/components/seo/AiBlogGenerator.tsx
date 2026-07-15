@@ -3,87 +3,10 @@
 import { useState } from 'react';
 import { Loader2, Sparkles, Edit2, Upload, ChevronDown } from 'lucide-react';
 import { usePersistentState } from '@/lib/usePersistentState';
-import type { StoreId } from '@/lib/seoData';
+import type { StoreId, GeneratedBlog } from '@/lib/seoData';
 
 type Tone = 'informative' | 'conversational' | 'persuasive' | 'technical';
 type WordCount = 500 | 1000 | 1500 | 2000;
-
-interface SeoScoreBreakdown {
-  titleOptimization: number;
-  keywordDensity: number;
-  readability: number;
-  internalLinks: number;
-  metaDescription: number;
-}
-
-interface GeneratedBlog {
-  id: string;
-  title: string;
-  metaDescription: string;
-  store: StoreId;
-  wordCount: number;
-  readingTime: number;
-  seoScore: number;
-  breakdown: SeoScoreBreakdown;
-  content: string;
-  generatedAt: string;
-  tone: Tone;
-}
-
-const PREVIOUS_BLOGS: GeneratedBlog[] = [
-  {
-    id: 'blog-001',
-    title: 'How to Choose the Right Commercial Donut Fryer for Your Bakery',
-    metaDescription: 'Discover the key factors for selecting a commercial donut fryer — capacity, oil recovery, and energy efficiency — with expert recommendations for every production volume.',
-    store: 'donut-equipment',
-    wordCount: 1480,
-    readingTime: 6,
-    seoScore: 94,
-    breakdown: { titleOptimization: 96, keywordDensity: 91, readability: 94, internalLinks: 88, metaDescription: 100 },
-    content: '',
-    generatedAt: 'May 9, 2026',
-    tone: 'informative',
-  },
-  {
-    id: 'blog-002',
-    title: '7 Bulk Donut Mix Brands Compared: Quality, Price & Yield',
-    metaDescription: 'We tested 7 wholesale donut mix brands head-to-head. See which delivers the best rise, flavor, and cost-per-dozen for high-volume bakeries.',
-    store: 'donut-supplies',
-    wordCount: 1620,
-    readingTime: 7,
-    seoScore: 88,
-    breakdown: { titleOptimization: 90, keywordDensity: 84, readability: 92, internalLinks: 82, metaDescription: 94 },
-    content: '',
-    generatedAt: 'May 6, 2026',
-    tone: 'informative',
-  },
-  {
-    id: 'blog-003',
-    title: 'Bakery Supply Chain 2026: Why Wholesale Sourcing Beats Retail',
-    metaDescription: 'Switching to wholesale bakery ingredients can cut costs by 35-50%. Here\'s a step-by-step guide to transitioning your procurement strategy.',
-    store: 'bakery-wholesalers',
-    wordCount: 1920,
-    readingTime: 8,
-    seoScore: 91,
-    breakdown: { titleOptimization: 93, keywordDensity: 88, readability: 90, internalLinks: 92, metaDescription: 96 },
-    content: '',
-    generatedAt: 'May 3, 2026',
-    tone: 'persuasive',
-  },
-  {
-    id: 'blog-004',
-    title: 'Donut Glazing Machine Setup: A Step-by-Step Technical Guide',
-    metaDescription: 'Complete installation and calibration guide for commercial donut glazing machines. Includes belt speed settings, temperature profiles, and maintenance schedule.',
-    store: 'donut-equipment',
-    wordCount: 980,
-    readingTime: 4,
-    seoScore: 82,
-    breakdown: { titleOptimization: 85, keywordDensity: 78, readability: 86, internalLinks: 74, metaDescription: 90 },
-    content: '',
-    generatedAt: 'Apr 28, 2026',
-    tone: 'technical',
-  },
-];
 
 const STORE_OPTIONS: { value: StoreId; label: string }[] = [
   { value: 'donut-equipment',    label: 'Donut Equipment' },
@@ -248,7 +171,7 @@ export function AiBlogGenerator() {
   const [generated, setGenerated]     = useState<GeneratedBlog | null>(null);
   const [showContent, setShowContent] = useState(false);
   const [editing, setEditing]         = useState(false);
-  const [prevBlogs, setPrevBlogs]     = usePersistentState<GeneratedBlog[]>('seo.blogs', PREVIOUS_BLOGS);
+  const [prevBlogs, setPrevBlogs]     = usePersistentState<GeneratedBlog[]>('seo.blogs', []);
 
   const handleGenerate = () => {
     if (!topic.trim()) return;
@@ -499,6 +422,11 @@ export function AiBlogGenerator() {
       <div className='glass-card p-4'>
         <div className='section-label mb-3'>Previously Generated ({prevBlogs.length})</div>
         <div className='space-y-2'>
+          {prevBlogs.length === 0 && (
+            <div className='text-base text-center py-6' style={{ color: 'var(--text-muted)' }}>
+              No blog posts generated yet — use the form above.
+            </div>
+          )}
           {prevBlogs.map(blog => {
             const color      = seoScoreColor(blog.seoScore);
             const storeLabel = STORE_OPTIONS.find(s => s.value === blog.store)?.label ?? blog.store;

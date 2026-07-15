@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { ExternalLink, MessageCircle, CheckCircle, XCircle, Bot } from 'lucide-react';
 import { usePersistentState } from '@/lib/usePersistentState';
-import { BRAND_MENTIONS, LLM_VISIBILITY } from '@/lib/seoData';
-import type { MentionSource, Sentiment, LlmProvider } from '@/lib/seoData';
+import { emptyLlmVisibility } from '@/lib/seoData';
+import type { MentionSource, Sentiment, LlmProvider, BrandMention, LlmVisibilityEntry } from '@/lib/seoData';
 
 type SourceFilter = MentionSource | 'all';
 
@@ -36,23 +36,25 @@ function fmt(n: number): string {
 const SOURCE_FILTERS: SourceFilter[] = ['all', 'web', 'social', 'news'];
 
 export function BrandMentions() {
+  const [mentions] = usePersistentState<BrandMention[]>('seo.brandMentions', []);
+  const [llmVisibility] = usePersistentState<LlmVisibilityEntry[]>('seo.llmVisibility', emptyLlmVisibility());
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
   const [responded, setResponded] = usePersistentState<Record<string, boolean>>('seo.mentionResponded', {});
 
-  const filtered = BRAND_MENTIONS.filter(m => sourceFilter === 'all' || m.source === sourceFilter);
+  const filtered = mentions.filter(m => sourceFilter === 'all' || m.source === sourceFilter);
 
-  const positive = BRAND_MENTIONS.filter(m => m.sentiment === 'positive').length;
-  const neutral  = BRAND_MENTIONS.filter(m => m.sentiment === 'neutral').length;
-  const negative = BRAND_MENTIONS.filter(m => m.sentiment === 'negative').length;
-  const total    = BRAND_MENTIONS.length;
+  const positive = mentions.filter(m => m.sentiment === 'positive').length;
+  const neutral  = mentions.filter(m => m.sentiment === 'neutral').length;
+  const negative = mentions.filter(m => m.sentiment === 'negative').length;
+  const total    = mentions.length;
 
-  const positivePct = Math.round((positive / total) * 100);
-  const neutralPct  = Math.round((neutral  / total) * 100);
-  const negativePct = Math.round((negative / total) * 100);
+  const positivePct = total > 0 ? Math.round((positive / total) * 100) : 0;
+  const neutralPct  = total > 0 ? Math.round((neutral  / total) * 100) : 0;
+  const negativePct = total > 0 ? Math.round((negative / total) * 100) : 0;
 
-  const webCount    = BRAND_MENTIONS.filter(m => m.source === 'web').length;
-  const socialCount = BRAND_MENTIONS.filter(m => m.source === 'social').length;
-  const newsCount   = BRAND_MENTIONS.filter(m => m.source === 'news').length;
+  const webCount    = mentions.filter(m => m.source === 'web').length;
+  const socialCount = mentions.filter(m => m.source === 'social').length;
+  const newsCount   = mentions.filter(m => m.source === 'news').length;
 
   const sourceCounts: Record<MentionSource, number> = { web: webCount, social: socialCount, news: newsCount };
 
@@ -66,13 +68,13 @@ export function BrandMentions() {
             <div className='section-label'>LLM Brand Visibility</div>
           </div>
           <div className='flex items-center gap-1.5 text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>
-            <div className='w-1.5 h-1.5 rounded-full live-dot' style={{ background: '#10d98a' }} />
-            Checked today
+            <div className='w-1.5 h-1.5 rounded-full live-dot' style={{ background: llmVisibility.some(e => e.lastChecked) ? '#10d98a' : 'var(--text-muted)' }} />
+            {llmVisibility.some(e => e.lastChecked) ? 'Checked today' : 'Not checked yet'}
           </div>
         </div>
 
         <div className='grid grid-cols-4 gap-3'>
-          {LLM_VISIBILITY.map(entry => {
+          {llmVisibility.map(entry => {
             const cfg = LLM_CONFIG[entry.llm];
             return (
               <div
@@ -134,7 +136,9 @@ export function BrandMentions() {
                 )}
 
                 <div className='mt-3 text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>
-                  {new Date(entry.lastChecked).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                  {entry.lastChecked
+                    ? new Date(entry.lastChecked).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+                    : 'Not checked yet'}
                 </div>
               </div>
             );
@@ -219,6 +223,11 @@ export function BrandMentions() {
         </div>
 
         <div className='space-y-2'>
+          {filtered.length === 0 && (
+            <div className='text-base text-center py-10' style={{ color: 'var(--text-muted)' }}>
+              No brand mentions tracked yet.
+            </div>
+          )}
           {filtered.map(mention => {
             const sCfg   = SENTIMENT_CONFIG[mention.sentiment];
             const srcCfg = SOURCE_CONFIG[mention.source];

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
-import { KEYWORD_RANKINGS } from '@/lib/seoData';
+import { usePersistentState } from '@/lib/usePersistentState';
 import type { StoreId, KeywordRanking } from '@/lib/seoData';
 
 type SortKey = 'rank' | 'change' | 'searchVolume';
@@ -68,6 +68,7 @@ const TH_STYLE: React.CSSProperties = {
 };
 
 export function KeywordRankTable() {
+  const [keywords] = usePersistentState<KeywordRanking[]>('seo.keywordRankings', []);
   const [storeFilter, setStoreFilter] = useState<StoreId | 'all'>('all');
   const [sortKey, setSortKey]         = useState<SortKey>('rank');
   const [sortAsc, setSortAsc]         = useState(true);
@@ -77,7 +78,7 @@ export function KeywordRankTable() {
     else { setSortKey(key); setSortAsc(key !== 'change'); }
   };
 
-  const filtered: KeywordRanking[] = KEYWORD_RANKINGS
+  const filtered: KeywordRanking[] = keywords
     .filter(k => storeFilter === 'all' || k.store === storeFilter)
     .sort((a, b) => {
       let diff = 0;
@@ -171,6 +172,13 @@ export function KeywordRankTable() {
             </tr>
           </thead>
           <tbody>
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={8} className='py-6 text-center text-base' style={{ color: 'var(--text-muted)' }}>
+                  No keywords tracked yet — connect Search Console or add keywords to start tracking rankings.
+                </td>
+              </tr>
+            )}
             {filtered.map((kw, i) => {
               const storeCfg = STORE_CONFIG[kw.store];
               const rColor   = rankColor(kw.rank);

@@ -6,8 +6,8 @@ import {
   ResponsiveContainer, AreaChart, Area, CartesianGrid,
   XAxis, YAxis, Tooltip, Legend,
 } from 'recharts';
-import { GSC_METRICS } from '@/lib/seoData';
-import type { StoreId, DateRange } from '@/lib/seoData';
+import { usePersistentState } from '@/lib/usePersistentState';
+import type { StoreId, DateRange, GscStoreMetrics } from '@/lib/seoData';
 
 const STORE_CONFIG: Record<StoreId, { label: string; color: string }> = {
   'donut-equipment':    { label: 'Donut Equipment',  color: 'var(--cyan)' },
@@ -55,12 +55,45 @@ function positionBadgeColor(pos: number): string {
 }
 
 export function GscPerformance() {
+  const [gscMetrics] = usePersistentState<GscStoreMetrics[]>('seo.gscMetrics', []);
   const [store, setStore]         = useState<StoreId>('donut-equipment');
   const [dateRange, setDateRange] = useState<DateRange>('30d');
 
-  const storeData = GSC_METRICS.find(m => m.store === store)!;
-  const metrics   = storeData[dateRange];
+  const storeData = gscMetrics.find(m => m.store === store);
   const storeCfg  = STORE_CONFIG[store];
+
+  if (!storeData) {
+    return (
+      <div className='glass-card p-4'>
+        <div className='flex items-center gap-0.5 p-1 mb-4' style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: 10, width: 'fit-content' }}>
+          {STORES.map(s => {
+            const cfg    = STORE_CONFIG[s];
+            const active = store === s;
+            return (
+              <button
+                key={s}
+                onClick={() => setStore(s)}
+                className='px-3 py-1.5 text-base font-medium transition-all whitespace-nowrap'
+                style={{
+                  borderRadius: 7,
+                  background: active ? cfg.color + '18' : 'transparent',
+                  color: active ? cfg.color : 'var(--text-secondary)',
+                  border: active ? `1px solid ${cfg.color}35` : '1px solid transparent',
+                }}
+              >
+                {cfg.label}
+              </button>
+            );
+          })}
+        </div>
+        <div className='text-base text-center py-10' style={{ color: 'var(--text-muted)' }}>
+          No Search Console data connected for this store yet.
+        </div>
+      </div>
+    );
+  }
+
+  const metrics = storeData[dateRange];
 
   const kpis = [
     {

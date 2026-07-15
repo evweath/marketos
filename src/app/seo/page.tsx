@@ -9,9 +9,11 @@ import { OnSiteSeoAudit }    from '@/components/seo/OnSiteSeoAudit';
 import { AiBlogGenerator }   from '@/components/seo/AiBlogGenerator';
 import { CompetitorMonitor } from '@/components/seo/CompetitorMonitor';
 import { BrandMentions }     from '@/components/seo/BrandMentions';
-import { SEO_STATS } from '@/lib/seoData';
+import { computeSeoStats } from '@/lib/seoData';
+import type { KeywordRanking, GscStoreMetrics } from '@/lib/seoData';
+import { usePersistentState } from '@/lib/usePersistentState';
 import {
-  TrendingUp, TrendingDown, Search, MousePointer, Award,
+  Search, MousePointer, Award,
   Target, DollarSign, BarChart2, Wrench, PenSquare, Globe, MessageSquare,
 } from 'lucide-react';
 
@@ -33,61 +35,44 @@ function currency(n: number): string {
 interface StatCard {
   label: string;
   value: string;
-  delta: number;
-  deltaLabel: string;
   icon: typeof Search;
   color: string;
-  lowerIsBetter?: boolean;
-  deltaIsAbsolute?: boolean;
 }
 
 export default function SeoPage() {
   const [activeTab, setActiveTab] = useState<Tab>('keywords');
-  const s = SEO_STATS;
+  const [keywords] = usePersistentState<KeywordRanking[]>('seo.keywordRankings', []);
+  const [gscMetrics] = usePersistentState<GscStoreMetrics[]>('seo.gscMetrics', []);
+  const s = computeSeoStats(keywords, gscMetrics);
 
   const statCards: StatCard[] = [
     {
       label: 'Avg Position',
-      value: s.avgPosition.toFixed(1),
-      delta: s.avgPositionDelta,
-      deltaLabel: 'vs prior 30d',
+      value: s.avgPosition > 0 ? s.avgPosition.toFixed(1) : '—',
       icon: Target,
       color: 'var(--cyan)',
-      lowerIsBetter: true,
-      deltaIsAbsolute: true,
     },
     {
       label: 'Total Keywords',
       value: s.totalKeywords.toLocaleString(),
-      delta: s.totalKeywordsDelta,
-      deltaLabel: 'this month',
       icon: Search,
       color: '#7b93ff',
-      deltaIsAbsolute: true,
     },
     {
       label: 'Top 3 Rankings',
       value: s.top3Count.toLocaleString(),
-      delta: s.top3Delta,
-      deltaLabel: 'vs prior 30d',
       icon: Award,
       color: '#10d98a',
-      deltaIsAbsolute: true,
     },
     {
       label: 'Top 10 Rankings',
       value: s.top10Count.toLocaleString(),
-      delta: s.top10Delta,
-      deltaLabel: 'vs prior 30d',
       icon: MousePointer,
       color: '#ffb347',
-      deltaIsAbsolute: true,
     },
     {
       label: 'Organic Revenue (30d)',
       value: currency(s.organicRevenue30d),
-      delta: s.revenueDelta,
-      deltaLabel: 'vs prior 30d',
       icon: DollarSign,
       color: '#10d98a',
     },
@@ -107,14 +92,7 @@ export default function SeoPage() {
           {/* Stats bar */}
           <div className='grid grid-cols-5 gap-3 mb-5'>
             {statCards.map(card => {
-              const Icon     = card.icon;
-              const positive = card.delta >= 0;
-              const isGood   = card.lowerIsBetter ? !positive : positive;
-              const sign     = card.delta >= 0 ? '+' : '';
-              const deltaDisplay = card.deltaIsAbsolute
-                ? `${sign}${card.delta}`
-                : `${sign}${card.delta.toFixed(1)}%`;
-
+              const Icon = card.icon;
               return (
                 <div key={card.label} className='glass-card px-4 py-3.5 relative overflow-hidden'>
                   {/* Glow blob */}
@@ -134,19 +112,10 @@ export default function SeoPage() {
                   </div>
 
                   <div
-                    className='font-bold text-2xl mb-2 leading-none'
+                    className='font-bold text-2xl leading-none'
                     style={{ fontFamily: 'DM Mono', color: card.color }}
                   >
                     {card.value}
-                  </div>
-
-                  <div
-                    className='flex items-center gap-1 text-[16px] font-mono'
-                    style={{ color: isGood ? '#10d98a' : '#ff4444' }}
-                  >
-                    {isGood ? <TrendingUp size={9} /> : <TrendingDown size={9} />}
-                    <span>{deltaDisplay}</span>
-                    <span className='ml-1' style={{ color: 'var(--text-muted)' }}>{card.deltaLabel}</span>
                   </div>
                 </div>
               );
