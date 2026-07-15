@@ -7,8 +7,12 @@ import TopBar from '@/components/layout/TopBar';
 import CampaignTable from '@/components/ads/CampaignTable';
 import CampaignDetail from '@/components/ads/CampaignDetail';
 import { AutomationRulesPanel, AccountHealthAudit } from '@/components/ads/AdsAutomation';
-import { computeCampaignTotals } from '@/lib/campaignData';
-import type { Campaign, HealthCheckItem } from '@/lib/campaignData';
+import { computeCampaignTotals, NEG_KEYWORD_CAMPAIGNS } from '@/lib/campaignData';
+import type {
+  Campaign, HealthCheckItem, ABTest, ABStatus, AudienceOverlap, NegKeyword, MatchType, NegKeywordSuggestion,
+} from '@/lib/campaignData';
+import { useStores, useStoreScope, resolveStoreId } from '@/lib/storeScope';
+import { StoreScopeBar } from '@/components/shared/StoreScopeBar';
 import {
   BarChart2, Zap, Shield, FlaskConical, Users, XCircle,
   Play, Pause, Trophy, TrendingUp, TrendingDown, AlertTriangle,
@@ -32,56 +36,6 @@ const TABS: { key: Tab; label: string; icon: any }[] = [
 
 // ─── A/B Testing ──────────────────────────────────────────────────────────────
 
-type ABStatus = 'running' | 'winner_found' | 'paused' | 'scheduled';
-type Variant = { id: string; label: string; name: string; impressions: number; ctr: number; cpa: number; roas: number; spend: number; isWinner?: boolean; autoPaused?: boolean };
-interface ABTest {
-  id: string;
-  name: string;
-  campaign: string;
-  platform: 'Meta' | 'Google';
-  status: ABStatus;
-  confidence: number;
-  startDate: string;
-  endDate?: string;
-  variants: Variant[];
-  metric: string;
-}
-
-const INITIAL_AB_TESTS: ABTest[] = [
-  {
-    id: 'ab-001', name: 'Donut Fryer — Headline Copy', campaign: 'Spring Sale — Donut Equipment', platform: 'Meta', status: 'winner_found',
-    confidence: 97, startDate: '2026-05-01', endDate: '2026-05-10', metric: 'CPA',
-    variants: [
-      { id: 'v1', label: 'Control',    name: 'Shop Pro Donut Fryers — Free Shipping', impressions: 42800, ctr: 2.1, cpa: 38.40, roas: 4.2, spend: 1840 },
-      { id: 'v2', label: 'Challenger', name: 'Get Commercial-Grade Donuts Ready in 90 Sec', impressions: 43200, ctr: 3.4, cpa: 24.80, roas: 6.1, spend: 1790, isWinner: true },
-    ],
-  },
-  {
-    id: 'ab-002', name: 'Glaze Kit — Creative Format', campaign: 'Bakery Wholesale — Supplies', platform: 'Meta', status: 'running',
-    confidence: 72, startDate: '2026-05-08', metric: 'ROAS',
-    variants: [
-      { id: 'v1', label: 'Control',    name: 'Static Image — Product on White', impressions: 18400, ctr: 1.8, cpa: 44.20, roas: 3.8, spend: 920 },
-      { id: 'v2', label: 'Challenger', name: 'Video — 15-sec Recipe Demo',       impressions: 19100, ctr: 2.3, cpa: 39.60, roas: 4.2, spend: 890 },
-    ],
-  },
-  {
-    id: 'ab-003', name: 'Equipment — Audience Targeting', campaign: 'Google — Branded Search', platform: 'Google', status: 'running',
-    confidence: 61, startDate: '2026-05-06', metric: 'CTR',
-    variants: [
-      { id: 'v1', label: 'Control',    name: 'Broad Match + Smart Bidding', impressions: 28600, ctr: 3.9, cpa: 52.10, roas: 3.1, spend: 1420 },
-      { id: 'v2', label: 'Challenger', name: 'Exact Match + Target CPA',    impressions: 27200, ctr: 5.1, cpa: 41.80, roas: 3.9, spend: 1380 },
-    ],
-  },
-  {
-    id: 'ab-004', name: 'Wholesale — CTA Button Text', campaign: 'Bakery Wholesale — Retargeting', platform: 'Meta', status: 'paused',
-    confidence: 45, startDate: '2026-04-28', endDate: '2026-05-05', metric: 'CTR',
-    variants: [
-      { id: 'v1', label: 'Control',    name: '"Shop Now"',   impressions: 8400,  ctr: 1.2, cpa: 61.40, roas: 2.8, spend: 480, autoPaused: true },
-      { id: 'v2', label: 'Challenger', name: '"Get a Quote"', impressions: 8100, ctr: 1.6, cpa: 55.20, roas: 3.1, spend: 470 },
-    ],
-  },
-];
-
 const STATUS_CONFIG: Record<ABStatus, { label: string; color: string; bg: string }> = {
   running:      { label: 'Running',      color: '#10d98a', bg: 'rgba(16,217,138,.12)' },
   winner_found: { label: 'Winner Found', color: '#7b93ff', bg: 'rgba(123,147,255,.12)' },
@@ -90,7 +44,7 @@ const STATUS_CONFIG: Record<ABStatus, { label: string; color: string; bg: string
 };
 
 function ABTestingPanel() {
-  const [tests, setTests] = usePersistentState<ABTest[]>('ads.abTests', INITIAL_AB_TESTS);
+  const [tests, setTests] = usePersistentState<ABTest[]>('ads.abTests', []);
   const [expanded, setExpanded] = useState<string | null>('ab-001');
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
@@ -170,6 +124,11 @@ function ABTestingPanel() {
       )}
 
       <div className="flex flex-col gap-3">
+        {tests.length === 0 && (
+          <div className="glass-card p-8 text-center" style={{ color: 'var(--text-muted)' }}>
+            No A/B tests yet — click New Test to create one.
+          </div>
+        )}
         {tests.map(test => {
           const st = STATUS_CONFIG[test.status];
           const isOpen = expanded === test.id;
@@ -251,33 +210,14 @@ function ABTestingPanel() {
 
 // ─── Audience Overlap ─────────────────────────────────────────────────────────
 
-interface AudienceOverlap {
-  id: string;
-  set1: string;
-  set2: string;
-  campaign1: string;
-  campaign2: string;
-  overlapPct: number;
-  platform: 'Meta' | 'Google';
-  impact: 'high' | 'medium' | 'low';
-  recommendation: string;
-}
-
-const OVERLAPS: AudienceOverlap[] = [
-  { id: 'ov-1', set1: 'Lookalike 1% — Purchasers', set2: 'Lookalike 2% — Purchasers', campaign1: 'Spring Sale — Equipment', campaign2: 'Retargeting — Equipment', overlapPct: 68, platform: 'Meta', impact: 'high', recommendation: 'Exclude Lookalike 1% from the Retargeting campaign to stop internal auction competition.' },
-  { id: 'ov-2', set1: 'Website Visitors 30d', set2: 'Website Visitors 60d', campaign1: 'Retargeting — Supplies', campaign2: 'Awareness — Supplies', overlapPct: 84, platform: 'Meta', impact: 'high', recommendation: 'Add "Website Visitors 30d" as an exclusion to the Awareness campaign audience.' },
-  { id: 'ov-3', set1: 'Interest: Commercial Baking', set2: 'Interest: Food Manufacturing', campaign1: 'Awareness — Wholesale', campaign2: 'Prospecting — Equipment', overlapPct: 42, platform: 'Meta', impact: 'medium', recommendation: 'Consider consolidating these interests into a single campaign to avoid bid inflation.' },
-  { id: 'ov-4', set1: 'Customer Match — All Customers', set2: 'In-Market: Commercial Kitchen', campaign1: 'RLSA — Google', campaign2: 'Prospecting — Google', overlapPct: 31, platform: 'Google', impact: 'low', recommendation: 'Low overlap — no action needed. Monitor if campaigns scale.' },
-  { id: 'ov-5', set1: 'Cart Abandoners 14d', set2: 'Cart Abandoners 30d', campaign1: 'Cart Recovery — Meta', campaign2: 'Retargeting — Equipment', overlapPct: 76, platform: 'Meta', impact: 'high', recommendation: 'Exclude Cart Abandoners 14d from the broader 30d retargeting campaign.' },
-];
-
 const IMPACT_COLOR = { high: '#ff4444', medium: '#ffb347', low: '#10d98a' };
 
 function AudienceOverlapPanel() {
+  const [overlaps] = usePersistentState<AudienceOverlap[]>('ads.audienceOverlaps', []);
   const [filter, setFilter] = useState<'all' | 'Meta' | 'Google'>('all');
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
 
-  const visible = OVERLAPS.filter(o =>
+  const visible = overlaps.filter(o =>
     !dismissed.has(o.id) && (filter === 'all' || o.platform === filter)
   );
   const highCount = visible.filter(o => o.impact === 'high').length;
@@ -353,9 +293,13 @@ function AudienceOverlapPanel() {
         ))}
         {visible.length === 0 && (
           <div className="glass-card p-8 text-center">
-            <CheckCircle2 size={32} className="mx-auto mb-2" style={{ color: '#10d98a' }} />
-            <div className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>No overlaps detected</div>
-            <div className="section-label mt-1">All audiences are clean — no internal auction competition.</div>
+            <CheckCircle2 size={32} className="mx-auto mb-2" style={{ color: overlaps.length === 0 ? 'var(--text-muted)' : '#10d98a' }} />
+            <div className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>
+              {overlaps.length === 0 ? 'No audience overlap analysis yet' : 'No overlaps detected'}
+            </div>
+            <div className="section-label mt-1">
+              {overlaps.length === 0 ? 'Connect an ad platform to start detecting audience overlaps.' : 'All audiences are clean — no internal auction competition.'}
+            </div>
           </div>
         )}
       </div>
@@ -365,38 +309,16 @@ function AudienceOverlapPanel() {
 
 // ─── Negative Keywords ────────────────────────────────────────────────────────
 
-type MatchType = 'exact' | 'phrase' | 'broad';
-interface NegKeyword { id: string; keyword: string; matchType: MatchType; campaign: string; addedDate: string; impressionsBlocked?: number }
-
-const CAMPAIGNS_GOOGLE = ['Google — Branded Search', 'Google — Competitor Conquest', 'Google — Shopping — Equipment', 'Google — Shopping — Supplies', 'Google — Display Retargeting'];
-
-const INITIAL_NEG_KWS: NegKeyword[] = [
-  { id: 'nk-1',  keyword: 'free',           matchType: 'broad',  campaign: 'Google — Branded Search',       addedDate: '2026-04-10', impressionsBlocked: 8420 },
-  { id: 'nk-2',  keyword: 'diy donut',       matchType: 'phrase', campaign: 'Google — Branded Search',       addedDate: '2026-04-10', impressionsBlocked: 2140 },
-  { id: 'nk-3',  keyword: 'home donut maker', matchType: 'exact', campaign: 'Google — Shopping — Equipment', addedDate: '2026-04-15', impressionsBlocked: 4870 },
-  { id: 'nk-4',  keyword: 'recipe',          matchType: 'broad',  campaign: 'Google — Shopping — Supplies',  addedDate: '2026-04-20', impressionsBlocked: 12300 },
-  { id: 'nk-5',  keyword: 'how to make',     matchType: 'phrase', campaign: 'Google — Shopping — Supplies',  addedDate: '2026-04-20', impressionsBlocked: 6800 },
-  { id: 'nk-6',  keyword: 'donut shop near me', matchType: 'phrase', campaign: 'Google — Competitor Conquest', addedDate: '2026-04-22', impressionsBlocked: 9400 },
-  { id: 'nk-7',  keyword: 'retail',          matchType: 'broad',  campaign: 'Google — Shopping — Equipment', addedDate: '2026-04-25', impressionsBlocked: 3200 },
-  { id: 'nk-8',  keyword: 'used equipment',  matchType: 'phrase', campaign: 'Google — Shopping — Equipment', addedDate: '2026-04-28', impressionsBlocked: 5600 },
-];
-
-const SUGGESTIONS = [
-  { keyword: 'cheap', matchType: 'broad' as MatchType, reason: 'Attracts low-intent traffic unlikely to convert at commercial pricing.' },
-  { keyword: 'repair', matchType: 'phrase' as MatchType, reason: 'Triggers for service queries — irrelevant to new equipment sales.' },
-  { keyword: 'small batch', matchType: 'phrase' as MatchType, reason: 'Indicates hobbyist intent, not commercial buyers.' },
-  { keyword: 'rent', matchType: 'exact' as MatchType, reason: 'Equipment rental queries waste spend on purchase campaigns.' },
-];
-
 const MATCH_COLOR: Record<MatchType, string> = { exact: '#7b93ff', phrase: '#00d9ff', broad: '#ffb347' };
 const MATCH_TEXT_COLOR: Record<MatchType, string> = { exact: '#7b93ff', phrase: 'var(--cyan)', broad: 'var(--amber)' };
 
 function NegativeKeywordsPanel() {
-  const [keywords, setKeywords] = usePersistentState<NegKeyword[]>('ads.negativeKeywords', INITIAL_NEG_KWS);
+  const [keywords, setKeywords] = usePersistentState<NegKeyword[]>('ads.negativeKeywords', []);
+  const [suggestions] = usePersistentState<NegKeywordSuggestion[]>('ads.negativeKeywordSuggestions', []);
   const [filterCampaign, setFilterCampaign] = useState<string>('all');
   const [newKw, setNewKw] = useState('');
   const [newMatch, setNewMatch] = useState<MatchType>('exact');
-  const [newCampaign, setNewCampaign] = useState(CAMPAIGNS_GOOGLE[0]);
+  const [newCampaign, setNewCampaign] = useState(NEG_KEYWORD_CAMPAIGNS[0]);
   const [bulkText, setBulkText] = useState('');
   const [showBulk, setShowBulk] = useState(false);
 
@@ -427,7 +349,7 @@ function NegativeKeywordsPanel() {
     setBulkText(''); setShowBulk(false);
   };
 
-  const addSuggestion = (s: typeof SUGGESTIONS[0]) => {
+  const addSuggestion = (s: NegKeywordSuggestion) => {
     const kw: NegKeyword = {
       id: `nk-sug-${Date.now()}`, keyword: s.keyword, matchType: s.matchType, campaign: newCampaign,
       addedDate: new Date().toISOString().slice(0, 10),
@@ -470,7 +392,7 @@ function NegativeKeywordsPanel() {
               </select>
               <select value={newCampaign} onChange={e => setNewCampaign(e.target.value)}
                 className="px-2 py-1.5 rounded-lg text-base flex-[2]" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
-                {CAMPAIGNS_GOOGLE.map(c => <option key={c} value={c}>{c}</option>)}
+                {NEG_KEYWORD_CAMPAIGNS.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
               <button onClick={addBulk} className="px-3 py-1.5 rounded-lg text-base font-medium whitespace-nowrap" style={{ background: 'var(--accent-blue)', color: '#fff' }}>Import {bulkText.split('\n').filter(l => l.trim()).length}</button>
             </div>
@@ -487,7 +409,7 @@ function NegativeKeywordsPanel() {
             </select>
             <select value={newCampaign} onChange={e => setNewCampaign(e.target.value)}
               className="px-2 py-1.5 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
-              {CAMPAIGNS_GOOGLE.map(c => <option key={c} value={c}>{c}</option>)}
+              {NEG_KEYWORD_CAMPAIGNS.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
             <button onClick={addKeyword} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-base font-medium" style={{ background: 'var(--accent-blue)', color: '#fff' }}>
               <Plus size={12} /> Add
@@ -504,7 +426,7 @@ function NegativeKeywordsPanel() {
           <span className="section-label">— based on search term reports</span>
         </div>
         <div className="flex flex-col gap-2">
-          {SUGGESTIONS.filter(s => !keywords.find(k => k.keyword === s.keyword)).map(s => (
+          {suggestions.filter(s => !keywords.find(k => k.keyword === s.keyword)).map(s => (
             <div key={s.keyword} className="flex items-center gap-3 rounded-lg p-2.5" style={{ background: 'var(--bg-base)' }}>
               <span className="text-base px-1.5 py-0.5 rounded font-mono font-medium" style={{ color: MATCH_COLOR[s.matchType], background: `${MATCH_COLOR[s.matchType]}18` }}>[{s.matchType}]</span>
               <span className="text-base font-medium flex-1" style={{ color: 'var(--text-primary)' }}>{s.keyword}</span>
@@ -514,7 +436,7 @@ function NegativeKeywordsPanel() {
               </button>
             </div>
           ))}
-          {SUGGESTIONS.filter(s => !keywords.find(k => k.keyword === s.keyword)).length === 0 && (
+          {suggestions.filter(s => !keywords.find(k => k.keyword === s.keyword)).length === 0 && (
             <div className="text-base text-center py-2" style={{ color: 'var(--text-muted)' }}>All suggestions have been added.</div>
           )}
         </div>
@@ -527,7 +449,7 @@ function NegativeKeywordsPanel() {
           <select value={filterCampaign} onChange={e => setFilterCampaign(e.target.value)}
             className="px-2 py-1 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
             <option value="all">All Campaigns</option>
-            {CAMPAIGNS_GOOGLE.map(c => <option key={c} value={c}>{c}</option>)}
+            {NEG_KEYWORD_CAMPAIGNS.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
         <div className="overflow-y-auto" style={{ maxHeight: 340 }}>
@@ -571,8 +493,11 @@ function NegativeKeywordsPanel() {
 export default function AdsPage() {
   const [tab, setTab]           = useState<Tab>('campaigns');
   const [selected, setSelected] = useState<Campaign | null>(null);
-  const [campaigns]   = usePersistentState<Campaign[]>('ads.campaigns', []);
+  const [stores] = useStores();
+  const { selectedStoreIds } = useStoreScope('ads');
+  const [allCampaigns]   = usePersistentState<Campaign[]>('ads.campaigns', []);
   const [healthChecks] = usePersistentState<HealthCheckItem[]>('ads.healthChecks', []);
+  const campaigns = allCampaigns.filter(c => selectedStoreIds.includes(resolveStoreId(c.store, stores) ?? ''));
   const t = computeCampaignTotals(campaigns, healthChecks);
   const blendedRoas = t.totalSpend > 0 ? (t.totalRevenue / t.totalSpend).toFixed(2) + '×' : '—';
 
@@ -582,6 +507,8 @@ export default function AdsPage() {
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <TopBar title="Ad Campaigns" subtitle={`${t.activeCampaigns} active`} breadcrumbs={['MarketOS', 'Ads']} />
         <main className="flex-1 overflow-hidden flex flex-col p-5 gap-4" style={{ minHeight: 0 }}>
+
+          <div className="shrink-0"><StoreScopeBar sectionKey="ads" /></div>
 
           <div className="grid grid-cols-5 gap-3 shrink-0">
             {[
@@ -620,7 +547,7 @@ export default function AdsPage() {
           {tab === 'campaigns' && (
             <div className="flex gap-4 flex-1 min-h-0">
               <div className="flex-1 min-w-0 flex flex-col min-h-0">
-                <CampaignTable onSelectCampaign={setSelected} selected={selected} />
+                <CampaignTable onSelectCampaign={setSelected} selected={selected} selectedStoreIds={selectedStoreIds} />
               </div>
               {selected && (
                 <div style={{ width: 360, flexShrink: 0 }}>

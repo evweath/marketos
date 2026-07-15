@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp, Zap, Megaphone } from 'lucide-react';
 import { usePersistentState } from '@/lib/usePersistentState';
 import { AD_PLATFORM_CONFIG, STATUS_CONFIG, AD_PLATFORM_STARTED } from '@/lib/campaignData';
 import type { Campaign, AdPlatform, CampaignStatus } from '@/lib/campaignData';
+import { useStores, resolveStoreId } from '@/lib/storeScope';
 
 const c$ = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
@@ -26,6 +27,7 @@ type SortKey = 'name' | 'spendToDate' | 'revenue' | 'roas' | 'conversions' | 'cp
 interface Props {
   onSelectCampaign: (c: Campaign) => void;
   selected: Campaign | null;
+  selectedStoreIds: string[];
 }
 
 const PLATFORM_TABS: { key: AdPlatform | 'all'; label: string }[] = [
@@ -55,12 +57,15 @@ const COLS: { key: SortKey; label: string }[] = [
   { key: 'cpa',         label: 'CPA'     },
 ];
 
-export default function CampaignTable({ onSelectCampaign, selected }: Props) {
-  const [allCampaigns] = usePersistentState<Campaign[]>('ads.campaigns', []);
+export default function CampaignTable({ onSelectCampaign, selected, selectedStoreIds }: Props) {
+  const [stores] = useStores();
+  const [allStoreCampaigns] = usePersistentState<Campaign[]>('ads.campaigns', []);
   const [platform, setPlatform] = useState<AdPlatform | 'all'>('all');
   const [status,   setStatus]   = useState<CampaignStatus | 'all'>('all');
   const [sortKey,  setSortKey]  = useState<SortKey>('revenue');
   const [sortDir,  setSortDir]  = useState<'asc' | 'desc'>('desc');
+
+  const allCampaigns = allStoreCampaigns.filter(c => selectedStoreIds.includes(resolveStoreId(c.store, stores) ?? ''));
 
   const campaigns = allCampaigns
     .filter(c => platform === 'all' || c.platform === platform)
@@ -292,12 +297,20 @@ export default function CampaignTable({ onSelectCampaign, selected }: Props) {
             {campaigns.length === 0 && (
               <tr>
                 <td colSpan={11} className='px-4 py-10 text-center'>
-                  {allCampaigns.length === 0 ? (
+                  {allStoreCampaigns.length === 0 ? (
                     <>
                       <Megaphone size={22} className='mx-auto mb-2' style={{ color: 'var(--text-muted)' }} />
                       <div className='text-base font-medium' style={{ color: 'var(--text-primary)' }}>No campaigns yet</div>
                       <div className='text-[16px] mt-1' style={{ color: 'var(--text-muted)' }}>
                         Connect an ad platform for a store to start pulling in campaign data.
+                      </div>
+                    </>
+                  ) : allCampaigns.length === 0 ? (
+                    <>
+                      <Megaphone size={22} className='mx-auto mb-2' style={{ color: 'var(--text-muted)' }} />
+                      <div className='text-base font-medium' style={{ color: 'var(--text-primary)' }}>No campaigns for the selected store{selectedStoreIds.length !== 1 ? 's' : ''}</div>
+                      <div className='text-[16px] mt-1' style={{ color: 'var(--text-muted)' }}>
+                        Try selecting a different store, or All Stores.
                       </div>
                     </>
                   ) : (

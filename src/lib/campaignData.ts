@@ -289,6 +289,110 @@ export const SAMPLE_HEALTH_CHECKS: HealthCheckItem[] = [
   { id: 'hc-012', platform: 'meta', category: 'Policy', check: 'Ad Account Standing', status: 'pass', detail: 'Account in Good Standing — no active policy flags or restrictions', priority: 'high' },
 ];
 
+// ─── A/B Tests ────────────────────────────────────────────────────────────────
+// Variants are transitively store-scoped via their parent campaign's `store`
+// field (matched by `campaign` name here) — no own store field needed.
+
+export type ABStatus = 'running' | 'winner_found' | 'paused' | 'scheduled';
+export interface ABVariant { id: string; label: string; name: string; impressions: number; ctr: number; cpa: number; roas: number; spend: number; isWinner?: boolean; autoPaused?: boolean }
+export interface ABTest {
+  id: string;
+  name: string;
+  campaign: string;
+  platform: 'Meta' | 'Google';
+  status: ABStatus;
+  confidence: number;
+  startDate: string;
+  endDate?: string;
+  variants: ABVariant[];
+  metric: string;
+}
+
+export const SAMPLE_AB_TESTS: ABTest[] = [
+  {
+    id: 'ab-001', name: 'Donut Fryer — Headline Copy', campaign: 'Spring Sale — Donut Equipment', platform: 'Meta', status: 'winner_found',
+    confidence: 97, startDate: '2026-05-01', endDate: '2026-05-10', metric: 'CPA',
+    variants: [
+      { id: 'v1', label: 'Control',    name: 'Shop Pro Donut Fryers — Free Shipping', impressions: 42800, ctr: 2.1, cpa: 38.40, roas: 4.2, spend: 1840 },
+      { id: 'v2', label: 'Challenger', name: 'Get Commercial-Grade Donuts Ready in 90 Sec', impressions: 43200, ctr: 3.4, cpa: 24.80, roas: 6.1, spend: 1790, isWinner: true },
+    ],
+  },
+  {
+    id: 'ab-002', name: 'Glaze Kit — Creative Format', campaign: 'Bakery Wholesale — Supplies', platform: 'Meta', status: 'running',
+    confidence: 72, startDate: '2026-05-08', metric: 'ROAS',
+    variants: [
+      { id: 'v1', label: 'Control',    name: 'Static Image — Product on White', impressions: 18400, ctr: 1.8, cpa: 44.20, roas: 3.8, spend: 920 },
+      { id: 'v2', label: 'Challenger', name: 'Video — 15-sec Recipe Demo',       impressions: 19100, ctr: 2.3, cpa: 39.60, roas: 4.2, spend: 890 },
+    ],
+  },
+  {
+    id: 'ab-003', name: 'Equipment — Audience Targeting', campaign: 'Google — Branded Search', platform: 'Google', status: 'running',
+    confidence: 61, startDate: '2026-05-06', metric: 'CTR',
+    variants: [
+      { id: 'v1', label: 'Control',    name: 'Broad Match + Smart Bidding', impressions: 28600, ctr: 3.9, cpa: 52.10, roas: 3.1, spend: 1420 },
+      { id: 'v2', label: 'Challenger', name: 'Exact Match + Target CPA',    impressions: 27200, ctr: 5.1, cpa: 41.80, roas: 3.9, spend: 1380 },
+    ],
+  },
+  {
+    id: 'ab-004', name: 'Wholesale — CTA Button Text', campaign: 'Bakery Wholesale — Retargeting', platform: 'Meta', status: 'paused',
+    confidence: 45, startDate: '2026-04-28', endDate: '2026-05-05', metric: 'CTR',
+    variants: [
+      { id: 'v1', label: 'Control',    name: '"Shop Now"',   impressions: 8400,  ctr: 1.2, cpa: 61.40, roas: 2.8, spend: 480, autoPaused: true },
+      { id: 'v2', label: 'Challenger', name: '"Get a Quote"', impressions: 8100, ctr: 1.6, cpa: 55.20, roas: 3.1, spend: 470 },
+    ],
+  },
+];
+
+// ─── Audience Overlap ─────────────────────────────────────────────────────────
+// Platform/ad-account-level analysis, not tied to a single store — same
+// exception class as AutomationRule/HealthCheckItem above.
+
+export interface AudienceOverlap {
+  id: string;
+  set1: string;
+  set2: string;
+  campaign1: string;
+  campaign2: string;
+  overlapPct: number;
+  platform: 'Meta' | 'Google';
+  impact: 'high' | 'medium' | 'low';
+  recommendation: string;
+}
+
+export const SAMPLE_AUDIENCE_OVERLAPS: AudienceOverlap[] = [
+  { id: 'ov-1', set1: 'Lookalike 1% — Purchasers', set2: 'Lookalike 2% — Purchasers', campaign1: 'Spring Sale — Equipment', campaign2: 'Retargeting — Equipment', overlapPct: 68, platform: 'Meta', impact: 'high', recommendation: 'Exclude Lookalike 1% from the Retargeting campaign to stop internal auction competition.' },
+  { id: 'ov-2', set1: 'Website Visitors 30d', set2: 'Website Visitors 60d', campaign1: 'Retargeting — Supplies', campaign2: 'Awareness — Supplies', overlapPct: 84, platform: 'Meta', impact: 'high', recommendation: 'Add "Website Visitors 30d" as an exclusion to the Awareness campaign audience.' },
+  { id: 'ov-3', set1: 'Interest: Commercial Baking', set2: 'Interest: Food Manufacturing', campaign1: 'Awareness — Wholesale', campaign2: 'Prospecting — Equipment', overlapPct: 42, platform: 'Meta', impact: 'medium', recommendation: 'Consider consolidating these interests into a single campaign to avoid bid inflation.' },
+  { id: 'ov-4', set1: 'Customer Match — All Customers', set2: 'In-Market: Commercial Kitchen', campaign1: 'RLSA — Google', campaign2: 'Prospecting — Google', overlapPct: 31, platform: 'Google', impact: 'low', recommendation: 'Low overlap — no action needed. Monitor if campaigns scale.' },
+  { id: 'ov-5', set1: 'Cart Abandoners 14d', set2: 'Cart Abandoners 30d', campaign1: 'Cart Recovery — Meta', campaign2: 'Retargeting — Equipment', overlapPct: 76, platform: 'Meta', impact: 'high', recommendation: 'Exclude Cart Abandoners 14d from the broader 30d retargeting campaign.' },
+];
+
+// ─── Negative Keywords (Google account-level) ────────────────────────────────
+
+export type MatchType = 'exact' | 'phrase' | 'broad';
+export interface NegKeyword { id: string; keyword: string; matchType: MatchType; campaign: string; addedDate: string; impressionsBlocked?: number }
+export interface NegKeywordSuggestion { keyword: string; matchType: MatchType; reason: string }
+
+export const NEG_KEYWORD_CAMPAIGNS = ['Google — Branded Search', 'Google — Competitor Conquest', 'Google — Shopping — Equipment', 'Google — Shopping — Supplies', 'Google — Display Retargeting'];
+
+export const SAMPLE_NEG_KEYWORDS: NegKeyword[] = [
+  { id: 'nk-1',  keyword: 'free',           matchType: 'broad',  campaign: 'Google — Branded Search',       addedDate: '2026-04-10', impressionsBlocked: 8420 },
+  { id: 'nk-2',  keyword: 'diy donut',       matchType: 'phrase', campaign: 'Google — Branded Search',       addedDate: '2026-04-10', impressionsBlocked: 2140 },
+  { id: 'nk-3',  keyword: 'home donut maker', matchType: 'exact', campaign: 'Google — Shopping — Equipment', addedDate: '2026-04-15', impressionsBlocked: 4870 },
+  { id: 'nk-4',  keyword: 'recipe',          matchType: 'broad',  campaign: 'Google — Shopping — Supplies',  addedDate: '2026-04-20', impressionsBlocked: 12300 },
+  { id: 'nk-5',  keyword: 'how to make',     matchType: 'phrase', campaign: 'Google — Shopping — Supplies',  addedDate: '2026-04-20', impressionsBlocked: 6800 },
+  { id: 'nk-6',  keyword: 'donut shop near me', matchType: 'phrase', campaign: 'Google — Competitor Conquest', addedDate: '2026-04-22', impressionsBlocked: 9400 },
+  { id: 'nk-7',  keyword: 'retail',          matchType: 'broad',  campaign: 'Google — Shopping — Equipment', addedDate: '2026-04-25', impressionsBlocked: 3200 },
+  { id: 'nk-8',  keyword: 'used equipment',  matchType: 'phrase', campaign: 'Google — Shopping — Equipment', addedDate: '2026-04-28', impressionsBlocked: 5600 },
+];
+
+export const SAMPLE_NEG_KEYWORD_SUGGESTIONS: NegKeywordSuggestion[] = [
+  { keyword: 'cheap', matchType: 'broad', reason: 'Attracts low-intent traffic unlikely to convert at commercial pricing.' },
+  { keyword: 'repair', matchType: 'phrase', reason: 'Triggers for service queries — irrelevant to new equipment sales.' },
+  { keyword: 'small batch', matchType: 'phrase', reason: 'Indicates hobbyist intent, not commercial buyers.' },
+  { keyword: 'rent', matchType: 'exact', reason: 'Equipment rental queries waste spend on purchase campaigns.' },
+];
+
 // ─── Computed Totals ──────────────────────────────────────────────────────────
 //
 // Computed from whatever campaigns/health checks currently exist (empty by
