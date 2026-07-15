@@ -5,7 +5,16 @@ import Sidebar from '@/components/layout/Sidebar';
 import TopBar from '@/components/layout/TopBar';
 import { usePersistentState } from '@/lib/usePersistentState';
 import { formatCurrency, formatMinutesAgo } from '@/lib/mockData';
-import { useStores } from '@/lib/storeScope';
+import { useStores, useStoreScope, resolveStoreId } from '@/lib/storeScope';
+import { StoreScopeBar } from '@/components/shared/StoreScopeBar';
+import {
+  SAMPLE_SEQUENCES, SAMPLE_RECOVERED_LIST, SAMPLE_UPSELL_OFFERS, SAMPLE_WATCH_PRODUCTS, SAMPLE_CUSTOMERS,
+  computeUpsellStats,
+} from '@/lib/cartData';
+import type {
+  RecoverySequence, RecoveredCart, UpsellOffer, UpsellType, UpsellStatus,
+  WatchProduct, StockStatus, CustomerInsight, ChurnRisk,
+} from '@/lib/cartData';
 import type { AbandonedCart } from '@/types';
 import {
   ShoppingCart, Mail, MessageSquare, Bell, TrendingUp, BarChart2, MapPin,
@@ -16,44 +25,6 @@ import {
 
 const c$ = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
 
-const SEQUENCES = [
-  {
-    id: 'seq-001', name: '3-Step Email + SMS Recovery', store: 'All Stores',
-    steps: [
-      { channel: 'email', delay: '1h',  subject: 'You left something behind 🛒',       openRate: 48.2, clickRate: 22.4, convRate: 6.8 },
-      { channel: 'sms',   delay: '3h',  subject: 'Cart reminder + 5% off code',        openRate: 94.1, clickRate: 38.2, convRate: 4.2 },
-      { channel: 'email', delay: '24h', subject: 'Last chance — your cart expires soon', openRate: 31.4, clickRate: 14.8, convRate: 3.1 },
-    ],
-    recovered30d: 62, revenue30d: 31840,
-  },
-  {
-    id: 'seq-002', name: 'High-Value ($2K+) Priority Recovery', store: 'donut-equipment.com',
-    steps: [
-      { channel: 'email', delay: '30m', subject: 'Your equipment order is waiting',       openRate: 61.4, clickRate: 31.2, convRate: 14.2 },
-      { channel: 'sms',   delay: '2h',  subject: 'Personal note from our team',          openRate: 97.2, clickRate: 48.4, convRate: 9.8  },
-      { channel: 'email', delay: '6h',  subject: 'Financing options for your order',     openRate: 44.8, clickRate: 22.1, convRate: 7.4  },
-    ],
-    recovered30d: 18, revenue30d: 32480,
-  },
-  {
-    id: 'seq-003', name: 'Browse Abandonment — Email Only', store: 'All Stores',
-    steps: [
-      { channel: 'email', delay: '4h',  subject: 'Still thinking about it?',            openRate: 32.1, clickRate: 11.4, convRate: 2.4 },
-      { channel: 'email', delay: '48h', subject: "Here's what other bakers chose",      openRate: 24.8, clickRate: 8.2,  convRate: 1.8 },
-    ],
-    recovered30d: 14, revenue30d: 4100,
-  },
-];
-
-const RECOVERED_LIST = [
-  { id: 'r-001', customer: 'Riverside Donuts LLC',   value: 2340, channel: 'SMS',   minutesAgo: 84  },
-  { id: 'r-002', customer: 'Sunrise Pastry Co',      value: 847,  channel: 'Email', minutesAgo: 142 },
-  { id: 'r-003', customer: 'Golden Grain Bakeries',  value: 5640, channel: 'SMS',   minutesAgo: 214 },
-  { id: 'r-004', customer: 'Metro Bread Corp',       value: 1240, channel: 'Email', minutesAgo: 284 },
-  { id: 'r-005', customer: 'Dunkin Alternatives',    value: 3420, channel: 'SMS',   minutesAgo: 412 },
-  { id: 'r-006', customer: 'Hole Foods Donut Bar',   value: 612,  channel: 'Push',  minutesAgo: 540 },
-];
-
 const CH_COLOR: Record<string, string> = { Email: '#ffb347', SMS: '#10d98a', Push: '#00d9ff' };
 const CH_ICON_MAP: Record<string, React.ElementType> = { email: Mail, sms: MessageSquare, push: Bell };
 const CH_COL_MAP: Record<string, string> = { email: '#ffb347', sms: '#10d98a', push: '#00d9ff' };
@@ -61,7 +32,9 @@ const CH_COL_MAP: Record<string, string> = { email: '#ffb347', sms: '#10d98a', p
 // ─── Exit-Intent Panel ────────────────────────────────────────────────────────
 
 function ExitIntentPanel() {
-  const EI_STATS = { shown: 4820, captured: 724, captureRate: 15.02, recovered: 412, conversionRate: 8.55, revenue: 38420, avgDiscount: '10%' };
+  // No exit-intent impression/conversion tracking model exists yet — zeroed
+  // honestly rather than fabricated until the popup is wired to real events.
+  const EI_STATS = { shown: 0, captured: 0, captureRate: 0, recovered: 0, conversionRate: 0, revenue: 0, avgDiscount: '10%' };
 
   const [enabled, setEnabled]             = usePersistentState('cart.exitIntent.enabled', true);
   const [headline, setHeadline]           = usePersistentState('cart.exitIntent.headline', "Wait! Don't leave yet...");
@@ -334,19 +307,19 @@ function ExitIntentPanel() {
         <div className="flex items-center justify-between mb-4">
           <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>A/B Testing</div>
           <div className="flex items-center gap-1.5">
-            <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#10d98a' }} />
-            <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Currently testing · started May 1, 2026</span>
+            <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--text-muted)' }} />
+            <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>No test running yet</span>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
           {[
             {
               variant: 'A', label: 'Control', headline: '"Wait! Don\'t leave yet..."',
-              offer: '10% off', traffic: '48.2%', conv: '8.2%', winner: true,
+              offer: '10% off', traffic: '0%', conv: '0%', winner: false,
             },
             {
               variant: 'B', label: 'Challenger', headline: '"Your cart is waiting..."',
-              offer: 'Free shipping', traffic: '51.8%', conv: '7.4%', winner: false,
+              offer: 'Free shipping', traffic: '0%', conv: '0%', winner: false,
             },
           ].map(v => (
             <div key={v.variant} className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: `1px solid ${v.winner ? 'rgba(16,217,138,0.3)' : 'var(--border-subtle)'}` }}>
@@ -385,36 +358,11 @@ function ExitIntentPanel() {
 
 // ─── Upsell Panel ─────────────────────────────────────────────────────────────
 
-type UpsellStatus = 'active' | 'paused';
-type UpsellType   = 'upsell' | 'cross-sell' | 'bundle';
-
-interface UpsellOffer {
-  id: string;
-  name: string;
-  type: UpsellType;
-  trigger: string;
-  offerProduct: string;
-  originalPrice: number;
-  offerPrice: number;
-  discount: string;
-  acceptRate: number;
-  revenue30d: number;
-  status: UpsellStatus;
-}
-
-const UPSELL_OFFERS: UpsellOffer[] = [
-  { id: 'u-001', name: 'Donut Fryer Oil Bundle',          type: 'cross-sell', trigger: 'After purchase of Donut Fryer',               offerProduct: 'Commercial Frying Oil 5L x3',    originalPrice: 89,   offerPrice: 72,   discount: '19% off', acceptRate: 18.4, revenue30d: 8420,  status: 'active' },
-  { id: 'u-002', name: 'Upgrade to Pro Package',          type: 'upsell',     trigger: 'After purchase of Standard Donut Equipment',  offerProduct: 'Pro Equipment Package',          originalPrice: 2400, offerPrice: 1980, discount: '17% off', acceptRate: 8.2,  revenue30d: 14200, status: 'active' },
-  { id: 'u-003', name: 'Starter Supply Bundle',           type: 'bundle',     trigger: 'First purchase from any store',               offerProduct: 'Essential Baking Supplies Bundle', originalPrice: 180, offerPrice: 139,  discount: '23% off', acceptRate: 22.1, revenue30d: 6840,  status: 'active' },
-  { id: 'u-004', name: 'Extended Warranty',               type: 'cross-sell', trigger: 'After purchase of any equipment',             offerProduct: 'Extended 3-Year Warranty',       originalPrice: 299,  offerPrice: 249,  discount: '17% off', acceptRate: 6.8,  revenue30d: 4200,  status: 'paused' },
-];
-
-const UPSELL_STATS = { upsellRevenue30d: 24840, acceptanceRate: 12.4, avgUpsellValue: 148, totalOffers: 847 };
-
 const TYPE_COLOR: Record<UpsellType, string> = { 'upsell': '#00d9ff', 'cross-sell': '#7b93ff', 'bundle': '#ffb347' };
 
 function UpsellPanel() {
-  const [offers, setOffers] = usePersistentState<UpsellOffer[]>('cart.upsellOffers', UPSELL_OFFERS);
+  const [offers, setOffers] = usePersistentState<UpsellOffer[]>('cart.upsellOffers', []);
+  const UPSELL_STATS = computeUpsellStats(offers);
   const [deletingId, setDeletingId]     = useState<string | null>(null);
   const [addOpen, setAddOpen]           = useState(false);
   const [editingId, setEditingId]       = useState<string | null>(null);
@@ -600,6 +548,11 @@ function UpsellPanel() {
         )}
 
         {/* Offer cards */}
+        {offers.length === 0 && (
+          <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>
+            No upsell offers yet — click Add Offer to create one.
+          </div>
+        )}
         <div className="space-y-3">
           {offers.map(offer => {
             const typeColor = TYPE_COLOR[offer.type];
@@ -685,44 +638,22 @@ function UpsellPanel() {
 
 // ─── Watchlists (Back-in-Stock + Price Drops) ─────────────────────────────────
 
-type StockStatus = 'out_of_stock' | 'low_stock' | 'in_stock';
-interface WatchProduct {
-  id: string;
-  name: string;
-  store: string;
-  sku: string;
-  currentPrice: number;
-  targetPrice?: number;
-  originalPrice?: number;
-  stockStatus: StockStatus;
-  watcherCount: number;
-  notificationsSent: number;
-  lastUpdated: string;
-}
-
-const WATCH_PRODUCTS: WatchProduct[] = [
-  { id: 'wp-1', name: 'Pro Series Donut Fryer 24"',      store: 'donut-equipment.com',   sku: 'DF-PRO-24',  currentPrice: 2499, targetPrice: 2200,            stockStatus: 'out_of_stock', watcherCount: 47, notificationsSent: 0,  lastUpdated: '2026-05-10' },
-  { id: 'wp-2', name: 'Commercial Donut Fryer — 18"',    store: 'donut-equipment.com',   sku: 'DF-COM-18',  currentPrice: 1649, targetPrice: 1500,            stockStatus: 'low_stock',    watcherCount: 31, notificationsSent: 0,  lastUpdated: '2026-05-12' },
-  { id: 'wp-3', name: 'Bulk Glaze Mix — Chocolate 50lb', store: 'donut-supplies.com',    sku: 'GM-CHOC-50', currentPrice: 124,  targetPrice: 99,              stockStatus: 'out_of_stock', watcherCount: 83, notificationsSent: 0,  lastUpdated: '2026-05-11' },
-  { id: 'wp-4', name: 'Yeast Donut Mix — 50lb Case',     store: 'donut-supplies.com',    sku: 'DM-YEAST-50',currentPrice: 189,  originalPrice: 220,           stockStatus: 'in_stock',     watcherCount: 22, notificationsSent: 22, lastUpdated: '2026-05-12' },
-  { id: 'wp-5', name: 'Bakery Proofing Cabinet — 4-Tray', store: 'bakerywholesalers.com', sku: 'PC-4T',     currentPrice: 899,  targetPrice: 750, originalPrice: 1099, stockStatus: 'in_stock', watcherCount: 15, notificationsSent: 15, lastUpdated: '2026-05-09' },
-  { id: 'wp-6', name: 'Cake Decorating Kit — Pro',       store: 'bakerywholesalers.com', sku: 'CK-DEC-PRO', currentPrice: 349,  targetPrice: 299,            stockStatus: 'out_of_stock', watcherCount: 29, notificationsSent: 0,  lastUpdated: '2026-05-08' },
-];
-
 const STOCK_CONFIG: Record<StockStatus, { label: string; color: string }> = {
   out_of_stock: { label: 'Out of Stock', color: '#ff4444' },
   low_stock:    { label: 'Low Stock',    color: '#ffb347' },
   in_stock:     { label: 'In Stock',     color: '#10d98a' },
 };
 
-function WatchlistsPanel() {
-  const [products, setProducts] = usePersistentState<WatchProduct[]>('cart.watchlists', WATCH_PRODUCTS);
+function WatchlistsPanel({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
+  const [allProducts, setProducts] = usePersistentState<WatchProduct[]>('cart.watchlists', []);
   const [filter, setFilter] = useState<StockStatus | 'all'>('all');
 
   const notify = (id: string) => {
     setProducts(prev => prev.map(p => p.id !== id ? p : { ...p, notificationsSent: p.notificationsSent + p.watcherCount }));
   };
 
+  const products = allProducts.filter(p => selectedStoreIds.includes(resolveStoreId(p.store, stores) ?? ''));
   const visible = filter === 'all' ? products : products.filter(p => p.stockStatus === filter);
   const totalWatchers = products.reduce((s, p) => s + p.watcherCount, 0);
   const outOfStock    = products.filter(p => p.stockStatus === 'out_of_stock');
@@ -776,6 +707,13 @@ function WatchlistsPanel() {
             </tr>
           </thead>
           <tbody>
+            {visible.length === 0 && (
+              <tr>
+                <td colSpan={7} className="px-3 py-6 text-center text-base" style={{ color: 'var(--text-muted)' }}>
+                  No watched products yet for the selected store{selectedStoreIds.length !== 1 ? 's' : ''}.
+                </td>
+              </tr>
+            )}
             {visible.map(p => {
               const sc = STOCK_CONFIG[p.stockStatus];
               const isPriceDrop = p.originalPrice && p.currentPrice < p.originalPrice;
@@ -830,46 +768,23 @@ function WatchlistsPanel() {
 
 // ─── Customer Insights (CLV + Churn) ──────────────────────────────────────────
 
-type ChurnRisk = 'high' | 'medium' | 'low';
-interface CustomerInsight {
-  id: string;
-  name: string;
-  email: string;
-  store: string;
-  clv: number;
-  totalOrders: number;
-  lastOrderDays: number;
-  avgOrderValue: number;
-  churnRisk: ChurnRisk;
-  repeatRate: number;
-  predictedNextOrder?: number;
-}
-
-const CUSTOMERS: CustomerInsight[] = [
-  { id: 'ci-1', name: 'Oak Street Bakery',    email: 'orders@oakstreet.com',    store: 'donut-equipment.com',   clv: 28400, totalOrders: 14, lastOrderDays: 8,  avgOrderValue: 2028, churnRisk: 'low',    repeatRate: 91, predictedNextOrder: 22 },
-  { id: 'ci-2', name: 'Metro Donuts LLC',      email: 'metro@metrodo.com',       store: 'donut-equipment.com',   clv: 19200, totalOrders: 9,  lastOrderDays: 34, avgOrderValue: 2133, churnRisk: 'medium', repeatRate: 72, predictedNextOrder: 14 },
-  { id: 'ci-3', name: 'Sweet Rings Co.',       email: 'buy@sweetrings.co',       store: 'donut-supplies.com',    clv: 6840,  totalOrders: 38, lastOrderDays: 12, avgOrderValue: 180,  churnRisk: 'low',    repeatRate: 88, predictedNextOrder: 18 },
-  { id: 'ci-4', name: 'Baker Bros Wholesale',  email: 'orders@bakerbros.net',    store: 'bakerywholesalers.com', clv: 14200, totalOrders: 21, lastOrderDays: 62, avgOrderValue: 676,  churnRisk: 'high',   repeatRate: 45, predictedNextOrder: undefined },
-  { id: 'ci-5', name: 'Sunrise Bakehouse',     email: 'hello@sunrisebh.com',     store: 'donut-supplies.com',    clv: 4100,  totalOrders: 8,  lastOrderDays: 91, avgOrderValue: 512,  churnRisk: 'high',   repeatRate: 28, predictedNextOrder: undefined },
-  { id: 'ci-6', name: 'Artisan Donut Works',   email: 'ops@artisandonut.com',    store: 'donut-equipment.com',   clv: 11800, totalOrders: 6,  lastOrderDays: 19, avgOrderValue: 1966, churnRisk: 'low',    repeatRate: 83, predictedNextOrder: 41 },
-  { id: 'ci-7', name: 'Golden Ring Suppliers', email: 'sales@goldenring.com',    store: 'bakerywholesalers.com', clv: 22100, totalOrders: 47, lastOrderDays: 4,  avgOrderValue: 470,  churnRisk: 'low',    repeatRate: 96, predictedNextOrder: 6  },
-  { id: 'ci-8', name: 'Central City Bakers',   email: 'central@ccbakers.com',    store: 'donut-supplies.com',    clv: 3200,  totalOrders: 5,  lastOrderDays: 78, avgOrderValue: 640,  churnRisk: 'high',   repeatRate: 31, predictedNextOrder: undefined },
-];
-
 const CHURN_CONFIG: Record<ChurnRisk, { label: string; color: string }> = {
   high:   { label: 'High Risk',   color: '#ff4444' },
   medium: { label: 'Medium Risk', color: '#ffb347' },
   low:    { label: 'Low Risk',    color: '#10d98a' },
 };
 
-function CustomerInsightsPanel() {
+function CustomerInsightsPanel({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
+  const [allCustomers] = usePersistentState<CustomerInsight[]>('cart.customers', []);
   const [sort, setSort] = useState<'clv' | 'churn' | 'days'>('clv');
   const [churnFilter, setChurnFilter] = useState<ChurnRisk | 'all'>('all');
 
+  const CUSTOMERS = allCustomers.filter(c => selectedStoreIds.includes(resolveStoreId(c.store, stores) ?? ''));
   const totalClv     = CUSTOMERS.reduce((s, c) => s + c.clv, 0);
-  const avgRepeat    = (CUSTOMERS.reduce((s, c) => s + c.repeatRate, 0) / CUSTOMERS.length).toFixed(1);
+  const avgRepeat    = CUSTOMERS.length > 0 ? (CUSTOMERS.reduce((s, c) => s + c.repeatRate, 0) / CUSTOMERS.length).toFixed(1) : '0.0';
   const highRisk     = CUSTOMERS.filter(c => c.churnRisk === 'high').length;
-  const avgClv       = Math.round(totalClv / CUSTOMERS.length);
+  const avgClv       = CUSTOMERS.length > 0 ? Math.round(totalClv / CUSTOMERS.length) : 0;
 
   const visible = (churnFilter === 'all' ? CUSTOMERS : CUSTOMERS.filter(c => c.churnRisk === churnFilter))
     .slice().sort((a, b) => {
@@ -934,6 +849,13 @@ function CustomerInsightsPanel() {
             </tr>
           </thead>
           <tbody>
+            {visible.length === 0 && (
+              <tr>
+                <td colSpan={9} className="px-3 py-6 text-center text-base" style={{ color: 'var(--text-muted)' }}>
+                  No customer data yet for the selected store{selectedStoreIds.length !== 1 ? 's' : ''}.
+                </td>
+              </tr>
+            )}
             {visible.map(c => {
               const cc = CHURN_CONFIG[c.churnRisk];
               return (
@@ -982,8 +904,17 @@ type Tab = 'live' | 'sequences' | 'recovered' | 'exitintent' | 'upsell' | 'watch
 export default function CartPage() {
   const [tab, setTab] = useState<Tab>('live');
   const [stores] = useStores();
+  const { selectedStoreIds } = useStoreScope('cart');
   // Shared with Site Monitoring's Abandoned Cart Feed — same underlying records.
-  const [liveCarts, setLiveCarts] = usePersistentState<AbandonedCart[]>('monitoring.abandonedCarts', []);
+  const [allLiveCarts, setLiveCarts] = usePersistentState<AbandonedCart[]>('monitoring.abandonedCarts', []);
+  const [allSequences] = usePersistentState<RecoverySequence[]>('cart.sequences', []);
+  const [allRecovered] = usePersistentState<RecoveredCart[]>('cart.recovered', []);
+
+  const inScope = (storeStr: string) => storeStr === 'All Stores' || selectedStoreIds.includes(resolveStoreId(storeStr, stores) ?? '');
+
+  const liveCarts = allLiveCarts.filter(c => selectedStoreIds.includes(c.storeId));
+  const SEQUENCES = allSequences.filter(seq => inScope(seq.store));
+  const RECOVERED_LIST = allRecovered.filter(r => inScope(r.store));
 
   // Recovery tracking (status/stage, recovered revenue, per-channel rates) isn't
   // modeled yet — zeroed honestly rather than fabricated until that data exists.
@@ -999,7 +930,7 @@ export default function CartPage() {
   };
 
   const triggerAllRecovery = () =>
-    setLiveCarts(prev => prev.map(cart => ({ ...cart, recoveryEmailSent: true, smsSent: true })));
+    setLiveCarts(prev => prev.map(cart => selectedStoreIds.includes(cart.storeId) ? { ...cart, recoveryEmailSent: true, smsSent: true } : cart));
 
   const TABS = [
     { key: 'live' as Tab,        label: 'Live Carts',           icon: ShoppingCart, badge: liveCarts.length },
@@ -1017,6 +948,8 @@ export default function CartPage() {
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <TopBar title="Cart Recovery" subtitle={`${s.cartsAbandoned30d} abandoned (30d)`} breadcrumbs={['MarketOS', 'Cart Recovery']} />
         <main className="flex-1 overflow-hidden flex flex-col p-5 gap-4" style={{ minHeight: 0 }}>
+
+          <div className="shrink-0"><StoreScopeBar sectionKey="cart" /></div>
 
           {/* Stats */}
           <div className="grid grid-cols-5 gap-3 shrink-0">
@@ -1145,6 +1078,11 @@ export default function CartPage() {
 
             {tab === 'sequences' && (
               <div className="space-y-3">
+                {SEQUENCES.length === 0 && (
+                  <div className="glass-card p-8 text-center" style={{ color: 'var(--text-muted)' }}>
+                    No recovery sequences yet for the selected store{selectedStoreIds.length !== 1 ? 's' : ''}.
+                  </div>
+                )}
                 {SEQUENCES.map(seq => (
                   <div key={seq.id} className="glass-card p-4">
                     <div className="flex items-center justify-between mb-4">
@@ -1201,6 +1139,11 @@ export default function CartPage() {
                 <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
                   <span className="section-label">Recently Recovered Carts</span>
                 </div>
+                {RECOVERED_LIST.length === 0 && (
+                  <div className="px-4 py-8 text-center text-base" style={{ color: 'var(--text-muted)' }}>
+                    No recovered carts yet for the selected store{selectedStoreIds.length !== 1 ? 's' : ''}.
+                  </div>
+                )}
                 {RECOVERED_LIST.map(r => (
                   <div key={r.id} className="flex items-center gap-3 px-4 py-2.5 border-b hover:bg-white/[0.02] transition-colors" style={{ borderColor: 'var(--border-subtle)' }}>
                     <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ background: CH_COLOR[r.channel] + '20' }}>
@@ -1222,9 +1165,9 @@ export default function CartPage() {
 
             {tab === 'upsell' && <UpsellPanel />}
 
-            {tab === 'watchlists' && <WatchlistsPanel />}
+            {tab === 'watchlists' && <WatchlistsPanel selectedStoreIds={selectedStoreIds} />}
 
-            {tab === 'insights' && <CustomerInsightsPanel />}
+            {tab === 'insights' && <CustomerInsightsPanel selectedStoreIds={selectedStoreIds} />}
 
           </div>
         </main>

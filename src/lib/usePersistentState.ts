@@ -1,5 +1,24 @@
 import { useEffect, useState, Dispatch, SetStateAction } from 'react';
 
+// In-memory pub-sub so multiple simultaneously-mounted usePersistentState
+// instances of the *same* key (e.g. a page's own useStoreScope call and the
+// <StoreScopeBar> it renders, both reading 'scope.<section>') stay in sync
+// within a tab. localStorage's native 'storage' event only fires for OTHER
+// tabs/windows, never same-tab writers, so without this a write from one
+// instance is invisible to sibling instances until a remount/reload.
+type Listener = (value: unknown) => void;
+const listeners = new Map<string, Set<Listener>>();
+
+function subscribe(storageKey: string, listener: Listener): () => void {
+  if (!listeners.has(storageKey)) listeners.set(storageKey, new Set());
+  listeners.get(storageKey)!.add(listener);
+  return () => listeners.get(storageKey)?.delete(listener);
+}
+
+function broadcast(storageKey: string, value: unknown): void {
+  listeners.get(storageKey)?.forEach(l => l(value));
+}
+
 /**
  * A drop-in replacement for useState that persists the value to localStorage so
  * it survives component unmounts (e.g. switching a settings sub-tab) and full
@@ -32,6 +51,8 @@ export function usePersistentState<T>(
       /* corrupt/unavailable storage — keep the seed value */
     }
     setHydrated(true);
+
+    return subscribe(storageKey, (v) => setValue(v as T));
   }, [storageKey]);
 
   useEffect(() => {
@@ -41,6 +62,7 @@ export function usePersistentState<T>(
     } catch {
       /* storage full/unavailable — best-effort persistence */
     }
+    broadcast(storageKey, value);
   }, [storageKey, value, hydrated]);
 
   return [value, setValue];

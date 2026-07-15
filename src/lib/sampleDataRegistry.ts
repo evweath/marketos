@@ -6,6 +6,7 @@ import { SAMPLE_SOCIAL_POSTS, SAMPLE_INBOX_MESSAGES, SAMPLE_LISTENING_ITEMS, SAM
 import { SAMPLE_EMAIL_FLOWS, SAMPLE_EMAIL_CAMPAIGNS, SAMPLE_SEGMENTS, SAMPLE_DELIVERABILITY } from './emailData';
 import { SAMPLE_GENERATED_CREATIVES, SAMPLE_COMPETITOR_ADS, SAMPLE_PERFORMANCE_SCORES, SAMPLE_CAMPAIGN_BRIEFS, SAMPLE_BRAND_VOICE_SETTINGS, DEFAULT_BRAND_VOICE_SETTINGS } from './contentData';
 import { SAMPLE_KEYWORD_RANKINGS, SAMPLE_GSC_METRICS, SAMPLE_SEO_AUDIT_ITEMS, SAMPLE_COMPETITOR_DATA, SAMPLE_BRAND_MENTIONS, SAMPLE_LLM_VISIBILITY, SAMPLE_PREVIOUS_BLOGS, emptyLlmVisibility } from './seoData';
+import { SAMPLE_SEQUENCES, SAMPLE_RECOVERED_LIST, SAMPLE_UPSELL_OFFERS, SAMPLE_WATCH_PRODUCTS, SAMPLE_CUSTOMERS } from './cartData';
 
 // ─── Sample data registry ──────────────────────────────────────────────────
 //
@@ -82,6 +83,11 @@ const REGISTRY: SampleDataEntry[] = [
   { key: 'seo.brandMentions',      sample: SAMPLE_BRAND_MENTIONS,     empty: [] },
   { key: 'seo.llmVisibility',      sample: SAMPLE_LLM_VISIBILITY,     empty: emptyLlmVisibility() },
   { key: 'seo.blogs',              sample: SAMPLE_PREVIOUS_BLOGS,     empty: [] },
+  { key: 'cart.sequences',         sample: SAMPLE_SEQUENCES,         empty: [] },
+  { key: 'cart.recovered',         sample: SAMPLE_RECOVERED_LIST,    empty: [] },
+  { key: 'cart.upsellOffers',      sample: SAMPLE_UPSELL_OFFERS,     empty: [] },
+  { key: 'cart.watchlists',        sample: SAMPLE_WATCH_PRODUCTS,    empty: [] },
+  { key: 'cart.customers',         sample: SAMPLE_CUSTOMERS,         empty: [] },
 ];
 
 function storageKey(key: string): string {
