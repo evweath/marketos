@@ -1,7 +1,7 @@
 'use client';
 
 import { scaledChannelMetrics, DATE_RANGE_LABELS } from '@/lib/analyticsData';
-import type { DateRange } from '@/lib/analyticsData';
+import type { DateRange, ChannelMetrics } from '@/lib/analyticsData';
 
 const currency = (n: number): string =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
@@ -21,8 +21,8 @@ function dimColor(hex: string, opacity: number): string {
   return `rgba(${r},${g},${b},${opacity})`;
 }
 
-export default function SpendBudgetChart({ dateRange = '30d' }: { dateRange?: DateRange }) {
-  const data = scaledChannelMetrics(dateRange)
+export default function SpendBudgetChart({ dateRange = '30d', channelMetrics }: { dateRange?: DateRange; channelMetrics: ChannelMetrics[] }) {
+  const data = scaledChannelMetrics(dateRange, channelMetrics)
     .filter(c => c.budget > 0)
     .sort((a, b) => b.budget - a.budget)
     .map(c => ({
@@ -57,6 +57,9 @@ export default function SpendBudgetChart({ dateRange = '30d' }: { dateRange?: Da
       </div>
 
       {/* Channel rows */}
+      {data.length === 0 && (
+        <div className="text-base text-center py-4" style={{ color: 'var(--text-muted)' }}>No channel budgets set yet.</div>
+      )}
       <div className="space-y-2">
         {data.map(d => {
           const spentPct = Math.min(d.pct * 100, 100);

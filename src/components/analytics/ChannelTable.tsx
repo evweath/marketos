@@ -5,6 +5,11 @@ import { TrendingUp, TrendingDown, ChevronDown, ChevronUp } from 'lucide-react';
 import { scaledChannelMetrics, DATE_RANGE_LABELS } from '@/lib/analyticsData';
 import type { ChannelMetrics, DateRange } from '@/lib/analyticsData';
 
+interface Props {
+  dateRange?: DateRange;
+  channelMetrics: ChannelMetrics[];
+}
+
 type SortKey = keyof Pick<ChannelMetrics, 'spend' | 'revenue' | 'roas' | 'conversions' | 'cpa' | 'ctr' | 'clicks' | 'impressions' | 'margin'>;
 
 const currency = (n: number): string =>
@@ -41,12 +46,12 @@ const COLUMNS: { key: SortKey; label: string }[] = [
   { key: 'margin',      label: 'Margin%'     },
 ];
 
-export default function ChannelTable({ dateRange = '30d' }: { dateRange?: DateRange }) {
+export default function ChannelTable({ dateRange = '30d', channelMetrics }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('revenue');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
 
-  const metrics = scaledChannelMetrics(dateRange);
+  const metrics = scaledChannelMetrics(dateRange, channelMetrics);
 
   const sorted = [...metrics].sort((a, b) => {
     const av = a[sortKey] as number;
@@ -249,7 +254,7 @@ export default function ChannelTable({ dateRange = '30d' }: { dateRange?: DateRa
                   revenue:     currency(metrics.reduce((s, c) => s + c.revenue, 0)),
                   roas:        (metrics.reduce((s, c) => s + c.revenue, 0) / (metrics.reduce((s, c) => s + c.spend, 0) || 1)).toFixed(2) + '×',
                   conversions: fmt(metrics.reduce((s, c) => s + c.conversions, 0)),
-                  cpa:         currency(metrics.reduce((s, c) => s + c.spend, 0) / metrics.reduce((s, c) => s + c.conversions, 0)),
+                  cpa:         metrics.reduce((s, c) => s + c.conversions, 0) > 0 ? currency(metrics.reduce((s, c) => s + c.spend, 0) / metrics.reduce((s, c) => s + c.conversions, 0)) : '—',
                   margin:      '—',
                 };
                 return (

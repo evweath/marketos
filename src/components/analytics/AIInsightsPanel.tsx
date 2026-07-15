@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AI_INSIGHTS, CHANNEL_CONFIG } from '@/lib/analyticsData';
+import { CHANNEL_CONFIG } from '@/lib/analyticsData';
 import type { AIInsight } from '@/lib/analyticsData';
+import { usePersistentState } from '@/lib/usePersistentState';
 import { Lightbulb, AlertTriangle, TrendingUp, ChevronDown, Sparkles } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -128,8 +129,9 @@ function InsightCard({ insight }: { insight: AIInsight }) {
 }
 
 export default function AIInsightsPanel() {
+  const [insights] = usePersistentState<AIInsight[]>('analytics.aiInsights', []);
   const [filter, setFilter] = useState<'all' | 'high'>('all');
-  const shown = AI_INSIGHTS.filter(i => filter === 'all' || i.impact === 'high');
+  const shown = insights.filter(i => filter === 'all' || i.impact === 'high');
 
   // Rendered only after mount to avoid a server/client hydration mismatch
   // (the current time differs between the SSR pass and hydration).
@@ -173,6 +175,10 @@ export default function AIInsightsPanel() {
           ))}
         </div>
       </div>
+
+      {shown.length === 0 && (
+        <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>No AI insights yet — connect channels with real data to generate recommendations.</div>
+      )}
 
       <div className="space-y-2">
         {shown.map(insight => (

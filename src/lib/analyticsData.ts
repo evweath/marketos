@@ -86,8 +86,23 @@ export const CHANNEL_CONFIG: Record<Channel, { label: string; icon: string; colo
 };
 
 // ─── Channel Metrics (30-day current period) ──────────────────────────────────
+//
+// The live app starts with every channel zeroed (see emptyChannelMetrics) —
+// SAMPLE_CHANNEL_METRICS below only seeds Settings → Data → "Load Sample Data".
 
-export const CHANNEL_METRICS: ChannelMetrics[] = [
+export function emptyChannelMetrics(): ChannelMetrics[] {
+  return (Object.keys(CHANNEL_CONFIG) as Channel[]).map(channel => ({
+    channel,
+    ...CHANNEL_CONFIG[channel],
+    impressions: 0, clicks: 0, ctr: 0, cpc: 0, spend: 0, budget: 0,
+    conversions: 0, revenue: 0, roas: 0, cpa: 0, margin: 0,
+    impressionsDelta: 0, clicksDelta: 0, conversionsDelta: 0,
+    revenueDelta: 0, roasDelta: 0, spendDelta: 0,
+    status: 'not-started',
+  }));
+}
+
+export const SAMPLE_CHANNEL_METRICS: ChannelMetrics[] = [
   {
     channel: 'google-ads', label: 'Google Ads', icon: 'G', color: '#4285F4',
     impressions: 428600, clicks: 12840, ctr: 2.99, cpc: 1.84, spend: 23625,
@@ -146,20 +161,6 @@ export const CHANNEL_METRICS: ChannelMetrics[] = [
   },
 ];
 
-// ─── Totals (computed from above) ────────────────────────────────────────────
-
-export const ANALYTICS_TOTALS = {
-  totalSpend:        CHANNEL_METRICS.reduce((s, c) => s + c.spend, 0),
-  totalRevenue:      CHANNEL_METRICS.reduce((s, c) => s + c.revenue, 0),
-  totalConversions:  CHANNEL_METRICS.reduce((s, c) => s + c.conversions, 0),
-  totalClicks:       CHANNEL_METRICS.reduce((s, c) => s + c.clicks, 0),
-  totalImpressions:  CHANNEL_METRICS.reduce((s, c) => s + c.impressions, 0),
-  blendedRoas:       0, // computed below
-  totalBudget:       CHANNEL_METRICS.reduce((s, c) => s + c.budget, 0),
-};
-ANALYTICS_TOTALS.blendedRoas =
-  ANALYTICS_TOTALS.totalRevenue / (ANALYTICS_TOTALS.totalSpend || 1);
-
 // ─── 30-day Time Series (Google + Meta only for chart density) ────────────────
 
 function genDailyData(baseSpend: number, baseRevenue: number, trend: number, seed: number): DailyMetric[] {
@@ -187,16 +188,22 @@ function genDailyData(baseSpend: number, baseRevenue: number, trend: number, see
   return days;
 }
 
-export const TIME_SERIES: ChannelTimeSeries[] = [
+export const SAMPLE_TIME_SERIES: ChannelTimeSeries[] = [
   { channel: 'google-ads',  data: genDailyData(23625, 142890, 0.14, 12345) },
   { channel: 'meta-ads',    data: genDailyData(19517, 89340,  -0.06, 67890) },
   { channel: 'youtube-ads', data: genDailyData(5075,  28960,  0.15, 22222) },
   { channel: 'email',       data: genDailyData(1215,  89640,  0.09, 44444) },
 ];
 
+/** Zeroed 30-day series (same date labels, all-zero values) for every channel — the live default. */
+export function emptyTimeSeries(): ChannelTimeSeries[] {
+  const zeroDays = genDailyData(0, 0, 0, 1).map(d => ({ ...d, spend: 0, revenue: 0, conversions: 0, impressions: 0, clicks: 0 }));
+  return (Object.keys(CHANNEL_CONFIG) as Channel[]).map(channel => ({ channel, data: zeroDays }));
+}
+
 // ─── Attribution ──────────────────────────────────────────────────────────────
 
-export const ATTRIBUTION: AttributionTouchpoint[] = [
+export const SAMPLE_ATTRIBUTION: AttributionTouchpoint[] = [
   { channel: 'google-ads',  label: 'Google Ads',   color: '#4285F4', firstTouch: 34.2, lastTouch: 28.7, linearTouch: 24.8, positionBased: 29.4 },
   { channel: 'meta-ads',    label: 'Meta Ads',     color: '#0866FF', firstTouch: 18.4, lastTouch: 21.3, linearTouch: 19.7, positionBased: 20.2 },
   { channel: 'organic',     label: 'Organic',      color: '#10d98a', firstTouch: 22.1, lastTouch: 14.6, linearTouch: 18.9, positionBased: 18.1 },
@@ -204,9 +211,17 @@ export const ATTRIBUTION: AttributionTouchpoint[] = [
   { channel: 'youtube-ads', label: 'YouTube Ads',  color: '#FF0000', firstTouch: 4.8,  lastTouch: 5.2,  linearTouch: 6.4,  positionBased: 4.9  },
 ];
 
+/** Zeroed attribution rows for every channel — the live default. */
+export function emptyAttribution(): AttributionTouchpoint[] {
+  return (Object.keys(CHANNEL_CONFIG) as Channel[]).map(channel => ({
+    channel, label: CHANNEL_CONFIG[channel].label, color: CHANNEL_CONFIG[channel].color,
+    firstTouch: 0, lastTouch: 0, linearTouch: 0, positionBased: 0,
+  }));
+}
+
 // ─── AI Insights ──────────────────────────────────────────────────────────────
 
-export const AI_INSIGHTS: AIInsight[] = [
+export const SAMPLE_AI_INSIGHTS: AIInsight[] = [
   {
     id: 'ins-001',
     type: 'anomaly',
@@ -276,8 +291,8 @@ export function scaleChannel(c: ChannelMetrics, range: DateRange): ChannelMetric
   };
 }
 
-export function scaledChannelMetrics(range: DateRange): ChannelMetrics[] {
-  return CHANNEL_METRICS.map(c => scaleChannel(c, range));
+export function scaledChannelMetrics(range: DateRange, channelMetrics: ChannelMetrics[]): ChannelMetrics[] {
+  return channelMetrics.map(c => scaleChannel(c, range));
 }
 
 export interface AnalyticsTotals {
@@ -290,10 +305,11 @@ export interface AnalyticsTotals {
   totalBudget: number;
 }
 
-// Totals for a range. Budget stays monthly (period-independent); the 30d case
-// reproduces ANALYTICS_TOTALS exactly.
-export function scaledTotals(range: DateRange): AnalyticsTotals {
-  const metrics = scaledChannelMetrics(range);
+// Totals for a range, computed from whatever channel metrics currently exist
+// (empty by default, or seeded via Load Sample Data). Budget stays monthly
+// (period-independent).
+export function scaledTotals(range: DateRange, channelMetrics: ChannelMetrics[]): AnalyticsTotals {
+  const metrics = scaledChannelMetrics(range, channelMetrics);
   const totalSpend = metrics.reduce((s, c) => s + c.spend, 0);
   const totalRevenue = metrics.reduce((s, c) => s + c.revenue, 0);
   return {
@@ -302,19 +318,19 @@ export function scaledTotals(range: DateRange): AnalyticsTotals {
     totalConversions: metrics.reduce((s, c) => s + c.conversions, 0),
     totalClicks: metrics.reduce((s, c) => s + c.clicks, 0),
     totalImpressions: metrics.reduce((s, c) => s + c.impressions, 0),
-    blendedRoas: totalRevenue / (totalSpend || 1),
-    totalBudget: ANALYTICS_TOTALS.totalBudget,
+    blendedRoas: totalSpend > 0 ? totalRevenue / totalSpend : 0,
+    totalBudget: channelMetrics.reduce((s, c) => s + c.budget, 0),
   };
 }
 
 // Time series sliced/scaled for the range. Ranges ≤30d take the last N days of
 // the baseline series; ranges >30d scale each day's volume up by rangeScale/N-ratio
 // so totals stay consistent with scaledTotals.
-export function scaledTimeSeries(range: DateRange): ChannelTimeSeries[] {
+export function scaledTimeSeries(range: DateRange, timeSeries: ChannelTimeSeries[]): ChannelTimeSeries[] {
   const points = rangePoints(range);
   // Per-day multiplier so the sum over `points` days equals the full range volume.
   const k = (rangeScale(range) * 30) / points;
-  return TIME_SERIES.map(ts => ({
+  return timeSeries.map(ts => ({
     channel: ts.channel,
     data: ts.data.slice(-points).map(d => ({
       ...d,
@@ -327,8 +343,27 @@ export function scaledTimeSeries(range: DateRange): ChannelTimeSeries[] {
   }));
 }
 
-// Attributed conversion count backing the attribution panel, scaled by range.
-export const ATTRIBUTION_BASE_CONVERSIONS = 3131;
-export function scaledAttributionConversions(range: DateRange): number {
-  return Math.round(ATTRIBUTION_BASE_CONVERSIONS * rangeScale(range));
+// Attributed conversion count backing the attribution panel, scaled by range —
+// equal to total conversions across channels so it never drifts from the
+// Channel Performance Table's own totals.
+export function scaledAttributionConversions(range: DateRange, channelMetrics: ChannelMetrics[]): number {
+  return scaledChannelMetrics(range, channelMetrics).reduce((s, c) => s + c.conversions, 0);
 }
+
+// ─── Shareable Reports (Looker Studio / Google Slides stubs) ─────────────────
+
+export interface SharedReport {
+  id: string;
+  name: string;
+  platform: string;
+  lastUpdated: string;
+  views: number;
+  shareUrl: string;
+  live: boolean;
+}
+
+export const SAMPLE_SHARED_REPORTS: SharedReport[] = [
+  { id: 'sr-1', name: 'Monthly Performance — All Stores', platform: 'Looker Studio', lastUpdated: '2h ago', views: 14, shareUrl: 'https://lookerstudio.google.com/r/abc123', live: true },
+  { id: 'sr-2', name: 'Q1 Ad Spend Summary',              platform: 'Google Slides', lastUpdated: '3d ago', views: 8,  shareUrl: 'https://docs.google.com/presentation/d/xyz789', live: true },
+  { id: 'sr-3', name: 'Channel Attribution Deep-Dive',    platform: 'Looker Studio', lastUpdated: '1w ago', views: 5,  shareUrl: 'https://lookerstudio.google.com/r/def456', live: false },
+];

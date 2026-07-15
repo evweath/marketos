@@ -1,6 +1,7 @@
 import { SAMPLE_CAMPAIGNS, SAMPLE_AD_SETS, SAMPLE_CREATIVES, SAMPLE_AUTOMATION_RULES, SAMPLE_HEALTH_CHECKS } from './campaignData';
 import { SAMPLE_ALERT_RULES, SAMPLE_FIRED_ALERTS } from './alertData';
 import { SAMPLE_STORE_HEALTH, SAMPLE_TRAFFIC, SAMPLE_CONVERSIONS, SAMPLE_ABANDONED_CARTS, SAMPLE_TRANSACTIONS, SAMPLE_PAGE_CHANGES, SAMPLE_SEO_SNAPSHOTS } from './mockData';
+import { SAMPLE_CHANNEL_METRICS, SAMPLE_TIME_SERIES, SAMPLE_ATTRIBUTION, SAMPLE_AI_INSIGHTS, SAMPLE_SHARED_REPORTS, emptyChannelMetrics, emptyTimeSeries, emptyAttribution } from './analyticsData';
 
 // ─── Sample data registry ──────────────────────────────────────────────────
 //
@@ -39,6 +40,11 @@ const REGISTRY: SampleDataEntry[] = [
   { key: 'monitoring.transactions',   sample: SAMPLE_TRANSACTIONS,    empty: [] },
   { key: 'monitoring.pageChanges',    sample: SAMPLE_PAGE_CHANGES,    empty: [] },
   { key: 'monitoring.seoSnapshots',   sample: SAMPLE_SEO_SNAPSHOTS,   empty: {} },
+  { key: 'analytics.channelMetrics',  sample: SAMPLE_CHANNEL_METRICS, empty: emptyChannelMetrics() },
+  { key: 'analytics.timeSeries',      sample: SAMPLE_TIME_SERIES,     empty: emptyTimeSeries() },
+  { key: 'analytics.attribution',     sample: SAMPLE_ATTRIBUTION,     empty: emptyAttribution() },
+  { key: 'analytics.aiInsights',      sample: SAMPLE_AI_INSIGHTS,     empty: [] },
+  { key: 'analytics.reports',         sample: SAMPLE_SHARED_REPORTS,  empty: [] },
 ];
 
 function storageKey(key: string): string {

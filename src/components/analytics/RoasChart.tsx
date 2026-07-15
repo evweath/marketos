@@ -1,8 +1,8 @@
 'use client';
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine, CartesianGrid } from 'recharts';
-import { scaledChannelMetrics, CHANNEL_METRICS } from '@/lib/analyticsData';
-import type { DateRange } from '@/lib/analyticsData';
+import { scaledChannelMetrics } from '@/lib/analyticsData';
+import type { DateRange, ChannelMetrics } from '@/lib/analyticsData';
 
 interface TooltipPayloadItem {
   value: number;
@@ -15,39 +15,15 @@ interface CustomTooltipProps {
   label?: string;
 }
 
-const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
-  if (!active || !payload?.length) return null;
-  const ch = CHANNEL_METRICS.find(c => c.label === label || c.label.replace(' Ads', '').replace(' / ', '/') === label);
-  return (
-    <div
-      className="glass-card-elevated px-3 py-2.5 text-base"
-      style={{ border: '1px solid var(--border-dim)', boxShadow: 'var(--shadow-float)' }}
-    >
-      <div className="font-mono font-semibold mb-1.5" style={{ color: 'var(--text-primary)' }}>{label}</div>
-      <div className="flex justify-between gap-6">
-        <span style={{ color: 'var(--text-secondary)' }}>ROAS</span>
-        <span className="font-mono font-semibold" style={{ color: payload[0].fill }}>
-          {payload[0].value === 0 ? 'N/A' : payload[0].value.toFixed(2) + '×'}
-        </span>
-      </div>
-      {ch && ch.spend > 0 && (
-        <div className="flex justify-between gap-6 mt-0.5">
-          <span style={{ color: 'var(--text-secondary)' }}>Margin</span>
-          <span className="font-mono" style={{ color: 'var(--text-muted)' }}>{ch.margin.toFixed(1)}%</span>
-        </div>
-      )}
-    </div>
-  );
-};
-
 const ZONE_LEGEND = [
   { color: '#10d98a', label: '≥ 5×  Strong' },
   { color: '#ffb347', label: '3–5×  OK' },
   { color: '#ff4444', label: '< 3×  Weak' },
 ];
 
-export default function RoasChart({ dateRange = '30d' }: { dateRange?: DateRange }) {
-  const data = scaledChannelMetrics(dateRange)
+export default function RoasChart({ dateRange = '30d', channelMetrics }: { dateRange?: DateRange; channelMetrics: ChannelMetrics[] }) {
+  const scaled = scaledChannelMetrics(dateRange, channelMetrics);
+  const data = scaled
     .filter(c => c.channel !== 'organic')
     .sort((a, b) => b.roas - a.roas)
     .map(c => ({
@@ -57,7 +33,33 @@ export default function RoasChart({ dateRange = '30d' }: { dateRange?: DateRange
       id: c.channel,
     }));
 
-  const avgRoas = data.filter(d => d.roas > 0).reduce((s, d) => s + d.roas, 0) / data.filter(d => d.roas > 0).length;
+  const positiveRoasCount = data.filter(d => d.roas > 0).length;
+  const avgRoas = positiveRoasCount > 0 ? data.filter(d => d.roas > 0).reduce((s, d) => s + d.roas, 0) / positiveRoasCount : 0;
+
+  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+    if (!active || !payload?.length) return null;
+    const ch = scaled.find(c => c.label === label || c.label.replace(' Ads', '').replace(' / ', '/') === label);
+    return (
+      <div
+        className="glass-card-elevated px-3 py-2.5 text-base"
+        style={{ border: '1px solid var(--border-dim)', boxShadow: 'var(--shadow-float)' }}
+      >
+        <div className="font-mono font-semibold mb-1.5" style={{ color: 'var(--text-primary)' }}>{label}</div>
+        <div className="flex justify-between gap-6">
+          <span style={{ color: 'var(--text-secondary)' }}>ROAS</span>
+          <span className="font-mono font-semibold" style={{ color: payload[0].fill }}>
+            {payload[0].value === 0 ? 'N/A' : payload[0].value.toFixed(2) + '×'}
+          </span>
+        </div>
+        {ch && ch.spend > 0 && (
+          <div className="flex justify-between gap-6 mt-0.5">
+            <span style={{ color: 'var(--text-secondary)' }}>Margin</span>
+            <span className="font-mono" style={{ color: 'var(--text-muted)' }}>{ch.margin.toFixed(1)}%</span>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const barColor = (roas: number): string => {
     if (roas === 0) return 'rgba(var(--overlay-rgb),0.08)';

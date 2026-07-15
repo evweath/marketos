@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { ATTRIBUTION, scaledAttributionConversions, DATE_RANGE_LABELS } from '@/lib/analyticsData';
-import type { DateRange } from '@/lib/analyticsData';
+import { scaledAttributionConversions, DATE_RANGE_LABELS, emptyAttribution } from '@/lib/analyticsData';
+import { usePersistentState } from '@/lib/usePersistentState';
+import type { DateRange, ChannelMetrics, AttributionTouchpoint } from '@/lib/analyticsData';
 
 type Model = 'firstTouch' | 'lastTouch' | 'linearTouch' | 'positionBased';
 
@@ -22,10 +23,11 @@ const MODEL_DESC: Record<Model, string> = {
 
 const MODELS: Model[] = ['firstTouch', 'lastTouch', 'linearTouch', 'positionBased'];
 
-export default function AttributionPanel({ dateRange = '30d' }: { dateRange?: DateRange }) {
+export default function AttributionPanel({ dateRange = '30d', channelMetrics }: { dateRange?: DateRange; channelMetrics: ChannelMetrics[] }) {
   const [model, setModel] = useState<Model>('linearTouch');
-  const conversions = scaledAttributionConversions(dateRange);
-  const data = [...ATTRIBUTION].sort((a, b) => b[model] - a[model]);
+  const [attribution] = usePersistentState<AttributionTouchpoint[]>('analytics.attribution', emptyAttribution());
+  const conversions = scaledAttributionConversions(dateRange, channelMetrics);
+  const data = [...attribution].sort((a, b) => b[model] - a[model]);
 
   return (
     <div className="glass-card p-4">

@@ -12,25 +12,9 @@ import AttributionPanel from '@/components/analytics/AttributionPanel';
 import AIInsightsPanel from '@/components/analytics/AIInsightsPanel';
 import RoasChart from '@/components/analytics/RoasChart';
 import DateRangePicker from '@/components/analytics/DateRangePicker';
-import { scaledTotals, DATE_RANGE_LABELS } from '@/lib/analyticsData';
-import type { DateRange } from '@/lib/analyticsData';
+import { scaledTotals, DATE_RANGE_LABELS, emptyChannelMetrics } from '@/lib/analyticsData';
+import type { DateRange, ChannelMetrics, SharedReport } from '@/lib/analyticsData';
 import { Download, Share2, ExternalLink, Copy, CheckCircle2 } from 'lucide-react';
-
-interface SharedReport {
-  id: string;
-  name: string;
-  platform: string;
-  lastUpdated: string;
-  views: number;
-  shareUrl: string;
-  live: boolean;
-}
-
-const SHARED_REPORTS: SharedReport[] = [
-  { id: 'sr-1', name: 'Monthly Performance — All Stores', platform: 'Looker Studio', lastUpdated: '2h ago', views: 14, shareUrl: 'https://lookerstudio.google.com/r/abc123', live: true },
-  { id: 'sr-2', name: 'Q1 Ad Spend Summary',              platform: 'Google Slides', lastUpdated: '3d ago', views: 8,  shareUrl: 'https://docs.google.com/presentation/d/xyz789', live: true },
-  { id: 'sr-3', name: 'Channel Attribution Deep-Dive',    platform: 'Looker Studio', lastUpdated: '1w ago', views: 5,  shareUrl: 'https://lookerstudio.google.com/r/def456', live: false },
-];
 
 function ShareableReportsPanel({ onClose, reports, onCreate }: { onClose: () => void; reports: SharedReport[]; onCreate: () => void }) {
   const [copied, setCopied] = useState<string | null>(null);
@@ -96,7 +80,8 @@ function ShareableReportsPanel({ onClose, reports, onCreate }: { onClose: () => 
 export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [showReports, setShowReports] = useState(false);
-  const [reports, setReports] = usePersistentState<SharedReport[]>('analytics.reports', SHARED_REPORTS);
+  const [reports, setReports] = usePersistentState<SharedReport[]>('analytics.reports', []);
+  const [channelMetrics] = usePersistentState<ChannelMetrics[]>('analytics.channelMetrics', emptyChannelMetrics());
 
   // Runs only in a click handler (never during render), so browser-only APIs
   // and non-deterministic values are safe here — no hydration impact.
@@ -117,7 +102,7 @@ export default function AnalyticsPage() {
 
   const handleExport = () => {
     if (typeof window === 'undefined') return;
-    const t = scaledTotals(dateRange);
+    const t = scaledTotals(dateRange, channelMetrics);
     const payload = {
       range: DATE_RANGE_LABELS[dateRange],
       generatedAt: new Date().toISOString(),
@@ -165,16 +150,16 @@ export default function AnalyticsPage() {
               </div>
             </div>
           </div>
-          <KpiRow dateRange={dateRange} />
+          <KpiRow dateRange={dateRange} channelMetrics={channelMetrics} />
           <div className="grid grid-cols-3 gap-3 mb-3">
             <div className="col-span-2"><RevenueSpendChart dateRange={dateRange} /></div>
-            <RoasChart dateRange={dateRange} />
+            <RoasChart dateRange={dateRange} channelMetrics={channelMetrics} />
           </div>
           <div className="grid grid-cols-2 gap-3 mb-3">
-            <SpendBudgetChart dateRange={dateRange} />
-            <AttributionPanel dateRange={dateRange} />
+            <SpendBudgetChart dateRange={dateRange} channelMetrics={channelMetrics} />
+            <AttributionPanel dateRange={dateRange} channelMetrics={channelMetrics} />
           </div>
-          <div className="mb-3"><ChannelTable dateRange={dateRange} /></div>
+          <div className="mb-3"><ChannelTable dateRange={dateRange} channelMetrics={channelMetrics} /></div>
           <AIInsightsPanel />
         </main>
         {showReports && <ShareableReportsPanel onClose={() => setShowReports(false)} reports={reports} onCreate={handleCreateReport} />}

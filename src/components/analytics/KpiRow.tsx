@@ -1,8 +1,8 @@
 'use client';
 
 import { TrendingUp, TrendingDown, DollarSign, MousePointer, BarChart2, Target, ShoppingBag, Eye } from 'lucide-react';
-import { scaledTotals, CHANNEL_METRICS } from '@/lib/analyticsData';
-import type { DateRange } from '@/lib/analyticsData';
+import { scaledTotals } from '@/lib/analyticsData';
+import type { DateRange, ChannelMetrics } from '@/lib/analyticsData';
 import type { LucideIcon } from 'lucide-react';
 
 interface KpiItem {
@@ -25,13 +25,16 @@ function currency(n: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(n);
 }
 
-export default function KpiRow({ dateRange = '30d' }: { dateRange?: DateRange }) {
-  const t = scaledTotals(dateRange);
+export default function KpiRow({ dateRange = '30d', channelMetrics }: { dateRange?: DateRange; channelMetrics: ChannelMetrics[] }) {
+  const t = scaledTotals(dateRange, channelMetrics);
 
-  const paidChannels = CHANNEL_METRICS.filter(c => c.spend > 0 && c.channel !== 'organic' && c.channel !== 'email');
-  const weightedRevDelta = paidChannels.reduce((s, c) => s + c.revenueDelta * c.revenue, 0) / paidChannels.reduce((s, c) => s + c.revenue, 0);
-  const weightedRoasDelta = paidChannels.reduce((s, c) => s + c.roasDelta * c.spend, 0) / paidChannels.reduce((s, c) => s + c.spend, 0);
-  const weightedConvDelta = CHANNEL_METRICS.reduce((s, c) => s + c.conversionsDelta * c.conversions, 0) / CHANNEL_METRICS.reduce((s, c) => s + c.conversions, 0);
+  const paidChannels = channelMetrics.filter(c => c.spend > 0 && c.channel !== 'organic' && c.channel !== 'email');
+  const paidRevenue = paidChannels.reduce((s, c) => s + c.revenue, 0);
+  const paidSpend = paidChannels.reduce((s, c) => s + c.spend, 0);
+  const totalConvForDelta = channelMetrics.reduce((s, c) => s + c.conversions, 0);
+  const weightedRevDelta = paidRevenue > 0 ? paidChannels.reduce((s, c) => s + c.revenueDelta * c.revenue, 0) / paidRevenue : 0;
+  const weightedRoasDelta = paidSpend > 0 ? paidChannels.reduce((s, c) => s + c.roasDelta * c.spend, 0) / paidSpend : 0;
+  const weightedConvDelta = totalConvForDelta > 0 ? channelMetrics.reduce((s, c) => s + c.conversionsDelta * c.conversions, 0) / totalConvForDelta : 0;
 
   const kpis: KpiItem[] = [
     {
@@ -85,7 +88,7 @@ export default function KpiRow({ dateRange = '30d' }: { dateRange?: DateRange })
     },
     {
       label: 'Blended CPA',
-      value: currency(t.totalSpend / t.totalConversions),
+      value: t.totalConversions > 0 ? currency(t.totalSpend / t.totalConversions) : '—',
       delta: -3.8,
       deltaLabel: 'vs prior period',
       icon: Target,
@@ -93,7 +96,7 @@ export default function KpiRow({ dateRange = '30d' }: { dateRange?: DateRange })
     },
     {
       label: 'Budget Utilization',
-      value: ((t.totalSpend / t.totalBudget) * 100).toFixed(1) + '%',
+      value: t.totalBudget > 0 ? ((t.totalSpend / t.totalBudget) * 100).toFixed(1) + '%' : '—',
       delta: +2.1,
       deltaLabel: 'vs last month',
       icon: BarChart2,
