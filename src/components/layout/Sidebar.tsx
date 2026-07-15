@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   BarChart2, Globe, Bell, Send, Zap, ShoppingCart,
-  Mail, Search, Settings, Radio, Sparkles
+  Mail, Search, Settings, Radio, Sparkles, BookOpen
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { href: '/cart',       label: 'Cart Recovery',   icon: ShoppingCart,badge: 5,    badgeColor: '#ff4444' },
   { href: '/alerts',     label: 'Alerts',          icon: Bell,        badge: 4,    badgeColor: '#ff4444' },
   { href: '/seo',        label: 'SEO',             icon: Search,      badge: null, badgeColor: null },
+  { href: '/glossary',   label: 'Glossary',        icon: BookOpen,    badge: null, badgeColor: null },
 ];
 
 const STORES = [
