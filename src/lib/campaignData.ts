@@ -142,7 +142,7 @@ export const SAMPLE_CAMPAIGNS: Campaign[] = [
     objective: 'conversions', dailyBudget: 140, totalBudget: 4200, spendToDate: 3128, budgetPacing: 99,
     impressions: 18400, clicks: 2104, ctr: 11.43, cpc: 1.49, conversions: 248, revenue: 67840, roas: 21.68, cpa: 12.61,
     qualityScore: 10, spendDelta: +1.1, roasDelta: +2.4, conversionsDelta: +4.8,
-    startDate: '2026-03-01', adSets: 1, ads: 4, autoRulesFired: 0, store: 'bakerywholesalers.com',
+    startDate: '2026-03-01', adSets: 1, ads: 4, autoRulesFired: 0, store: 'bakery-wholesalers.com',
   },
   {
     id: 'c-004', platform: 'google', name: 'Competitors — Defense', status: 'paused',
@@ -171,7 +171,7 @@ export const SAMPLE_CAMPAIGNS: Campaign[] = [
     objective: 'leads', dailyBudget: 200, totalBudget: 3000, spendToDate: 1240, budgetPacing: 72,
     impressions: 48400, clicks: 842, ctr: 1.74, cpc: 1.47, conversions: 42, revenue: 18480, roas: 14.90, cpa: 29.52,
     frequency: 1.4, spendDelta: +41.2, roasDelta: 0, conversionsDelta: 0,
-    startDate: '2026-05-05', adSets: 2, ads: 6, autoRulesFired: 0, store: 'bakerywholesalers.com',
+    startDate: '2026-05-05', adSets: 2, ads: 6, autoRulesFired: 0, store: 'bakery-wholesalers.com',
   },
   // YouTube
   {

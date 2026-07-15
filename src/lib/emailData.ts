@@ -102,7 +102,7 @@ export const SAMPLE_EMAIL_FLOWS: EmailFlow[] = [
   },
   {
     id: 'ef-006', name: 'VIP Tier Upgrade — $5K+ Lifetime Spend', trigger: 'vip',
-    status: 'active', steps: 2, channels: ['email'], store: 'bakerywholesalers.com',
+    status: 'active', steps: 2, channels: ['email'], store: 'bakery-wholesalers.com',
     triggered: 48, sent: 86, openRate: 74.4, clickRate: 42.8, conversionRate: 28.4,
     revenue: 84240, unsubscribeRate: 0.0, lastEdited: daysAgo(60),
   },
@@ -137,7 +137,7 @@ export const SAMPLE_EMAIL_CAMPAIGNS: EmailCampaign[] = [
   {
     id: 'ec-003', subject: 'Q2 Bakery Wholesale Buying Guide + Volume Pricing Update',
     preview: 'Reduce your ingredient costs by 18% with our new volume pricing tiers...',
-    status: 'sent', store: 'bakerywholesalers.com', sentTo: 3120,
+    status: 'sent', store: 'bakery-wholesalers.com', sentTo: 3120,
     openRate: 48.2, clickRate: 22.8, revenue: 84240, unsubscribes: 8,
     sentAt: daysAgo(7),
   },

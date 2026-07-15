@@ -53,7 +53,7 @@ export const SAMPLE_GENERATED_CREATIVES: GeneratedCreative[] = [
   {
     id: 'gc-009', type: 'image', platform: 'google', name: 'Responsive Display — Wholesale',
     status: 'published', performanceScore: 76, size: '300x250', format: 'PNG',
-    createdAt: '3d ago', store: 'bakerywholesalers.com',
+    createdAt: '3d ago', store: 'bakery-wholesalers.com',
     thumbnailColor: 'linear-gradient(135deg, #34a85322, #10d98a22)', thumbnailInitials: 'RD',
   },
   {

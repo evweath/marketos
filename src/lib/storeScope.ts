@@ -77,8 +77,11 @@ function normalize(value: string): string {
   return value.trim().toLowerCase()
     .replace(/^https?:\/\//, '')
     .replace(/^www\./, '')
-    .replace(/\/$/, '')
-    .replace(/\.myshopify\.com$/, '');
+    .replace(/\/.*$/, '')
+    // Strip any domain suffix (.com, .myshopify.com, etc.) — not just
+    // .myshopify.com — since data files reference stores by bare .com
+    // domain too. Bare ids/names have no dot, so this is a no-op for them.
+    .split('.')[0];
 }
 
 /**

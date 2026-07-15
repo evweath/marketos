@@ -133,7 +133,7 @@ export const SAMPLE_SOCIAL_POSTS: SocialPost[] = [
     id: 'sp-009', platforms: ['facebook'], status: 'scheduled', category: 'educational',
     caption: "Bulk buying guide for bakery wholesalers: how to calculate your monthly flour needs and negotiate volume discounts. We put together a free calculator — link in comments.",
     hashtags: ['#WholesaleBaking','#BakeryCosts','#BulkBuying'],
-    mediaType: 'image', author: 'James K.', store: 'bakerywholesalers.com',
+    mediaType: 'image', author: 'James K.', store: 'bakery-wholesalers.com',
     scheduledFor: daysFromNow(5, 9, 0),
   },
 
@@ -142,7 +142,7 @@ export const SAMPLE_SOCIAL_POSTS: SocialPost[] = [
     id: 'sp-013', platforms: ['facebook'], status: 'review', category: 'promotional',
     caption: "🍩 Introducing our new B2B loyalty program for wholesale bakeries. Spend $5,000+/month and unlock exclusive pricing, priority shipping, and dedicated account management. Apply now at bakerywholesalers.com/loyalty",
     hashtags: ['#BakeryBusiness','#WholesalePartners','#LoyaltyProgram'],
-    mediaType: 'image', author: 'James K.', approver: 'Michael D.', store: 'bakerywholesalers.com',
+    mediaType: 'image', author: 'James K.', approver: 'Michael D.', store: 'bakery-wholesalers.com',
     scheduledFor: daysFromNow(2, 11, 0),
   },
 ];
