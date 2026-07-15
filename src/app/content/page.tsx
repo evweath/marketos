@@ -11,7 +11,8 @@ import { TemplateLibrary } from '@/components/content/TemplateLibrary';
 import { CampaignBriefGenerator } from '@/components/content/CampaignBriefGenerator';
 import { PerformanceScorer } from '@/components/content/PerformanceScorer';
 import { CompetitorAdAnalysis } from '@/components/content/CompetitorAdAnalysis';
-import { CONTENT_STATS } from '@/lib/contentData';
+import { computeContentStats } from '@/lib/contentData';
+import type { GeneratedCreative, CampaignBrief } from '@/lib/contentData';
 import {
   Image, PenLine, Mic, LayoutGrid, FileText, TrendingUp, BarChart2,
   TrendingDown, Camera, Video, Upload, Wand2, Play, Download, Captions,
@@ -59,13 +60,8 @@ interface KpiCard {
 
 type PhotoJob = { id: string; name: string; original: string; result: 'bg_removed' | 'styled' | 'pending'; style?: string; time: string };
 
-const PHOTO_JOBS: PhotoJob[] = [
-  { id: 'pj-1', name: 'ProFryer-3000.jpg',         original: '1.2 MB', result: 'bg_removed', time: '2m ago' },
-  { id: 'pj-2', name: 'GlazeKit-Pro.png',           original: '840 KB', result: 'styled', style: 'Studio White', time: '5m ago' },
-  { id: 'pj-3', name: 'DeckOven-Series7.jpg',       original: '2.1 MB', result: 'styled', style: 'Lifestyle Kitchen', time: '18m ago' },
-  { id: 'pj-4', name: 'MixerAttachment-Set.png',    original: '560 KB', result: 'bg_removed', time: '31m ago' },
-  { id: 'pj-5', name: 'DonutCutter-Bundle.jpg',     original: '1.8 MB', result: 'pending', time: 'Processing…' },
-];
+// Empty until real photo-processing jobs have run.
+const PHOTO_JOBS: PhotoJob[] = [];
 
 const STYLE_PRESETS = ['Studio White', 'Lifestyle Kitchen', 'Dark Dramatic', 'Flat Lay', 'Outdoor Market', 'Minimalist'];
 
@@ -90,10 +86,10 @@ function PhotoStudioPanel() {
       {/* Stats */}
       <div className='grid grid-cols-4 gap-3'>
         {[
-          { label: 'Photos Processed (30d)', value: '1,248', color: 'var(--cyan)' },
-          { label: 'Backgrounds Removed',    value: '842',   color: '#10d98a' },
-          { label: 'AI Styles Applied',       value: '406',   color: '#7b93ff' },
-          { label: 'Avg Processing Time',     value: '8s',    color: '#ffb347' },
+          { label: 'Photos Processed (30d)', value: done.length.toString(), color: 'var(--cyan)' },
+          { label: 'Backgrounds Removed',    value: jobs.filter(j => j.result === 'bg_removed').length.toString(), color: '#10d98a' },
+          { label: 'AI Styles Applied',       value: jobs.filter(j => j.result === 'styled').length.toString(), color: '#7b93ff' },
+          { label: 'Avg Processing Time',     value: '—',    color: '#ffb347' },
         ].map(s => (
           <div key={s.label} className='glass-card px-4 py-3'>
             <div className='section-label mb-1'>{s.label}</div>
@@ -171,6 +167,9 @@ function PhotoStudioPanel() {
               </tr>
             </thead>
             <tbody>
+              {jobs.length === 0 && (
+                <tr><td colSpan={4} className='px-4 py-8 text-center text-base' style={{ color: 'var(--text-muted)' }}>No photos processed yet — upload one to get started.</td></tr>
+              )}
               {jobs.map(job => (
                 <tr key={job.id} className='border-b hover:bg-white/[0.02] transition-colors' style={{ borderColor: 'var(--border-subtle)' }}>
                   <td className='px-4 py-2.5 font-medium' style={{ color: 'var(--text-primary)' }}>{job.name}</td>
@@ -218,13 +217,8 @@ function PhotoStudioPanel() {
 
 type VideoJob = { id: string; title: string; type: 'text_to_video' | 'edit'; platform: string; duration: string; status: 'done' | 'rendering' | 'draft'; captions: boolean; time: string };
 
-const VIDEO_JOBS: VideoJob[] = [
-  { id: 'vj-1', title: 'Spring Sale — Donut Equipment',       type: 'text_to_video', platform: 'TikTok', duration: '0:30', status: 'done',      captions: true,  time: '12m ago' },
-  { id: 'vj-2', title: 'ProFryer-3000 Product Showcase',     type: 'edit',          platform: 'YouTube', duration: '1:45', status: 'done',      captions: true,  time: '1h ago'  },
-  { id: 'vj-3', title: 'Behind the Bakery — Maker Story',    type: 'text_to_video', platform: 'YouTube', duration: '2:00', status: 'rendering', captions: false, time: '2m ago'  },
-  { id: 'vj-4', title: 'Flash Sale Countdown',                type: 'text_to_video', platform: 'TikTok', duration: '0:15', status: 'done',      captions: true,  time: '3h ago'  },
-  { id: 'vj-5', title: 'Wholesale Intro — Bakers B2B',       type: 'edit',          platform: 'LinkedIn', duration: '0:60', status: 'draft',    captions: false, time: '1d ago'  },
-];
+// Empty until real video jobs have run.
+const VIDEO_JOBS: VideoJob[] = [];
 
 function VideoToolsPanel() {
   const [videoMode, setVideoMode] = useState<'t2v' | 'edit'>('t2v');
@@ -266,10 +260,10 @@ function VideoToolsPanel() {
       {/* Stats */}
       <div className='grid grid-cols-4 gap-3'>
         {[
-          { label: 'Videos Created (30d)', value: '84',   color: 'var(--cyan)' },
-          { label: 'Avg Render Time',       value: '42s',  color: '#10d98a' },
-          { label: 'Auto-Captions Added',   value: '71',   color: '#7b93ff' },
-          { label: 'Platforms Covered',     value: '4',    color: '#ffb347' },
+          { label: 'Videos Created (30d)', value: jobs.length.toString(),   color: 'var(--cyan)' },
+          { label: 'Avg Render Time',       value: '—',  color: '#10d98a' },
+          { label: 'Auto-Captions Added',   value: jobs.filter(j => j.captions).length.toString(),   color: '#7b93ff' },
+          { label: 'Platforms Covered',     value: new Set(jobs.map(j => j.platform)).size.toString(),    color: '#ffb347' },
         ].map(s => (
           <div key={s.label} className='glass-card px-4 py-3'>
             <div className='section-label mb-1'>{s.label}</div>
@@ -378,6 +372,9 @@ function VideoToolsPanel() {
               </tr>
             </thead>
             <tbody>
+              {jobs.length === 0 && (
+                <tr><td colSpan={6} className='px-4 py-8 text-center text-base' style={{ color: 'var(--text-muted)' }}>No videos created yet.</td></tr>
+              )}
               {jobs.map(job => (
                 <tr key={job.id} className='border-b hover:bg-white/[0.02] transition-colors' style={{ borderColor: 'var(--border-subtle)' }}>
                   <td className='px-4 py-2.5 font-medium max-w-[160px] truncate' style={{ color: 'var(--text-primary)' }}>{job.title}</td>
@@ -435,32 +432,35 @@ function VideoToolsPanel() {
 
 export default function ContentPage() {
   const [tab, setTab] = useState<Tab>('creative');
+  const [creatives] = usePersistentState<GeneratedCreative[]>('content.creatives', []);
+  const [briefs] = usePersistentState<CampaignBrief[]>('content.briefs', []);
+  const contentStats = computeContentStats(creatives, briefs);
 
   const kpiCards: KpiCard[] = [
     {
       label: 'Creatives Generated (30d)',
-      value: CONTENT_STATS.creativesGenerated30d.toLocaleString(),
+      value: contentStats.creativesGenerated30d.toLocaleString(),
       color: 'var(--cyan)',
       delta: 12.4,
       deltaLabel: 'vs prior 30d',
     },
     {
       label: 'Avg Performance Score',
-      value: `${CONTENT_STATS.avgPerformanceScore}/100`,
+      value: `${contentStats.avgPerformanceScore}/100`,
       color: '#10d98a',
       delta: 3.1,
       deltaLabel: 'vs prior 30d',
     },
     {
       label: 'Templates Used',
-      value: CONTENT_STATS.templatesUsed.toLocaleString(),
+      value: contentStats.templatesUsed.toLocaleString(),
       color: '#7b93ff',
       delta: 8.0,
       deltaLabel: 'this month',
     },
     {
       label: 'Campaigns Generated',
-      value: CONTENT_STATS.campaignBriefs.toString(),
+      value: contentStats.campaignBriefs.toString(),
       color: '#ffb347',
       delta: 5.0,
       deltaLabel: 'this month',

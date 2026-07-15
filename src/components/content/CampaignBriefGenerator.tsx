@@ -5,7 +5,7 @@ import {
   FileText, Loader2, Download, Share2, Target, Users, MessageSquare,
   BarChart2, Clock, ChevronRight, Zap
 } from 'lucide-react';
-import { CAMPAIGN_BRIEFS } from '@/lib/contentData';
+import { usePersistentState } from '@/lib/usePersistentState';
 import type { CampaignBrief, CampaignObjective } from '@/lib/contentData';
 
 const OBJECTIVE_CONFIG: Record<CampaignObjective, { color: string; bg: string }> = {
@@ -66,6 +66,7 @@ export function CampaignBriefGenerator() {
   const [channels, setChannels] = useState<string[]>(['Google', 'Meta']);
   const [generating, setGenerating] = useState(false);
   const [brief, setBrief] = useState<CampaignBrief | null>(null);
+  const [briefs, setBriefs] = usePersistentState<CampaignBrief[]>('content.briefs', []);
   const [shared, setShared] = useState(false);
   const [viewedId, setViewedId] = useState<string | null>(null);
 
@@ -106,7 +107,12 @@ export function CampaignBriefGenerator() {
       const title = product
         ? `${product} — ${objective} Campaign Brief`
         : `${objective} Campaign Brief`;
-      setBrief({ ...GENERATED_BRIEF_TEMPLATE, title, objective, budget, channels, timeline });
+      const newBrief: CampaignBrief = {
+        ...GENERATED_BRIEF_TEMPLATE, id: `cb-${Date.now()}`,
+        title, objective, budget, channels, timeline, generatedAt: 'just now',
+      };
+      setBrief(newBrief);
+      setBriefs(prev => [newBrief, ...prev]);
       setGenerating(false);
     }, 2500);
   };
@@ -388,8 +394,11 @@ export function CampaignBriefGenerator() {
           <FileText size={13} style={{ color: 'var(--text-secondary)' }} />
           <span className="section-label">Recent Briefs</span>
         </div>
+        {briefs.length === 0 && (
+          <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>No briefs generated yet.</div>
+        )}
         <div className="space-y-2">
-          {CAMPAIGN_BRIEFS.map(b => {
+          {briefs.map(b => {
             const oc = OBJECTIVE_CONFIG[b.objective];
             return (
               <div key={b.id} className="flex items-center gap-3 p-3 rounded-lg transition-colors hover:bg-white/3 cursor-pointer"

@@ -4,6 +4,7 @@ import { SAMPLE_STORE_HEALTH, SAMPLE_TRAFFIC, SAMPLE_CONVERSIONS, SAMPLE_ABANDON
 import { SAMPLE_CHANNEL_METRICS, SAMPLE_TIME_SERIES, SAMPLE_ATTRIBUTION, SAMPLE_AI_INSIGHTS, SAMPLE_SHARED_REPORTS, emptyChannelMetrics, emptyTimeSeries, emptyAttribution } from './analyticsData';
 import { SAMPLE_SOCIAL_POSTS, SAMPLE_INBOX_MESSAGES, SAMPLE_LISTENING_ITEMS, SAMPLE_PLATFORM_STATS, SAMPLE_APPROVAL_POSTS, SAMPLE_DM_RULES, emptyPlatformStats } from './socialData';
 import { SAMPLE_EMAIL_FLOWS, SAMPLE_EMAIL_CAMPAIGNS, SAMPLE_SEGMENTS, SAMPLE_DELIVERABILITY } from './emailData';
+import { SAMPLE_GENERATED_CREATIVES, SAMPLE_COMPETITOR_ADS, SAMPLE_PERFORMANCE_SCORES, SAMPLE_CAMPAIGN_BRIEFS, SAMPLE_BRAND_VOICE_SETTINGS, DEFAULT_BRAND_VOICE_SETTINGS } from './contentData';
 
 // ─── Sample data registry ──────────────────────────────────────────────────
 //
@@ -57,6 +58,22 @@ const REGISTRY: SampleDataEntry[] = [
   { key: 'email.campaigns',           sample: SAMPLE_EMAIL_CAMPAIGNS,  empty: [] },
   { key: 'email.segments',            sample: SAMPLE_SEGMENTS,         empty: [] },
   { key: 'email.deliverability',      sample: SAMPLE_DELIVERABILITY,   empty: [] },
+  { key: 'content.creatives',         sample: SAMPLE_GENERATED_CREATIVES, empty: [] },
+  { key: 'content.competitorAds',     sample: SAMPLE_COMPETITOR_ADS,   empty: [] },
+  { key: 'content.performanceScores', sample: SAMPLE_PERFORMANCE_SCORES, empty: [] },
+  { key: 'content.briefs',            sample: SAMPLE_CAMPAIGN_BRIEFS,  empty: [] },
+  { key: 'content.brandVoice.tone',           sample: SAMPLE_BRAND_VOICE_SETTINGS.toneValue,          empty: DEFAULT_BRAND_VOICE_SETTINGS.toneValue },
+  { key: 'content.brandVoice.formality',      sample: SAMPLE_BRAND_VOICE_SETTINGS.formalityValue,     empty: DEFAULT_BRAND_VOICE_SETTINGS.formalityValue },
+  { key: 'content.brandVoice.traits',         sample: SAMPLE_BRAND_VOICE_SETTINGS.personalityTraits,  empty: DEFAULT_BRAND_VOICE_SETTINGS.personalityTraits },
+  { key: 'content.brandVoice.avoidWords',     sample: SAMPLE_BRAND_VOICE_SETTINGS.wordListAvoid,       empty: DEFAULT_BRAND_VOICE_SETTINGS.wordListAvoid },
+  { key: 'content.brandVoice.useWords',       sample: SAMPLE_BRAND_VOICE_SETTINGS.wordListUse,         empty: DEFAULT_BRAND_VOICE_SETTINGS.wordListUse },
+  { key: 'content.brandVoice.exampleCopy',    sample: SAMPLE_BRAND_VOICE_SETTINGS.exampleCopy,         empty: DEFAULT_BRAND_VOICE_SETTINGS.exampleCopy },
+  { key: 'content.brandVoice.trainingDocFiles', sample: [
+      { name: 'Brand_Guidelines_2026.pdf', size: '2.4 MB', status: 'Trained' },
+      { name: 'Tone_of_Voice_Document.docx', size: '840 KB', status: 'Trained' },
+      { name: 'Email_Copy_Examples.txt', size: '124 KB', status: 'Trained' },
+      { name: 'Social_Media_Style_Guide.pdf', size: '1.8 MB', status: 'Trained' },
+    ], empty: [] },
 ];
 
 function storageKey(key: string): string {

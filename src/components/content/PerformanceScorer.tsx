@@ -2,8 +2,52 @@
 
 import { useState } from 'react';
 import { Upload, Link2, Loader2, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
-import { PERFORMANCE_SCORES } from '@/lib/contentData';
+import { usePersistentState } from '@/lib/usePersistentState';
 import type { ScoredCreative, PerformancePrediction } from '@/lib/contentData';
+
+// Simple string hash so the same input scores consistently, used only inside
+// the click handler (not during render), so it doesn't affect SSR hydration.
+function hashString(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) & 0xffffffff;
+  return Math.abs(h);
+}
+
+function scoreFromInput(input: string): ScoredCreative {
+  const h = hashString(input);
+  const metric = (offset: number, min: number, max: number) => min + ((h >> offset) % (max - min + 1));
+  const metrics = {
+    clarity: metric(0, 45, 98),
+    emotionalAppeal: metric(3, 40, 95),
+    brandConsistency: metric(6, 50, 97),
+    callToAction: metric(9, 42, 96),
+    visualHierarchy: metric(12, 45, 95),
+    colorContrast: metric(15, 40, 92),
+  };
+  const overallScore = Math.round(Object.values(metrics).reduce((s, v) => s + v, 0) / 6);
+  const prediction: PerformancePrediction = overallScore >= 80 ? 'strong' : overallScore >= 60 ? 'average' : 'weak';
+  const weakest = (Object.entries(metrics) as [string, number][]).sort((a, b) => a[1] - b[1])[0][0];
+  const IMPROVEMENT_HINTS: Record<string, string> = {
+    clarity: 'Simplify the headline and remove competing visual elements to sharpen the core message.',
+    emotionalAppeal: 'Add a human element or lifestyle context to create a stronger emotional connection.',
+    brandConsistency: 'Align colors, fonts, and tone more closely with your brand voice guidelines.',
+    callToAction: 'Make the CTA button more prominent and use action-oriented copy.',
+    visualHierarchy: 'Restructure the layout so the eye is guided toward the product and CTA first.',
+    colorContrast: 'Increase contrast between text and background to meet accessibility standards.',
+  };
+  return {
+    id: `ps-${Date.now()}`,
+    name: input.length > 40 ? input.slice(0, 40) + '…' : input,
+    type: 'image',
+    platform: 'meta',
+    overallScore,
+    prediction,
+    metrics,
+    commentary: `This creative scores ${overallScore}/100 overall. ${prediction === 'strong' ? 'Strong performance is predicted across most dimensions.' : prediction === 'average' ? 'Performance is predicted to be middle-of-the-pack — a few targeted fixes could meaningfully improve results.' : 'Several dimensions need attention before this is likely to perform well.'}`,
+    improvements: [IMPROVEMENT_HINTS[weakest], 'Test an alternate variant with a different visual focus.', 'A/B test the headline against a benefit-led alternative.'],
+    thumbnailColor: 'linear-gradient(135deg, #00d9ff33, #7b93ff33)',
+  };
+}
 
 const METRIC_LABELS: Record<keyof ScoredCreative['metrics'], string> = {
   clarity:            'Clarity',
@@ -63,19 +107,26 @@ export function PerformanceScorer() {
   const [urlInput, setUrlInput] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const [scoring, setScoring] = useState(false);
-  const [selected, setSelected] = useState<ScoredCreative>(PERFORMANCE_SCORES[0]);
+  const [scores, setScores] = usePersistentState<ScoredCreative[]>('content.performanceScores', []);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const selected = scores.find(sc => sc.id === selectedId) ?? scores[0] ?? null;
 
   const handleScore = () => {
     if (!urlInput.trim()) return;
     setScoring(true);
+    const input = urlInput;
     setTimeout(() => {
-      setSelected(PERFORMANCE_SCORES[Math.floor(Math.random() * PERFORMANCE_SCORES.length)]);
+      const scored = scoreFromInput(input);
+      setScores(prev => [scored, ...prev]);
+      setSelectedId(scored.id);
       setScoring(false);
+      setUrlInput('');
     }, 2000);
   };
 
-  const predCfg = PREDICTION_CONFIG[selected.prediction];
-  const PredIcon = predCfg.icon;
+  const predCfg = selected ? PREDICTION_CONFIG[selected.prediction] : null;
+  const PredIcon = predCfg?.icon;
 
   return (
     <div className="space-y-4">
@@ -133,9 +184,17 @@ export function PerformanceScorer() {
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp size={13} style={{ color: 'var(--cyan)' }} />
             <span className="section-label">Score Results</span>
-            <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>— {selected.name}</span>
+            {selected && (
+              <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>— {selected.name}</span>
+            )}
           </div>
 
+          {!selected ? (
+            <div className="text-base text-center py-10" style={{ color: 'var(--text-muted)' }}>
+              No creatives scored yet — upload one or paste a URL above to get started.
+            </div>
+          ) : (
+          <>
           <div className="flex gap-5 mb-5">
             {/* Gauge */}
             <div className="relative shrink-0">
@@ -152,9 +211,9 @@ export function PerformanceScorer() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
                 <span className="flex items-center gap-1.5 text-[16px] font-medium px-2.5 py-1 rounded-lg"
-                  style={{ background: predCfg.bg, color: predCfg.color }}>
-                  <PredIcon size={11} />
-                  {predCfg.label}
+                  style={{ background: predCfg!.bg, color: predCfg!.color }}>
+                  {PredIcon && <PredIcon size={11} />}
+                  {predCfg!.label}
                 </span>
               </div>
               <p className="text-[16px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
@@ -185,18 +244,25 @@ export function PerformanceScorer() {
               ))}
             </div>
           </div>
+          </>
+          )}
         </div>
 
         {/* Creative List */}
         <div className="glass-card p-4 col-span-1">
           <div className="section-label mb-3">Scored Creatives</div>
+          {scores.length === 0 ? (
+            <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>
+              No creatives scored yet.
+            </div>
+          ) : (
           <div className="space-y-2">
-            {PERFORMANCE_SCORES.map(sc => {
+            {scores.map(sc => {
               const color = scoreColor(sc.overallScore);
               const pc = PREDICTION_CONFIG[sc.prediction];
-              const isActive = selected.id === sc.id;
+              const isActive = selected?.id === sc.id;
               return (
-                <button key={sc.id} onClick={() => setSelected(sc)}
+                <button key={sc.id} onClick={() => setSelectedId(sc.id)}
                   className="w-full text-left p-2.5 rounded-xl transition-all"
                   style={{
                     background: isActive ? 'var(--bg-overlay)' : 'var(--bg-elevated)',
@@ -226,6 +292,7 @@ export function PerformanceScorer() {
               );
             })}
           </div>
+          )}
         </div>
       </div>
     </div>

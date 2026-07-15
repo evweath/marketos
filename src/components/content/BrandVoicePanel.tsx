@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { usePersistentState } from '@/lib/usePersistentState';
 import { Mic, Plus, X, Upload, Check, BookOpen, RefreshCw } from 'lucide-react';
-import { BRAND_VOICE_SETTINGS } from '@/lib/contentData';
+import { DEFAULT_BRAND_VOICE_SETTINGS as BRAND_VOICE_SETTINGS } from '@/lib/contentData';
 
 const PERSONALITY_OPTIONS = [
   'Bold', 'Trustworthy', 'Innovative', 'Friendly', 'Expert',
@@ -16,6 +16,7 @@ export function BrandVoicePanel() {
   const [saved, setSaved] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [browsing, setBrowsing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Editable state
   const [toneValue, setToneValue] = usePersistentState('content.brandVoice.tone', BRAND_VOICE_SETTINGS.toneValue);
@@ -24,6 +25,7 @@ export function BrandVoicePanel() {
   const [avoidWords, setAvoidWords] = usePersistentState<string[]>('content.brandVoice.avoidWords', BRAND_VOICE_SETTINGS.wordListAvoid);
   const [useWords, setUseWords] = usePersistentState<string[]>('content.brandVoice.useWords', BRAND_VOICE_SETTINGS.wordListUse);
   const [exampleCopy, setExampleCopy] = usePersistentState('content.brandVoice.exampleCopy', BRAND_VOICE_SETTINGS.exampleCopy);
+  const [trainingDocs, setTrainingDocs] = usePersistentState<{ name: string; size: string; status: string }[]>('content.brandVoice.trainingDocFiles', []);
 
   // Tag input state
   const [avoidInput, setAvoidInput] = useState('');
@@ -45,6 +47,16 @@ export function BrandVoicePanel() {
     setSaved(true);
     setEditing(false);
     setTimeout(() => setSaved(false), 3000);
+  };
+
+  const addFiles = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const docs = Array.from(files).map(f => ({
+      name: f.name,
+      size: f.size > 1024 * 1024 ? `${(f.size / (1024 * 1024)).toFixed(1)} MB` : `${Math.max(1, Math.round(f.size / 1024))} KB`,
+      status: 'Trained',
+    }));
+    setTrainingDocs(prev => [...prev, ...docs]);
   };
 
   const toggleTrait = (t: string) => {
@@ -71,7 +83,8 @@ export function BrandVoicePanel() {
               </div>
             )}
             <div className="flex items-center gap-1.5 text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
-              <RefreshCw size={9} />Last trained {BRAND_VOICE_SETTINGS.lastTrained} · {BRAND_VOICE_SETTINGS.trainingDocs} docs
+              <RefreshCw size={9} />
+              {trainingDocs.length > 0 ? `Trained on ${trainingDocs.length} doc${trainingDocs.length === 1 ? '' : 's'}` : 'Not trained yet'}
             </div>
             <button onClick={() => setEditing(!editing)}
               className="px-3 py-1.5 rounded-lg text-[16px] font-medium transition-all"
@@ -115,8 +128,8 @@ export function BrandVoicePanel() {
           {/* Example Copy */}
           <div className="p-3 rounded-xl" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
             <div className="section-label mb-2">Example Copy</div>
-            <p className="text-[16px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-              {BRAND_VOICE_SETTINGS.exampleCopy}
+            <p className="text-[16px] leading-relaxed" style={{ color: exampleCopy ? 'var(--text-secondary)' : 'var(--text-muted)' }}>
+              {exampleCopy || 'No example copy yet — add one below.'}
             </p>
           </div>
         </div>
@@ -291,10 +304,12 @@ export function BrandVoicePanel() {
           Supported formats: PDF, DOCX, TXT.
         </p>
 
+        <input ref={fileInputRef} type="file" multiple accept=".pdf,.docx,.txt" className="hidden"
+          onChange={e => { addFiles(e.target.files); e.target.value = ''; }} />
         <div
           onDragOver={e => { e.preventDefault(); setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
-          onDrop={e => { e.preventDefault(); setDragOver(false); }}
+          onDrop={e => { e.preventDefault(); setDragOver(false); addFiles(e.dataTransfer.files); }}
           className="rounded-xl flex flex-col items-center justify-center py-10 transition-all cursor-pointer"
           style={{
             border: `2px dashed ${dragOver ? '#ffb347' : 'var(--border-dim)'}`,
@@ -307,20 +322,20 @@ export function BrandVoicePanel() {
           <div className="text-base mb-3" style={{ color: 'var(--text-muted)' }}>
             PDF, DOCX, or TXT · Up to 50MB per file
           </div>
-          <button onClick={() => { setBrowsing(true); setTimeout(() => setBrowsing(false), 1500); }}
+          <button onClick={() => { setBrowsing(true); fileInputRef.current?.click(); setTimeout(() => setBrowsing(false), 1500); }}
             className="px-4 py-2 rounded-lg text-base font-medium transition-all hover:opacity-90"
             style={{ background: 'rgba(255,179,71,0.12)', color: '#ffb347', border: '1px solid rgba(255,179,71,0.25)' }}>
             {browsing ? 'Opening…' : 'Browse Files'}
           </button>
         </div>
 
+        {trainingDocs.length === 0 ? (
+          <div className="text-base text-center py-4" style={{ color: 'var(--text-muted)' }}>
+            No documents uploaded yet.
+          </div>
+        ) : (
         <div className="mt-3 space-y-1.5">
-          {[
-            { name: 'Brand_Guidelines_2026.pdf', size: '2.4 MB', status: 'Trained' },
-            { name: 'Tone_of_Voice_Document.docx', size: '840 KB', status: 'Trained' },
-            { name: 'Email_Copy_Examples.txt', size: '124 KB', status: 'Trained' },
-            { name: 'Social_Media_Style_Guide.pdf', size: '1.8 MB', status: 'Trained' },
-          ].map(doc => (
+          {trainingDocs.map(doc => (
             <div key={doc.name} className="flex items-center justify-between px-3 py-2 rounded-lg"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
               <div className="flex items-center gap-2">
@@ -337,6 +352,7 @@ export function BrandVoicePanel() {
             </div>
           ))}
         </div>
+        )}
       </div>
     </div>
   );

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Search, X, BarChart2, TrendingUp } from 'lucide-react';
-import { COMPETITOR_ADS } from '@/lib/contentData';
+import { usePersistentState } from '@/lib/usePersistentState';
 import type { CompetitorAd, ContentPlatform, PerformanceIndicator } from '@/lib/contentData';
 
 type PlatformFilter = 'all' | ContentPlatform;
@@ -194,6 +194,7 @@ function AnalysisPanel({ modal, onClose }: { modal: AnalysisModal; onClose: () =
 }
 
 export function CompetitorAdAnalysis() {
+  const [competitorAds] = usePersistentState<CompetitorAd[]>('content.competitorAds', []);
   const [searchQuery, setSearchQuery] = useState('');
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>('all');
   const [adTypeFilter, setAdTypeFilter] = useState<AdTypeFilter>('all');
@@ -201,7 +202,7 @@ export function CompetitorAdAnalysis() {
   const [modal, setModal] = useState<AnalysisModal | null>(null);
   const [searching, setSearching] = useState(false);
 
-  const filtered = COMPETITOR_ADS.filter(ad => {
+  const filtered = competitorAds.filter(ad => {
     const matchSearch = !searchQuery || ad.competitor.includes(searchQuery.toLowerCase()) || ad.headline.toLowerCase().includes(searchQuery.toLowerCase());
     const matchPlatform = platformFilter === 'all' || ad.platform === platformFilter;
     const matchType = adTypeFilter === 'all' || ad.adType === adTypeFilter;
@@ -209,13 +210,13 @@ export function CompetitorAdAnalysis() {
     return matchSearch && matchPlatform && matchType && matchPerf;
   });
 
-  const avgDays = Math.round(COMPETITOR_ADS.reduce((s, a) => s + a.daysRunning, 0) / COMPETITOR_ADS.length);
-  const platformCounts = COMPETITOR_ADS.reduce((acc, ad) => {
+  const avgDays = competitorAds.length > 0 ? Math.round(competitorAds.reduce((s, a) => s + a.daysRunning, 0) / competitorAds.length) : 0;
+  const platformCounts = competitorAds.reduce((acc, ad) => {
     acc[ad.platform] = (acc[ad.platform] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
-  const topPlatform = Object.entries(platformCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'meta';
-  const highCount = COMPETITOR_ADS.filter(a => a.performanceIndicator === 'high').length;
+  const topPlatform = Object.entries(platformCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+  const highCount = competitorAds.filter(a => a.performanceIndicator === 'high').length;
 
   return (
     <div className="space-y-4">
@@ -224,10 +225,10 @@ export function CompetitorAdAnalysis() {
       {/* Summary Bar */}
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: 'Ads Tracked', value: COMPETITOR_ADS.length.toString(), color: 'var(--cyan)' },
-          { label: 'Avg Days Running', value: `${avgDays}d`, color: '#ffb347' },
-          { label: 'Top Platform', value: PLATFORM_LABELS[topPlatform as ContentPlatform]?.label ?? topPlatform, color: '#7b93ff' },
-          { label: 'High Performers', value: `${highCount} / ${COMPETITOR_ADS.length}`, color: '#10d98a' },
+          { label: 'Ads Tracked', value: competitorAds.length.toString(), color: 'var(--cyan)' },
+          { label: 'Avg Days Running', value: competitorAds.length > 0 ? `${avgDays}d` : '—', color: '#ffb347' },
+          { label: 'Top Platform', value: topPlatform ? (PLATFORM_LABELS[topPlatform as ContentPlatform]?.label ?? topPlatform) : '—', color: '#7b93ff' },
+          { label: 'High Performers', value: `${highCount} / ${competitorAds.length}`, color: '#10d98a' },
         ].map(s => (
           <div key={s.label} className="glass-card px-4 py-3">
             <div className="section-label mb-1">{s.label}</div>

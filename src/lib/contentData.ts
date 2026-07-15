@@ -24,7 +24,8 @@ export interface GeneratedCreative {
   thumbnailInitials: string;
 }
 
-export const GENERATED_CREATIVES: GeneratedCreative[] = [
+// SAMPLE_* below seeds Settings → Data → "Load Sample Data"; the app boots empty.
+export const SAMPLE_GENERATED_CREATIVES: GeneratedCreative[] = [
   {
     id: 'gc-001', type: 'image', platform: 'meta', name: 'Commercial Fryer Hero — White BG',
     status: 'published', performanceScore: 87, size: '1080x1080', format: 'JPG',
@@ -86,7 +87,7 @@ export interface CompetitorAd {
   thumbnailColor: string;
 }
 
-export const COMPETITOR_ADS: CompetitorAd[] = [
+export const SAMPLE_COMPETITOR_ADS: CompetitorAd[] = [
   {
     id: 'ca-001', competitor: 'fryer-king.com', platform: 'meta', adType: 'image',
     headline: 'Commercial Fryers from $899', description: 'NSF-certified commercial fryers for bakeries and restaurants. Free shipping on orders over $1,200.',
@@ -146,17 +147,21 @@ export interface TemplateCategory {
   iconName: string;
 }
 
+// The category list itself is structural (a fixed taxonomy for the template
+// library), but `count` reflected a fabricated inventory size — it's now
+// derived from the actual template library at render time instead (see
+// TemplateLibrary.tsx), so it's zeroed here rather than hardcoded.
 export const TEMPLATE_CATEGORIES: TemplateCategory[] = [
-  { id: 'social',        name: 'Social Media',       count: 4820, iconName: 'Share2'        },
-  { id: 'display',       name: 'Display Ads',        count: 3240, iconName: 'Monitor'        },
-  { id: 'email',         name: 'Email Headers',      count: 2180, iconName: 'Mail'           },
-  { id: 'youtube',       name: 'YouTube Thumbnails', count: 1840, iconName: 'Youtube'        },
-  { id: 'stories',       name: 'Stories',            count: 2640, iconName: 'Smartphone'     },
-  { id: 'carousels',     name: 'Carousels',          count: 1920, iconName: 'LayoutGrid'     },
-  { id: 'video',         name: 'Video Ads',          count: 1480, iconName: 'Video'          },
-  { id: 'print',         name: 'Print',              count: 980,  iconName: 'Printer'        },
-  { id: 'presentations', name: 'Presentations',      count: 640,  iconName: 'Presentation'   },
-  { id: 'landing',       name: 'Landing Pages',      count: 780,  iconName: 'Layout'         },
+  { id: 'social',        name: 'Social Media',       count: 0, iconName: 'Share2'        },
+  { id: 'display',       name: 'Display Ads',        count: 0, iconName: 'Monitor'        },
+  { id: 'email',         name: 'Email Headers',      count: 0, iconName: 'Mail'           },
+  { id: 'youtube',       name: 'YouTube Thumbnails', count: 0, iconName: 'Youtube'        },
+  { id: 'stories',       name: 'Stories',            count: 0, iconName: 'Smartphone'     },
+  { id: 'carousels',     name: 'Carousels',          count: 0, iconName: 'LayoutGrid'     },
+  { id: 'video',         name: 'Video Ads',          count: 0, iconName: 'Video'          },
+  { id: 'print',         name: 'Print',              count: 0, iconName: 'Printer'        },
+  { id: 'presentations', name: 'Presentations',      count: 0, iconName: 'Presentation'   },
+  { id: 'landing',       name: 'Landing Pages',      count: 0, iconName: 'Layout'         },
 ];
 
 // ─── Brand Voice ──────────────────────────────────────────────────────────────
@@ -173,7 +178,20 @@ export interface BrandVoiceSettings {
   trainingDocs: number;
 }
 
-export const BRAND_VOICE_SETTINGS: BrandVoiceSettings = {
+// Untrained default — no brand voice has been trained yet.
+export const DEFAULT_BRAND_VOICE_SETTINGS: BrandVoiceSettings = {
+  tone: 'Not yet trained',
+  toneValue: 50,
+  formalityValue: 50,
+  personalityTraits: [],
+  wordListAvoid: [],
+  wordListUse: [],
+  exampleCopy: '',
+  lastTrained: '',
+  trainingDocs: 0,
+};
+
+export const SAMPLE_BRAND_VOICE_SETTINGS: BrandVoiceSettings = {
   tone: 'Professional with warmth',
   toneValue: 65,
   formalityValue: 55,
@@ -209,7 +227,7 @@ export interface ScoredCreative {
   thumbnailColor: string;
 }
 
-export const PERFORMANCE_SCORES: ScoredCreative[] = [
+export const SAMPLE_PERFORMANCE_SCORES: ScoredCreative[] = [
   {
     id: 'ps-001', name: 'Commercial Fryer Hero — White BG', type: 'image', platform: 'meta',
     overallScore: 87, prediction: 'strong',
@@ -274,7 +292,7 @@ export interface CampaignBrief {
   generatedAt: string;
 }
 
-export const CAMPAIGN_BRIEFS: CampaignBrief[] = [
+export const SAMPLE_CAMPAIGN_BRIEFS: CampaignBrief[] = [
   {
     id: 'cb-001',
     title: 'Commercial Fryer Q2 Launch — Donut Equipment',
@@ -477,10 +495,15 @@ export const IMAGE_PRESETS: PlatformPreset[] = [
 ];
 
 // ─── Content Stats ─────────────────────────────────────────────────────────────
+// Computed from whatever creatives/briefs currently exist rather than hardcoded.
 
-export const CONTENT_STATS = {
-  creativesGenerated30d: 847,
-  avgPerformanceScore: 76,
-  templatesUsed: 124,
-  campaignBriefs: 18,
-};
+export function computeContentStats(creatives: GeneratedCreative[], briefs: CampaignBrief[]) {
+  return {
+    creativesGenerated30d: creatives.length,
+    avgPerformanceScore: creatives.length > 0
+      ? Math.round(creatives.reduce((s, c) => s + c.performanceScore, 0) / creatives.length)
+      : 0,
+    templatesUsed: 0,
+    campaignBriefs: briefs.length,
+  };
+}

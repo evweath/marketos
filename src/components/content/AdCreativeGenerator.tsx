@@ -5,7 +5,7 @@ import {
   Image, Video, User, Download, Edit3, Send, Loader2,
   Zap, Star, LayoutGrid
 } from 'lucide-react';
-import { GENERATED_CREATIVES } from '@/lib/contentData';
+import { usePersistentState } from '@/lib/usePersistentState';
 import type { GeneratedCreative, ContentPlatform } from '@/lib/contentData';
 
 type SubTab = 'image' | 'video' | 'ugc';
@@ -46,6 +46,7 @@ export function AdCreativeGenerator() {
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState<GeneratedResult | null>(null);
   const [previewAction, setPreviewAction] = useState<'edit' | 'publish' | null>(null);
+  const [creatives, setCreatives] = usePersistentState<GeneratedCreative[]>('content.creatives', []);
 
   const downloadCreative = (g: GeneratedResult) => {
     const content = `AI Generated Creative\nName: ${g.name}\nPlatform: ${g.platform}\nSize: ${g.size}\nFormat: ${g.format}`;
@@ -86,18 +87,36 @@ export function AdCreativeGenerator() {
         'linear-gradient(135deg, #ffb347, #ff4444)',
         'linear-gradient(135deg, #7b93ff, #10d98a)',
       ];
+      const name = `${productName} — ${PLATFORM_CONFIG[platform].label} ${subTab === 'ugc' ? 'UGC' : subTab.charAt(0).toUpperCase() + subTab.slice(1)}`;
+      const color = colors[Math.floor(Math.random() * colors.length)];
       setGenerated({
-        name: `${productName} — ${PLATFORM_CONFIG[platform].label} ${subTab === 'ugc' ? 'UGC' : subTab.charAt(0).toUpperCase() + subTab.slice(1)}`,
+        name,
         platform: PLATFORM_CONFIG[platform].label,
         size: sizes[subTab][platform],
         format: formats[subTab],
-        color: colors[Math.floor(Math.random() * colors.length)],
+        color,
       });
+      const initials = productName.trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      const newCreative: GeneratedCreative = {
+        id: `gc-${Date.now()}`,
+        type: subTab,
+        platform,
+        name,
+        status: 'draft',
+        performanceScore: 0,
+        size: sizes[subTab][platform],
+        format: formats[subTab],
+        createdAt: 'just now',
+        store,
+        thumbnailColor: color,
+        thumbnailInitials: initials || 'AD',
+      };
+      setCreatives(prev => [newCreative, ...prev]);
       setGenerating(false);
     }, 2000);
   };
 
-  const filteredCreatives = GENERATED_CREATIVES.filter(c =>
+  const filteredCreatives = creatives.filter(c =>
     subTab === 'image' ? c.type === 'image' : subTab === 'video' ? c.type === 'video' : c.type === 'ugc'
   );
 
@@ -297,11 +316,17 @@ export function AdCreativeGenerator() {
             </span>
           </div>
         </div>
+        {filteredCreatives.length === 0 ? (
+          <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>
+            No creatives generated yet — use the form above to create one.
+          </div>
+        ) : (
         <div className="grid grid-cols-4 gap-3">
           {filteredCreatives.map(creative => (
             <CreativeCard key={creative.id} creative={creative} />
           ))}
         </div>
+        )}
       </div>
     </div>
   );
