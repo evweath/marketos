@@ -12,6 +12,8 @@ import SocialInbox from '@/components/social/SocialInbox';
 import SocialListening from '@/components/social/SocialListening';
 import { PLATFORM_CONFIG } from '@/lib/socialData';
 import type { SocialPost, SocialPlatform, InboxMessage, ApprovalPost, ApprovalStatus, DMRule, DMPlatform, DMTrigger } from '@/lib/socialData';
+import { useStores, useStoreScope, resolveStoreId } from '@/lib/storeScope';
+import { StoreScopeBar } from '@/components/shared/StoreScopeBar';
 import {
   Plus, Calendar, List, Inbox, Search, Grid3X3, RefreshCw, ChevronUp, ChevronDown,
   CheckSquare, Bot, Trash2, MessageCircle, Hash, ArrowRight, Edit3, Upload,
@@ -32,14 +34,6 @@ const TABS: { key: Tab; label: string; icon: React.ElementType; badge?: number }
 ];
 
 const ALL_PLATFORMS: SocialPlatform[] = ['facebook','instagram','youtube','x-twitter','linkedin','tiktok'];
-
-// ─── Grid Preview stores ───────────────────────────────────────────────────────
-
-const GRID_STORES = [
-  { id: 'donut-equipment',  username: 'donut_equipment' },
-  { id: 'donut-supplies',   username: 'donut_supplies' },
-  { id: 'bakery-wholesalers', username: 'bakery_wholesalers' },
-];
 
 // ─── Status dot config ─────────────────────────────────────────────────────────
 
@@ -74,7 +68,12 @@ function cellGradient(idx: number): string {
 
 // ─── Instagram Grid Preview ────────────────────────────────────────────────────
 
-function InstagramGridPreview({ posts, onEditPost, onNewPost }: { posts: SocialPost[]; onEditPost: (post: SocialPost) => void; onNewPost: () => void }) {
+interface GridStore { id: string; username: string; }
+
+function InstagramGridPreview({ posts, gridStores, resolveStore, onEditPost, onNewPost }: {
+  posts: SocialPost[]; gridStores: GridStore[]; resolveStore: (store: string) => string | null;
+  onEditPost: (post: SocialPost) => void; onNewPost: () => void;
+}) {
   const [gridStoreIdx, setGridStoreIdx] = useState(0);
   const [showUpcoming, setShowUpcoming] = useState(false);
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
@@ -82,11 +81,11 @@ function InstagramGridPreview({ posts, onEditPost, onNewPost }: { posts: SocialP
     Array.from({ length: 12 }, (_, i) => i)
   );
 
-  const currentStore = GRID_STORES[gridStoreIdx];
+  const currentStore = gridStores[Math.min(gridStoreIdx, gridStores.length - 1)];
 
-  // Filter instagram posts and sort
+  // Filter instagram posts for the selected store and sort
   const instagramPosts: SocialPost[] = posts
-    .filter(p => p.platforms.includes('instagram'))
+    .filter(p => p.platforms.includes('instagram') && (!currentStore || resolveStore(p.store) === currentStore.id))
     .sort((a, b) => {
       if (showUpcoming) {
         return new Date(a.scheduledFor).getTime() - new Date(b.scheduledFor).getTime();
@@ -116,6 +115,14 @@ function InstagramGridPreview({ posts, onEditPost, onNewPost }: { posts: SocialP
   const formatDate = (iso: string) =>
     new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
+  if (!currentStore) {
+    return (
+      <div className="text-base text-center py-10" style={{ color: 'var(--text-muted)' }}>
+        Select a store above to preview its Instagram grid.
+      </div>
+    );
+  }
+
   return (
     <div className="flex gap-5 h-full min-h-0 overflow-hidden">
       {/* Left: controls + phone */}
@@ -125,7 +132,7 @@ function InstagramGridPreview({ posts, onEditPost, onNewPost }: { posts: SocialP
         <div className="flex items-center gap-3 flex-wrap">
           {/* Store selector */}
           <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
-            {GRID_STORES.map((s, i) => (
+            {gridStores.map((s, i) => (
               <button
                 key={s.id}
                 onClick={() => setGridStoreIdx(i)}
@@ -469,13 +476,16 @@ const PLT_COLOR: Record<string, string> = {
   'x-twitter': '#1da1f2', linkedin: '#0a66c2', tiktok: '#010101',
 };
 
-function PostApprovalsPanel() {
-  const [posts, setPosts] = usePersistentState<ApprovalPost[]>('social.approvalPosts', []);
+function PostApprovalsPanel({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
+  const [allPosts, setPosts] = usePersistentState<ApprovalPost[]>('social.approvalPosts', []);
+  const posts = allPosts.filter(p => selectedStoreIds.includes(resolveStoreId(p.store, stores) ?? ''));
   const [filterStatus, setFilterStatus] = useState<ApprovalStatus | 'all'>('all');
   const [rejectNote, setRejectNote] = useState('');
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [csvText, setCsvText] = useState('');
   const [showCsv, setShowCsv] = useState(false);
+  const [csvStore, setCsvStore] = useState(stores[0]?.id ?? '');
 
   const pending = posts.filter(p => p.status === 'review').length;
 
@@ -491,6 +501,7 @@ function PostApprovalsPanel() {
       const parts = line.split(',');
       return {
         id: `csv-${Date.now()}-${i}`,
+        store: csvStore,
         title: parts[0]?.trim() || `Imported Post ${i + 1}`,
         platforms: (parts[1]?.trim() || 'instagram').split(';'),
         scheduledFor: parts[2]?.trim() || '2026-05-20 10:00',
@@ -554,6 +565,13 @@ function PostApprovalsPanel() {
         <div className="glass-card p-4 flex flex-col gap-3">
           <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>CSV Bulk Import</div>
           <div className="section-label text-[16px]">Format: Title, Platforms (semicolon-separated), Scheduled Date (YYYY-MM-DD HH:MM), Content</div>
+          <div className="flex items-center gap-2">
+            <label className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Import into store:</label>
+            <select value={csvStore} onChange={e => setCsvStore(e.target.value)}
+              className="px-2 py-1.5 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+              {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          </div>
           <textarea value={csvText} onChange={e => setCsvText(e.target.value)}
             placeholder={'title,platforms,scheduledFor,content\n"Summer Post","instagram;facebook","2026-05-20 10:00","Summer sale content..."'}
             rows={5} className="w-full px-3 py-2 rounded-lg text-base font-mono" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)', resize: 'none' }} />
@@ -805,11 +823,14 @@ const TRIGGER_LABELS: Record<DMTrigger, string> = {
 
 const PLT_DM_COLOR: Record<DMPlatform, string> = { instagram: '#e1306c', facebook: '#1877f2', tiktok: '#010101' };
 
-function DMAutomationPanel() {
-  const [rules, setRules] = usePersistentState<DMRule[]>('social.dmRules', []);
+function DMAutomationPanel({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
+  const [allRules, setRules] = usePersistentState<DMRule[]>('social.dmRules', []);
+  const rules = allRules.filter(r => selectedStoreIds.includes(resolveStoreId(r.store, stores) ?? ''));
   const [expanded, setExpanded] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName]               = useState('');
+  const [newStore, setNewStore]             = useState(stores[0]?.id ?? '');
   const [newPlatform, setNewPlatform]       = useState<DMPlatform>('instagram');
   const [newTrigger, setNewTrigger]         = useState<DMTrigger>('comment_keyword');
   const [newKeyword, setNewKeyword]         = useState('');
@@ -823,9 +844,9 @@ function DMAutomationPanel() {
   const deleteRule = (id: string) => setRules(prev => prev.filter(r => r.id !== id));
 
   const createRule = () => {
-    if (!newName.trim() || !newDm.trim()) return;
+    if (!newName.trim() || !newDm.trim() || !newStore) return;
     const r: DMRule = {
-      id: `dm-${Date.now()}`, name: newName, platform: newPlatform, trigger: newTrigger,
+      id: `dm-${Date.now()}`, store: newStore, name: newName, platform: newPlatform, trigger: newTrigger,
       keyword: newKeyword || undefined, replyMessage: newReply, dmMessage: newDm,
       status: 'active', triggeredCount: 0, conversionCount: 0,
     };
@@ -881,6 +902,10 @@ function DMAutomationPanel() {
             </select>
             <input value={newKeyword} onChange={e => setNewKeyword(e.target.value)} placeholder="Trigger keyword (optional)"
               className="px-3 py-2 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
+            <select value={newStore} onChange={e => setNewStore(e.target.value)}
+              className="col-span-3 px-3 py-2 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+              {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
           </div>
           <input value={newReply} onChange={e => setNewReply(e.target.value)} placeholder="Public comment reply (e.g., 'Check your DMs!')"
             className="px-3 py-2 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
@@ -965,20 +990,28 @@ function DMAutomationPanel() {
 
 export default function SocialPage() {
   const [tab, setTab] = useState<Tab>('calendar');
-  const [posts, setPosts] = usePersistentState<SocialPost[]>('social.posts', []);
-  const [inboxMessages] = usePersistentState<InboxMessage[]>('social.inboxMessages', []);
+  const [stores] = useStores();
+  const { selectedStoreIds } = useStoreScope('social');
+  const [allPosts, setAllPosts] = usePersistentState<SocialPost[]>('social.posts', []);
+  const posts = allPosts.filter(p => selectedStoreIds.includes(resolveStoreId(p.store, stores) ?? ''));
+  const [allInboxMessages] = usePersistentState<InboxMessage[]>('social.inboxMessages', []);
+  const inboxMessages = allInboxMessages.filter(m => selectedStoreIds.includes(resolveStoreId(m.store, stores) ?? ''));
   const inboxBadge = inboxMessages.filter(m => !m.replied && m.requiresAttention).length;
   const [selectedPost, setSelectedPost] = useState<SocialPost | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [newPostDate, setNewPostDate] = useState<Date | null>(null);
   const [platformFilter, setPlatformFilter] = useState<SocialPlatform | 'all'>('all');
 
+  const gridStores: GridStore[] = stores
+    .filter(s => selectedStoreIds.includes(s.id))
+    .map(s => ({ id: s.id, username: s.name.toLowerCase().replace(/\s+/g, '_') }));
+
   const handleAddPost = (post: SocialPost) => {
-    setPosts(prev => [post, ...prev]);
+    setAllPosts(prev => [post, ...prev]);
   };
 
   const handleUpdatePost = (id: string, status: SocialPost['status']) => {
-    setPosts(prev => prev.map(p => p.id !== id ? p : { ...p, status }));
+    setAllPosts(prev => prev.map(p => p.id !== id ? p : { ...p, status }));
     setSelectedPost(prev => prev && prev.id === id ? { ...prev, status } : prev);
   };
 
@@ -1004,6 +1037,8 @@ export default function SocialPage() {
         <TopBar title="Social Media" subtitle="6 Platforms" breadcrumbs={['MarketOS', 'Social']} />
 
         <main className="flex-1 overflow-hidden flex flex-col p-5 gap-4" style={{ minHeight: 0 }}>
+
+          <div className="shrink-0"><StoreScopeBar sectionKey="social" /></div>
 
           {/* Platform stats row */}
           <PlatformStatsBar />
@@ -1089,15 +1124,17 @@ export default function SocialPage() {
                   filterPlatform={platformFilter}
                 />
               )}
-              {tab === 'inbox' && <SocialInbox />}
-              {tab === 'listening' && <SocialListening />}
-              {tab === 'approvals' && <div className="flex-1 overflow-y-auto"><PostApprovalsPanel /></div>}
-              {tab === 'dmauto'   && <div className="flex-1 overflow-y-auto"><DMAutomationPanel /></div>}
+              {tab === 'inbox' && <SocialInbox selectedStoreIds={selectedStoreIds} />}
+              {tab === 'listening' && <SocialListening selectedStoreIds={selectedStoreIds} />}
+              {tab === 'approvals' && <div className="flex-1 overflow-y-auto"><PostApprovalsPanel selectedStoreIds={selectedStoreIds} /></div>}
+              {tab === 'dmauto'   && <div className="flex-1 overflow-y-auto"><DMAutomationPanel selectedStoreIds={selectedStoreIds} /></div>}
               {tab === 'aitools'  && <div className="flex-1 overflow-y-auto"><AIToolsPanel posts={posts} /></div>}
               {tab === 'grid' && (
                 <div className="flex-1 overflow-y-auto overflow-x-auto">
                   <InstagramGridPreview
                     posts={posts}
+                    gridStores={gridStores}
+                    resolveStore={(store) => resolveStoreId(store, stores)}
                     onEditPost={post => { setTab('calendar'); handleSelectPost(post); }}
                     onNewPost={() => { setTab('calendar'); handleNewPost(); }}
                   />

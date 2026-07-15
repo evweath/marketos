@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { usePersistentState } from '@/lib/usePersistentState';
+import { useStores, resolveStoreId } from '@/lib/storeScope';
 import { PLATFORM_CONFIG } from '@/lib/socialData';
 import type { InboxMessage } from '@/lib/socialData';
 import { MessageSquare, AtSign, Star, Send } from 'lucide-react';
@@ -106,8 +107,10 @@ function MessageCard({ msg, selected, onClick }: { msg: InboxMessage; selected: 
   );
 }
 
-export default function SocialInbox() {
-  const [messages, setMessages] = usePersistentState<InboxMessage[]>('social.inboxMessages', []);
+export default function SocialInbox({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
+  const [allMessages, setMessages] = usePersistentState<InboxMessage[]>('social.inboxMessages', []);
+  const messages = allMessages.filter(m => selectedStoreIds.includes(resolveStoreId(m.store, stores) ?? ''));
   const [selected, setSelected] = useState<InboxMessage | null>(null);
   const [replyText, setReplyText] = useState('');
   const [platformFilter, setPlatformFilter] = useState<PlatformTab>('all');
@@ -177,7 +180,9 @@ export default function SocialInbox() {
         {/* Messages */}
         <div className="flex-1 overflow-y-auto">
           {filtered.length === 0 && (
-            <div className="text-base text-center py-8" style={{ color: 'var(--text-muted)' }}>No messages yet.</div>
+            <div className="text-base text-center py-8" style={{ color: 'var(--text-muted)' }}>
+              {allMessages.length === 0 ? 'No messages yet.' : `No messages for the selected store${selectedStoreIds.length !== 1 ? 's' : ''}.`}
+            </div>
           )}
           {filtered.map(msg => (
             <MessageCard key={msg.id} msg={msg} selected={selected?.id === msg.id} onClick={() => setSelected(msg)} />

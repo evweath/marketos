@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { PLATFORM_CONFIG } from '@/lib/socialData';
 import type { SocialListeningItem } from '@/lib/socialData';
 import { usePersistentState } from '@/lib/usePersistentState';
+import { useStores, resolveStoreId } from '@/lib/storeScope';
 import { Search, ExternalLink, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 const SENTIMENT_CONFIG = {
@@ -121,8 +122,10 @@ function timeAgo(iso: string) {
   return `${Math.floor(mins / 60)}h ago`;
 }
 
-export default function SocialListening() {
-  const [listeningItems] = usePersistentState<SocialListeningItem[]>('social.listeningItems', []);
+export default function SocialListening({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
+  const [allListeningItems] = usePersistentState<SocialListeningItem[]>('social.listeningItems', []);
+  const listeningItems = allListeningItems.filter(i => selectedStoreIds.includes(resolveStoreId(i.store, stores) ?? ''));
   const [showAnalytics, setShowAnalytics] = useState(true);
   const [actedIds, setActedIds] = useState<Set<string>>(new Set());
   const markActed = (id: string) => setActedIds(prev => new Set(prev).add(id));
@@ -168,7 +171,11 @@ export default function SocialListening() {
 
       {/* Listening items */}
       {listeningItems.length === 0 && (
-        <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>No mentions found yet for your tracked keywords.</div>
+        <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>
+          {allListeningItems.length === 0
+            ? 'No mentions found yet for your tracked keywords.'
+            : `No mentions for the selected store${selectedStoreIds.length !== 1 ? 's' : ''}.`}
+        </div>
       )}
       <div className="space-y-2">
         {listeningItems.map(item => {

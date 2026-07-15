@@ -39,6 +39,7 @@ export interface SocialPost {
 
 export interface InboxMessage {
   id: string;
+  store: string;
   platform: SocialPlatform;
   type: 'comment' | 'dm' | 'mention' | 'review';
   author: string;
@@ -54,6 +55,7 @@ export interface InboxMessage {
 
 export interface SocialListeningItem {
   id: string;
+  store: string;
   keyword: string;
   platform: SocialPlatform;
   author: string;
@@ -151,14 +153,14 @@ export const SAMPLE_SOCIAL_POSTS: SocialPost[] = [
 
 export const SAMPLE_INBOX_MESSAGES: InboxMessage[] = [
   {
-    id: 'im-002', platform: 'facebook', type: 'comment', author: 'Marco Pellegrino', authorHandle: 'Marco Pellegrino',
+    id: 'im-002', store: 'donut-equipment.com', platform: 'facebook', type: 'comment', author: 'Marco Pellegrino', authorHandle: 'Marco Pellegrino',
     avatarInitials: 'MP', sentiment: 'negative',
     content: 'Ordered 3 weeks ago and still waiting. Customer service hasn\'t responded to 2 emails. Very disappointed.',
     receivedAt: daysFromNow(0, 7, 42), replied: false,
     requiresAttention: true,
   },
   {
-    id: 'im-008', platform: 'facebook', type: 'review', author: 'Glazed & Confused LLC', authorHandle: 'Glazed & Confused LLC',
+    id: 'im-008', store: 'donut-equipment.com', platform: 'facebook', type: 'review', author: 'Glazed & Confused LLC', authorHandle: 'Glazed & Confused LLC',
     avatarInitials: 'GC', sentiment: 'neutral',
     content: 'Good products overall. The fryer is excellent. Shipping took longer than expected but customer service was helpful when we called. 4/5 stars.',
     receivedAt: daysFromNow(-1, 11, 0), replied: false,
@@ -170,7 +172,7 @@ export const SAMPLE_INBOX_MESSAGES: InboxMessage[] = [
 
 export const SAMPLE_LISTENING_ITEMS: SocialListeningItem[] = [
   {
-    id: 'sl-002', keyword: 'donut-equipment.com', platform: 'facebook', author: 'Bakers United Group',
+    id: 'sl-002', store: 'donut-equipment.com', keyword: 'donut-equipment.com', platform: 'facebook', author: 'Bakers United Group',
     content: 'Has anyone ordered from donut-equipment.com lately? Seeing mixed reviews online.',
     sentiment: 'neutral', reach: 1840, foundAt: daysFromNow(0, 9, 10),
     url: 'https://facebook.com/post/456',
@@ -265,6 +267,7 @@ export type ApprovalStatus = 'draft' | 'review' | 'approved' | 'published' | 're
 
 export interface ApprovalPost {
   id: string;
+  store: string;
   title: string;
   platforms: string[];
   status: ApprovalStatus;
@@ -275,13 +278,13 @@ export interface ApprovalPost {
 }
 
 export const SAMPLE_APPROVAL_POSTS: ApprovalPost[] = [
-  { id: 'ap-1', title: 'Summer Fryer Promo — Instagram',   platforms: ['instagram', 'facebook'], status: 'review',   author: 'Sarah K.',   scheduledFor: '2026-05-15 10:00', content: '🍩 Summer savings are here! Get 20% off our pro donut fryers...' },
-  { id: 'ap-2', title: 'Bakery Tips Video — YouTube',       platforms: ['youtube'],               status: 'review',   author: 'Mike R.',    scheduledFor: '2026-05-16 14:00', content: 'New tutorial: 5 tips for perfect donuts every time...' },
-  { id: 'ap-3', title: 'Wholesale Catalog — LinkedIn',      platforms: ['linkedin'],              status: 'approved', author: 'Sarah K.',   scheduledFor: '2026-05-14 09:00', content: 'Bakery Wholesalers Spring Catalog 2026 is live...' },
-  { id: 'ap-4', title: 'TikTok — Glaze Recipe Demo',        platforms: ['tiktok', 'instagram'],   status: 'draft',    author: 'Jenny L.',   scheduledFor: '2026-05-17 18:00', content: 'Watch us make 3 glaze flavors in under 60 seconds...' },
-  { id: 'ap-5', title: 'X/Twitter — Flash Sale Alert',      platforms: ['x-twitter'],             status: 'rejected', author: 'Mike R.',    scheduledFor: '2026-05-13 12:00', content: '⚡ 4-HOUR FLASH SALE — 30% off all supplies...', rejectionNote: 'Discount too aggressive — max 20%. Resubmit.' },
-  { id: 'ap-6', title: 'FB — Customer Spotlight',           platforms: ['facebook'],              status: 'published', author: 'Jenny L.',  scheduledFor: '2026-05-12 11:00', content: 'Meet Oak Street Bakery — they\'ve been using our fryers for 5 years...' },
-  { id: 'ap-7', title: 'Instagram Reel — Behind the Scenes', platforms: ['instagram'],            status: 'draft',    author: 'Sarah K.',   scheduledFor: '2026-05-18 15:00', content: 'Go behind the scenes at our warehouse — see how your order ships...' },
+  { id: 'ap-1', store: 'donut-equipment.com', title: 'Summer Fryer Promo — Instagram',   platforms: ['instagram', 'facebook'], status: 'review',   author: 'Sarah K.',   scheduledFor: '2026-05-15 10:00', content: '🍩 Summer savings are here! Get 20% off our pro donut fryers...' },
+  { id: 'ap-2', store: 'donut-equipment.com', title: 'Bakery Tips Video — YouTube',       platforms: ['youtube'],               status: 'review',   author: 'Mike R.',    scheduledFor: '2026-05-16 14:00', content: 'New tutorial: 5 tips for perfect donuts every time...' },
+  { id: 'ap-3', store: 'bakery-wholesalers.com', title: 'Wholesale Catalog — LinkedIn',      platforms: ['linkedin'],              status: 'approved', author: 'Sarah K.',   scheduledFor: '2026-05-14 09:00', content: 'Bakery Wholesalers Spring Catalog 2026 is live...' },
+  { id: 'ap-4', store: 'donut-supplies.com', title: 'TikTok — Glaze Recipe Demo',        platforms: ['tiktok', 'instagram'],   status: 'draft',    author: 'Jenny L.',   scheduledFor: '2026-05-17 18:00', content: 'Watch us make 3 glaze flavors in under 60 seconds...' },
+  { id: 'ap-5', store: 'donut-supplies.com', title: 'X/Twitter — Flash Sale Alert',      platforms: ['x-twitter'],             status: 'rejected', author: 'Mike R.',    scheduledFor: '2026-05-13 12:00', content: '⚡ 4-HOUR FLASH SALE — 30% off all supplies...', rejectionNote: 'Discount too aggressive — max 20%. Resubmit.' },
+  { id: 'ap-6', store: 'donut-equipment.com', title: 'FB — Customer Spotlight',           platforms: ['facebook'],              status: 'published', author: 'Jenny L.',  scheduledFor: '2026-05-12 11:00', content: 'Meet Oak Street Bakery — they\'ve been using our fryers for 5 years...' },
+  { id: 'ap-7', store: 'donut-equipment.com', title: 'Instagram Reel — Behind the Scenes', platforms: ['instagram'],            status: 'draft',    author: 'Sarah K.',   scheduledFor: '2026-05-18 15:00', content: 'Go behind the scenes at our warehouse — see how your order ships...' },
 ];
 
 // ─── DM Automation ────────────────────────────────────────────────────────────
@@ -291,6 +294,7 @@ export type DMTrigger = 'comment_keyword' | 'story_reply' | 'first_dm' | 'post_r
 
 export interface DMRule {
   id: string;
+  store: string;
   name: string;
   platform: DMPlatform;
   trigger: DMTrigger;
@@ -303,9 +307,9 @@ export interface DMRule {
 }
 
 export const SAMPLE_DM_RULES: DMRule[] = [
-  { id: 'dm-1', name: 'Fryer Info Comment Capture',     platform: 'instagram', trigger: 'comment_keyword', keyword: 'price',     replyMessage: 'Check your DMs! 📬',                      dmMessage: 'Hi! You asked about our fryer prices. Here\'s the link to our full catalog: [catalog-link]. Reply with any questions!', status: 'active', triggeredCount: 284, conversionCount: 47 },
-  { id: 'dm-2', name: 'Equipment Guide — "info" trigger', platform: 'instagram', trigger: 'comment_keyword', keyword: 'info',      replyMessage: 'Sending you our guide now! 🍩',            dmMessage: 'Hi! Here\'s our free Commercial Donut Equipment Guide: [guide-link]. Let me know if you have questions!',               status: 'active', triggeredCount: 192, conversionCount: 38 },
-  { id: 'dm-3', name: 'FB Story Reply Capture',          platform: 'facebook',  trigger: 'story_reply',    keyword: undefined,   replyMessage: '',                                         dmMessage: 'Thanks for the reply! Want to know more about our donut supplies? Click here: [link]',                                  status: 'active', triggeredCount: 64,  conversionCount: 12 },
-  { id: 'dm-4', name: 'TikTok Comment — "how much"',     platform: 'tiktok',    trigger: 'comment_keyword', keyword: 'how much',  replyMessage: 'Check DMs for pricing! 💬',               dmMessage: 'Hey! Pricing starts at $299 for our entry-level fryers. Full catalog: [link]',                                         status: 'paused', triggeredCount: 89,  conversionCount: 9  },
-  { id: 'dm-5', name: 'New Follower Welcome',             platform: 'instagram', trigger: 'first_dm',       keyword: undefined,   replyMessage: '',                                         dmMessage: 'Welcome to Donut Equipment! 🍩 Here\'s a 10% welcome discount for your first order: WELCOME10. Shop here: [link]',    status: 'active', triggeredCount: 420, conversionCount: 53 },
+  { id: 'dm-1', store: 'donut-equipment.com', name: 'Fryer Info Comment Capture',     platform: 'instagram', trigger: 'comment_keyword', keyword: 'price',     replyMessage: 'Check your DMs! 📬',                      dmMessage: 'Hi! You asked about our fryer prices. Here\'s the link to our full catalog: [catalog-link]. Reply with any questions!', status: 'active', triggeredCount: 284, conversionCount: 47 },
+  { id: 'dm-2', store: 'donut-equipment.com', name: 'Equipment Guide — "info" trigger', platform: 'instagram', trigger: 'comment_keyword', keyword: 'info',      replyMessage: 'Sending you our guide now! 🍩',            dmMessage: 'Hi! Here\'s our free Commercial Donut Equipment Guide: [guide-link]. Let me know if you have questions!',               status: 'active', triggeredCount: 192, conversionCount: 38 },
+  { id: 'dm-3', store: 'donut-supplies.com', name: 'FB Story Reply Capture',          platform: 'facebook',  trigger: 'story_reply',    keyword: undefined,   replyMessage: '',                                         dmMessage: 'Thanks for the reply! Want to know more about our donut supplies? Click here: [link]',                                  status: 'active', triggeredCount: 64,  conversionCount: 12 },
+  { id: 'dm-4', store: 'donut-equipment.com', name: 'TikTok Comment — "how much"',     platform: 'tiktok',    trigger: 'comment_keyword', keyword: 'how much',  replyMessage: 'Check DMs for pricing! 💬',               dmMessage: 'Hey! Pricing starts at $299 for our entry-level fryers. Full catalog: [link]',                                         status: 'paused', triggeredCount: 89,  conversionCount: 9  },
+  { id: 'dm-5', store: 'donut-equipment.com', name: 'New Follower Welcome',             platform: 'instagram', trigger: 'first_dm',       keyword: undefined,   replyMessage: '',                                         dmMessage: 'Welcome to Donut Equipment! 🍩 Here\'s a 10% welcome discount for your first order: WELCOME10. Shop here: [link]',    status: 'active', triggeredCount: 420, conversionCount: 53 },
 ];
