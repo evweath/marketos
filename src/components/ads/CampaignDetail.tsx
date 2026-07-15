@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { X, Pause, Play, TrendingUp, TrendingDown, Users, Image, Zap, DollarSign, MousePointer, BarChart2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { AD_PLATFORM_CONFIG, STATUS_CONFIG, AD_SETS, CREATIVES } from '@/lib/campaignData';
-import type { Campaign, CampaignStatus } from '@/lib/campaignData';
+import { usePersistentState } from '@/lib/usePersistentState';
+import { AD_PLATFORM_CONFIG, STATUS_CONFIG } from '@/lib/campaignData';
+import type { Campaign, CampaignStatus, AdSet, Creative } from '@/lib/campaignData';
 
 const c$ = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
@@ -30,10 +31,13 @@ export default function CampaignDetail({ campaign: c, onClose }: Props) {
   const togglePause = () =>
     setStatus(prev => (prev === 'paused' ? 'active' : 'paused'));
 
+  const [allAdSets]    = usePersistentState<AdSet[]>('ads.adSets', []);
+  const [allCreatives] = usePersistentState<Creative[]>('ads.creatives', []);
+
   const pc = AD_PLATFORM_CONFIG[c.platform];
   const sc = STATUS_CONFIG[status];
-  const adSets    = AD_SETS.filter(a => a.campaignId === c.id);
-  const creatives = CREATIVES.filter(cr => cr.campaignId === c.id);
+  const adSets    = allAdSets.filter(a => a.campaignId === c.id);
+  const creatives = allCreatives.filter(cr => cr.campaignId === c.id);
 
   const roasColor = c.roas >= 7 ? '#10d98a' : c.roas >= 4 ? '#ffb347' : '#ff4444';
   const spendPct  = Math.min((c.spendToDate / c.totalBudget) * 100, 100);

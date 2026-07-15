@@ -8,15 +8,17 @@ import { StoreSettings } from '@/components/settings/StoreSettings';
 import { TeamSettings } from '@/components/settings/TeamSettings';
 import { TrackingSettings } from '@/components/settings/TrackingSettings';
 import { GeneralSettings } from '@/components/settings/GeneralSettings';
+import { DataSettings } from '@/components/settings/DataSettings';
 import {
   Plug,
   ShoppingBag,
   Users,
   Radio,
   SlidersHorizontal,
+  Database,
 } from 'lucide-react';
 
-type Section = 'integrations' | 'stores' | 'team' | 'tracking' | 'general';
+type Section = 'integrations' | 'stores' | 'team' | 'tracking' | 'general' | 'data';
 
 interface NavItem {
   id: Section;
@@ -31,6 +33,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'team',         label: 'Team & Access',   icon: Users,             description: 'Members and permissions'     },
   { id: 'tracking',     label: 'Tracking & APIs', icon: Radio,             description: 'CAPI, conversions, UTM'      },
   { id: 'general',      label: 'General',         icon: SlidersHorizontal, description: 'Account and branding'        },
+  { id: 'data',         label: 'Data',            icon: Database,         description: 'Sample data & reset'         },
 ];
 
 const SECTION_TITLES: Record<Section, { title: string; description: string }> = {
@@ -39,6 +42,7 @@ const SECTION_TITLES: Record<Section, { title: string; description: string }> = 
   team:         { title: 'Team & Access Control',  description: 'Members, roles, and module permissions'                  },
   tracking:     { title: 'Tracking & APIs',        description: 'Server-side events, conversion APIs, and UTM defaults'   },
   general:      { title: 'General Settings',       description: 'Business info, branding, and data preferences'           },
+  data:         { title: 'Data',                   description: 'Load realistic sample data for a demo, or reset to empty' },
 };
 
 export default function SettingsPage() {
@@ -119,6 +123,7 @@ export default function SettingsPage() {
               {activeSection === 'team'         && <TeamSettings />}
               {activeSection === 'tracking'     && <TrackingSettings />}
               {activeSection === 'general'      && <GeneralSettings />}
+              {activeSection === 'data'         && <DataSettings />}
             </div>
           </div>
         </main>

@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Zap } from 'lucide-react';
-import { CAMPAIGNS, AD_PLATFORM_CONFIG, STATUS_CONFIG, AD_PLATFORM_STARTED } from '@/lib/campaignData';
+import { ChevronDown, ChevronUp, Zap, Megaphone } from 'lucide-react';
+import { usePersistentState } from '@/lib/usePersistentState';
+import { AD_PLATFORM_CONFIG, STATUS_CONFIG, AD_PLATFORM_STARTED } from '@/lib/campaignData';
 import type { Campaign, AdPlatform, CampaignStatus } from '@/lib/campaignData';
 
 const c$ = (n: number) =>
@@ -55,12 +56,13 @@ const COLS: { key: SortKey; label: string }[] = [
 ];
 
 export default function CampaignTable({ onSelectCampaign, selected }: Props) {
+  const [allCampaigns] = usePersistentState<Campaign[]>('ads.campaigns', []);
   const [platform, setPlatform] = useState<AdPlatform | 'all'>('all');
   const [status,   setStatus]   = useState<CampaignStatus | 'all'>('all');
   const [sortKey,  setSortKey]  = useState<SortKey>('revenue');
   const [sortDir,  setSortDir]  = useState<'asc' | 'desc'>('desc');
 
-  const campaigns = CAMPAIGNS
+  const campaigns = allCampaigns
     .filter(c => platform === 'all' || c.platform === platform)
     .filter(c => status === 'all' || c.status === status)
     .sort((a, b) => {
@@ -92,8 +94,8 @@ export default function CampaignTable({ onSelectCampaign, selected }: Props) {
           {PLATFORM_TABS.map(t => {
             const cfg = t.key !== 'all' ? AD_PLATFORM_CONFIG[t.key as AdPlatform] : null;
             const count = t.key === 'all'
-              ? CAMPAIGNS.length
-              : CAMPAIGNS.filter(c => c.platform === t.key).length;
+              ? allCampaigns.length
+              : allCampaigns.filter(c => c.platform === t.key).length;
             const isActive = platform === t.key;
 
             return (
@@ -289,16 +291,28 @@ export default function CampaignTable({ onSelectCampaign, selected }: Props) {
             })}
             {campaigns.length === 0 && (
               <tr>
-                <td colSpan={11} className='px-4 py-8 text-center'>
-                  <div className='text-base font-medium' style={{ color: 'var(--text-primary)' }}>
-                    {platform !== 'all' && !AD_PLATFORM_STARTED[platform as AdPlatform]
-                      ? 'Not started on this platform yet'
-                      : 'No campaigns match these filters'}
-                  </div>
-                  {platform !== 'all' && !AD_PLATFORM_STARTED[platform as AdPlatform] && (
-                    <div className='text-[16px] mt-1' style={{ color: 'var(--text-muted)' }}>
-                      No ad account has been connected for {AD_PLATFORM_CONFIG[platform as AdPlatform].label} yet.
-                    </div>
+                <td colSpan={11} className='px-4 py-10 text-center'>
+                  {allCampaigns.length === 0 ? (
+                    <>
+                      <Megaphone size={22} className='mx-auto mb-2' style={{ color: 'var(--text-muted)' }} />
+                      <div className='text-base font-medium' style={{ color: 'var(--text-primary)' }}>No campaigns yet</div>
+                      <div className='text-[16px] mt-1' style={{ color: 'var(--text-muted)' }}>
+                        Connect an ad platform for a store to start pulling in campaign data.
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className='text-base font-medium' style={{ color: 'var(--text-primary)' }}>
+                        {platform !== 'all' && !AD_PLATFORM_STARTED[platform as AdPlatform]
+                          ? 'Not started on this platform yet'
+                          : 'No campaigns match these filters'}
+                      </div>
+                      {platform !== 'all' && !AD_PLATFORM_STARTED[platform as AdPlatform] && (
+                        <div className='text-[16px] mt-1' style={{ color: 'var(--text-muted)' }}>
+                          No ad account has been connected for {AD_PLATFORM_CONFIG[platform as AdPlatform].label} yet.
+                        </div>
+                      )}
+                    </>
                   )}
                 </td>
               </tr>

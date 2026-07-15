@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { usePersistentState } from '@/lib/usePersistentState';
-import { Zap, Shield, CheckCircle, AlertTriangle, XCircle, Clock } from 'lucide-react';
+import { Zap, Shield, CheckCircle, AlertTriangle, XCircle, Clock, ShieldCheck } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { AUTOMATION_RULES, HEALTH_CHECKS, AD_PLATFORM_CONFIG } from '@/lib/campaignData';
-import type { AdPlatform } from '@/lib/campaignData';
+import { AD_PLATFORM_CONFIG } from '@/lib/campaignData';
+import type { AdPlatform, AutomationRule, HealthCheckItem } from '@/lib/campaignData';
 
 function timeAgo(iso: string): string {
   const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
@@ -60,7 +60,7 @@ const RULE_STATUS_COLOR = {
 } as const;
 
 export function AutomationRulesPanel() {
-  const [rules, setRules] = usePersistentState('ads.automationRules', AUTOMATION_RULES.map(r => ({ ...r })));
+  const [rules, setRules] = usePersistentState<AutomationRule[]>('ads.automationRules', []);
 
   const toggle = (id: string) =>
     setRules(prev => prev.map(r => r.id === id ? { ...r, enabled: !r.enabled } : r));
@@ -100,6 +100,14 @@ export function AutomationRulesPanel() {
           + New Rule
         </button>
       </div>
+
+      {rules.length === 0 && (
+        <div className='rounded-xl p-8 text-center' style={{ background: 'var(--bg-elevated)', border: '1px dashed var(--border-dim)' }}>
+          <Zap size={22} className='mx-auto mb-2' style={{ color: 'var(--text-muted)' }} />
+          <div className='text-base font-medium' style={{ color: 'var(--text-primary)' }}>No automation rules yet</div>
+          <div className='text-[16px] mt-1' style={{ color: 'var(--text-muted)' }}>Add a rule to automatically pause, scale, or alert on campaign performance.</div>
+        </div>
+      )}
 
       <div className='space-y-2'>
         {rules.map(rule => {
@@ -193,15 +201,16 @@ const STATUS_CFG: Record<CheckStatus, {
 };
 
 export function AccountHealthAudit() {
+  const [allChecks] = usePersistentState<HealthCheckItem[]>('ads.healthChecks', []);
   const [platform, setPlatform] = useState<AdPlatform | 'all'>('all');
 
-  const checks   = HEALTH_CHECKS.filter(h => platform === 'all' || h.platform === platform);
-  const score    = Math.round((checks.filter(h => h.status === 'pass').length / checks.length) * 100);
+  const checks   = allChecks.filter(h => platform === 'all' || h.platform === platform);
+  const score    = checks.length === 0 ? 100 : Math.round((checks.filter(h => h.status === 'pass').length / checks.length) * 100);
   const fails    = checks.filter(h => h.status === 'fail').length;
   const warns    = checks.filter(h => h.status === 'warn').length;
   const scoreColor = score >= 80 ? '#10d98a' : score >= 60 ? '#ffb347' : '#ff4444';
 
-  const platforms = Array.from(new Set(HEALTH_CHECKS.map(h => h.platform))) as AdPlatform[];
+  const platforms = Array.from(new Set(allChecks.map(h => h.platform))) as AdPlatform[];
 
   return (
     <div className='glass-card p-4'>
@@ -274,6 +283,14 @@ export function AccountHealthAudit() {
           );
         })}
       </div>
+
+      {checks.length === 0 && (
+        <div className='rounded-xl p-8 text-center' style={{ background: 'var(--bg-elevated)', border: '1px dashed var(--border-dim)' }}>
+          <ShieldCheck size={22} className='mx-auto mb-2' style={{ color: 'var(--text-muted)' }} />
+          <div className='text-base font-medium' style={{ color: 'var(--text-primary)' }}>No health checks yet</div>
+          <div className='text-[16px] mt-1' style={{ color: 'var(--text-muted)' }}>Connect an ad platform to start auditing account health.</div>
+        </div>
+      )}
 
       <div className='space-y-1.5'>
         {checks.map(check => {

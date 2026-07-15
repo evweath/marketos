@@ -7,8 +7,8 @@ import TopBar from '@/components/layout/TopBar';
 import CampaignTable from '@/components/ads/CampaignTable';
 import CampaignDetail from '@/components/ads/CampaignDetail';
 import { AutomationRulesPanel, AccountHealthAudit } from '@/components/ads/AdsAutomation';
-import { CAMPAIGN_TOTALS } from '@/lib/campaignData';
-import type { Campaign } from '@/lib/campaignData';
+import { computeCampaignTotals } from '@/lib/campaignData';
+import type { Campaign, HealthCheckItem } from '@/lib/campaignData';
 import {
   BarChart2, Zap, Shield, FlaskConical, Users, XCircle,
   Play, Pause, Trophy, TrendingUp, TrendingDown, AlertTriangle,
@@ -571,7 +571,10 @@ function NegativeKeywordsPanel() {
 export default function AdsPage() {
   const [tab, setTab]           = useState<Tab>('campaigns');
   const [selected, setSelected] = useState<Campaign | null>(null);
-  const t = CAMPAIGN_TOTALS;
+  const [campaigns]   = usePersistentState<Campaign[]>('ads.campaigns', []);
+  const [healthChecks] = usePersistentState<HealthCheckItem[]>('ads.healthChecks', []);
+  const t = computeCampaignTotals(campaigns, healthChecks);
+  const blendedRoas = t.totalSpend > 0 ? (t.totalRevenue / t.totalSpend).toFixed(2) + '×' : '—';
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-base)' }}>
@@ -584,7 +587,7 @@ export default function AdsPage() {
             {[
               { label: 'Total Spend',        value: c$(t.totalSpend),                               color: 'var(--cyan)' },
               { label: 'Total Revenue',      value: c$(t.totalRevenue),                             color: '#10d98a' },
-              { label: 'Blended ROAS',       value: (t.totalRevenue / t.totalSpend).toFixed(2) + '×', color: '#7b93ff' },
+              { label: 'Blended ROAS',       value: blendedRoas,                                       color: '#7b93ff' },
               { label: 'Total Conversions',  value: t.totalConversions.toLocaleString(),             color: '#ffb347' },
               { label: 'Health Issues',      value: t.healthIssues.toString(),                       color: t.healthIssues > 3 ? '#ff4444' : '#ffb347' },
             ].map(s => (

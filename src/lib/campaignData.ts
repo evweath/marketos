@@ -115,8 +115,13 @@ export const STATUS_CONFIG: Record<CampaignStatus, { color: string; label: strin
 };
 
 // ─── Campaigns ────────────────────────────────────────────────────────────────
+//
+// These SAMPLE_* arrays are not the app's live data — the app boots empty by
+// default (see src/lib/sampleDataRegistry.ts). They're the seed content for
+// Settings → Data → "Load Sample Data", used to demo/verify the app with
+// realistic records without shipping fabricated numbers as the default state.
 
-export const CAMPAIGNS: Campaign[] = [
+export const SAMPLE_CAMPAIGNS: Campaign[] = [
   // Google Ads
   {
     id: 'c-001', platform: 'google', name: 'Commercial Fryers — Search (Exact)', status: 'active',
@@ -187,7 +192,7 @@ export const AD_PLATFORM_STARTED: Record<AdPlatform, boolean> = {
 
 // ─── Ad Sets (for campaign c-005 Meta example) ───────────────────────────────
 
-export const AD_SETS: AdSet[] = [
+export const SAMPLE_AD_SETS: AdSet[] = [
   {
     id: 'as-001', campaignId: 'c-005', name: 'LAL 2% — US Purchasers', status: 'active',
     audience: 'Lookalike 2% based on 180d purchasers', dailyBudget: 100, spend: 2420,
@@ -212,7 +217,7 @@ export const AD_SETS: AdSet[] = [
 
 // ─── Creatives (A/B test for c-006) ──────────────────────────────────────────
 
-export const CREATIVES: Creative[] = [
+export const SAMPLE_CREATIVES: Creative[] = [
   {
     id: 'cr-001', campaignId: 'c-006', name: 'Product Hero — White BG', type: 'image',
     status: 'winner', spend: 1240, impressions: 28400, clicks: 684, ctr: 2.41,
@@ -237,7 +242,7 @@ export const CREATIVES: Creative[] = [
 
 // ─── Automation Rules ─────────────────────────────────────────────────────────
 
-export const AUTOMATION_RULES: AutomationRule[] = [
+export const SAMPLE_AUTOMATION_RULES: AutomationRule[] = [
   {
     id: 'ar-001', name: 'Pause ad sets with CPA > $80 (72h data)', platform: 'meta', enabled: true,
     trigger: 'CPA > $80.00', action: 'Pause ad set', condition: 'After 72h with 50+ clicks',
@@ -267,7 +272,7 @@ export const AUTOMATION_RULES: AutomationRule[] = [
 
 // ─── Account Health Checks ────────────────────────────────────────────────────
 
-export const HEALTH_CHECKS: HealthCheckItem[] = [
+export const SAMPLE_HEALTH_CHECKS: HealthCheckItem[] = [
   // Google
   { id: 'hc-001', platform: 'google', category: 'Quality', check: 'Average Quality Score', status: 'pass', detail: 'Avg QS 7.8/10 across active keywords — above 6.0 benchmark', priority: 'medium' },
   { id: 'hc-002', platform: 'google', category: 'Coverage', check: 'Search Impression Share', status: 'warn', detail: 'Brand terms at 84% — losing 16% to competitors. Increase brand bid or budget.', priority: 'high' },
@@ -285,13 +290,19 @@ export const HEALTH_CHECKS: HealthCheckItem[] = [
 ];
 
 // ─── Computed Totals ──────────────────────────────────────────────────────────
+//
+// Computed from whatever campaigns/health checks currently exist (empty by
+// default, or seeded via Load Sample Data) rather than hardcoded, so totals
+// are always accurate and never drift from the underlying records.
 
-export const CAMPAIGN_TOTALS = {
-  totalSpend:       CAMPAIGNS.reduce((s, c) => s + c.spendToDate, 0),
-  totalRevenue:     CAMPAIGNS.reduce((s, c) => s + c.revenue, 0),
-  totalConversions: CAMPAIGNS.reduce((s, c) => s + c.conversions, 0),
-  totalImpressions: CAMPAIGNS.reduce((s, c) => s + c.impressions, 0),
-  activeCampaigns:  CAMPAIGNS.filter(c => c.status === 'active').length,
-  totalCampaigns:   CAMPAIGNS.length,
-  healthIssues:     HEALTH_CHECKS.filter(h => h.status !== 'pass').length,
-};
+export function computeCampaignTotals(campaigns: Campaign[], healthChecks: HealthCheckItem[]) {
+  return {
+    totalSpend:       campaigns.reduce((s, c) => s + c.spendToDate, 0),
+    totalRevenue:     campaigns.reduce((s, c) => s + c.revenue, 0),
+    totalConversions: campaigns.reduce((s, c) => s + c.conversions, 0),
+    totalImpressions: campaigns.reduce((s, c) => s + c.impressions, 0),
+    activeCampaigns:  campaigns.filter(c => c.status === 'active').length,
+    totalCampaigns:   campaigns.length,
+    healthIssues:     healthChecks.filter(h => h.status !== 'pass').length,
+  };
+}
