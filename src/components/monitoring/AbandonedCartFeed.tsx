@@ -1,9 +1,17 @@
 'use client';
 
+import { useState } from 'react';
 import { usePersistentState } from '@/lib/usePersistentState';
 import type { AbandonedCart } from '@/types';
 import { formatCurrency, formatMinutesAgo } from '@/lib/mockData';
-import { Mail, MessageSquare, MapPin, ShoppingBag, CheckCircle, Send } from 'lucide-react';
+import { Mail, MessageSquare, MapPin, ShoppingBag, CheckCircle, Send, ChevronDown } from 'lucide-react';
+
+// Privacy masking for the cart email — hide most of the local part.
+function maskEmail(email: string): string {
+  const [local, domain] = email.split('@');
+  if (!domain) return email;
+  return `${local.slice(0, 1)}•••@${domain}`;
+}
 
 interface Props {
   carts: AbandonedCart[];
@@ -65,6 +73,7 @@ function RecoveryIcon({ sent, icon, sentTitle, pendingTitle, onSend }: RecoveryI
 
 export default function AbandonedCartFeed({ carts: initialCarts, storeColor: _storeColor }: Props) {
   const [carts, setCarts] = usePersistentState('monitoring.carts', initialCarts);
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   const triggerAllRecovery = () =>
     setCarts(prev => prev.map(c => ({ ...c, recoveryEmailSent: true, smsSent: true })));
@@ -117,18 +126,20 @@ export default function AbandonedCartFeed({ carts: initialCarts, storeColor: _st
       </div>
 
       <div className='space-y-2'>
-        {carts.map(cart => {
+        {[...carts].sort((a, b) => b.cartValue - a.cartValue).map(cart => {
           const timeColor = cart.minutesAgo < 10 ? '#ff4444' : cart.minutesAgo < 30 ? '#ffb347' : 'var(--text-muted)';
+          const isOpen = expanded === cart.id;
           return (
             <div key={cart.id} className='rounded-lg p-3'
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
 
               {/* Main row */}
-              <div className='flex items-start gap-2.5'>
+              <div className='flex items-start gap-2.5 cursor-pointer' onClick={() => setExpanded(isOpen ? null : cart.id)}>
                 <CustomerAvatar name={cart.customerName} />
 
                 <div className='flex-1 min-w-0'>
                   <div className='flex items-center gap-2 mb-0.5'>
+                    <ChevronDown size={12} className='shrink-0 transition-transform' style={{ color: 'var(--text-muted)', transform: isOpen ? 'none' : 'rotate(-90deg)' }} />
                     <span className='text-base font-semibold truncate' style={{ color: 'var(--text-primary)' }}>
                       {cart.customerName}
                     </span>
@@ -136,7 +147,10 @@ export default function AbandonedCartFeed({ carts: initialCarts, storeColor: _st
                       {formatMinutesAgo(cart.minutesAgo)}
                     </span>
                   </div>
-                  <div className='flex items-center gap-2 text-[16px]' style={{ color: 'var(--text-muted)' }}>
+                  <div className='flex items-center gap-2 text-[16px] ml-4.5' style={{ color: 'var(--text-muted)' }}>
+                    <Mail size={9} />
+                    <span title='Email masked for privacy'>{maskEmail(cart.customerEmail)}</span>
+                    <span>·</span>
                     <MapPin size={9} />
                     <span>{cart.location}</span>
                     <span>·</span>
@@ -168,25 +182,22 @@ export default function AbandonedCartFeed({ carts: initialCarts, storeColor: _st
                 </div>
               </div>
 
-              {/* Item preview */}
-              <div className='mt-2 pt-2 border-t' style={{ borderColor: 'var(--border-subtle)' }}>
-                {cart.items.slice(0, 2).map((item, i) => (
-                  <div key={i} className='flex items-center justify-between text-[16px] py-0.5'>
-                    <span className='truncate' style={{ color: 'var(--text-secondary)', maxWidth: '70%' }}>
-                      {item.qty > 1 && <span style={{ color: 'var(--text-muted)' }}>{item.qty}× </span>}
-                      {item.name}
-                    </span>
-                    <span className='font-mono' style={{ color: 'var(--text-muted)' }}>
-                      {formatCurrency(item.qty * item.price)}
-                    </span>
-                  </div>
-                ))}
-                {cart.items.length > 2 && (
-                  <div className='text-[16px] pt-0.5' style={{ color: 'var(--text-muted)' }}>
-                    +{cart.items.length - 2} more item{cart.items.length - 2 !== 1 ? 's' : ''}
-                  </div>
-                )}
-              </div>
+              {/* Item preview — expandable */}
+              {isOpen && (
+                <div className='mt-2 pt-2 border-t' style={{ borderColor: 'var(--border-subtle)' }}>
+                  {cart.items.map((item, i) => (
+                    <div key={i} className='flex items-center justify-between text-[16px] py-0.5'>
+                      <span className='truncate' style={{ color: 'var(--text-secondary)', maxWidth: '70%' }}>
+                        {item.qty > 1 && <span style={{ color: 'var(--text-muted)' }}>{item.qty}× </span>}
+                        {item.name}
+                      </span>
+                      <span className='font-mono' style={{ color: 'var(--text-muted)' }}>
+                        {formatCurrency(item.qty * item.price)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}

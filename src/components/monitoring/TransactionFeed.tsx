@@ -1,8 +1,10 @@
 'use client';
 
+import { useRef, useEffect } from 'react';
 import type { Transaction } from '@/types';
 import { formatCurrency, formatMinutesAgo } from '@/lib/mockData';
 import { Package } from 'lucide-react';
+import { usePersistentState } from '@/lib/usePersistentState';
 
 interface Props {
   transactions: Transaction[];
@@ -17,7 +19,29 @@ const CHANNEL_CONFIG: Record<string, { label: string; color: string }> = {
   'direct':      { label: 'Direct',     color: '#7b93ff' },
 };
 
+// Privacy masking: keep the first name, reduce the surname to an initial + dots.
+function maskName(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2) + '•••';
+  return `${parts[0]} ${parts[parts.length - 1][0]}••••`;
+}
+
 export default function TransactionFeed({ transactions, storeColor }: Props) {
+  const [autoScroll, setAutoScroll] = usePersistentState('monitoring.txAutoScroll', false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!autoScroll) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    const id = setInterval(() => {
+      if (!el) return;
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 2) el.scrollTop = 0;
+      else el.scrollTop += 1;
+    }, 40);
+    return () => clearInterval(id);
+  }, [autoScroll, transactions.length]);
+
   if (transactions.length === 0) {
     return (
       <div className='glass-card p-4'>
@@ -43,10 +67,17 @@ export default function TransactionFeed({ transactions, storeColor }: Props) {
             <span className='text-base' style={{ color: 'var(--text-muted)' }}>recent orders</span>
           </div>
         </div>
-        <Package size={14} style={{ color: 'var(--text-muted)' }} />
+        <div className='flex items-center gap-2'>
+          <button onClick={() => setAutoScroll(v => !v)}
+            className='text-[16px] font-mono px-2 py-1 rounded-lg transition-all'
+            style={{ background: autoScroll ? 'rgba(0,217,255,0.12)' : 'var(--bg-elevated)', color: autoScroll ? 'var(--cyan)' : 'var(--text-muted)', border: `1px solid ${autoScroll ? 'rgba(0,217,255,0.3)' : 'var(--border-subtle)'}` }}>
+            Auto-scroll {autoScroll ? 'On' : 'Off'}
+          </button>
+          <Package size={14} style={{ color: 'var(--text-muted)' }} />
+        </div>
       </div>
 
-      <div className='space-y-px'>
+      <div ref={scrollRef} className='space-y-px overflow-y-auto' style={{ maxHeight: 340 }}>
         {transactions.map((tx, i) => {
           const ch = CHANNEL_CONFIG[tx.channel] ?? { label: tx.channel, color: 'var(--text-secondary)' };
           const isEven = i % 2 === 0;
@@ -62,9 +93,14 @@ export default function TransactionFeed({ transactions, storeColor }: Props) {
                 {tx.orderNumber}
               </span>
 
-              {/* Customer */}
-              <span className='text-base flex-1 truncate' style={{ color: 'var(--text-secondary)' }}>
-                {tx.customerName}
+              {/* Customer (masked) */}
+              <span className='text-base flex-1 truncate' style={{ color: 'var(--text-secondary)' }} title='Customer name masked for privacy'>
+                {maskName(tx.customerName)}
+              </span>
+
+              {/* Item count */}
+              <span className='text-[16px] font-mono shrink-0' style={{ color: 'var(--text-muted)' }}>
+                {tx.itemCount} item{tx.itemCount !== 1 ? 's' : ''}
               </span>
 
               {/* Channel pill */}
