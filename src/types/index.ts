@@ -111,6 +111,8 @@ export interface PageChange {
   description: string;
   detectedAt: string;     // ISO string
   severity: 'info' | 'warning' | 'critical';
+  oldValue?: string;
+  newValue?: string;
 }
 
 // ─── Alerts ──────────────────────────────────────────────────────────────────

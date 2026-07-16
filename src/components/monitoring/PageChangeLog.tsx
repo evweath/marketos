@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import type { PageChange, ChangeType } from '@/types';
 import { formatMinutesAgo } from '@/lib/mockData';
-import { DollarSign, Plus, Minus, FileText, Search, AlertTriangle } from 'lucide-react';
+import { DollarSign, Plus, Minus, FileText, Search, AlertTriangle, ArrowRight } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 interface Props {
@@ -36,9 +37,13 @@ function timeAgo(iso: string): string {
 }
 
 export default function PageChangeLog({ changes }: Props) {
+  const [typeFilter, setTypeFilter] = useState<ChangeType | 'all'>('all');
   const criticalCount = changes.filter(c => c.severity === 'critical').length;
   const warningCount  = changes.filter(c => c.severity === 'warning').length;
   const infoCount     = changes.filter(c => c.severity === 'info').length;
+
+  const presentTypes = Array.from(new Set(changes.map(c => c.changeType)));
+  const filtered = changes.filter(c => typeFilter === 'all' || c.changeType === typeFilter);
 
   return (
     <div className='glass-card p-4'>
@@ -69,8 +74,25 @@ export default function PageChangeLog({ changes }: Props) {
         </div>
       </div>
 
+      {/* Type filter */}
+      {presentTypes.length > 1 && (
+        <div className='flex items-center gap-1 mb-3 flex-wrap'>
+          {(['all', ...presentTypes] as const).map(t => {
+            const active = typeFilter === t;
+            const color = t === 'all' ? 'var(--cyan)' : CHANGE_TYPE_CONFIG[t as ChangeType].color;
+            return (
+              <button key={t} onClick={() => setTypeFilter(t)}
+                className='px-2.5 py-1 rounded-full text-[16px] font-mono transition-all'
+                style={{ background: active ? color + '18' : 'var(--bg-elevated)', color: active ? color : 'var(--text-muted)', border: `1px solid ${active ? color + '35' : 'var(--border-subtle)'}` }}>
+                {t === 'all' ? 'All' : CHANGE_TYPE_CONFIG[t as ChangeType].label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       <div className='space-y-2'>
-        {changes.map(change => {
+        {filtered.map(change => {
           const tc = CHANGE_TYPE_CONFIG[change.changeType];
           const Icon = tc.icon;
           const bg = change.severity === 'critical'
@@ -111,6 +133,18 @@ export default function PageChangeLog({ changes }: Props) {
                     <div className='text-[16px] mb-1' style={{ color: 'var(--text-secondary)' }}>
                       {change.description}
                     </div>
+                    {/* Structured old → new */}
+                    {(change.oldValue || change.newValue) && (
+                      <div className='flex items-center gap-2 text-[16px] font-mono mb-1'>
+                        {change.oldValue && (
+                          <span className='px-1.5 py-0.5 rounded' style={{ background: 'rgba(255,68,68,0.08)', color: '#ff4444', textDecoration: 'line-through' }}>{change.oldValue}</span>
+                        )}
+                        {change.oldValue && change.newValue && <ArrowRight size={11} style={{ color: 'var(--text-muted)' }} />}
+                        {change.newValue && (
+                          <span className='px-1.5 py-0.5 rounded font-semibold' style={{ background: 'rgba(16,217,138,0.1)', color: '#10d98a' }}>{change.newValue}</span>
+                        )}
+                      </div>
+                    )}
                     {/* URL in code style */}
                     <div className='font-mono text-[16px] truncate'
                       style={{ color: 'var(--cyan)', opacity: 0.75 }}>

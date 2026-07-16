@@ -325,9 +325,11 @@ export const SAMPLE_PAGE_CHANGES: PageChange[] = [
     url: '/products/glazing-mix-25lb',
     pageTitle: 'Glazing Mix 25lb Bag',
     changeType: 'price',
-    description: 'Price changed from $34.99 → $37.20 (+6.3%)',
+    description: 'Price changed +6.3%',
     detectedAt: new Date(Date.now() - 14 * 60000).toISOString(),
     severity: 'warning',
+    oldValue: '$34.99',
+    newValue: '$37.20',
   },
   {
     id: 'pc-002',
