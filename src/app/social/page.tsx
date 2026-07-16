@@ -480,7 +480,6 @@ function PostApprovalsPanel({ selectedStoreIds }: { selectedStoreIds: string[] }
   const [stores] = useStores();
   const [allPosts, setPosts] = usePersistentState<ApprovalPost[]>('social.approvalPosts', []);
   const posts = allPosts.filter(p => selectedStoreIds.includes(resolveStoreId(p.store, stores) ?? ''));
-  const [filterStatus, setFilterStatus] = useState<ApprovalStatus | 'all'>('all');
   const [rejectNote, setRejectNote] = useState('');
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [csvText, setCsvText] = useState('');
@@ -515,18 +514,16 @@ function PostApprovalsPanel({ selectedStoreIds }: { selectedStoreIds: string[] }
     setShowCsv(false);
   };
 
-  const visible = filterStatus === 'all' ? posts : posts.filter(p => p.status === filterStatus);
-
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-5 gap-3">
-        {([['draft', posts], ['review', posts], ['approved', posts], ['published', posts], ['rejected', posts]] as const).map(([s, arr]) => {
+        {(['draft', 'review', 'approved', 'published', 'rejected'] as ApprovalStatus[]).map(s => {
           const cfg = APPROVAL_CONFIG[s];
-          const count = (arr as ApprovalPost[]).filter(p => p.status === s).length;
+          const count = posts.filter(p => p.status === s).length;
           const Icon = cfg.icon;
           return (
-            <div key={s} className="glass-card px-3 py-3 flex items-center gap-2 cursor-pointer" onClick={() => setFilterStatus(s === filterStatus ? 'all' : s)}
-              style={{ border: filterStatus === s ? `1px solid ${cfg.color}44` : '1px solid var(--border-subtle)' }}>
+            <div key={s} className="glass-card px-3 py-3 flex items-center gap-2"
+              style={{ border: '1px solid var(--border-subtle)' }}>
               <Icon size={14} style={{ color: cfg.color, flexShrink: 0 }} />
               <div>
                 <div className="data-value text-lg font-bold" style={{ color: cfg.color }}>{count}</div>
@@ -545,18 +542,10 @@ function PostApprovalsPanel({ selectedStoreIds }: { selectedStoreIds: string[] }
       )}
 
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
-          {(['all', 'draft', 'review', 'approved', 'published', 'rejected'] as const).map(s => (
-            <button key={s} onClick={() => setFilterStatus(s)}
-              className="px-2.5 py-1 rounded-md text-[16px] capitalize transition-all"
-              style={{ background: filterStatus === s ? 'var(--bg-elevated)' : 'transparent', color: filterStatus === s ? 'var(--text-primary)' : 'var(--text-muted)', border: filterStatus === s ? '1px solid var(--border-dim)' : '1px solid transparent' }}>
-              {s}
-            </button>
-          ))}
-        </div>
+        <span className="section-label">Approval Board</span>
         <button onClick={() => setShowCsv(!showCsv)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base font-medium"
-          style={{ background: 'rgba(0,217,255,.1)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,.2)' }}>
+          style={{ background: 'rgba(0,217,.1)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,.2)' }}>
           <Upload size={12} /> Bulk CSV Import
         </button>
       </div>
@@ -584,75 +573,79 @@ function PostApprovalsPanel({ selectedStoreIds }: { selectedStoreIds: string[] }
         </div>
       )}
 
-      <div className="flex flex-col gap-3">
-        {visible.map(post => {
-          const cfg = APPROVAL_CONFIG[post.status];
-          const Icon = cfg.icon;
+      {/* Kanban board — Draft → In Review → Approved → Published */}
+      <div className="grid grid-cols-4 gap-3 items-start">
+        {(['draft', 'review', 'approved', 'published'] as ApprovalStatus[]).map(col => {
+          const cfg = APPROVAL_CONFIG[col];
+          const ColIcon = cfg.icon;
+          // Rejected posts surface in the Draft column (bounced back for rework).
+          const colPosts = posts.filter(p => p.status === col || (col === 'draft' && p.status === 'rejected'));
           return (
-            <div key={post.id} className="glass-card p-4 flex flex-col gap-3">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <span className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>{post.title}</span>
-                    <span className="flex items-center gap-1 text-base px-2 py-0.5 rounded-full" style={{ color: cfg.color, background: cfg.bg }}>
-                      <Icon size={10} /> {cfg.label}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span className="section-label">by {post.author}</span>
-                    <span className="flex items-center gap-1 section-label"><Clock size={10} /> {post.scheduledFor}</span>
-                    <div className="flex gap-1">
-                      {post.platforms.map(p => (
-                        <span key={p} className="text-[16px] px-1.5 py-0.5 rounded-full font-medium capitalize" style={{ color: PLT_COLOR[p] || '#888', background: `${PLT_COLOR[p] || '#888'}18` }}>{p.replace('x-twitter', 'X')}</span>
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-base mt-2 line-clamp-2" style={{ color: 'var(--text-secondary)' }}>{post.content}</p>
-                  {post.rejectionNote && (
-                    <div className="mt-2 px-2 py-1.5 rounded-lg text-base flex gap-1.5" style={{ background: 'rgba(255,68,68,.08)', color: '#ff4444' }}>
-                      <XCircle size={11} className="mt-0.5 shrink-0" />
-                      {post.rejectionNote}
-                    </div>
-                  )}
-                </div>
-                {post.status === 'review' && (
-                  <div className="flex gap-2 shrink-0">
-                    {rejectingId === post.id ? (
-                      <div className="flex flex-col gap-2 w-56">
-                        <input value={rejectNote} onChange={e => setRejectNote(e.target.value)} placeholder="Rejection reason..."
-                          className="px-2 py-1.5 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
-                        <div className="flex gap-1.5">
-                          <button onClick={() => updateStatus(post.id, 'rejected', rejectNote)} className="flex-1 py-1 rounded-lg text-base font-medium" style={{ background: 'rgba(255,68,68,.15)', color: '#ff4444' }}>Reject</button>
-                          <button onClick={() => setRejectingId(null)} className="flex-1 py-1 rounded-lg text-base" style={{ color: 'var(--text-muted)' }}>Cancel</button>
-                        </div>
+            <div key={col} className="rounded-xl flex flex-col" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', minHeight: 120 }}>
+              <div className="flex items-center gap-1.5 px-3 py-2.5 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+                <ColIcon size={12} style={{ color: cfg.color }} />
+                <span className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>{cfg.label}</span>
+                <span className="text-[16px] font-mono ml-auto px-1.5 py-0.5 rounded-full" style={{ background: cfg.bg, color: cfg.color }}>{colPosts.length}</span>
+              </div>
+              <div className="p-2 flex flex-col gap-2">
+                {colPosts.length === 0 && (
+                  <div className="text-[16px] text-center py-4" style={{ color: 'var(--text-muted)' }}>—</div>
+                )}
+                {colPosts.map(post => {
+                  const rejected = post.status === 'rejected';
+                  return (
+                    <div key={post.id} className="rounded-lg p-2.5" style={{ background: 'var(--bg-elevated)', border: `1px solid ${rejected ? 'rgba(255,68,68,.3)' : 'var(--border-subtle)'}` }}>
+                      <div className="text-[16px] font-medium mb-1" style={{ color: 'var(--text-primary)' }}>{post.title}</div>
+                      <div className="flex flex-wrap gap-1 mb-1.5">
+                        {post.platforms.map(p => (
+                          <span key={p} className="text-[16px] px-1 py-0.5 rounded font-medium capitalize" style={{ color: PLT_COLOR[p] || '#888', background: `${PLT_COLOR[p] || '#888'}18` }}>{p.replace('x-twitter', 'X')}</span>
+                        ))}
                       </div>
-                    ) : (
-                      <>
-                        <button onClick={() => updateStatus(post.id, 'approved')} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-base font-medium" style={{ background: 'rgba(16,217,138,.12)', color: '#10d98a' }}>
-                          <CheckCircle2 size={12} /> Approve
-                        </button>
-                        <button onClick={() => setRejectingId(post.id)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-base" style={{ background: 'rgba(255,68,68,.1)', color: '#ff4444' }}>
-                          <XCircle size={12} /> Reject
-                        </button>
-                      </>
-                    )}
-                  </div>
-                )}
-                {post.status === 'approved' && (
-                  <button onClick={() => updateStatus(post.id, 'published')} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-base font-medium shrink-0" style={{ background: 'rgba(123,147,255,.12)', color: '#7b93ff' }}>
-                    <CheckSquare size={12} /> Mark Published
-                  </button>
-                )}
+                      <div className="text-[16px] mb-1.5" style={{ color: 'var(--text-muted)' }}>by {post.author} · {post.scheduledFor}</div>
+                      {rejected && post.rejectionNote && (
+                        <div className="mb-1.5 px-1.5 py-1 rounded text-[16px] flex gap-1" style={{ background: 'rgba(255,68,68,.08)', color: '#ff4444' }}>
+                          <XCircle size={10} className="mt-0.5 shrink-0" />{post.rejectionNote}
+                        </div>
+                      )}
+                      {/* Move controls */}
+                      {rejectingId === post.id ? (
+                        <div className="flex flex-col gap-1.5">
+                          <input value={rejectNote} onChange={e => setRejectNote(e.target.value)} placeholder="Rejection reason…"
+                            className="px-2 py-1 rounded text-[16px]" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }} />
+                          <div className="flex gap-1">
+                            <button onClick={() => updateStatus(post.id, 'rejected', rejectNote)} className="flex-1 py-1 rounded text-[16px] font-medium" style={{ background: 'rgba(255,68,68,.15)', color: '#ff4444' }}>Reject</button>
+                            <button onClick={() => setRejectingId(null)} className="flex-1 py-1 rounded text-[16px]" style={{ color: 'var(--text-muted)' }}>Cancel</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          {(col === 'draft') && (
+                            <button onClick={() => updateStatus(post.id, 'review')} className="flex-1 py-1 rounded text-[16px] font-medium" style={{ background: 'rgba(255,179,71,.12)', color: '#ffb347' }}>Submit →</button>
+                          )}
+                          {col === 'review' && (
+                            <>
+                              <button onClick={() => updateStatus(post.id, 'approved')} className="flex-1 py-1 rounded text-[16px] font-medium" style={{ background: 'rgba(16,217,138,.12)', color: '#10d98a' }}>Approve</button>
+                              <button onClick={() => setRejectingId(post.id)} className="py-1 px-1.5 rounded text-[16px]" style={{ background: 'rgba(255,68,68,.1)', color: '#ff4444' }}>Reject</button>
+                            </>
+                          )}
+                          {col === 'approved' && (
+                            <>
+                              <button onClick={() => updateStatus(post.id, 'review')} className="py-1 px-1.5 rounded text-[16px]" style={{ color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>←</button>
+                              <button onClick={() => updateStatus(post.id, 'published')} className="flex-1 py-1 rounded text-[16px] font-medium" style={{ background: 'rgba(123,147,255,.12)', color: '#7b93ff' }}>Publish →</button>
+                            </>
+                          )}
+                          {col === 'published' && (
+                            <button onClick={() => updateStatus(post.id, 'approved')} className="flex-1 py-1 rounded text-[16px]" style={{ color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>← Unpublish</button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           );
         })}
-        {visible.length === 0 && (
-          <div className="glass-card p-8 text-center">
-            <CheckCircle2 size={28} className="mx-auto mb-2" style={{ color: '#10d98a' }} />
-            <div className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>No posts in this state</div>
-          </div>
-        )}
       </div>
     </div>
   );
