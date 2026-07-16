@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { TrendingUp, TrendingDown, MousePointer, Eye, Target, BarChart2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, MousePointer, Eye, Target, BarChart2, ArrowUp, ArrowDown, Search } from 'lucide-react';
 import {
   ResponsiveContainer, AreaChart, Area, CartesianGrid,
   XAxis, YAxis, Tooltip, Legend,
@@ -58,6 +58,9 @@ export function GscPerformance({ selectedStoreIds }: { selectedStoreIds: string[
   const [gscMetrics] = usePersistentState<GscStoreMetrics[]>('seo.gscMetrics', []);
   const [store, setStore]         = useState<StoreId>('donut-equipment');
   const [dateRange, setDateRange] = useState<DateRange>('30d');
+  const [tableTab, setTableTab]   = useState<'queries' | 'pages'>('queries');
+  const [tableQuery, setTableQuery] = useState('');
+  const [tableSort, setTableSort] = useState<{ key: 'clicks' | 'impressions' | 'ctr' | 'position'; asc: boolean }>({ key: 'clicks', asc: false });
 
   const inScopeStores = STORES.filter(s => selectedStoreIds.includes(s));
   const activeStore = inScopeStores.includes(store) ? store : inScopeStores[0];
@@ -299,100 +302,94 @@ export function GscPerformance({ selectedStoreIds }: { selectedStoreIds: string[
         </ResponsiveContainer>
       </div>
 
-      {/* Tables row */}
-      <div className='grid grid-cols-2 gap-4'>
-        {/* Top Pages */}
-        <div>
-          <div className='section-label mb-2.5'>Top Pages</div>
-          <table className='w-full text-base' style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                {['URL', 'Clicks', 'Imp', 'CTR', 'Pos'].map(h => (
-                  <th key={h} className='text-left pb-2 pr-2'
-                    style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono', fontWeight: 500, fontSize: 16, letterSpacing: '0.08em' }}>
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {storeData.topPages.map((p, i) => (
-                <tr
-                  key={i}
-                  className='transition-colors hover:bg-white/[0.02]'
-                  style={{ borderBottom: i < storeData.topPages.length - 1 ? '1px solid var(--border-subtle)' : undefined }}
-                >
-                  <td className='py-2 pr-2' style={{ maxWidth: 120 }}>
-                    <span
-                      className='font-mono block truncate'
-                      style={{ color: '#7b93ff', fontSize: 16, maxWidth: 120 }}
-                    >
-                      {p.url}
-                    </span>
-                  </td>
-                  <td className='py-2 pr-2 font-mono tabular-nums' style={{ color: 'var(--text-primary)', fontSize: 16 }}>{fmt(p.clicks)}</td>
-                  <td className='py-2 pr-2 font-mono tabular-nums' style={{ color: 'var(--text-secondary)', fontSize: 16 }}>{fmt(p.impressions)}</td>
-                  <td className='py-2 pr-2 font-mono tabular-nums' style={{ color: '#10d98a', fontSize: 16 }}>{p.ctr.toFixed(1)}%</td>
-                  <td className='py-2'>
-                    <span
-                      className='inline-flex items-center justify-center px-1.5 py-0.5 rounded font-mono font-semibold'
-                      style={{ fontSize: 16, background: positionBadgeColor(p.position) + '20', color: positionBadgeColor(p.position) }}
-                    >
-                      {p.position.toFixed(1)}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* Queries / Pages tabs — sortable + filterable */}
+      {(() => {
+        const rows = (tableTab === 'pages'
+          ? storeData.topPages.map(p => ({ label: p.url, clicks: p.clicks, impressions: p.impressions, ctr: p.ctr, position: p.position }))
+          : storeData.topQueries.map(q => ({ label: q.query, clicks: q.clicks, impressions: q.impressions, ctr: q.ctr, position: q.position })))
+          .filter(r => tableQuery.trim() === '' || r.label.toLowerCase().includes(tableQuery.trim().toLowerCase()))
+          .sort((a, b) => {
+            const diff = a[tableSort.key] - b[tableSort.key];
+            return tableSort.asc ? diff : -diff;
+          });
+        const toggleSort = (key: typeof tableSort.key) =>
+          setTableSort(s => s.key === key ? { key, asc: !s.asc } : { key, asc: key === 'position' });
+        const SortHead = ({ label, k, align = 'right' }: { label: string; k: typeof tableSort.key; align?: 'left' | 'right' }) => (
+          <th className={`pb-2 pr-2 cursor-pointer select-none text-${align}`}
+            onClick={() => toggleSort(k)}
+            style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono', fontWeight: 500, fontSize: 16, letterSpacing: '0.08em' }}>
+            <span className={`flex items-center gap-1 ${align === 'right' ? 'justify-end' : ''}`}>
+              {label}
+              {tableSort.key === k && (tableSort.asc ? <ArrowUp size={10} style={{ color: 'var(--cyan)' }} /> : <ArrowDown size={10} style={{ color: 'var(--cyan)' }} />)}
+            </span>
+          </th>
+        );
+        return (
+          <div>
+            {/* Tab switch + search */}
+            <div className='flex items-center justify-between mb-3 gap-2 flex-wrap'>
+              <div className='flex items-center gap-0.5 p-1' style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: 8 }}>
+                {(['queries', 'pages'] as const).map(t => {
+                  const active = tableTab === t;
+                  return (
+                    <button key={t} onClick={() => setTableTab(t)}
+                      className='px-3 py-1 text-base font-medium capitalize transition-all'
+                      style={{ borderRadius: 6, background: active ? 'rgba(0,217,255,0.15)' : 'transparent', color: active ? 'var(--cyan)' : 'var(--text-secondary)', border: active ? '1px solid rgba(0,217,255,0.3)' : '1px solid transparent' }}>
+                      Top {t}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className='relative' style={{ minWidth: 200 }}>
+                <Search size={12} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <input type='text' value={tableQuery} onChange={e => setTableQuery(e.target.value)}
+                  placeholder={`Filter ${tableTab}…`}
+                  className='w-full text-base rounded-lg outline-none'
+                  style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', padding: '6px 10px 6px 28px' }} />
+              </div>
+            </div>
 
-        {/* Top Queries */}
-        <div>
-          <div className='section-label mb-2.5'>Top Queries</div>
-          <table className='w-full text-base' style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                {['Query', 'Clicks', 'Imp', 'CTR', 'Pos'].map(h => (
-                  <th key={h} className='text-left pb-2 pr-2'
-                    style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono', fontWeight: 500, fontSize: 16, letterSpacing: '0.08em' }}>
-                    {h}
+            <table className='w-full text-base' style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                  <th className='text-left pb-2 pr-2' style={{ color: 'var(--text-muted)', fontFamily: 'DM Mono', fontWeight: 500, fontSize: 16, letterSpacing: '0.08em' }}>
+                    {tableTab === 'pages' ? 'URL' : 'Query'}
                   </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {storeData.topQueries.map((q, i) => (
-                <tr
-                  key={i}
-                  className='transition-colors hover:bg-white/[0.02]'
-                  style={{ borderBottom: i < storeData.topQueries.length - 1 ? '1px solid var(--border-subtle)' : undefined }}
-                >
-                  <td className='py-2 pr-2' style={{ maxWidth: 150 }}>
-                    <span
-                      className='block truncate'
-                      style={{ color: 'var(--text-primary)', fontSize: 16, maxWidth: 150 }}
-                    >
-                      {q.query}
-                    </span>
-                  </td>
-                  <td className='py-2 pr-2 font-mono tabular-nums' style={{ color: 'var(--text-primary)', fontSize: 16 }}>{fmt(q.clicks)}</td>
-                  <td className='py-2 pr-2 font-mono tabular-nums' style={{ color: 'var(--text-secondary)', fontSize: 16 }}>{fmt(q.impressions)}</td>
-                  <td className='py-2 pr-2 font-mono tabular-nums' style={{ color: '#10d98a', fontSize: 16 }}>{q.ctr.toFixed(1)}%</td>
-                  <td className='py-2'>
-                    <span
-                      className='inline-flex items-center justify-center px-1.5 py-0.5 rounded font-mono font-semibold'
-                      style={{ fontSize: 16, background: positionBadgeColor(q.position) + '20', color: positionBadgeColor(q.position) }}
-                    >
-                      {q.position.toFixed(1)}
-                    </span>
-                  </td>
+                  <SortHead label='Clicks' k='clicks' />
+                  <SortHead label='Imp' k='impressions' />
+                  <SortHead label='CTR' k='ctr' />
+                  <SortHead label='Pos' k='position' />
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+              </thead>
+              <tbody>
+                {rows.length === 0 && (
+                  <tr><td colSpan={5} className='py-6 text-center text-base' style={{ color: 'var(--text-muted)' }}>No {tableTab} match the filter.</td></tr>
+                )}
+                {rows.map((r, i) => (
+                  <tr key={i} className='transition-colors hover:bg-white/[0.02]'
+                    style={{ borderBottom: i < rows.length - 1 ? '1px solid var(--border-subtle)' : undefined }}>
+                    <td className='py-2 pr-2' style={{ maxWidth: 260 }}>
+                      <span className={`block truncate ${tableTab === 'pages' ? 'font-mono' : ''}`}
+                        style={{ color: tableTab === 'pages' ? '#7b93ff' : 'var(--text-primary)', fontSize: 16, maxWidth: 260 }}>
+                        {r.label}
+                      </span>
+                    </td>
+                    <td className='py-2 pr-2 font-mono tabular-nums text-right' style={{ color: 'var(--text-primary)', fontSize: 16 }}>{fmt(r.clicks)}</td>
+                    <td className='py-2 pr-2 font-mono tabular-nums text-right' style={{ color: 'var(--text-secondary)', fontSize: 16 }}>{fmt(r.impressions)}</td>
+                    <td className='py-2 pr-2 font-mono tabular-nums text-right' style={{ color: '#10d98a', fontSize: 16 }}>{r.ctr.toFixed(1)}%</td>
+                    <td className='py-2 text-right'>
+                      <span className='inline-flex items-center justify-center px-1.5 py-0.5 rounded font-mono font-semibold'
+                        style={{ fontSize: 16, background: positionBadgeColor(r.position) + '20', color: positionBadgeColor(r.position) }}>
+                        {r.position.toFixed(1)}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      })()}
     </div>
   );
 }
