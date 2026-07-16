@@ -367,11 +367,26 @@ const STATUS_CFG: Record<CheckStatus, {
   fail: { Icon: XCircle,       color: '#ff4444', label: 'Fail' },
 };
 
+const PRIORITY_CFG: Record<'high' | 'medium' | 'low', { color: string; label: string; rank: number }> = {
+  high:   { color: '#ff4444', label: 'High',   rank: 0 },
+  medium: { color: '#ffb347', label: 'Medium', rank: 1 },
+  low:    { color: '#7b93ff', label: 'Low',    rank: 2 },
+};
+
 export function AccountHealthAudit() {
   const [allChecks] = usePersistentState<HealthCheckItem[]>('ads.healthChecks', []);
   const [platform, setPlatform] = useState<AdPlatform | 'all'>('all');
+  const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const [fixed, setFixed] = useState<Set<string>>(new Set());
 
-  const checks   = allChecks.filter(h => platform === 'all' || h.platform === platform);
+  const checks   = allChecks
+    .filter(h => platform === 'all' || h.platform === platform)
+    .filter(h => !dismissed.has(h.id))
+    .sort((a, b) => {
+      const statusRank = (s: string) => s === 'fail' ? 0 : s === 'warn' ? 1 : 2;
+      if (statusRank(a.status) !== statusRank(b.status)) return statusRank(a.status) - statusRank(b.status);
+      return PRIORITY_CFG[a.priority].rank - PRIORITY_CFG[b.priority].rank;
+    });
   const score    = checks.length === 0 ? 100 : Math.round((checks.filter(h => h.status === 'pass').length / checks.length) * 100);
   const fails    = checks.filter(h => h.status === 'fail').length;
   const warns    = checks.filter(h => h.status === 'warn').length;
@@ -389,6 +404,9 @@ export function AccountHealthAudit() {
 
         {/* Score gauge */}
         <div className='flex items-center gap-3'>
+          <span className='text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>
+            Health <span className='font-bold' style={{ color: scoreColor }}>{score}</span> / 100
+          </span>
           <div className='flex items-center gap-1.5 text-base font-mono'>
             {fails > 0 && (
               <span className='px-1.5 py-0.5 rounded text-[16px] font-bold'
@@ -483,6 +501,12 @@ export function AccountHealthAudit() {
                   <span className='text-base font-semibold' style={{ color: 'var(--text-primary)' }}>
                     {check.check}
                   </span>
+                  {check.status !== 'pass' && (
+                    <span className='text-[16px] font-mono px-1.5 py-0.5 rounded'
+                      style={{ background: PRIORITY_CFG[check.priority].color + '18', color: PRIORITY_CFG[check.priority].color }}>
+                      {PRIORITY_CFG[check.priority].label}
+                    </span>
+                  )}
                   <span className='text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>
                     {check.category}
                   </span>
@@ -498,6 +522,27 @@ export function AccountHealthAudit() {
                   style={{ color: check.status === 'pass' ? 'var(--text-muted)' : 'var(--text-secondary)' }}>
                   {check.detail}
                 </div>
+                {check.status !== 'pass' && (
+                  <div className='flex items-center gap-2 mt-2'>
+                    {fixed.has(check.id) ? (
+                      <span className='text-[16px] font-mono px-2 py-0.5 rounded flex items-center gap-1'
+                        style={{ background: 'rgba(16,217,138,0.12)', color: '#10d98a' }}>
+                        <CheckCircle size={10} /> Fix applied
+                      </span>
+                    ) : (
+                      <button onClick={() => setFixed(prev => new Set(prev).add(check.id))}
+                        className='text-[16px] font-medium px-2.5 py-1 rounded-lg'
+                        style={{ background: 'rgba(0,217,255,0.1)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
+                        Fix Now
+                      </button>
+                    )}
+                    <button onClick={() => setDismissed(prev => new Set(prev).add(check.id))}
+                      className='text-[16px] font-medium px-2.5 py-1 rounded-lg'
+                      style={{ color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
+                      Dismiss
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           );
