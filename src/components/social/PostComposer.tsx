@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Sparkles, Clock, Save, Send } from 'lucide-react';
+import { X, Sparkles, Clock, Save, Send, Image as ImageIcon, Check, ListPlus } from 'lucide-react';
 import { PLATFORM_CONFIG, CATEGORY_CONFIG, generateCaptions, NOT_STARTED_PLATFORMS } from '@/lib/socialData';
 import type { SocialPost, SocialPlatform, PostCategory } from '@/lib/socialData';
 
@@ -35,6 +35,8 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
   const [caption, setCaption] = useState(post?.caption ?? '');
   const [selectedPlatforms, setSelectedPlatforms] = useState<SocialPlatform[]>(post?.platforms ?? ['instagram']);
   const [category, setCategory] = useState<PostCategory>(post?.category ?? 'product');
+  const [mediaType, setMediaType] = useState<'image' | 'video' | 'carousel'>((post?.mediaType as 'image' | 'video' | 'carousel') ?? 'image');
+  const [hasMedia, setHasMedia] = useState<boolean>(!!post?.mediaUrl);
   const [showAI, setShowAI] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<AiSuggestion[]>([]);
@@ -85,7 +87,8 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
       category,
       caption: caption.trim(),
       hashtags: [],
-      mediaType: 'image',
+      mediaType,
+      mediaUrl: hasMedia ? 'placeholder' : undefined,
       scheduledFor: when.toISOString(),
       publishedAt: status === 'published' ? now.toISOString() : undefined,
       author: 'You',
@@ -207,6 +210,62 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
           <div className="mt-1.5 h-0.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-overlay)' }}>
             <div className="h-full rounded-full transition-all duration-300"
               style={{ width: `${charPct}%`, background: charColor }} />
+          </div>
+        </div>
+
+        {/* Media */}
+        {!isExisting && (
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="section-label">Media</div>
+              <div className="flex items-center gap-0.5 p-0.5 rounded-lg" style={{ background: 'var(--bg-elevated)' }}>
+                {(['image', 'video', 'carousel'] as const).map(t => {
+                  const active = mediaType === t;
+                  return (
+                    <button key={t} onClick={() => setMediaType(t)}
+                      className="px-2 py-0.5 rounded text-[16px] font-mono capitalize transition-all"
+                      style={{ background: active ? 'var(--bg-overlay)' : 'transparent', color: active ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                      {t}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <button onClick={() => setHasMedia(h => !h)}
+              className="w-full rounded-xl flex flex-col items-center justify-center gap-1.5 py-6 transition-all"
+              style={{ border: `2px dashed ${hasMedia ? 'rgba(16,217,138,0.4)' : 'var(--border-dim)'}`, background: hasMedia ? 'rgba(16,217,138,0.04)' : 'var(--bg-elevated)' }}>
+              {hasMedia ? <Check size={18} style={{ color: '#10d98a' }} /> : <ImageIcon size={18} style={{ color: 'var(--text-muted)' }} />}
+              <span className="text-base" style={{ color: hasMedia ? '#10d98a' : 'var(--text-muted)' }}>
+                {hasMedia ? `${mediaType} attached — click to remove` : `Add ${mediaType} — drop or click to upload`}
+              </span>
+            </button>
+          </div>
+        )}
+
+        {/* Live per-platform preview */}
+        <div>
+          <div className="section-label mb-2">Live Preview <span style={{ color: 'var(--text-muted)' }}>· {PLATFORM_CONFIG[activePlatformPreview].label}</span></div>
+          <div className="rounded-xl overflow-hidden" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+            <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-[16px] font-bold"
+                style={{ background: PLATFORM_CONFIG[activePlatformPreview].color + '20', color: PLATFORM_CONFIG[activePlatformPreview].color }}>
+                {PLATFORM_CONFIG[activePlatformPreview].label.charAt(0)}
+              </div>
+              <div className="min-w-0">
+                <div className="text-[16px] font-semibold" style={{ color: 'var(--text-primary)' }}>your_brand</div>
+                <div className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>Sponsored</div>
+              </div>
+            </div>
+            {(hasMedia || !isExisting) && (
+              <div className="flex items-center justify-center" style={{ height: 150, background: `linear-gradient(135deg, ${PLATFORM_CONFIG[activePlatformPreview].color}22, var(--bg-overlay))` }}>
+                <ImageIcon size={26} style={{ color: hasMedia ? PLATFORM_CONFIG[activePlatformPreview].color : 'var(--text-muted)', opacity: 0.6 }} />
+              </div>
+            )}
+            <div className="px-3 py-2.5">
+              <p className="text-base leading-relaxed" style={{ color: caption ? 'var(--text-primary)' : 'var(--text-muted)', lineHeight: 1.5 }}>
+                {caption ? (caption.length > 200 ? caption.slice(0, 200) + '…' : caption) : 'Your caption will appear here…'}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -415,6 +474,14 @@ export default function PostComposer({ post, defaultDate, onAddPost, onUpdatePos
             style={{ color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
             <Save size={12} />
             Draft
+          </button>
+
+          {/* Queue — adds to the content queue for later scheduling */}
+          <button onClick={() => { createPost('scheduled'); setFeedback('Added to queue'); }}
+            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-base font-medium transition-all hover:bg-white/[0.05]"
+            style={{ color: '#7b93ff', border: '1px solid rgba(123,147,255,0.25)' }}>
+            <ListPlus size={13} />
+            Queue
           </button>
 
           {/* Schedule — secondary */}
