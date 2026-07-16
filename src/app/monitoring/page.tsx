@@ -15,6 +15,8 @@ import { MapPin, Zap, DollarSign, Globe, Gauge, Route } from 'lucide-react';
 
 import { useMonitoringStores, DEFAULT_TRAFFIC, DEFAULT_CONVERSIONS, DEFAULT_SEO_SNAPSHOT } from '@/lib/mockData';
 import { usePersistentState } from '@/lib/usePersistentState';
+import { useStoreScope } from '@/lib/storeScope';
+import { StoreScopeBar } from '@/components/shared/StoreScopeBar';
 import type { TrafficMetrics, ConversionMetrics, AbandonedCart, Transaction, PageChange, SeoSnapshot as SeoSnapshotData, Alert } from '@/types';
 import type { FiredAlert } from '@/lib/alertData';
 
@@ -456,7 +458,9 @@ function CustomerJourneyTracker() {
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function MonitoringPage() {
-  const stores = useMonitoringStores();
+  const allStores = useMonitoringStores();
+  const { selectedStoreIds } = useStoreScope('monitoring');
+  const stores = allStores.filter(s => selectedStoreIds.includes(s.id));
   const [selectedStoreId, setSelectedStoreId] = useState<string>('');
   const [allTraffic]      = usePersistentState<Record<string, TrafficMetrics>>('monitoring.traffic', {});
   const [allConversions]  = usePersistentState<Record<string, ConversionMetrics>>('monitoring.conversions', {});
@@ -466,7 +470,12 @@ export default function MonitoringPage() {
   const [allSeoSnapshots] = usePersistentState<Record<string, SeoSnapshotData>>('monitoring.seoSnapshots', {});
   const [firedAlerts]     = usePersistentState<FiredAlert[]>('alerts.list', []);
 
-  const activeStoreId = selectedStoreId || stores[0]?.id || '';
+  // The single-store detail drill-down operates within the current scope;
+  // if the previously-selected store falls out of scope, fall back to the
+  // first in-scope store.
+  const activeStoreId = (selectedStoreId && stores.some(s => s.id === selectedStoreId))
+    ? selectedStoreId
+    : (stores[0]?.id || '');
   const store = stores.find(s => s.id === activeStoreId);
   const traffic = allTraffic[activeStoreId] ?? DEFAULT_TRAFFIC;
   const conversions = allConversions[activeStoreId] ?? DEFAULT_CONVERSIONS;
@@ -474,17 +483,22 @@ export default function MonitoringPage() {
   const storeTransactions = allTransactions.filter(t => t.storeId === activeStoreId);
   const seoSnapshot = allSeoSnapshots[activeStoreId] ?? DEFAULT_SEO_SNAPSHOT(activeStoreId);
 
-  const bannerAlerts: Alert[] = firedAlerts.map(a => ({
-    id: a.id, storeId: a.storeId, severity: a.severity, title: a.title,
-    message: a.detail, createdAt: a.firedAt, acknowledged: a.status !== 'active',
-  }));
+  const bannerAlerts: Alert[] = firedAlerts
+    .filter(a => a.storeId === null || selectedStoreIds.includes(a.storeId))
+    .map(a => ({
+      id: a.id, storeId: a.storeId, severity: a.severity, title: a.title,
+      message: a.detail, createdAt: a.firedAt, acknowledged: a.status !== 'active',
+    }));
 
-  // Summary metrics across all stores
-  const totalRevenue = Object.values(allConversions).reduce((s, c) => s + c.revenueToday, 0);
-  const totalOrders = Object.values(allConversions).reduce((s, c) => s + c.ordersToday, 0);
-  const totalSessions = Object.values(allTraffic).reduce((s, t) => s + t.sessionsToday, 0);
-  const totalCarts = allCarts.length;
-  const cartValue = allCarts.reduce((s, c) => s + c.cartValue, 0);
+  // Summary metrics aggregated across the in-scope stores.
+  const scopedConversions = stores.map(s => allConversions[s.id]).filter(Boolean) as ConversionMetrics[];
+  const scopedTraffic = stores.map(s => allTraffic[s.id]).filter(Boolean) as TrafficMetrics[];
+  const scopedCarts = allCarts.filter(c => selectedStoreIds.includes(c.storeId));
+  const totalRevenue = scopedConversions.reduce((s, c) => s + c.revenueToday, 0);
+  const totalOrders = scopedConversions.reduce((s, c) => s + c.ordersToday, 0);
+  const totalSessions = scopedTraffic.reduce((s, t) => s + t.sessionsToday, 0);
+  const totalCarts = scopedCarts.length;
+  const cartValue = scopedCarts.reduce((s, c) => s + c.cartValue, 0);
 
   const formatCurrency = (v: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(v);
@@ -519,6 +533,8 @@ export default function MonitoringPage() {
         />
 
         <main className="flex-1 overflow-y-auto p-5">
+
+          <div className="mb-4"><StoreScopeBar sectionKey="monitoring" /></div>
 
           {/* Active alerts */}
           <AlertBanner alerts={bannerAlerts} />
@@ -580,7 +596,7 @@ export default function MonitoringPage() {
           {/* Row 3: Page Change Log + SEO */}
           <div className="grid grid-cols-3 gap-3 mb-3">
             <div className="col-span-2">
-              <PageChangeLog changes={allPageChanges} />
+              <PageChangeLog changes={allPageChanges.filter(pc => selectedStoreIds.includes(pc.storeId))} />
             </div>
             <SeoSnapshot snapshot={seoSnapshot} />
           </div>
