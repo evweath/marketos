@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { CHANNEL_CONFIG } from '@/lib/analyticsData';
 import type { AIInsight } from '@/lib/analyticsData';
-import { usePersistentState } from '@/lib/usePersistentState';
 import { Lightbulb, AlertTriangle, TrendingUp, ChevronDown, Sparkles } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -128,8 +127,7 @@ function InsightCard({ insight }: { insight: AIInsight }) {
   );
 }
 
-export default function AIInsightsPanel() {
-  const [insights] = usePersistentState<AIInsight[]>('analytics.aiInsights', []);
+export default function AIInsightsPanel({ insights }: { insights: AIInsight[] }) {
   const [filter, setFilter] = useState<'all' | 'high'>('all');
   const shown = insights.filter(i => filter === 'all' || i.impact === 'high');
 

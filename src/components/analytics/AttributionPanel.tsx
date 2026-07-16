@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { scaledAttributionConversions, DATE_RANGE_LABELS, emptyAttribution } from '@/lib/analyticsData';
-import { usePersistentState } from '@/lib/usePersistentState';
+import { scaledAttributionConversions, DATE_RANGE_LABELS } from '@/lib/analyticsData';
 import type { DateRange, ChannelMetrics, AttributionTouchpoint } from '@/lib/analyticsData';
 
 type Model = 'firstTouch' | 'lastTouch' | 'linearTouch' | 'positionBased';
@@ -23,9 +22,8 @@ const MODEL_DESC: Record<Model, string> = {
 
 const MODELS: Model[] = ['firstTouch', 'lastTouch', 'linearTouch', 'positionBased'];
 
-export default function AttributionPanel({ dateRange = '30d', channelMetrics }: { dateRange?: DateRange; channelMetrics: ChannelMetrics[] }) {
+export default function AttributionPanel({ dateRange = '30d', channelMetrics, attribution }: { dateRange?: DateRange; channelMetrics: ChannelMetrics[]; attribution: AttributionTouchpoint[] }) {
   const [model, setModel] = useState<Model>('linearTouch');
-  const [attribution] = usePersistentState<AttributionTouchpoint[]>('analytics.attribution', emptyAttribution());
   const conversions = scaledAttributionConversions(dateRange, channelMetrics);
   const data = [...attribution].sort((a, b) => b[model] - a[model]);
 

@@ -12,8 +12,14 @@ import AttributionPanel from '@/components/analytics/AttributionPanel';
 import AIInsightsPanel from '@/components/analytics/AIInsightsPanel';
 import RoasChart from '@/components/analytics/RoasChart';
 import DateRangePicker from '@/components/analytics/DateRangePicker';
-import { scaledTotals, DATE_RANGE_LABELS, emptyChannelMetrics } from '@/lib/analyticsData';
-import type { DateRange, ChannelMetrics, SharedReport } from '@/lib/analyticsData';
+import {
+  scaledTotals, DATE_RANGE_LABELS,
+  aggregateChannelMetrics, aggregateTimeSeries, aggregateAttribution,
+  emptyTimeSeries, emptyAttribution,
+} from '@/lib/analyticsData';
+import type { DateRange, ChannelMetrics, ChannelTimeSeries, AttributionTouchpoint, AIInsight, SharedReport } from '@/lib/analyticsData';
+import { useStoreScope } from '@/lib/storeScope';
+import { StoreScopeBar } from '@/components/shared/StoreScopeBar';
 import { Download, Share2, ExternalLink, Copy, CheckCircle2 } from 'lucide-react';
 
 function ShareableReportsPanel({ onClose, reports, onCreate }: { onClose: () => void; reports: SharedReport[]; onCreate: () => void }) {
@@ -80,8 +86,23 @@ function ShareableReportsPanel({ onClose, reports, onCreate }: { onClose: () => 
 export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [showReports, setShowReports] = useState(false);
+  const { selectedStoreIds } = useStoreScope('analytics');
   const [reports, setReports] = usePersistentState<SharedReport[]>('analytics.reports', []);
-  const [channelMetrics] = usePersistentState<ChannelMetrics[]>('analytics.channelMetrics', emptyChannelMetrics());
+  const [rawChannelMetrics] = usePersistentState<ChannelMetrics[]>('analytics.channelMetrics', []);
+  const [rawTimeSeries] = usePersistentState<ChannelTimeSeries[]>('analytics.timeSeries', []);
+  const [rawAttribution] = usePersistentState<AttributionTouchpoint[]>('analytics.attribution', []);
+  const [rawInsights] = usePersistentState<AIInsight[]>('analytics.aiInsights', []);
+
+  const inScope = (store?: string) => !!store && selectedStoreIds.includes(store);
+  const scopedChannelRows = rawChannelMetrics.filter(r => inScope(r.store));
+  const scopedTsRows = rawTimeSeries.filter(r => inScope(r.store));
+  const scopedAttrRows = rawAttribution.filter(r => inScope(r.store));
+
+  // Collapse the scoped per-store rows back to one blended row per channel.
+  const channelMetrics = aggregateChannelMetrics(scopedChannelRows);
+  const timeSeries = scopedTsRows.length ? aggregateTimeSeries(scopedTsRows) : emptyTimeSeries();
+  const attribution = scopedAttrRows.length ? aggregateAttribution(scopedAttrRows, scopedChannelRows) : emptyAttribution();
+  const insights = rawInsights.filter(i => !i.store || selectedStoreIds.includes(i.store));
 
   // Runs only in a click handler (never during render), so browser-only APIs
   // and non-deterministic values are safe here — no hydration impact.
@@ -125,10 +146,11 @@ export default function AnalyticsPage() {
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <TopBar title="Analytics" subtitle="All Channels" breadcrumbs={['MarketOS', 'Analytics']} />
         <main className="flex-1 overflow-y-auto p-5">
+          <div className="mb-4"><StoreScopeBar sectionKey="analytics" /></div>
           <div className="flex items-center justify-between mb-5">
             <div>
               <h2 className="text-base font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>
-                Marketing Performance — All 3 Stores
+                Marketing Performance
               </h2>
               <p className="text-base" style={{ color: 'var(--text-muted)' }}>
                 Google Ads · Meta Ads · TikTok · YouTube · X/Twitter · LinkedIn · Email · Organic
@@ -152,15 +174,15 @@ export default function AnalyticsPage() {
           </div>
           <KpiRow dateRange={dateRange} channelMetrics={channelMetrics} />
           <div className="grid grid-cols-3 gap-3 mb-3">
-            <div className="col-span-2"><RevenueSpendChart dateRange={dateRange} /></div>
+            <div className="col-span-2"><RevenueSpendChart dateRange={dateRange} timeSeries={timeSeries} /></div>
             <RoasChart dateRange={dateRange} channelMetrics={channelMetrics} />
           </div>
           <div className="grid grid-cols-2 gap-3 mb-3">
             <SpendBudgetChart dateRange={dateRange} channelMetrics={channelMetrics} />
-            <AttributionPanel dateRange={dateRange} channelMetrics={channelMetrics} />
+            <AttributionPanel dateRange={dateRange} channelMetrics={channelMetrics} attribution={attribution} />
           </div>
           <div className="mb-3"><ChannelTable dateRange={dateRange} channelMetrics={channelMetrics} /></div>
-          <AIInsightsPanel />
+          <AIInsightsPanel insights={insights} />
         </main>
         {showReports && <ShareableReportsPanel onClose={() => setShowReports(false)} reports={reports} onCreate={handleCreateReport} />}
       </div>

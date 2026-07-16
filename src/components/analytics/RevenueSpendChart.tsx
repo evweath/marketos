@@ -5,9 +5,8 @@ import {
   AreaChart, Area, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid,
 } from 'recharts';
-import { scaledTimeSeries, DATE_RANGE_LABELS, CHANNEL_CONFIG, emptyTimeSeries } from '@/lib/analyticsData';
+import { scaledTimeSeries, DATE_RANGE_LABELS, CHANNEL_CONFIG } from '@/lib/analyticsData';
 import type { Channel, DateRange, ChannelTimeSeries } from '@/lib/analyticsData';
-import { usePersistentState } from '@/lib/usePersistentState';
 
 const DEFAULT_CHANNELS: Channel[] = ['google-ads', 'meta-ads', 'linkedin', 'email'];
 
@@ -60,12 +59,11 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   );
 };
 
-export default function RevenueSpendChart({ dateRange = '30d' }: { dateRange?: DateRange }) {
+export default function RevenueSpendChart({ dateRange = '30d', timeSeries: rawTimeSeries }: { dateRange?: DateRange; timeSeries: ChannelTimeSeries[] }) {
   const [activeChannels, setActiveChannels] = useState<Set<Channel>>(new Set(DEFAULT_CHANNELS));
   const [metric, setMetric] = useState<Metric>('revenue');
-  const [allTimeSeries] = usePersistentState<ChannelTimeSeries[]>('analytics.timeSeries', emptyTimeSeries());
 
-  const timeSeries = scaledTimeSeries(dateRange, allTimeSeries);
+  const timeSeries = scaledTimeSeries(dateRange, rawTimeSeries);
 
   const toggleChannel = (ch: Channel) => {
     setActiveChannels(prev => {

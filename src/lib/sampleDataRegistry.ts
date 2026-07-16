@@ -1,7 +1,7 @@
 import { SAMPLE_CAMPAIGNS, SAMPLE_AD_SETS, SAMPLE_CREATIVES, SAMPLE_AUTOMATION_RULES, SAMPLE_HEALTH_CHECKS, SAMPLE_AB_TESTS, SAMPLE_AUDIENCE_OVERLAPS, SAMPLE_NEG_KEYWORDS, SAMPLE_NEG_KEYWORD_SUGGESTIONS } from './campaignData';
 import { SAMPLE_ALERT_RULES, SAMPLE_FIRED_ALERTS } from './alertData';
 import { SAMPLE_STORE_HEALTH, SAMPLE_TRAFFIC, SAMPLE_CONVERSIONS, SAMPLE_ABANDONED_CARTS, SAMPLE_TRANSACTIONS, SAMPLE_PAGE_CHANGES, SAMPLE_SEO_SNAPSHOTS } from './mockData';
-import { SAMPLE_CHANNEL_METRICS, SAMPLE_TIME_SERIES, SAMPLE_ATTRIBUTION, SAMPLE_AI_INSIGHTS, SAMPLE_SHARED_REPORTS, emptyChannelMetrics, emptyTimeSeries, emptyAttribution } from './analyticsData';
+import { SAMPLE_CHANNEL_METRICS, SAMPLE_TIME_SERIES, SAMPLE_ATTRIBUTION, SAMPLE_AI_INSIGHTS, SAMPLE_SHARED_REPORTS } from './analyticsData';
 import { SAMPLE_SOCIAL_POSTS, SAMPLE_INBOX_MESSAGES, SAMPLE_LISTENING_ITEMS, SAMPLE_PLATFORM_STATS, SAMPLE_APPROVAL_POSTS, SAMPLE_DM_RULES, emptyPlatformStats } from './socialData';
 import {
   SAMPLE_EMAIL_FLOWS, SAMPLE_EMAIL_CAMPAIGNS, SAMPLE_SEGMENTS, SAMPLE_DELIVERABILITY,
@@ -53,9 +53,12 @@ const REGISTRY: SampleDataEntry[] = [
   { key: 'monitoring.transactions',   sample: SAMPLE_TRANSACTIONS,    empty: [] },
   { key: 'monitoring.pageChanges',    sample: SAMPLE_PAGE_CHANGES,    empty: [] },
   { key: 'monitoring.seoSnapshots',   sample: SAMPLE_SEO_SNAPSHOTS,   empty: {} },
-  { key: 'analytics.channelMetrics',  sample: SAMPLE_CHANNEL_METRICS, empty: emptyChannelMetrics() },
-  { key: 'analytics.timeSeries',      sample: SAMPLE_TIME_SERIES,     empty: emptyTimeSeries() },
-  { key: 'analytics.attribution',     sample: SAMPLE_ATTRIBUTION,     empty: emptyAttribution() },
+  // Analytics data is now per-store (rows carry `store`); the empty default is
+  // an empty array and the page's aggregation helpers zero-fill channels for
+  // display. (Was emptyChannelMetrics()/emptyTimeSeries()/emptyAttribution().)
+  { key: 'analytics.channelMetrics',  sample: SAMPLE_CHANNEL_METRICS, empty: [] },
+  { key: 'analytics.timeSeries',      sample: SAMPLE_TIME_SERIES,     empty: [] },
+  { key: 'analytics.attribution',     sample: SAMPLE_ATTRIBUTION,     empty: [] },
   { key: 'analytics.aiInsights',      sample: SAMPLE_AI_INSIGHTS,     empty: [] },
   { key: 'analytics.reports',         sample: SAMPLE_SHARED_REPORTS,  empty: [] },
   { key: 'social.posts',              sample: SAMPLE_SOCIAL_POSTS,     empty: [] },
