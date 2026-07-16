@@ -405,11 +405,11 @@ export const SAMPLE_SEO_SNAPSHOTS: Record<string, SeoSnapshot> = {
   'donut-supplies': {
     storeId: 'donut-supplies',
     metrics: [
-      { label: 'Homepage Title',      value: '31 chars — Too short', status: 'warning' },
-      { label: 'Meta Description',    value: '88 chars — Too short',  status: 'warning' },
+      { label: 'Homepage Title',      value: '31 chars — Too short', status: 'warning', affectedUrls: 1 },
+      { label: 'Meta Description',    value: '88 chars — Too short',  status: 'warning', affectedUrls: 12 },
       { label: 'H1 Tag',              value: 'Present',              status: 'ok' },
       { label: 'Canonical Tag',       value: 'Set correctly',        status: 'ok' },
-      { label: 'Structured Data',     value: 'Missing on 3 products', status: 'error' },
+      { label: 'Structured Data',     value: 'Missing on 3 products', status: 'error', affectedUrls: 3 },
       { label: 'Robots.txt',          value: 'No issues',            status: 'ok' },
     ],
   },

@@ -135,6 +135,7 @@ export interface SeoMetric {
   label: string;
   value: string;
   status: 'ok' | 'warning' | 'error';
+  affectedUrls?: number;
 }
 
 export interface SeoSnapshot {

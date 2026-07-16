@@ -42,6 +42,12 @@ export default function SeoSnapshot({ snapshot }: Props) {
               style={{ background: 'var(--bg-elevated)' }}>
               <Icon size={13} style={{ color: sc.color }} className="shrink-0" />
               <span className="text-base flex-1" style={{ color: 'var(--text-secondary)' }}>{metric.label}</span>
+              {metric.status !== 'ok' && metric.affectedUrls != null && (
+                <span className="text-[16px] font-mono px-1.5 py-0.5 rounded shrink-0"
+                  style={{ background: sc.color + '18', color: sc.color }}>
+                  {metric.affectedUrls} URL{metric.affectedUrls !== 1 ? 's' : ''}
+                </span>
+              )}
               <span className="text-base text-right" style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono', maxWidth: 160 }}>
                 {metric.value}
               </span>
