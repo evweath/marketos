@@ -1286,38 +1286,49 @@ export default function CartPage() {
                         <div className="section-label">recovered (30d)</div>
                       </div>
                     </div>
-                    <div className="flex items-start gap-2">
-                      {seq.steps.map((step, i) => {
-                        const Icon = CH_ICON_MAP[step.channel];
-                        const color = CH_COL_MAP[step.channel];
-                        return (
-                          <div key={i} className="flex items-start gap-2 flex-1 min-w-0">
-                            <div className="flex-1 rounded-xl p-3" style={{ background: 'var(--bg-elevated)', border: `1px solid ${color}20` }}>
-                              <div className="flex items-center gap-1.5 mb-2">
-                                <div className="w-5 h-5 rounded flex items-center justify-center" style={{ background: color + '20' }}>
-                                  <Icon size={11} style={{ color }} />
-                                </div>
-                                <span className="text-[16px] font-mono" style={{ color }}>+{step.delay}</span>
-                              </div>
-                              <div className="text-[16px] font-medium mb-2 leading-snug" style={{ color: 'var(--text-secondary)' }}>{step.subject}</div>
-                              {[
-                                { label: 'Open', value: step.openRate + '%', color: step.openRate > 50 ? '#10d98a' : '#ffb347' },
-                                { label: 'Click', value: step.clickRate + '%', color: 'var(--cyan)' },
-                                { label: 'Conv.', value: step.convRate + '%', color: '#7b93ff' },
-                              ].map(m => (
-                                <div key={m.label} className="flex items-center justify-between text-[16px]">
-                                  <span style={{ color: 'var(--text-muted)' }}>{m.label}</span>
-                                  <span className="font-mono font-semibold" style={{ color: m.color }}>{m.value}</span>
-                                </div>
-                              ))}
-                            </div>
-                            {i < seq.steps.length - 1 && (
-                              <div className="text-[16px] mt-6 shrink-0" style={{ color: 'var(--text-muted)' }}>→</div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
+                    {/* Step table */}
+                    <table className="w-full text-base" style={{ borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr className="section-label" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                          <th className="text-left font-normal pb-2 pr-2">Step</th>
+                          <th className="text-left font-normal pb-2 pr-2">Channel</th>
+                          <th className="text-left font-normal pb-2 pr-2">Delay</th>
+                          <th className="text-left font-normal pb-2 pr-2">Subject</th>
+                          <th className="text-right font-normal pb-2 pr-2">Open</th>
+                          <th className="text-right font-normal pb-2 pr-2">Click</th>
+                          <th className="text-right font-normal pb-2">Conv.</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {seq.steps.map((step, i) => {
+                          const Icon = CH_ICON_MAP[step.channel];
+                          const color = CH_COL_MAP[step.channel];
+                          return (
+                            <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                              <td className="py-2 pr-2 font-mono" style={{ color: 'var(--text-muted)' }}>{i + 1}</td>
+                              <td className="py-2 pr-2">
+                                <span className="inline-flex items-center gap-1.5" style={{ color }}>
+                                  <Icon size={12} /> <span className="capitalize">{step.channel}</span>
+                                </span>
+                              </td>
+                              <td className="py-2 pr-2 font-mono" style={{ color: 'var(--text-secondary)' }}>+{step.delay}</td>
+                              <td className="py-2 pr-2 truncate" style={{ color: 'var(--text-primary)', maxWidth: 280 }}>{step.subject}</td>
+                              <td className="py-2 pr-2 text-right font-mono" style={{ color: step.openRate > 50 ? '#10d98a' : '#ffb347' }}>{step.openRate}%</td>
+                              <td className="py-2 pr-2 text-right font-mono" style={{ color: 'var(--cyan)' }}>{step.clickRate}%</td>
+                              <td className="py-2 text-right font-mono" style={{ color: '#7b93ff' }}>{step.convRate}%</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                      <tfoot>
+                        <tr className="font-semibold" style={{ background: 'var(--bg-elevated)' }}>
+                          <td className="py-2 pr-2 section-label" colSpan={4}>SEQUENCE AVG</td>
+                          <td className="py-2 pr-2 text-right font-mono" style={{ color: '#10d98a' }}>{(seq.steps.reduce((s, x) => s + x.openRate, 0) / seq.steps.length).toFixed(1)}%</td>
+                          <td className="py-2 pr-2 text-right font-mono" style={{ color: 'var(--cyan)' }}>{(seq.steps.reduce((s, x) => s + x.clickRate, 0) / seq.steps.length).toFixed(1)}%</td>
+                          <td className="py-2 text-right font-mono" style={{ color: '#7b93ff' }}>{(seq.steps.reduce((s, x) => s + x.convRate, 0) / seq.steps.length).toFixed(1)}%</td>
+                        </tr>
+                      </tfoot>
+                    </table>
                   </div>
                 ))}
               </div>
