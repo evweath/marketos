@@ -13,15 +13,20 @@ const DEFAULT_CHANNELS: Channel[] = ['google-ads', 'meta-ads', 'linkedin', 'emai
 const currency = (n: number): string =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 
-type Metric = 'revenue' | 'spend' | 'conversions';
+type Metric = 'revenue' | 'spend' | 'conversions' | 'blended';
 
 const METRIC_LABELS: Record<Metric, string> = {
   revenue: 'Attributed Revenue ($)',
   spend: 'Ad Spend ($)',
   conversions: 'Conversions',
+  blended: 'Blended Revenue (left) vs Spend (right)',
 };
 
-const METRICS: Metric[] = ['revenue', 'spend', 'conversions'];
+const METRIC_TAB_LABELS: Record<Metric, string> = {
+  revenue: 'Revenue', spend: 'Spend', conversions: 'Conversions', blended: 'Rev vs Spend',
+};
+
+const METRICS: Metric[] = ['revenue', 'spend', 'conversions', 'blended'];
 
 interface TooltipPayloadItem {
   dataKey: string;
@@ -74,14 +79,26 @@ export default function RevenueSpendChart({ dateRange = '30d', timeSeries: rawTi
     });
   };
 
+  const perChannelMetric = metric === 'blended' ? 'revenue' : metric;
   const mergedData = timeSeries[0].data.map((_, dayIdx) => {
     const dayObj: Record<string, number | string> = { date: timeSeries[0].data[dayIdx].date };
     for (const ts of timeSeries) {
       if (activeChannels.has(ts.channel)) {
-        dayObj[ts.channel] = ts.data[dayIdx][metric];
+        dayObj[ts.channel] = ts.data[dayIdx][perChannelMetric];
       }
     }
     return dayObj;
+  });
+
+  // Blended view: total revenue + total spend per day across active channels.
+  const blendedData = timeSeries[0].data.map((_, dayIdx) => {
+    let rev = 0, spend = 0;
+    for (const ts of timeSeries) {
+      if (!activeChannels.has(ts.channel)) continue;
+      rev += ts.data[dayIdx].revenue;
+      spend += ts.data[dayIdx].spend;
+    }
+    return { date: timeSeries[0].data[dayIdx].date, revenue: rev, spend };
   });
 
   const activeTimeSeries = timeSeries.filter(ts => activeChannels.has(ts.channel));
@@ -113,13 +130,35 @@ export default function RevenueSpendChart({ dateRange = '30d', timeSeries: rawTi
                 transition: 'all 0.15s ease',
               }}
             >
-              {m.charAt(0).toUpperCase() + m.slice(1)}
+              {METRIC_TAB_LABELS[m]}
             </button>
           ))}
         </div>
       </div>
 
-      <div style={{ height: 220 }}>
+      <div style={{ height: 220 }} className={metric === 'blended' ? '' : 'hidden'}>
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={blendedData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+            <defs>
+              <linearGradient id="blend-rev" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#10d98a" stopOpacity={0.25} /><stop offset="100%" stopColor="#10d98a" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="blend-spend" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#00d9ff" stopOpacity={0.2} /><stop offset="100%" stopColor="#00d9ff" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid stroke="rgba(var(--overlay-rgb),0.04)" strokeDasharray="4 4" vertical={false} />
+            <XAxis dataKey="date" tick={{ fill: 'var(--text-muted)', fontSize: 16, fontFamily: 'DM Mono' }} axisLine={false} tickLine={false} interval={4} />
+            <YAxis yAxisId="rev" orientation="left" tick={{ fill: '#10d98a', fontSize: 16, fontFamily: 'DM Mono' }} axisLine={false} tickLine={false} tickFormatter={(v: number) => currency(v)} width={54} />
+            <YAxis yAxisId="spend" orientation="right" tick={{ fill: '#00d9ff', fontSize: 16, fontFamily: 'DM Mono' }} axisLine={false} tickLine={false} tickFormatter={(v: number) => currency(v)} width={54} />
+            <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(var(--overlay-rgb),0.06)', strokeWidth: 1 }} />
+            <Area yAxisId="rev" type="monotone" dataKey="revenue" name="Revenue" stroke="#10d98a" strokeWidth={2} fill="url(#blend-rev)" dot={false} activeDot={{ r: 3, strokeWidth: 0, fill: '#10d98a' }} />
+            <Area yAxisId="spend" type="monotone" dataKey="spend" name="Spend" stroke="#00d9ff" strokeWidth={2} strokeDasharray="4 2" fill="url(#blend-spend)" dot={false} activeDot={{ r: 3, strokeWidth: 0, fill: '#00d9ff' }} />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div style={{ height: 220 }} className={metric === 'blended' ? 'hidden' : ''}>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={mergedData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
             <defs>
