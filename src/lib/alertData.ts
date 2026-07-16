@@ -447,6 +447,18 @@ export const DIGEST_CONFIG: DigestConfig = {
   includeCategories: ['budget', 'roas', 'revenue', 'cart', 'uptime', 'ssl'],
 };
 
+// ─── Store-scope helpers ──────────────────────────────────────────────────────
+// A fired alert with storeId null is cross-store (e.g. an ad-account policy
+// flag) and always shows; a rule scoped to ['all'] applies to every store.
+// Store ids here are canonical, matching selectedStoreIds — no resolution needed.
+
+export function alertInScope(storeId: string | null, selectedStoreIds: string[]): boolean {
+  return storeId === null || selectedStoreIds.includes(storeId);
+}
+export function ruleInScope(storeIds: string[], selectedStoreIds: string[]): boolean {
+  return storeIds.includes('all') || storeIds.some(id => selectedStoreIds.includes(id));
+}
+
 // ─── Computed Stats ───────────────────────────────────────────────────────────
 // Computed from whatever rules/alerts currently exist (empty by default, or
 // seeded via Load Sample Data) rather than hardcoded.

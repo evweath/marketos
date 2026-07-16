@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { usePersistentState } from '@/lib/usePersistentState';
-import { CATEGORY_CONFIG } from '@/lib/alertData';
+import { CATEGORY_CONFIG, alertInScope } from '@/lib/alertData';
 import type { FiredAlert, AlertSeverity, AlertStatus, AlertCategory } from '@/lib/alertData';
 import { useStores } from '@/lib/storeScope';
 
@@ -303,10 +303,11 @@ const SEV_FILTERS: { key: AlertSeverity | 'all'; label: string; color?: string }
   { key: 'info',     label: 'Info',     color: '#7b93ff' },
 ];
 
-export default function AlertFeed() {
+export default function AlertFeed({ selectedStoreIds }: { selectedStoreIds: string[] }) {
   const [statusFilter, setStatusFilter] = useState<AlertStatus | 'all'>('all');
   const [sevFilter, setSevFilter] = useState<AlertSeverity | 'all'>('all');
-  const [allAlerts, setAllAlerts] = usePersistentState<FiredAlert[]>('alerts.list', []);
+  const [fullAlerts, setAllAlerts] = usePersistentState<FiredAlert[]>('alerts.list', []);
+  const allAlerts = fullAlerts.filter(a => alertInScope(a.storeId, selectedStoreIds));
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const selected = selectedId ? allAlerts.find(a => a.id === selectedId) ?? null : null;

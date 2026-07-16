@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { usePersistentState } from '@/lib/usePersistentState';
-import { CATEGORY_CONFIG } from '@/lib/alertData';
+import { CATEGORY_CONFIG, ruleInScope } from '@/lib/alertData';
 import type { AlertRule, AlertCategory } from '@/lib/alertData';
+import { useStores } from '@/lib/storeScope';
 import { Shield, ChevronDown, ChevronUp, Edit2, Bell, Clock, X } from 'lucide-react';
 
 const DELIVERY_ICONS: Record<string, string> = {
@@ -219,16 +220,19 @@ const NEW_RULE_CATEGORIES: AlertCategory[] = [
   'budget', 'roas', 'uptime', 'ssl', 'cart', 'stock', 'traffic', 'revenue',
 ];
 
-export default function AlertRulesPanel() {
+export default function AlertRulesPanel({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
   const [catFilter, setCatFilter] = useState<AlertCategory | 'all'>('all');
   const [showDisabled, setShowDisabled] = useState(false);
-  const [allRules, setAllRules] = usePersistentState<AlertRule[]>('alerts.rules', []);
+  const [fullRules, setAllRules] = usePersistentState<AlertRule[]>('alerts.rules', []);
+  const allRules = fullRules.filter(r => ruleInScope(r.storeIds, selectedStoreIds));
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState('');
   const [newCategory, setNewCategory] = useState<AlertCategory>('budget');
   const [newSeverity, setNewSeverity] = useState<AlertRule['severity']>('warning');
   const [newMetric, setNewMetric] = useState('');
   const [newThreshold, setNewThreshold] = useState('');
+  const [newStore, setNewStore] = useState('all');
 
   function resetForm() {
     setNewName('');
@@ -236,6 +240,7 @@ export default function AlertRulesPanel() {
     setNewSeverity('warning');
     setNewMetric('');
     setNewThreshold('');
+    setNewStore('all');
     setAdding(false);
   }
 
@@ -251,7 +256,7 @@ export default function AlertRulesPanel() {
       operator: '>=',
       threshold: Number(newThreshold) || 0,
       unit: '',
-      storeIds: ['all'],
+      storeIds: [newStore],
       channels: ['email'],
       cooldownMinutes: 60,
       description: 'Custom rule created from the dashboard.',
@@ -385,6 +390,16 @@ export default function AlertRulesPanel() {
               />
             </div>
 
+            <div>
+              <label className="text-[16px] block mb-1" style={{ color: 'var(--text-muted)' }}>Applies to</label>
+              <select value={newStore} onChange={e => setNewStore(e.target.value)}
+                className="w-full text-base px-2 py-1.5 rounded-lg outline-none"
+                style={{ background: 'var(--bg-overlay)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}>
+                <option value="all">All Stores</option>
+                {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+            </div>
+
             <div className="flex gap-2 pt-0.5">
               <button onClick={addRule}
                 disabled={!newName.trim()}
@@ -408,7 +423,9 @@ export default function AlertRulesPanel() {
         {rules.map(rule => <RuleCard key={rule.id} rule={rule} />)}
         {rules.length === 0 && (
           <div className="flex items-center justify-center h-24" style={{ color: 'var(--text-muted)' }}>
-            <span className="text-base">No rules match this filter</span>
+            <span className="text-base">
+              {fullRules.length === 0 ? 'No alert rules yet — add one to get started.' : 'No rules match this filter'}
+            </span>
           </div>
         )}
       </div>

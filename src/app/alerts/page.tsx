@@ -8,9 +8,11 @@ import AlertFeed from '@/components/alerts/AlertFeed';
 import AlertRulesPanel from '@/components/alerts/AlertRulesPanel';
 import DeliverySettings from '@/components/alerts/DeliverySettings';
 import { Bell, Shield, Settings } from 'lucide-react';
-import { computeAlertStats } from '@/lib/alertData';
+import { computeAlertStats, alertInScope, ruleInScope } from '@/lib/alertData';
 import type { AlertRule, FiredAlert } from '@/lib/alertData';
 import { usePersistentState } from '@/lib/usePersistentState';
+import { useStoreScope } from '@/lib/storeScope';
+import { StoreScopeBar } from '@/components/shared/StoreScopeBar';
 
 type Tab = 'feed' | 'rules' | 'delivery';
 
@@ -22,8 +24,11 @@ const TABS: { key: Tab; label: string; icon: any }[] = [
 
 export default function AlertsPage() {
   const [tab, setTab] = useState<Tab>('feed');
-  const [rules]  = usePersistentState<AlertRule[]>('alerts.rules', []);
-  const [alerts] = usePersistentState<FiredAlert[]>('alerts.list', []);
+  const { selectedStoreIds } = useStoreScope('alerts');
+  const [allRules]  = usePersistentState<AlertRule[]>('alerts.rules', []);
+  const [allAlerts] = usePersistentState<FiredAlert[]>('alerts.list', []);
+  const rules  = allRules.filter(r => ruleInScope(r.storeIds, selectedStoreIds));
+  const alerts = allAlerts.filter(a => alertInScope(a.storeId, selectedStoreIds));
   const stats = computeAlertStats(rules, alerts);
 
   return (
@@ -37,7 +42,9 @@ export default function AlertsPage() {
         />
         <main className="flex-1 overflow-hidden flex flex-col p-5 gap-4" style={{ minHeight: 0 }}>
 
-          <AlertStatsBar />
+          <div className="shrink-0"><StoreScopeBar sectionKey="alerts" /></div>
+
+          <AlertStatsBar selectedStoreIds={selectedStoreIds} />
 
           <div className="flex items-center gap-1 p-1 rounded-xl shrink-0"
             style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', width: 'fit-content' }}>
@@ -67,8 +74,8 @@ export default function AlertsPage() {
             })}
           </div>
 
-          {tab === 'feed'     && <AlertFeed />}
-          {tab === 'rules'    && <AlertRulesPanel />}
+          {tab === 'feed'     && <AlertFeed selectedStoreIds={selectedStoreIds} />}
+          {tab === 'rules'    && <AlertRulesPanel selectedStoreIds={selectedStoreIds} />}
           {tab === 'delivery' && <div className="flex-1 overflow-y-auto"><DeliverySettings /></div>}
 
         </main>
