@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import {
-  PenLine, Copy, Check, ChevronRight, Loader2, Sparkles, Clock
+  PenLine, Copy, Check, Loader2, Sparkles, Clock, Bookmark
 } from 'lucide-react';
 import { usePersistentState } from '@/lib/usePersistentState';
 
@@ -10,12 +10,50 @@ type Formula = 'AIDA' | 'PAS' | 'BAB' | '4Ps' | 'Before-After';
 type Tone = 'professional' | 'casual' | 'urgent' | 'witty' | 'empathetic';
 type Platform = 'meta' | 'google' | 'tiktok' | 'linkedin' | 'email' | 'instagram';
 type Strength = 'Strong' | 'Good' | 'Average';
+type ContentType = 'ad' | 'headline' | 'email-subject' | 'product-desc' | 'social';
+
+const CONTENT_TYPES: { value: ContentType; label: string }[] = [
+  { value: 'ad', label: 'Ad Copy' },
+  { value: 'headline', label: 'Headline' },
+  { value: 'email-subject', label: 'Email Subject' },
+  { value: 'product-desc', label: 'Product Description' },
+  { value: 'social', label: 'Social Caption' },
+];
+
+// Flesch Reading Ease approximation (0–100, higher = easier to read).
+function countSyllables(word: string): number {
+  const w = word.toLowerCase().replace(/[^a-z]/g, '');
+  if (!w) return 0;
+  const groups = w.match(/[aeiouy]+/g);
+  let n = groups ? groups.length : 1;
+  if (w.endsWith('e') && n > 1) n -= 1;
+  return Math.max(1, n);
+}
+function readabilityScore(text: string): number {
+  const sentences = Math.max(1, (text.match(/[.!?]+/g) || []).length);
+  const words = text.trim().split(/\s+/).filter(Boolean);
+  const wordCount = Math.max(1, words.length);
+  const syllables = words.reduce((s, w) => s + countSyllables(w), 0);
+  const score = 206.835 - 1.015 * (wordCount / sentences) - 84.6 * (syllables / wordCount);
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+function readabilityLabel(s: number): string {
+  return s >= 70 ? 'Easy' : s >= 50 ? 'Standard' : 'Complex';
+}
 
 interface CopyVariant {
   id: string;
   text: string;
   charCount: number;
   strength: Strength;
+  readability: number;
+}
+
+interface SavedCopy {
+  id: string;
+  contentType: ContentType;
+  platform: Platform;
+  text: string;
 }
 
 interface HistoryItem {
@@ -87,16 +125,19 @@ const STRENGTH_CONFIG: Record<Strength, { color: string; bg: string }> = {
 export function CopywritingTool() {
   const [formula, setFormula] = useState<Formula>('AIDA');
   const [platform, setPlatform] = useState<Platform>('meta');
+  const [contentType, setContentType] = useState<ContentType>('ad');
   const [product, setProduct] = useState('');
   const [benefit, setBenefit] = useState('');
   const [audience, setAudience] = useState('');
   const [tone, setTone] = useState<Tone>('professional');
+  const [useBrandVoice, setUseBrandVoice] = useState(true);
   const [charLimit, setCharLimit] = useState(125);
   const [generating, setGenerating] = useState(false);
   const [variants, setVariants] = useState<CopyVariant[]>([]);
   const [history, setHistory] = usePersistentState<HistoryItem[]>('content.copyHistory', []);
+  const [saved, setSaved] = usePersistentState<SavedCopy[]>('content.copySaved', []);
   const [copied, setCopied] = useState<string | null>(null);
-  const [applied, setApplied] = useState<string | null>(null);
+  const [savedFlash, setSavedFlash] = useState<string | null>(null);
 
   const handleGenerate = () => {
     setGenerating(true);
@@ -110,6 +151,7 @@ export function CopywritingTool() {
           text,
           charCount: text.length,
           strength: strengths[i] ?? 'Average',
+          readability: readabilityScore(text),
         };
       });
       setVariants(newVariants);
@@ -128,6 +170,12 @@ export function CopywritingTool() {
     navigator.clipboard.writeText(text).catch(() => undefined);
     setCopied(id);
     setTimeout(() => setCopied(null), 2000);
+  };
+
+  const handleSave = (v: CopyVariant) => {
+    setSaved(prev => [{ id: v.id, contentType, platform, text: v.text }, ...prev.filter(s => s.id !== v.id)].slice(0, 20));
+    setSavedFlash(v.id);
+    setTimeout(() => setSavedFlash(null), 2000);
   };
 
   return (
@@ -161,6 +209,24 @@ export function CopywritingTool() {
               ))}
             </select>
           </div>
+
+          <div>
+            <label className="section-label block mb-1.5">Content Type</label>
+            <select value={contentType} onChange={e => setContentType(e.target.value as ContentType)}
+              className="w-full px-3 py-2 rounded-lg text-base outline-none"
+              style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+              {CONTENT_TYPES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+            </select>
+          </div>
+
+          <button onClick={() => setUseBrandVoice(v => !v)}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-base transition-all"
+            style={{ background: 'var(--bg-elevated)', border: `1px solid ${useBrandVoice ? 'rgba(123,147,255,0.3)' : 'var(--border-dim)'}` }}>
+            <span style={{ color: 'var(--text-secondary)' }}>Apply Brand Voice</span>
+            <span className="relative w-9 h-5 rounded-full transition-colors" style={{ background: useBrandVoice ? '#7b93ff' : 'var(--bg-overlay)' }}>
+              <span className="absolute w-3.5 h-3.5 bg-white rounded-full top-0.5 transition-all" style={{ left: useBrandVoice ? '18px' : '2px' }} />
+            </span>
+          </button>
 
           <div>
             <label className="section-label block mb-1.5">Product / Service</label>
@@ -257,10 +323,17 @@ export function CopywritingTool() {
                       {variant.strength}
                     </span>
                   </div>
-                  <span className="text-[16px] font-mono"
-                    style={{ color: isOverLimit ? '#ff4444' : 'var(--text-muted)' }}>
-                    {variant.charCount} / {charLimit} chars
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[16px] font-mono px-1.5 py-0.5 rounded"
+                      title="Flesch reading ease"
+                      style={{ background: variant.readability >= 70 ? 'rgba(16,217,138,0.12)' : variant.readability >= 50 ? 'rgba(255,179,71,0.12)' : 'rgba(255,68,68,0.12)', color: variant.readability >= 70 ? '#10d98a' : variant.readability >= 50 ? '#ffb347' : '#ff4444' }}>
+                      {readabilityLabel(variant.readability)} · {variant.readability}
+                    </span>
+                    <span className="text-[16px] font-mono"
+                      style={{ color: isOverLimit ? '#ff4444' : 'var(--text-muted)' }}>
+                      {variant.charCount} / {charLimit} chars
+                    </span>
+                  </div>
                 </div>
 
                 <p className="text-base leading-relaxed mb-3" style={{ color: 'var(--text-primary)' }}>
@@ -274,10 +347,10 @@ export function CopywritingTool() {
                     {copied === variant.id ? <Check size={10} /> : <Copy size={10} />}
                     {copied === variant.id ? 'Copied!' : 'Copy'}
                   </button>
-                  <button onClick={() => { setApplied(variant.id); setTimeout(() => setApplied(null), 2000); }}
+                  <button onClick={() => handleSave(variant)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[16px] transition-all hover:bg-white/5"
-                    style={{ color: applied === variant.id ? '#10d98a' : '#7b93ff', border: `1px solid ${applied === variant.id ? 'rgba(16,217,138,0.3)' : 'rgba(123,147,255,0.2)'}` }}>
-                    <ChevronRight size={10} />{applied === variant.id ? 'Applied!' : 'Use This'}
+                    style={{ color: savedFlash === variant.id ? '#10d98a' : '#7b93ff', border: `1px solid ${savedFlash === variant.id ? 'rgba(16,217,138,0.3)' : 'rgba(123,147,255,0.2)'}` }}>
+                    <Bookmark size={10} />{savedFlash === variant.id ? 'Saved!' : 'Save'}
                   </button>
                 </div>
               </div>
@@ -285,6 +358,32 @@ export function CopywritingTool() {
           })}
         </div>
       </div>
+
+      {/* Saved Copy */}
+      {saved.length > 0 && (
+        <div className="glass-card p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Bookmark size={13} style={{ color: '#7b93ff' }} />
+            <span className="section-label">Saved Copy ({saved.length})</span>
+          </div>
+          <div className="space-y-2">
+            {saved.map(item => {
+              const pc = PLATFORM_CONFIG[item.platform];
+              const ct = CONTENT_TYPES.find(c => c.value === item.contentType);
+              return (
+                <div key={item.id} className="flex items-center gap-3 p-2.5 rounded-lg" style={{ border: '1px solid var(--border-subtle)' }}>
+                  <span className="text-[16px] font-mono px-1.5 py-0.5 rounded shrink-0" style={{ background: '#7b93ff18', color: '#7b93ff' }}>{ct?.label}</span>
+                  <span className="text-[16px] font-mono px-1.5 py-0.5 rounded shrink-0" style={{ background: pc.color + '18', color: pc.color }}>{pc.label}</span>
+                  <span className="text-[16px] flex-1 truncate" style={{ color: 'var(--text-secondary)' }}>{item.text}</span>
+                  <button onClick={() => setSaved(prev => prev.filter(s => s.id !== item.id))} className="shrink-0" style={{ color: 'var(--text-muted)' }}>
+                    <Check size={12} style={{ display: 'none' }} />×
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* History */}
       <div className="glass-card p-4">
