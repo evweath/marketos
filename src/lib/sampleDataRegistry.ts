@@ -1,6 +1,6 @@
 import { SAMPLE_CAMPAIGNS, SAMPLE_AD_SETS, SAMPLE_CREATIVES, SAMPLE_AUTOMATION_RULES, SAMPLE_HEALTH_CHECKS, SAMPLE_AB_TESTS, SAMPLE_AUDIENCE_OVERLAPS, SAMPLE_NEG_KEYWORDS, SAMPLE_NEG_KEYWORD_SUGGESTIONS } from './campaignData';
 import { SAMPLE_ALERT_RULES, SAMPLE_FIRED_ALERTS } from './alertData';
-import { SAMPLE_STORE_HEALTH, SAMPLE_TRAFFIC, SAMPLE_CONVERSIONS, SAMPLE_ABANDONED_CARTS, SAMPLE_TRANSACTIONS, SAMPLE_PAGE_CHANGES, SAMPLE_SEO_SNAPSHOTS } from './mockData';
+import { SAMPLE_STORE_HEALTH, SAMPLE_WEB_VITALS, SAMPLE_TRAFFIC, SAMPLE_CONVERSIONS, SAMPLE_ABANDONED_CARTS, SAMPLE_TRANSACTIONS, SAMPLE_PAGE_CHANGES, SAMPLE_SEO_SNAPSHOTS } from './mockData';
 import { SAMPLE_CHANNEL_METRICS, SAMPLE_TIME_SERIES, SAMPLE_ATTRIBUTION, SAMPLE_AI_INSIGHTS, SAMPLE_SHARED_REPORTS } from './analyticsData';
 import { SAMPLE_SOCIAL_POSTS, SAMPLE_INBOX_MESSAGES, SAMPLE_LISTENING_ITEMS, SAMPLE_PLATFORM_STATS, SAMPLE_APPROVAL_POSTS, SAMPLE_DM_RULES, emptyPlatformStats } from './socialData';
 import {
@@ -47,6 +47,7 @@ const REGISTRY: SampleDataEntry[] = [
   { key: 'alerts.rules',         sample: SAMPLE_ALERT_RULES,      empty: [] },
   { key: 'alerts.list',          sample: SAMPLE_FIRED_ALERTS,     empty: [] },
   { key: 'monitoring.storeHealth', sample: SAMPLE_STORE_HEALTH,  empty: {} },
+  { key: 'monitoring.webVitals',   sample: SAMPLE_WEB_VITALS,    empty: {} },
   { key: 'monitoring.traffic',     sample: SAMPLE_TRAFFIC,       empty: {} },
   { key: 'monitoring.conversions', sample: SAMPLE_CONVERSIONS,   empty: {} },
   { key: 'monitoring.abandonedCarts', sample: SAMPLE_ABANDONED_CARTS, empty: [] },

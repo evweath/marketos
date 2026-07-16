@@ -41,6 +41,31 @@ export const SAMPLE_STORE_HEALTH: Record<string, StoreHealth> = {
   },
 };
 
+// ─── Core Web Vitals (per store) ─────────────────────────────────────────────
+// LCP (s), CLS (unitless), INP (ms) — current field value + a 7-day history
+// for the sparkline. Empty by default; seeded by Load Sample Data.
+
+export interface WebVitalMetric { current: number; history: number[] }
+export interface StoreWebVitals { lcp: WebVitalMetric; cls: WebVitalMetric; inp: WebVitalMetric }
+
+export const SAMPLE_WEB_VITALS: Record<string, StoreWebVitals> = {
+  'donut-equipment': {
+    lcp: { current: 2.3, history: [2.8, 2.7, 2.6, 2.5, 2.4, 2.4, 2.3] },
+    cls: { current: 0.06, history: [0.09, 0.08, 0.08, 0.07, 0.07, 0.06, 0.06] },
+    inp: { current: 168, history: [210, 205, 190, 185, 178, 172, 168] },
+  },
+  'donut-supplies': {
+    lcp: { current: 4.6, history: [3.9, 4.0, 4.2, 4.3, 4.4, 4.5, 4.6] },
+    cls: { current: 0.19, history: [0.12, 0.13, 0.15, 0.16, 0.17, 0.18, 0.19] },
+    inp: { current: 340, history: [260, 275, 290, 305, 320, 330, 340] },
+  },
+  'bakery-wholesalers': {
+    lcp: { current: 1.9, history: [2.1, 2.0, 2.0, 1.9, 1.9, 1.9, 1.9] },
+    cls: { current: 0.04, history: [0.05, 0.05, 0.04, 0.04, 0.04, 0.04, 0.04] },
+    inp: { current: 142, history: [160, 158, 152, 150, 147, 145, 142] },
+  },
+};
+
 /** Live store list (identity + connections) merged with persisted health data — the single source Monitoring/Alerts read store info from. */
 export function useMonitoringStores(): Store[] {
   const [stores] = useStores();

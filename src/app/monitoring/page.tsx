@@ -14,6 +14,7 @@ import SeoSnapshot from '@/components/monitoring/SeoSnapshot';
 import { MapPin, Zap, DollarSign, Globe, Gauge, Route } from 'lucide-react';
 
 import { useMonitoringStores, DEFAULT_TRAFFIC, DEFAULT_CONVERSIONS, DEFAULT_SEO_SNAPSHOT } from '@/lib/mockData';
+import type { StoreWebVitals, WebVitalMetric } from '@/lib/mockData';
 import { usePersistentState } from '@/lib/usePersistentState';
 import { useStoreScope } from '@/lib/storeScope';
 import { StoreScopeBar } from '@/components/shared/StoreScopeBar';
@@ -333,62 +334,94 @@ function SitemapMonitor({ storeId, storeColor }: { storeId: string; storeColor: 
   );
 }
 
-// ─── Page Load Speed (G-17) ──────────────────────────────────────────────────
+// ─── Core Web Vitals gauges (G-17) ───────────────────────────────────────────
 
-// Empty until real Core Web Vitals data is available for a store.
-const LOAD_SPEED_DATA: Record<string, Array<{
-  page: string; desktopMs: number; mobileMs: number; lcp: number; cls: number; fid: number;
-}>> = {};
+type Rating = { label: string; color: string };
+// Google CWV thresholds: [good ≤, needs-improvement ≤]
+const CWV_META = {
+  lcp: { label: 'LCP', name: 'Largest Contentful Paint', unit: 's',  good: 2.5, ni: 4.0,  max: 6.0,  fmt: (v: number) => v.toFixed(1) },
+  cls: { label: 'CLS', name: 'Cumulative Layout Shift',  unit: '',   good: 0.1, ni: 0.25, max: 0.4,  fmt: (v: number) => v.toFixed(2) },
+  inp: { label: 'INP', name: 'Interaction to Next Paint', unit: 'ms', good: 200, ni: 500,  max: 700,  fmt: (v: number) => String(Math.round(v)) },
+} as const;
+type CwvKey = keyof typeof CWV_META;
 
-function speedGrade(ms: number): { label: string; color: string } {
-  if (ms < 1500) return { label: 'Good',   color: '#10d98a' };
-  if (ms < 3000) return { label: 'OK',     color: '#ffb347' };
-  return              { label: 'Slow',    color: '#ff4444' };
+function cwvRating(key: CwvKey, v: number): Rating {
+  const m = CWV_META[key];
+  if (v <= m.good) return { label: 'Good', color: '#10d98a' };
+  if (v <= m.ni)   return { label: 'Needs work', color: '#ffb347' };
+  return             { label: 'Poor', color: '#ff4444' };
+}
+
+function Sparkline({ data, color }: { data: number[]; color: string }) {
+  const w = 120, h = 28;
+  const min = Math.min(...data), max = Math.max(...data);
+  const range = max - min || 1;
+  const pts = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * w;
+    const y = h - ((v - min) / range) * (h - 4) - 2;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  return (
+    <svg width={w} height={h} style={{ display: 'block' }}>
+      <polyline points={pts} fill="none" stroke={color} strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CwvGauge({ metricKey, metric }: { metricKey: CwvKey; metric: WebVitalMetric }) {
+  const m = CWV_META[metricKey];
+  const rating = cwvRating(metricKey, metric.current);
+  // Semicircle arc gauge (180°), fill proportional to value vs a sensible max.
+  const size = 92, r = 38, cx = size / 2, cy = size / 2;
+  const semi = Math.PI * r;                       // arc length of a half circle
+  const frac = Math.min(metric.current / m.max, 1);
+  const dash = frac * semi;
+  return (
+    <div className="rounded-xl p-3 flex flex-col items-center"
+      style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+      <div className="section-label mb-1" title={m.name}>{m.label}</div>
+      <div style={{ position: 'relative', width: size, height: size / 2 + 8 }}>
+        <svg width={size} height={size / 2 + 8} style={{ overflow: 'visible' }}>
+          {/* track */}
+          <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
+            fill="none" stroke="var(--bg-overlay)" strokeWidth={7} strokeLinecap="round" />
+          {/* value arc */}
+          <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
+            fill="none" stroke={rating.color} strokeWidth={7} strokeLinecap="round"
+            strokeDasharray={`${dash} ${semi - dash}`} />
+        </svg>
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, textAlign: 'center' }}>
+          <span className="font-mono font-bold" style={{ fontSize: 20, color: rating.color }}>{m.fmt(metric.current)}</span>
+          <span className="font-mono" style={{ fontSize: 13, color: 'var(--text-muted)', marginLeft: 2 }}>{m.unit}</span>
+        </div>
+      </div>
+      <div className="text-[16px] font-mono mb-1.5" style={{ color: rating.color }}>{rating.label}</div>
+      <Sparkline data={metric.history} color={rating.color} />
+      <div className="section-label mt-1" style={{ fontSize: 13 }}>7-day trend</div>
+    </div>
+  );
 }
 
 function LoadSpeedMonitor({ storeId, storeColor }: { storeId: string; storeColor: string }) {
-  const pages = LOAD_SPEED_DATA[storeId] ?? [];
+  const [allVitals] = usePersistentState<Record<string, StoreWebVitals>>('monitoring.webVitals', {});
+  const vitals = allVitals[storeId];
 
   return (
     <div className="glass-card" style={{ padding: '16px 20px' }}>
       <div className="flex items-center gap-2 mb-4">
         <Gauge size={14} style={{ color: storeColor }} />
-        <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Page Load Speed</h3>
-        <span className="section-label ml-auto">Core Web Vitals</span>
+        <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Core Web Vitals</h3>
+        <span className="section-label ml-auto">Field data · last 7 days</span>
       </div>
-      {pages.length === 0 && (
-        <div className="text-base text-center py-4" style={{ color: 'var(--text-muted)' }}>No page speed data yet for this store.</div>
+      {!vitals ? (
+        <div className="text-base text-center py-4" style={{ color: 'var(--text-muted)' }}>No Core Web Vitals data yet for this store.</div>
+      ) : (
+        <div className="grid grid-cols-3 gap-3">
+          <CwvGauge metricKey="lcp" metric={vitals.lcp} />
+          <CwvGauge metricKey="cls" metric={vitals.cls} />
+          <CwvGauge metricKey="inp" metric={vitals.inp} />
+        </div>
       )}
-      {pages.length > 0 && (
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px 60px 50px 50px', gap: '0 8px', marginBottom: 6 }}>
-        {['Page', 'Desktop', 'Mobile', 'LCP', 'CLS', 'FID'].map(h => (
-          <div key={h} className="section-label" style={{ fontSize: 16 }}>{h}</div>
-        ))}
-      </div>
-      )}
-      {pages.map(pg => {
-        const dGrade = speedGrade(pg.desktopMs);
-        const mGrade = speedGrade(pg.mobileMs);
-        const lcpBad = pg.lcp > 2.5;
-        const clsBad = pg.cls > 0.1;
-        const fidBad = pg.fid > 100;
-        return (
-          <div key={pg.page} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px 60px 50px 50px', gap: '0 8px', alignItems: 'center', padding: '7px 0', borderTop: '1px solid var(--border-subtle)' }}>
-            <div style={{ fontSize: 16, color: 'var(--text-primary)', fontFamily: 'DM Mono', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pg.page}</div>
-            <div style={{ fontSize: 16 }}>
-              <span style={{ color: dGrade.color, fontWeight: 600 }}>{pg.desktopMs}ms</span>
-              <span style={{ fontSize: 16, marginLeft: 3, color: dGrade.color }}>({dGrade.label})</span>
-            </div>
-            <div style={{ fontSize: 16 }}>
-              <span style={{ color: mGrade.color, fontWeight: 600 }}>{pg.mobileMs}ms</span>
-              <span style={{ fontSize: 16, marginLeft: 3, color: mGrade.color }}>({mGrade.label})</span>
-            </div>
-            <div style={{ fontSize: 16, color: lcpBad ? '#ff4444' : '#10d98a', fontWeight: 600 }}>{pg.lcp}s</div>
-            <div style={{ fontSize: 16, color: clsBad ? '#ff4444' : '#10d98a', fontWeight: 600 }}>{pg.cls}</div>
-            <div style={{ fontSize: 16, color: fidBad ? '#ff4444' : '#10d98a', fontWeight: 600 }}>{pg.fid}ms</div>
-          </div>
-        );
-      })}
     </div>
   );
 }
