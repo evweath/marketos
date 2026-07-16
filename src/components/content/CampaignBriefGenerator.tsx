@@ -6,6 +6,7 @@ import {
   BarChart2, Clock, ChevronRight, Zap
 } from 'lucide-react';
 import { usePersistentState } from '@/lib/usePersistentState';
+import { useStores, resolveStoreId } from '@/lib/storeScope';
 import type { CampaignBrief, CampaignObjective } from '@/lib/contentData';
 
 const OBJECTIVE_CONFIG: Record<CampaignObjective, { color: string; bg: string }> = {
@@ -20,6 +21,7 @@ const CHANNEL_OPTIONS = ['Google', 'Meta', 'TikTok', 'YouTube', 'LinkedIn', 'Ema
 
 const GENERATED_BRIEF_TEMPLATE: CampaignBrief = {
   id: 'generated',
+  store: 'All Stores',
   title: 'AI-Generated Campaign Brief',
   objective: 'Sales',
   executiveSummary: 'Drive direct sales and maximize ROAS for your target product across selected channels. This multi-channel campaign leverages AI-optimized creative and audience targeting to reach high-intent buyers at the right moment in their purchase journey.',
@@ -57,16 +59,19 @@ const GENERATED_BRIEF_TEMPLATE: CampaignBrief = {
   generatedAt: 'Just now',
 };
 
-export function CampaignBriefGenerator() {
+export function CampaignBriefGenerator({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
   const [objective, setObjective] = useState<CampaignObjective>('Sales');
   const [product, setProduct] = useState('');
   const [audience, setAudience] = useState('');
   const [budget, setBudget] = useState('$5K–$20K');
   const [timeline, setTimeline] = useState('1 month');
   const [channels, setChannels] = useState<string[]>(['Google', 'Meta']);
+  const [briefStore, setBriefStore] = useState('All Stores');
   const [generating, setGenerating] = useState(false);
   const [brief, setBrief] = useState<CampaignBrief | null>(null);
-  const [briefs, setBriefs] = usePersistentState<CampaignBrief[]>('content.briefs', []);
+  const [allBriefs, setBriefs] = usePersistentState<CampaignBrief[]>('content.briefs', []);
+  const briefs = allBriefs.filter(b => b.store === 'All Stores' || selectedStoreIds.includes(resolveStoreId(b.store, stores) ?? ''));
   const [shared, setShared] = useState(false);
   const [viewedId, setViewedId] = useState<string | null>(null);
 
@@ -108,7 +113,7 @@ export function CampaignBriefGenerator() {
         ? `${product} — ${objective} Campaign Brief`
         : `${objective} Campaign Brief`;
       const newBrief: CampaignBrief = {
-        ...GENERATED_BRIEF_TEMPLATE, id: `cb-${Date.now()}`,
+        ...GENERATED_BRIEF_TEMPLATE, id: `cb-${Date.now()}`, store: briefStore,
         title, objective, budget, channels, timeline, generatedAt: 'just now',
       };
       setBrief(newBrief);
@@ -183,6 +188,16 @@ export function CampaignBriefGenerator() {
                 <option>6 months</option>
               </select>
             </div>
+          </div>
+
+          <div>
+            <label className="section-label block mb-1.5">Store to Target</label>
+            <select value={briefStore} onChange={e => setBriefStore(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg text-base outline-none"
+              style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+              <option value="All Stores">All Stores</option>
+              {stores.map(s => <option key={s.id} value={s.domain}>{s.name}</option>)}
+            </select>
           </div>
 
           <div>
@@ -395,7 +410,9 @@ export function CampaignBriefGenerator() {
           <span className="section-label">Recent Briefs</span>
         </div>
         {briefs.length === 0 && (
-          <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>No briefs generated yet.</div>
+          <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>
+            {allBriefs.length === 0 ? 'No briefs generated yet.' : `No briefs for the selected store${selectedStoreIds.length !== 1 ? 's' : ''}.`}
+          </div>
         )}
         <div className="space-y-2">
           {briefs.map(b => {

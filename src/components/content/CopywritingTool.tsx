@@ -4,6 +4,7 @@ import { useState } from 'react';
 import {
   PenLine, Copy, Check, ChevronRight, Loader2, Sparkles, Clock
 } from 'lucide-react';
+import { usePersistentState } from '@/lib/usePersistentState';
 
 type Formula = 'AIDA' | 'PAS' | 'BAB' | '4Ps' | 'Before-After';
 type Tone = 'professional' | 'casual' | 'urgent' | 'witty' | 'empathetic';
@@ -41,35 +42,6 @@ const PLATFORM_CONFIG: Record<Platform, { label: string; color: string; charLimi
   email:     { label: 'Email',     color: '#10d98a', charLimit: 60  },
   instagram: { label: 'Instagram', color: '#E1306C', charLimit: 125 },
 };
-
-const INITIAL_VARIANTS: CopyVariant[] = [
-  {
-    id: 'iv-1',
-    text: 'Stop losing dough to equipment that can\'t keep up. The ProFry 3000 recovers heat 40% faster than competitors — so your fryers never hold back your output. 5-year commercial warranty. NSF-certified. Free white-glove delivery.',
-    charCount: 218,
-    strength: 'Strong',
-  },
-  {
-    id: 'iv-2',
-    text: 'Your bakery is only as fast as your slowest fryer. The ProFry 3000 eliminates bottlenecks with rapid heat recovery and a 100-lb capacity. 12,000+ food service operators trust it. See why.',
-    charCount: 185,
-    strength: 'Good',
-  },
-  {
-    id: 'iv-3',
-    text: 'Before: waiting 8 minutes between batches, inconsistent oil temps, unhappy customers. After: the ProFry 3000 keeps up with your peak demand — consistent results, batch after batch. Request a quote.',
-    charCount: 198,
-    strength: 'Strong',
-  },
-];
-
-const INITIAL_HISTORY: HistoryItem[] = [
-  { id: 'h-1', platform: 'meta', formula: 'PAS', text: 'Dough shrinkage costing you thousands? Our premium mixes are formulated for consistent yield...', generatedAt: '1h ago' },
-  { id: 'h-2', platform: 'linkedin', formula: 'AIDA', text: 'Every minute of downtime costs your bakery $240. Industrial-grade commercial equipment that...', generatedAt: '3h ago' },
-  { id: 'h-3', platform: 'email', formula: 'BAB', text: 'Before our glaze: 45 minutes of prep per batch. After: 8 minutes. Here\'s how bakeries like yours...', generatedAt: '5h ago' },
-  { id: 'h-4', platform: 'google', formula: '4Ps', text: 'Promise yourself the best-performing commercial fryer. Picture your team...', generatedAt: '1d ago' },
-  { id: 'h-5', platform: 'instagram', formula: 'Before-After', text: 'Before the ProFry: long queues, tired staff, disappointed customers. Now...', generatedAt: '2d ago' },
-];
 
 const VARIANT_TEMPLATES: Record<Formula, string[]> = {
   'AIDA': [
@@ -121,8 +93,8 @@ export function CopywritingTool() {
   const [tone, setTone] = useState<Tone>('professional');
   const [charLimit, setCharLimit] = useState(125);
   const [generating, setGenerating] = useState(false);
-  const [variants, setVariants] = useState<CopyVariant[]>(INITIAL_VARIANTS);
-  const [history] = useState<HistoryItem[]>(INITIAL_HISTORY);
+  const [variants, setVariants] = useState<CopyVariant[]>([]);
+  const [history, setHistory] = usePersistentState<HistoryItem[]>('content.copyHistory', []);
   const [copied, setCopied] = useState<string | null>(null);
   const [applied, setApplied] = useState<string | null>(null);
 
@@ -141,6 +113,13 @@ export function CopywritingTool() {
         };
       });
       setVariants(newVariants);
+      // Record the top variant into recent-copy history.
+      if (newVariants[0]) {
+        setHistory(prev => [
+          { id: `h-${Date.now()}`, platform, formula, text: newVariants[0].text, generatedAt: 'just now' },
+          ...prev,
+        ].slice(0, 12));
+      }
       setGenerating(false);
     }, 1500);
   };
@@ -256,6 +235,12 @@ export function CopywritingTool() {
             {generating && <Loader2 size={11} className="animate-spin" style={{ color: 'var(--text-muted)' }} />}
           </div>
 
+          {variants.length === 0 && !generating && (
+            <div className="glass-card p-8 text-center text-base" style={{ color: 'var(--text-muted)' }}>
+              Fill out the form and click Generate Copy to see variants.
+            </div>
+          )}
+
           {variants.map((variant, idx) => {
             const sc = STRENGTH_CONFIG[variant.strength];
             const isOverLimit = variant.charCount > charLimit;
@@ -308,6 +293,11 @@ export function CopywritingTool() {
           <span className="section-label">Recent Copy</span>
         </div>
         <div className="space-y-2">
+          {history.length === 0 && (
+            <div className="text-base text-center py-4" style={{ color: 'var(--text-muted)' }}>
+              No copy generated yet.
+            </div>
+          )}
           {history.map(item => {
             const pc = PLATFORM_CONFIG[item.platform];
             return (

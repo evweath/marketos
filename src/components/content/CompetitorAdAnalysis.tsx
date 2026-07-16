@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Search, X, BarChart2, TrendingUp } from 'lucide-react';
 import { usePersistentState } from '@/lib/usePersistentState';
+import { useStores, resolveStoreId } from '@/lib/storeScope';
 import type { CompetitorAd, ContentPlatform, PerformanceIndicator } from '@/lib/contentData';
 
 type PlatformFilter = 'all' | ContentPlatform;
@@ -193,8 +194,10 @@ function AnalysisPanel({ modal, onClose }: { modal: AnalysisModal; onClose: () =
   );
 }
 
-export function CompetitorAdAnalysis() {
-  const [competitorAds] = usePersistentState<CompetitorAd[]>('content.competitorAds', []);
+export function CompetitorAdAnalysis({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
+  const [allCompetitorAds] = usePersistentState<CompetitorAd[]>('content.competitorAds', []);
+  const competitorAds = allCompetitorAds.filter(a => selectedStoreIds.includes(resolveStoreId(a.store, stores) ?? ''));
   const [searchQuery, setSearchQuery] = useState('');
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>('all');
   const [adTypeFilter, setAdTypeFilter] = useState<AdTypeFilter>('all');

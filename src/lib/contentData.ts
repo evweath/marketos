@@ -74,6 +74,7 @@ export const SAMPLE_GENERATED_CREATIVES: GeneratedCreative[] = [
 
 export interface CompetitorAd {
   id: string;
+  store: string;
   competitor: string;
   platform: ContentPlatform;
   adType: 'image' | 'video' | 'carousel';
@@ -89,49 +90,49 @@ export interface CompetitorAd {
 
 export const SAMPLE_COMPETITOR_ADS: CompetitorAd[] = [
   {
-    id: 'ca-001', competitor: 'fryer-king.com', platform: 'meta', adType: 'image',
+    id: 'ca-001', store: 'donut-equipment.com', competitor: 'fryer-king.com', platform: 'meta', adType: 'image',
     headline: 'Commercial Fryers from $899', description: 'NSF-certified commercial fryers for bakeries and restaurants. Free shipping on orders over $1,200.',
     cta: 'Shop Now', estimatedSpend: '$4,200/mo', daysRunning: 42, performanceIndicator: 'high',
     category: 'Commercial Equipment', thumbnailColor: 'linear-gradient(135deg, #e83e3e, #ff8c00)',
   },
   {
-    id: 'ca-002', competitor: 'bakersupply.co', platform: 'google', adType: 'image',
+    id: 'ca-002', store: 'donut-supplies.com', competitor: 'bakersupply.co', platform: 'google', adType: 'image',
     headline: 'Bulk Donut Supplies — 30% Off', description: 'Premium donut mixes, glazes, and toppings. Wholesale pricing for businesses. Same-day shipping available.',
     cta: 'Get Quote', estimatedSpend: '$2,800/mo', daysRunning: 18, performanceIndicator: 'medium',
     category: 'Baking Supplies', thumbnailColor: 'linear-gradient(135deg, #4285F4, #34A853)',
   },
   {
-    id: 'ca-003', competitor: 'equippro.com', platform: 'youtube', adType: 'video',
+    id: 'ca-003', store: 'donut-equipment.com', competitor: 'equippro.com', platform: 'youtube', adType: 'video',
     headline: 'See Our Mixers in Action', description: '5-year warranty commercial mixers trusted by 10,000+ bakeries. Watch the demo and save 20% today.',
     cta: 'Watch Demo', estimatedSpend: '$6,100/mo', daysRunning: 67, performanceIndicator: 'high',
     category: 'Commercial Equipment', thumbnailColor: 'linear-gradient(135deg, #FF0000, #cc0000)',
   },
   {
-    id: 'ca-004', competitor: 'wholesalecakes.com', platform: 'linkedin', adType: 'image',
+    id: 'ca-004', store: 'bakery-wholesalers.com', competitor: 'wholesalecakes.com', platform: 'linkedin', adType: 'image',
     headline: 'Partner With Us — Wholesale Pricing', description: 'B2B baking ingredients at scale. Volume discounts, dedicated account manager, NET-30 terms available.',
     cta: 'Apply Now', estimatedSpend: '$3,400/mo', daysRunning: 31, performanceIndicator: 'medium',
     category: 'Wholesale', thumbnailColor: 'linear-gradient(135deg, #0A66C2, #004182)',
   },
   {
-    id: 'ca-005', competitor: 'trendybakes.io', platform: 'tiktok', adType: 'video',
+    id: 'ca-005', store: 'donut-supplies.com', competitor: 'trendybakes.io', platform: 'tiktok', adType: 'video',
     headline: 'Viral Donut Trends 2026', description: 'Get the supplies to make trending donuts. Croissant donuts, matcha glazes, freeze-dried toppings.',
     cta: 'Shop Trends', estimatedSpend: '$1,900/mo', daysRunning: 12, performanceIndicator: 'high',
     category: 'Baking Supplies', thumbnailColor: 'linear-gradient(135deg, #FF0050, #00f2ea)',
   },
   {
-    id: 'ca-006', competitor: 'fryer-king.com', platform: 'google', adType: 'carousel',
+    id: 'ca-006', store: 'donut-equipment.com', competitor: 'fryer-king.com', platform: 'google', adType: 'carousel',
     headline: 'Industrial Fryers — Compare Models', description: 'Gas and electric commercial fryers. Capacity from 15 to 100 lbs. Compare specs side-by-side.',
     cta: 'Compare', estimatedSpend: '$5,800/mo', daysRunning: 55, performanceIndicator: 'high',
     category: 'Commercial Equipment', thumbnailColor: 'linear-gradient(135deg, #e83e3e, #7b1fa2)',
   },
   {
-    id: 'ca-007', competitor: 'bakersupply.co', platform: 'instagram', adType: 'video',
+    id: 'ca-007', store: 'donut-supplies.com', competitor: 'bakersupply.co', platform: 'instagram', adType: 'video',
     headline: 'New: Organic Donut Glazes', description: 'Clean-label glazes made with real fruit. Perfect for health-forward bakeries. Try our sampler pack.',
     cta: 'Try Now', estimatedSpend: '$1,200/mo', daysRunning: 8, performanceIndicator: 'low',
     category: 'Baking Supplies', thumbnailColor: 'linear-gradient(135deg, #E1306C, #F77737)',
   },
   {
-    id: 'ca-008', competitor: 'equippro.com', platform: 'meta', adType: 'carousel',
+    id: 'ca-008', store: 'donut-equipment.com', competitor: 'equippro.com', platform: 'meta', adType: 'carousel',
     headline: 'End-to-End Bakery Equipment', description: 'Mixers, proofers, ovens, fryers — outfit your entire bakery. Financing available. Free delivery & install.',
     cta: 'Learn More', estimatedSpend: '$7,200/mo', daysRunning: 89, performanceIndicator: 'high',
     category: 'Commercial Equipment', thumbnailColor: 'linear-gradient(135deg, #0866FF, #5900d3)',
@@ -216,6 +217,7 @@ export interface MetricScores {
 
 export interface ScoredCreative {
   id: string;
+  store: string;
   name: string;
   type: CreativeType;
   overallScore: number;
@@ -229,7 +231,7 @@ export interface ScoredCreative {
 
 export const SAMPLE_PERFORMANCE_SCORES: ScoredCreative[] = [
   {
-    id: 'ps-001', name: 'Commercial Fryer Hero — White BG', type: 'image', platform: 'meta',
+    id: 'ps-001', store: 'donut-equipment.com', name: 'Commercial Fryer Hero — White BG', type: 'image', platform: 'meta',
     overallScore: 87, prediction: 'strong',
     metrics: { clarity: 92, emotionalAppeal: 78, brandConsistency: 94, callToAction: 88, visualHierarchy: 91, colorContrast: 85 },
     commentary: 'This creative scores exceptionally well on clarity and brand consistency, with a strong visual hierarchy that draws the eye immediately to the product. The white background creates a professional feel that resonates with B2B buyers in the food service industry.',
@@ -237,7 +239,7 @@ export const SAMPLE_PERFORMANCE_SCORES: ScoredCreative[] = [
     thumbnailColor: 'linear-gradient(135deg, #00d9ff33, #7b93ff33)',
   },
   {
-    id: 'ps-005', name: 'Carousel — Top 5 Fryers', type: 'image', platform: 'meta',
+    id: 'ps-005', store: 'donut-equipment.com', name: 'Carousel — Top 5 Fryers', type: 'image', platform: 'meta',
     overallScore: 63, prediction: 'average',
     metrics: { clarity: 72, emotionalAppeal: 58, brandConsistency: 68, callToAction: 62, visualHierarchy: 65, colorContrast: 59 },
     commentary: 'This carousel shows room for improvement across most metrics. The product comparison format has potential, but the visual execution lacks the punch needed to stop the scroll. Color contrast is particularly weak, which will hurt performance on mobile in bright light conditions.',
@@ -245,7 +247,7 @@ export const SAMPLE_PERFORMANCE_SCORES: ScoredCreative[] = [
     thumbnailColor: 'linear-gradient(135deg, #0866ff33, #ff005033)',
   },
   {
-    id: 'ps-006', name: 'Retargeting — Cart Abandoner v3', type: 'image', platform: 'meta',
+    id: 'ps-006', store: 'donut-supplies.com', name: 'Retargeting — Cart Abandoner v3', type: 'image', platform: 'meta',
     overallScore: 91, prediction: 'strong',
     metrics: { clarity: 94, emotionalAppeal: 89, brandConsistency: 93, callToAction: 96, visualHierarchy: 90, colorContrast: 88 },
     commentary: 'Exceptional performance across all metrics, with the CTA standing out as the strongest element at 96. This retargeting creative does an excellent job of re-engaging cart abandoners with urgency and specificity. Expected to outperform the control by 20-35%.',
@@ -273,6 +275,7 @@ export interface KpiTargets {
 
 export interface CampaignBrief {
   id: string;
+  store: string;
   title: string;
   objective: CampaignObjective;
   executiveSummary: string;
@@ -294,7 +297,7 @@ export interface CampaignBrief {
 
 export const SAMPLE_CAMPAIGN_BRIEFS: CampaignBrief[] = [
   {
-    id: 'cb-001',
+    id: 'cb-001', store: 'donut-equipment.com',
     title: 'Commercial Fryer Q2 Launch — Donut Equipment',
     objective: 'Product Launch',
     executiveSummary: 'Drive awareness and first-purchase conversions for the new ProFry 3000 series commercial fryer targeting independent bakery owners and food service operators in North America. Campaign runs across Google, Meta, and LinkedIn with a combined budget of $28,000 over 6 weeks.',
@@ -336,7 +339,7 @@ export const SAMPLE_CAMPAIGN_BRIEFS: CampaignBrief[] = [
     generatedAt: '2 hours ago',
   },
   {
-    id: 'cb-002',
+    id: 'cb-002', store: 'donut-supplies.com',
     title: 'Donut Supplies Summer Retargeting Push',
     objective: 'Retargeting',
     executiveSummary: 'Re-engage the 12,400 website visitors who browsed donut supplies in the past 30 days but did not convert. Using dynamic product ads and personalized copy, this campaign targets bottom-of-funnel buyers with urgency-based creative across Meta and Google.',
@@ -375,7 +378,7 @@ export const SAMPLE_CAMPAIGN_BRIEFS: CampaignBrief[] = [
     generatedAt: '1 day ago',
   },
   {
-    id: 'cb-003',
+    id: 'cb-003', store: 'bakery-wholesalers.com',
     title: 'Bakery Wholesale Q3 Brand Awareness',
     objective: 'Brand Awareness',
     executiveSummary: 'Establish bakerywholesalers.com as the definitive B2B source for wholesale baking ingredients among independent bakery chains and food service distributors. This upper-funnel campaign uses LinkedIn, YouTube, and programmatic display to reach purchasing decision-makers.',

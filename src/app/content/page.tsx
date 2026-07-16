@@ -13,9 +13,11 @@ import { PerformanceScorer } from '@/components/content/PerformanceScorer';
 import { CompetitorAdAnalysis } from '@/components/content/CompetitorAdAnalysis';
 import { computeContentStats } from '@/lib/contentData';
 import type { GeneratedCreative, CampaignBrief } from '@/lib/contentData';
+import { useStores, useStoreScope, resolveStoreId } from '@/lib/storeScope';
+import { StoreScopeBar } from '@/components/shared/StoreScopeBar';
 import {
   Image, PenLine, Mic, LayoutGrid, FileText, TrendingUp, BarChart2,
-  TrendingDown, Camera, Video, Upload, Wand2, Play, Download, Captions,
+  Camera, Video, Upload, Wand2, Play, Download, Captions,
   Scissors, CheckCircle,
 } from 'lucide-react';
 
@@ -52,8 +54,6 @@ interface KpiCard {
   label: string;
   value: string;
   color: string;
-  delta: number;
-  deltaLabel: string;
 }
 
 // ─── Photo Studio (E-06 background removal / E-07 AI styling) ────────────────
@@ -432,8 +432,12 @@ function VideoToolsPanel() {
 
 export default function ContentPage() {
   const [tab, setTab] = useState<Tab>('creative');
-  const [creatives] = usePersistentState<GeneratedCreative[]>('content.creatives', []);
-  const [briefs] = usePersistentState<CampaignBrief[]>('content.briefs', []);
+  const [stores] = useStores();
+  const { selectedStoreIds } = useStoreScope('content');
+  const [allCreatives] = usePersistentState<GeneratedCreative[]>('content.creatives', []);
+  const [allBriefs] = usePersistentState<CampaignBrief[]>('content.briefs', []);
+  const creatives = allCreatives.filter(c => selectedStoreIds.includes(resolveStoreId(c.store, stores) ?? ''));
+  const briefs = allBriefs.filter(b => selectedStoreIds.includes(resolveStoreId(b.store, stores) ?? ''));
   const contentStats = computeContentStats(creatives, briefs);
 
   const kpiCards: KpiCard[] = [
@@ -441,29 +445,21 @@ export default function ContentPage() {
       label: 'Creatives Generated (30d)',
       value: contentStats.creativesGenerated30d.toLocaleString(),
       color: 'var(--cyan)',
-      delta: 12.4,
-      deltaLabel: 'vs prior 30d',
     },
     {
       label: 'Avg Performance Score',
       value: `${contentStats.avgPerformanceScore}/100`,
       color: '#10d98a',
-      delta: 3.1,
-      deltaLabel: 'vs prior 30d',
     },
     {
       label: 'Templates Used',
       value: contentStats.templatesUsed.toLocaleString(),
       color: '#7b93ff',
-      delta: 8.0,
-      deltaLabel: 'this month',
     },
     {
       label: 'Campaigns Generated',
       value: contentStats.campaignBriefs.toString(),
       color: '#ffb347',
-      delta: 5.0,
-      deltaLabel: 'this month',
     },
   ];
 
@@ -479,34 +475,25 @@ export default function ContentPage() {
 
         <main className='flex-1 overflow-y-auto p-5'>
 
+          <div className='mb-5'><StoreScopeBar sectionKey='content' /></div>
+
           {/* KPI Stats */}
           <div className='grid grid-cols-4 gap-3 mb-5'>
-            {kpiCards.map(card => {
-              const positive = card.delta >= 0;
-              return (
-                <div key={card.label} className='glass-card px-4 py-3.5 relative overflow-hidden'>
-                  <div
-                    className='absolute top-0 right-0 w-20 h-20 rounded-full pointer-events-none'
-                    style={{ background: card.color, opacity: 0.06, transform: 'translate(40%, -40%)' }}
-                  />
-                  <div className='section-label mb-2'>{card.label}</div>
-                  <div
-                    className='font-bold text-2xl mb-2 leading-none'
-                    style={{ fontFamily: 'DM Mono', color: card.color }}
-                  >
-                    {card.value}
-                  </div>
-                  <div
-                    className='flex items-center gap-1 text-[16px] font-mono'
-                    style={{ color: positive ? '#10d98a' : '#ff4444' }}
-                  >
-                    {positive ? <TrendingUp size={9} /> : <TrendingDown size={9} />}
-                    <span>{positive ? '+' : ''}{card.delta.toFixed(1)}%</span>
-                    <span className='ml-1' style={{ color: 'var(--text-muted)' }}>{card.deltaLabel}</span>
-                  </div>
+            {kpiCards.map(card => (
+              <div key={card.label} className='glass-card px-4 py-3.5 relative overflow-hidden'>
+                <div
+                  className='absolute top-0 right-0 w-20 h-20 rounded-full pointer-events-none'
+                  style={{ background: card.color, opacity: 0.06, transform: 'translate(40%, -40%)' }}
+                />
+                <div className='section-label mb-2'>{card.label}</div>
+                <div
+                  className='font-bold text-2xl leading-none'
+                  style={{ fontFamily: 'DM Mono', color: card.color }}
+                >
+                  {card.value}
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
 
           {/* Tab Navigation — pill container, scrolls horizontally if needed */}
@@ -545,13 +532,13 @@ export default function ContentPage() {
           </div>
 
           {/* Tab Content */}
-          {tab === 'creative'   && <AdCreativeGenerator />}
+          {tab === 'creative'   && <AdCreativeGenerator selectedStoreIds={selectedStoreIds} />}
           {tab === 'copy'       && <CopywritingTool />}
           {tab === 'brand'      && <BrandVoicePanel />}
           {tab === 'templates'  && <TemplateLibrary />}
-          {tab === 'brief'      && <CampaignBriefGenerator />}
-          {tab === 'scoring'    && <PerformanceScorer />}
-          {tab === 'competitor' && <CompetitorAdAnalysis />}
+          {tab === 'brief'      && <CampaignBriefGenerator selectedStoreIds={selectedStoreIds} />}
+          {tab === 'scoring'    && <PerformanceScorer selectedStoreIds={selectedStoreIds} />}
+          {tab === 'competitor' && <CompetitorAdAnalysis selectedStoreIds={selectedStoreIds} />}
           {tab === 'photos'     && <PhotoStudioPanel />}
           {tab === 'video'      && <VideoToolsPanel />}
 

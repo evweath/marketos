@@ -149,8 +149,9 @@ export function TemplateLibrary() {
         {/* Template Grid */}
         <div className="grid grid-cols-3 gap-3">
           {filtered.map(template => (
-            <button key={template.id} onClick={() => setSelected(template)}
-              className="text-left rounded-xl overflow-hidden transition-all hover:scale-[1.01]"
+            <div key={template.id} role="button" tabIndex={0} onClick={() => setSelected(template)}
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(template); } }}
+              className="text-left rounded-xl overflow-hidden transition-all hover:scale-[1.01] cursor-pointer"
               style={{
                 background: 'var(--bg-elevated)',
                 border: `1px solid ${selected?.id === template.id ? 'rgba(0,217,255,0.4)' : 'var(--border-dim)'}`,
@@ -193,7 +194,7 @@ export function TemplateLibrary() {
                   </button>
                 </div>
               </div>
-            </button>
+            </div>
           ))}
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Upload, Link2, Loader2, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
 import { usePersistentState } from '@/lib/usePersistentState';
+import { useStores, resolveStoreId } from '@/lib/storeScope';
 import type { ScoredCreative, PerformancePrediction } from '@/lib/contentData';
 
 // Simple string hash so the same input scores consistently, used only inside
@@ -13,7 +14,7 @@ function hashString(s: string): number {
   return Math.abs(h);
 }
 
-function scoreFromInput(input: string): ScoredCreative {
+function scoreFromInput(input: string, store: string): ScoredCreative {
   const h = hashString(input);
   const metric = (offset: number, min: number, max: number) => min + ((h >> offset) % (max - min + 1));
   const metrics = {
@@ -37,6 +38,7 @@ function scoreFromInput(input: string): ScoredCreative {
   };
   return {
     id: `ps-${Date.now()}`,
+    store,
     name: input.length > 40 ? input.slice(0, 40) + '…' : input,
     type: 'image',
     platform: 'meta',
@@ -103,12 +105,15 @@ function MetricBar({ label, value }: { label: string; value: number }) {
   );
 }
 
-export function PerformanceScorer() {
+export function PerformanceScorer({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
   const [urlInput, setUrlInput] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const [scoring, setScoring] = useState(false);
-  const [scores, setScores] = usePersistentState<ScoredCreative[]>('content.performanceScores', []);
+  const [allScores, setScores] = usePersistentState<ScoredCreative[]>('content.performanceScores', []);
+  const scores = allScores.filter(sc => selectedStoreIds.includes(resolveStoreId(sc.store, stores) ?? ''));
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [scoreStore, setScoreStore] = useState(stores[0]?.domain ?? '');
 
   const selected = scores.find(sc => sc.id === selectedId) ?? scores[0] ?? null;
 
@@ -117,7 +122,7 @@ export function PerformanceScorer() {
     setScoring(true);
     const input = urlInput;
     setTimeout(() => {
-      const scored = scoreFromInput(input);
+      const scored = scoreFromInput(input, scoreStore);
       setScores(prev => [scored, ...prev]);
       setSelectedId(scored.id);
       setScoring(false);
@@ -164,6 +169,11 @@ export function PerformanceScorer() {
                   style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}
                 />
               </div>
+              <select value={scoreStore} onChange={e => setScoreStore(e.target.value)}
+                className="px-2 py-2 rounded-lg text-base outline-none"
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+                {stores.map(s => <option key={s.id} value={s.domain}>{s.name}</option>)}
+              </select>
               <button onClick={handleScore} disabled={scoring || !urlInput.trim()}
                 className="px-4 py-2 rounded-lg text-base font-semibold transition-all whitespace-nowrap"
                 style={{

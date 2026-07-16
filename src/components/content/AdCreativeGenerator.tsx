@@ -6,6 +6,7 @@ import {
   Zap, Star, LayoutGrid
 } from 'lucide-react';
 import { usePersistentState } from '@/lib/usePersistentState';
+import { useStores, resolveStoreId } from '@/lib/storeScope';
 import type { GeneratedCreative, ContentPlatform } from '@/lib/contentData';
 
 type SubTab = 'image' | 'video' | 'ugc';
@@ -35,18 +36,20 @@ interface GeneratedResult {
   color: string;
 }
 
-export function AdCreativeGenerator() {
+export function AdCreativeGenerator({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
   const [subTab, setSubTab] = useState<SubTab>('image');
   const [productName, setProductName] = useState('');
   const [platform, setPlatform] = useState<ContentPlatform>('meta');
   const [objective, setObjective] = useState('conversions');
   const [sellingPoints, setSellingPoints] = useState('');
   const [ctaText, setCtaText] = useState('Shop Now');
-  const [store, setStore] = useState('donut-equipment.com');
+  const [store, setStore] = useState(stores[0]?.domain ?? '');
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState<GeneratedResult | null>(null);
   const [previewAction, setPreviewAction] = useState<'edit' | 'publish' | null>(null);
-  const [creatives, setCreatives] = usePersistentState<GeneratedCreative[]>('content.creatives', []);
+  const [allCreatives, setCreatives] = usePersistentState<GeneratedCreative[]>('content.creatives', []);
+  const creatives = allCreatives.filter(c => selectedStoreIds.includes(resolveStoreId(c.store, stores) ?? ''));
 
   const downloadCreative = (g: GeneratedResult) => {
     const content = `AI Generated Creative\nName: ${g.name}\nPlatform: ${g.platform}\nSize: ${g.size}\nFormat: ${g.format}`;
@@ -206,9 +209,7 @@ export function AdCreativeGenerator() {
               <select value={store} onChange={e => setStore(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg text-base outline-none"
                 style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
-                <option value="donut-equipment.com">Donut Equipment</option>
-                <option value="donut-supplies.com">Donut Supplies</option>
-                <option value="bakerywholesalers.com">Bakery Wholesale</option>
+                {stores.map(s => <option key={s.id} value={s.domain}>{s.name}</option>)}
               </select>
             </div>
           </div>
