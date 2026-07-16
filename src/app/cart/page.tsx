@@ -5,14 +5,14 @@ import Sidebar from '@/components/layout/Sidebar';
 import TopBar from '@/components/layout/TopBar';
 import { usePersistentState } from '@/lib/usePersistentState';
 import { formatCurrency, formatMinutesAgo } from '@/lib/mockData';
-import { useStores, useStoreScope, resolveStoreId } from '@/lib/storeScope';
+import { useStores, useStoreScope, resolveStoreId, type StoreRecord } from '@/lib/storeScope';
 import { StoreScopeBar } from '@/components/shared/StoreScopeBar';
 import {
   SAMPLE_SEQUENCES, SAMPLE_RECOVERED_LIST, SAMPLE_UPSELL_OFFERS, SAMPLE_WATCH_PRODUCTS, SAMPLE_CUSTOMERS,
   computeUpsellStats,
 } from '@/lib/cartData';
 import type {
-  RecoverySequence, RecoveredCart, UpsellOffer, UpsellType, UpsellStatus,
+  RecoverySequence, SequenceStep, RecoveredCart, UpsellOffer, UpsellType, UpsellStatus,
   WatchProduct, StockStatus, CustomerInsight, ChurnRisk,
 } from '@/lib/cartData';
 import type { AbandonedCart } from '@/types';
@@ -897,6 +897,104 @@ function CustomerInsightsPanel({ selectedStoreIds }: { selectedStoreIds: string[
   );
 }
 
+// ─── Recovery Sequence Builder ──────────────────────────────────────────────
+
+function SequenceBuilderModal({ stores, onClose, onCreate }: {
+  stores: StoreRecord[];
+  onClose: () => void;
+  onCreate: (seq: RecoverySequence) => void;
+}) {
+  const [name, setName] = useState('');
+  const [store, setStore] = useState('All Stores');
+  const [steps, setSteps] = useState<SequenceStep[]>([
+    { channel: 'email', delay: '1h', subject: '', openRate: 0, clickRate: 0, convRate: 0 },
+  ]);
+
+  const inputStyle = { background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' } as const;
+
+  const updateStep = (i: number, patch: Partial<SequenceStep>) =>
+    setSteps(prev => prev.map((s, idx) => idx === i ? { ...s, ...patch } : s));
+  const addStep = () => setSteps(prev => [...prev, { channel: 'email', delay: '24h', subject: '', openRate: 0, clickRate: 0, convRate: 0 }]);
+  const removeStep = (i: number) => setSteps(prev => prev.filter((_, idx) => idx !== i));
+
+  const canCreate = name.trim() !== '' && steps.length > 0 && steps.every(s => s.subject.trim() !== '');
+
+  const create = () => {
+    if (!canCreate) return;
+    onCreate({ id: `seq-${Date.now()}`, name: name.trim(), store, steps, recovered30d: 0, revenue30d: 0 });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={onClose}>
+      <div className="rounded-2xl w-[620px] max-w-[92vw] flex flex-col max-h-[88vh]" style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-dim)' }} onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+          <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>New Recovery Sequence</div>
+          <button onClick={onClose} style={{ color: 'var(--text-muted)' }}><X size={16} /></button>
+        </div>
+        <div className="p-5 flex flex-col gap-4 overflow-y-auto">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="section-label block mb-1.5">Sequence Name</label>
+              <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. 3-Step Cart Recovery"
+                className="w-full px-3 py-2 rounded-lg text-base outline-none" style={inputStyle} />
+            </div>
+            <div>
+              <label className="section-label block mb-1.5">Store</label>
+              <select value={store} onChange={e => setStore(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg text-base outline-none" style={inputStyle}>
+                <option value="All Stores">All Stores</option>
+                {stores.map(s => <option key={s.id} value={s.domain}>{s.name}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="section-label">Steps</span>
+              <button onClick={addStep} className="flex items-center gap-1 text-[16px] px-2 py-1 rounded-lg" style={{ color: 'var(--cyan)', background: 'rgba(0,217,255,0.08)' }}>
+                <Plus size={11} />Add Step
+              </button>
+            </div>
+            <div className="flex flex-col gap-2">
+              {steps.map((step, i) => {
+                const color = CH_COL_MAP[step.channel];
+                return (
+                  <div key={i} className="rounded-xl p-3" style={{ background: 'var(--bg-elevated)', border: `1px solid ${color}25` }}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[16px] font-mono w-6 shrink-0" style={{ color: 'var(--text-muted)' }}>#{i + 1}</span>
+                      <select value={step.channel} onChange={e => updateStep(i, { channel: e.target.value as 'email' | 'sms' })}
+                        className="px-2 py-1 rounded-lg text-[16px] outline-none" style={inputStyle}>
+                        <option value="email">Email</option>
+                        <option value="sms">SMS</option>
+                      </select>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>delay</span>
+                        <input value={step.delay} onChange={e => updateStep(i, { delay: e.target.value })} placeholder="1h"
+                          className="w-16 px-2 py-1 rounded-lg text-[16px] outline-none font-mono" style={inputStyle} />
+                      </div>
+                      {steps.length > 1 && (
+                        <button onClick={() => removeStep(i)} className="ml-auto p-1 rounded" style={{ color: '#ff4444' }}><Trash2 size={12} /></button>
+                      )}
+                    </div>
+                    <input value={step.subject} onChange={e => updateStep(i, { subject: e.target.value })} placeholder="Message subject / preview…"
+                      className="w-full px-2.5 py-1.5 rounded-lg text-[16px] outline-none" style={inputStyle} />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center justify-end gap-2 px-5 py-3 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
+          <button onClick={onClose} className="px-3 py-1.5 rounded-lg text-base" style={{ color: 'var(--text-muted)' }}>Cancel</button>
+          <button onClick={create} disabled={!canCreate}
+            className="px-4 py-1.5 rounded-lg text-base font-semibold disabled:opacity-50"
+            style={{ background: '#00d9ff', color: '#0a0e1a' }}>Create Sequence</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 type Tab = 'live' | 'sequences' | 'recovered' | 'exitintent' | 'upsell' | 'watchlists' | 'insights';
@@ -907,8 +1005,9 @@ export default function CartPage() {
   const { selectedStoreIds } = useStoreScope('cart');
   // Shared with Site Monitoring's Abandoned Cart Feed — same underlying records.
   const [allLiveCarts, setLiveCarts] = usePersistentState<AbandonedCart[]>('monitoring.abandonedCarts', []);
-  const [allSequences] = usePersistentState<RecoverySequence[]>('cart.sequences', []);
+  const [allSequences, setSequences] = usePersistentState<RecoverySequence[]>('cart.sequences', []);
   const [allRecovered] = usePersistentState<RecoveredCart[]>('cart.recovered', []);
+  const [buildingSeq, setBuildingSeq] = useState(false);
 
   const inScope = (storeStr: string) => storeStr === 'All Stores' || selectedStoreIds.includes(resolveStoreId(storeStr, stores) ?? '');
 
@@ -1078,6 +1177,20 @@ export default function CartPage() {
 
             {tab === 'sequences' && (
               <div className="space-y-3">
+                {buildingSeq && (
+                  <SequenceBuilderModal
+                    stores={stores}
+                    onClose={() => setBuildingSeq(false)}
+                    onCreate={(seq) => { setSequences(prev => [seq, ...prev]); setBuildingSeq(false); }}
+                  />
+                )}
+                <div className="flex justify-end">
+                  <button onClick={() => setBuildingSeq(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base font-medium"
+                    style={{ background: 'rgba(0,217,255,0.1)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
+                    <Plus size={13} /> New Sequence
+                  </button>
+                </div>
                 {SEQUENCES.length === 0 && (
                   <div className="glass-card p-8 text-center" style={{ color: 'var(--text-muted)' }}>
                     No recovery sequences yet for the selected store{selectedStoreIds.length !== 1 ? 's' : ''}.
