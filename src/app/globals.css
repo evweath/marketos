@@ -140,6 +140,19 @@ html, body {
 }
 .pulse-border-red { animation: pulseBorderRed 1.8s ease-in-out infinite; }
 
+/* Rendered-markdown preview (AI Blog Generator) — restores heading/list/table
+   styling that Tailwind's preflight otherwise strips. */
+.blog-rendered h1 { font-size: 1.5em; font-weight: 700; margin: 0.6em 0 0.3em; color: var(--text-primary); }
+.blog-rendered h2 { font-size: 1.25em; font-weight: 700; margin: 0.7em 0 0.3em; color: var(--text-primary); }
+.blog-rendered h3 { font-size: 1.1em; font-weight: 600; margin: 0.6em 0 0.2em; color: var(--text-primary); }
+.blog-rendered p  { margin: 0.5em 0; }
+.blog-rendered ul { list-style: disc; padding-left: 1.4em; margin: 0.5em 0; }
+.blog-rendered li { margin: 0.2em 0; }
+.blog-rendered strong { color: var(--text-primary); font-weight: 700; }
+.blog-rendered a { color: var(--cyan); text-decoration: underline; }
+.blog-rendered table { width: 100%; border-collapse: collapse; margin: 0.6em 0; }
+.blog-rendered td { border: 1px solid var(--border-subtle); padding: 4px 8px; }
+
 @keyframes countIn {
   from { opacity: 0; transform: translateY(5px); }
   to   { opacity: 1; transform: translateY(0);   }

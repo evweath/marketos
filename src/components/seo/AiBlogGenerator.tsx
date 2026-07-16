@@ -1,9 +1,55 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2, Sparkles, Edit2, Upload, ChevronDown } from 'lucide-react';
+import { Loader2, Sparkles, Edit2, Upload, ChevronDown, X, Copy, Check } from 'lucide-react';
 import { usePersistentState } from '@/lib/usePersistentState';
 import type { StoreId, GeneratedBlog } from '@/lib/seoData';
+
+// Minimal, escaped Markdown → HTML for the rendered preview + Copy HTML.
+// Content is app-generated (trusted) but we escape anyway to stay safe.
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function mdToHtml(md: string): string {
+  const lines = md.split('\n');
+  const out: string[] = [];
+  let inList = false, inTable = false;
+  const inline = (t: string) => escapeHtml(t)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>');
+  const closeList = () => { if (inList) { out.push('</ul>'); inList = false; } };
+  const closeTable = () => { if (inTable) { out.push('</table>'); inTable = false; } };
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+    if (/^#{1,6}\s/.test(line)) {
+      closeList(); closeTable();
+      const level = line.match(/^#+/)![0].length;
+      out.push(`<h${level}>${inline(line.replace(/^#+\s/, ''))}</h${level}>`);
+    } else if (/^[-*]\s/.test(line)) {
+      closeTable();
+      if (!inList) { out.push('<ul>'); inList = true; }
+      out.push(`<li>${inline(line.replace(/^[-*]\s/, ''))}</li>`);
+    } else if (/^\d+\.\s/.test(line)) {
+      closeTable();
+      if (!inList) { out.push('<ul>'); inList = true; }
+      out.push(`<li>${inline(line.replace(/^\d+\.\s/, ''))}</li>`);
+    } else if (/^\|.*\|$/.test(line)) {
+      closeList();
+      if (/^\|[\s:|-]+\|$/.test(line)) continue; // separator row
+      if (!inTable) { out.push('<table>'); inTable = true; }
+      const cells = line.slice(1, -1).split('|').map(c => `<td>${inline(c.trim())}</td>`).join('');
+      out.push(`<tr>${cells}</tr>`);
+    } else if (line === '') {
+      closeList(); closeTable();
+    } else {
+      closeList(); closeTable();
+      out.push(`<p>${inline(line)}</p>`);
+    }
+  }
+  closeList(); closeTable();
+  return out.join('\n');
+}
 
 type Tone = 'informative' | 'conversational' | 'persuasive' | 'technical';
 type WordCount = 500 | 1000 | 1500 | 2000;
@@ -68,10 +114,13 @@ function ScoreBar({ label, score }: { label: string; score: number }) {
   );
 }
 
-function generateBlogContent(topic: string, store: StoreId, tone: Tone, wordCount: WordCount): GeneratedBlog {
+function generateBlogContent(topic: string, store: StoreId, tone: Tone, wordCount: WordCount, secondaryKeywords: string[]): GeneratedBlog {
   const storeName = STORE_OPTIONS.find(s => s.value === store)?.label ?? store;
   const title = `${topic.charAt(0).toUpperCase() + topic.slice(1)}: Complete Guide for ${storeName}`;
   const metaDescription = `Everything you need to know about ${topic.toLowerCase()}. Expert insights from ${storeName} — actionable tips, buying guidance, and industry best practices for 2026.`;
+  const secondarySection = secondaryKeywords.length
+    ? `\n\n## Related Topics\n\nThis guide also covers ${secondaryKeywords.map(k => `**${k}**`).join(', ')} — closely related searches that help you make a fully-informed decision.`
+    : '';
 
   const content = `# ${title}
 
@@ -131,7 +180,7 @@ Proper maintenance extends equipment life by 3-5 years on average. Key practices
 
 Investing in the right ${topic.toLowerCase()} solution pays dividends in product quality, labor efficiency, and uptime. Browse ${storeName}'s full catalog for detailed specifications, or contact our sales team for a free consultation tailored to your production goals.
 
-*Ready to upgrade? [View our full product range](/products) or [request a quote](/contact).*`;
+*Ready to upgrade? [View our full product range](/products) or [request a quote](/contact).*${secondarySection}`;
 
   const seoScore = Math.round(82 + Math.random() * 15);
   return {
@@ -142,6 +191,7 @@ Investing in the right ${topic.toLowerCase()} solution pays dividends in product
     wordCount,
     readingTime: Math.round(wordCount / 238),
     seoScore,
+    secondaryKeywords,
     breakdown: {
       titleOptimization: Math.min(100, seoScore + Math.round((Math.random() - 0.5) * 10)),
       keywordDensity:     Math.min(100, seoScore - 4 + Math.round((Math.random() - 0.5) * 8)),
@@ -167,18 +217,36 @@ export function AiBlogGenerator({ selectedStoreIds }: { selectedStoreIds: string
   const [store, setStore]             = useState<StoreId>('donut-equipment');
   const [tone, setTone]               = useState<Tone>('informative');
   const [wordCount, setWordCount]     = useState<WordCount>(1000);
+  const [secondaryKw, setSecondaryKw] = useState<string[]>([]);
+  const [kwInput, setKwInput]         = useState('');
   const [generating, setGenerating]   = useState(false);
   const [generated, setGenerated]     = useState<GeneratedBlog | null>(null);
   const [showContent, setShowContent] = useState(false);
+  const [contentView, setContentView] = useState<'rendered' | 'raw'>('rendered');
+  const [copied, setCopied]           = useState<'md' | 'html' | null>(null);
   const [editing, setEditing]         = useState(false);
   const [allPrevBlogs, setPrevBlogs]  = usePersistentState<GeneratedBlog[]>('seo.blogs', []);
   const prevBlogs = allPrevBlogs.filter(b => selectedStoreIds.includes(b.store));
+
+  const addKeyword = () => {
+    const v = kwInput.trim();
+    if (v && secondaryKw.length < 5 && !secondaryKw.includes(v)) setSecondaryKw(prev => [...prev, v]);
+    setKwInput('');
+  };
+
+  const copyContent = async (kind: 'md' | 'html') => {
+    if (!generated) return;
+    const text = kind === 'md' ? generated.content : mdToHtml(generated.content);
+    try { await navigator.clipboard.writeText(text); } catch { /* clipboard unavailable */ }
+    setCopied(kind);
+    setTimeout(() => setCopied(null), 1500);
+  };
 
   const handleGenerate = () => {
     if (!topic.trim()) return;
     setGenerating(true);
     setTimeout(() => {
-      const blog = generateBlogContent(topic, store, tone, wordCount);
+      const blog = generateBlogContent(topic, store, tone, wordCount, secondaryKw);
       setGenerated(blog);
       setGenerating(false);
       setShowContent(false);
@@ -286,6 +354,32 @@ export function AiBlogGenerator({ selectedStoreIds }: { selectedStoreIds: string
           </div>
         </div>
 
+        {/* Secondary keywords (≤5) */}
+        <div className='mb-5'>
+          <label className='section-label block mb-1.5'>Secondary Keywords <span style={{ color: 'var(--text-muted)' }}>({secondaryKw.length}/5)</span></label>
+          <div className='flex flex-wrap items-center gap-1.5 rounded-xl px-2 py-1.5' style={{ ...SELECT_STYLE }}>
+            {secondaryKw.map(kw => (
+              <span key={kw} className='flex items-center gap-1 text-[16px] font-mono px-2 py-0.5 rounded-full'
+                style={{ background: 'rgba(123,147,255,0.15)', color: '#7b93ff' }}>
+                {kw}
+                <button onClick={() => setSecondaryKw(prev => prev.filter(k => k !== kw))} style={{ color: '#7b93ff' }}><X size={10} /></button>
+              </span>
+            ))}
+            {secondaryKw.length < 5 && (
+              <input
+                type='text'
+                value={kwInput}
+                onChange={e => setKwInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addKeyword(); } }}
+                onBlur={addKeyword}
+                placeholder={secondaryKw.length === 0 ? 'Add related keywords (Enter to add)…' : 'Add another…'}
+                className='flex-1 bg-transparent outline-none text-base'
+                style={{ minWidth: 120, color: 'var(--text-primary)' }}
+              />
+            )}
+          </div>
+        </div>
+
         {/* Generate button — prominent primary */}
         <button
           onClick={handleGenerate}
@@ -381,18 +475,48 @@ export function AiBlogGenerator({ selectedStoreIds }: { selectedStoreIds: string
           </button>
 
           {showContent && (
-            <div
-              className='rounded-xl p-4 mb-4 overflow-y-auto text-base leading-relaxed whitespace-pre-wrap'
-              style={{
-                background: 'var(--bg-elevated)',
-                border: '1px solid var(--border-subtle)',
-                color: 'var(--text-secondary)',
-                maxHeight: 400,
-                fontFamily: 'DM Sans, sans-serif',
-              }}
-            >
-              {generated.content}
-            </div>
+            <>
+              {/* Rendered/Raw toggle + Copy buttons */}
+              <div className='flex items-center justify-between mb-2 gap-2 flex-wrap'>
+                <div className='flex items-center gap-0.5 p-1' style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: 8 }}>
+                  {(['rendered', 'raw'] as const).map(v => {
+                    const active = contentView === v;
+                    return (
+                      <button key={v} onClick={() => setContentView(v)}
+                        className='px-3 py-1 text-[16px] font-mono capitalize transition-all'
+                        style={{ borderRadius: 6, background: active ? 'rgba(123,147,255,0.15)' : 'transparent', color: active ? '#7b93ff' : 'var(--text-secondary)', border: active ? '1px solid rgba(123,147,255,0.3)' : '1px solid transparent' }}>
+                        {v === 'raw' ? 'Raw Markdown' : 'Rendered'}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className='flex items-center gap-1.5'>
+                  <button onClick={() => copyContent('md')}
+                    className='flex items-center gap-1 text-[16px] px-2.5 py-1.5 rounded-lg font-mono transition-all'
+                    style={{ background: 'var(--bg-elevated)', color: copied === 'md' ? '#10d98a' : 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+                    {copied === 'md' ? <Check size={11} /> : <Copy size={11} />} Copy MD
+                  </button>
+                  <button onClick={() => copyContent('html')}
+                    className='flex items-center gap-1 text-[16px] px-2.5 py-1.5 rounded-lg font-mono transition-all'
+                    style={{ background: 'var(--bg-elevated)', color: copied === 'html' ? '#10d98a' : 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+                    {copied === 'html' ? <Check size={11} /> : <Copy size={11} />} Copy HTML
+                  </button>
+                </div>
+              </div>
+              {contentView === 'raw' ? (
+                <pre
+                  className='rounded-xl p-4 mb-4 overflow-auto text-base leading-relaxed whitespace-pre-wrap'
+                  style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', maxHeight: 400, fontFamily: 'DM Mono, monospace' }}>
+                  {generated.content}
+                </pre>
+              ) : (
+                <div
+                  className='blog-rendered rounded-xl p-4 mb-4 overflow-y-auto text-base leading-relaxed'
+                  style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', maxHeight: 400 }}
+                  dangerouslySetInnerHTML={{ __html: mdToHtml(generated.content) }}
+                />
+              )}
+            </>
           )}
 
           <div className='flex gap-2'>

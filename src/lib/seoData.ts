@@ -809,6 +809,7 @@ export interface GeneratedBlog {
   content: string;
   generatedAt: string;
   tone: BlogTone;
+  secondaryKeywords?: string[];
 }
 
 export const SAMPLE_PREVIOUS_BLOGS: GeneratedBlog[] = [
