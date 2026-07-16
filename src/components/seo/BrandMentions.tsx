@@ -34,16 +34,45 @@ function fmt(n: number): string {
 }
 
 const SOURCE_FILTERS: SourceFilter[] = ['all', 'web', 'social', 'news'];
+type SentimentFilter = Sentiment | 'all';
+const SENTIMENT_FILTERS: SentimentFilter[] = ['all', 'positive', 'neutral', 'negative'];
+type MentionRange = '7d' | '30d' | '90d' | 'all';
+const RANGE_FILTERS: { key: MentionRange; label: string; days: number }[] = [
+  { key: '7d', label: '7d', days: 7 }, { key: '30d', label: '30d', days: 30 },
+  { key: '90d', label: '90d', days: 90 }, { key: 'all', label: 'All', days: Infinity },
+];
+
+// Parse the relative "timeAgo" string ('2h ago', '1d ago', '3w ago') into days.
+function ageInDays(t: string): number {
+  if (/just now|now/i.test(t)) return 0;
+  const m = t.match(/(\d+)\s*(mo|min|h|d|w|m|y)/i);
+  if (!m) return 0;
+  const n = parseInt(m[1], 10);
+  const u = m[2].toLowerCase();
+  if (u === 'min' || u === 'h' || u === 'm') return u === 'h' ? n / 24 : 0;
+  if (u === 'd') return n;
+  if (u === 'w') return n * 7;
+  if (u === 'mo') return n * 30;
+  if (u === 'y') return n * 365;
+  return n;
+}
 
 export function BrandMentions({ selectedStoreIds }: { selectedStoreIds: string[] }) {
   const [allMentions] = usePersistentState<BrandMention[]>('seo.brandMentions', []);
-  const mentions = allMentions.filter(m => selectedStoreIds.includes(m.store));
+  const scopedMentions = allMentions.filter(m => selectedStoreIds.includes(m.store));
   const [allLlmVisibility] = usePersistentState<LlmVisibilityEntry[]>('seo.llmVisibility', emptyLlmVisibility());
   const llmVisibility = allLlmVisibility.filter(e => !e.store || selectedStoreIds.includes(e.store));
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
+  const [sentimentFilter, setSentimentFilter] = useState<SentimentFilter>('all');
+  const [range, setRange] = useState<MentionRange>('7d');
   const [responded, setResponded] = usePersistentState<Record<string, boolean>>('seo.mentionResponded', {});
 
-  const filtered = mentions.filter(m => sourceFilter === 'all' || m.source === sourceFilter);
+  const rangeDays = RANGE_FILTERS.find(r => r.key === range)!.days;
+  // Summary is scoped to the selected time window (default 7d).
+  const mentions = scopedMentions.filter(m => ageInDays(m.timeAgo) <= rangeDays);
+  const filtered = mentions
+    .filter(m => sourceFilter === 'all' || m.source === sourceFilter)
+    .filter(m => sentimentFilter === 'all' || m.sentiment === sentimentFilter);
 
   const positive = mentions.filter(m => m.sentiment === 'positive').length;
   const neutral  = mentions.filter(m => m.sentiment === 'neutral').length;
@@ -150,14 +179,29 @@ export function BrandMentions({ selectedStoreIds }: { selectedStoreIds: string[]
 
       {/* Sentiment summary bar */}
       <div className='glass-card p-4'>
-        <div className='flex items-center justify-between mb-3'>
+        <div className='flex items-center justify-between mb-3 gap-3 flex-wrap'>
           <div className='section-label'>Sentiment Overview</div>
-          <div className='flex items-center gap-3 text-[16px] font-mono'>
-            {(['web', 'social', 'news'] as MentionSource[]).map(s => (
-              <span key={s} style={{ color: SOURCE_CONFIG[s].color }}>
-                {SOURCE_CONFIG[s].label}: {sourceCounts[s]}
-              </span>
-            ))}
+          <div className='flex items-center gap-3 flex-wrap'>
+            <div className='flex items-center gap-3 text-[16px] font-mono'>
+              {(['web', 'social', 'news'] as MentionSource[]).map(s => (
+                <span key={s} style={{ color: SOURCE_CONFIG[s].color }}>
+                  {SOURCE_CONFIG[s].label}: {sourceCounts[s]}
+                </span>
+              ))}
+            </div>
+            {/* Date-range selector */}
+            <div className='flex items-center gap-0.5 p-1' style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: 8 }}>
+              {RANGE_FILTERS.map(r => {
+                const active = range === r.key;
+                return (
+                  <button key={r.key} onClick={() => setRange(r.key)}
+                    className='px-2.5 py-1 text-[16px] font-mono transition-all'
+                    style={{ borderRadius: 6, background: active ? 'rgba(0,217,255,0.15)' : 'transparent', color: active ? 'var(--cyan)' : 'var(--text-secondary)', border: active ? '1px solid rgba(0,217,255,0.3)' : '1px solid transparent', fontWeight: active ? 600 : 400 }}>
+                    {r.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -188,8 +232,24 @@ export function BrandMentions({ selectedStoreIds }: { selectedStoreIds: string[]
 
       {/* Mentions list */}
       <div className='glass-card p-4'>
-        <div className='flex items-center justify-between mb-3'>
+        <div className='flex items-center justify-between mb-3 gap-2 flex-wrap'>
           <div className='section-label'>All Mentions</div>
+          <div className='flex items-center gap-2 flex-wrap'>
+          {/* Sentiment filter pills */}
+          <div className='flex items-center gap-0.5 p-1'
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: 8 }}>
+            {SENTIMENT_FILTERS.map(f => {
+              const active = sentimentFilter === f;
+              const color = f === 'all' ? '#7b93ff' : SENTIMENT_CONFIG[f].color;
+              return (
+                <button key={f} onClick={() => setSentimentFilter(f)}
+                  className='px-2.5 py-1 text-[16px] font-mono transition-all'
+                  style={{ borderRadius: 6, background: active ? color + '18' : 'transparent', color: active ? color : 'var(--text-secondary)', border: active ? `1px solid ${color}35` : '1px solid transparent', fontWeight: active ? 600 : 400 }}>
+                  {f === 'all' ? 'All' : SENTIMENT_CONFIG[f].label}
+                </button>
+              );
+            })}
+          </div>
           {/* Source filter pills */}
           <div
             className='flex items-center gap-0.5 p-1'
@@ -222,14 +282,17 @@ export function BrandMentions({ selectedStoreIds }: { selectedStoreIds: string[]
               );
             })}
           </div>
+          </div>
         </div>
 
         <div className='space-y-2'>
           {filtered.length === 0 && (
             <div className='text-base text-center py-10' style={{ color: 'var(--text-muted)' }}>
-              {allMentions.length === 0
+              {scopedMentions.length === 0
                 ? 'No brand mentions tracked yet.'
-                : `No brand mentions for the selected store${selectedStoreIds.length !== 1 ? 's' : ''}.`}
+                : mentions.length === 0
+                ? `No brand mentions in the last ${range === 'all' ? 'period' : range}.`
+                : 'No brand mentions match the current filters.'}
             </div>
           )}
           {filtered.map(mention => {
