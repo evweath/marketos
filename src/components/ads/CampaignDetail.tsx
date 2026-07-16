@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Pause, Play, TrendingUp, TrendingDown, Users, Image, Zap, DollarSign, MousePointer, BarChart2 } from 'lucide-react';
+import { X, Pause, Play, TrendingUp, TrendingDown, Users, Image, Video, LayoutGrid, Type, Zap, DollarSign, MousePointer, BarChart2, Clock, Flag, AlertTriangle, Rocket } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { usePersistentState } from '@/lib/usePersistentState';
 import { AD_PLATFORM_CONFIG, STATUS_CONFIG } from '@/lib/campaignData';
@@ -11,6 +11,7 @@ const c$ = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
 const c2 = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+const pacingColor = (p: number) => (p > 95 ? '#ff4444' : p > 80 ? '#ffb347' : '#10d98a');
 
 interface Props {
   campaign: Campaign;
@@ -25,8 +26,17 @@ interface KPIItem {
   Icon: LucideIcon;
 }
 
+type Tab = 'adsets' | 'ads' | 'history';
+
+const CREATIVE_TYPE_ICON: Record<Creative['type'], LucideIcon> = {
+  image: Image, video: Video, carousel: LayoutGrid, text: Type,
+};
+
+interface HistoryEvent { Icon: LucideIcon; color: string; label: string; detail: string; when: string; }
+
 export default function CampaignDetail({ campaign: c, onClose }: Props) {
   const [status, setStatus] = useState<CampaignStatus>(c.status);
+  const [tab, setTab] = useState<Tab>('adsets');
   const isPaused = status === 'paused';
   const togglePause = () =>
     setStatus(prev => (prev === 'paused' ? 'active' : 'paused'));
@@ -39,9 +49,20 @@ export default function CampaignDetail({ campaign: c, onClose }: Props) {
   const adSets    = allAdSets.filter(a => a.campaignId === c.id);
   const creatives = allCreatives.filter(cr => cr.campaignId === c.id);
 
+  // History log — derived from the campaign's real current state (no fabricated
+  // random events): launch, status, pacing, creative winner, frequency fatigue.
+  const winner = creatives.find(cr => cr.status === 'winner');
+  const history: HistoryEvent[] = [
+    { Icon: Rocket, color: pc.color, label: 'Campaign launched', detail: `${pc.label} · objective: ${c.objective}`, when: creatives.length ? `${Math.max(...creatives.map(cr => cr.daysRunning))}d ago` : 'recently' },
+    ...(winner ? [{ Icon: Flag, color: '#ffd700', label: 'A/B winner declared', detail: `${winner.name} — ${winner.roas.toFixed(1)}× ROAS`, when: `${winner.daysRunning}d running` }] : []),
+    ...(c.frequency && c.frequency > 4.5 ? [{ Icon: AlertTriangle, color: '#ff4444', label: 'Creative fatigue flagged', detail: `Frequency ${c.frequency.toFixed(1)}× exceeds 4.5 threshold`, when: 'active' }] : []),
+    { Icon: DollarSign, color: pacingColor(c.budgetPacing), label: `Pacing at ${c.budgetPacing}%`, detail: `${c$(c.spendToDate)} of ${c$(c.totalBudget)} spent`, when: 'today' },
+    { Icon: status === 'paused' ? Pause : Play, color: sc.color, label: `Status: ${sc.label}`, detail: status === 'paused' ? 'Delivery paused' : 'Delivering ads', when: 'now' },
+  ];
+
   const roasColor = c.roas >= 7 ? '#10d98a' : c.roas >= 4 ? '#ffb347' : '#ff4444';
   const spendPct  = Math.min((c.spendToDate / c.totalBudget) * 100, 100);
-  const pacingBarColor = c.budgetPacing > 95 ? '#ff4444' : c.budgetPacing > 80 ? '#ffb347' : '#10d98a';
+  const pacingBarColor = pacingColor(c.budgetPacing);
 
   const kpis: KPIItem[] = [
     { label: 'Revenue',  value: c$(c.revenue),                       color: pc.color,  delta: c.roasDelta,        Icon: TrendingUp    },
@@ -145,13 +166,32 @@ export default function CampaignDetail({ campaign: c, onClose }: Props) {
           </div>
         </div>
 
-        {/* Ad Sets */}
-        {adSets.length > 0 && (
-          <div>
-            <div className='flex items-center gap-2 mb-2'>
-              <Users size={11} style={{ color: 'var(--text-muted)' }} />
-              <span className='section-label'>Ad Sets ({adSets.length})</span>
-            </div>
+        {/* Tab bar */}
+        <div className='flex items-center gap-1 p-1 rounded-xl'
+          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+          {([
+            { id: 'adsets'  as Tab, label: `Ad Sets (${adSets.length})`, Icon: Users },
+            { id: 'ads'     as Tab, label: `Ads (${creatives.length})`,  Icon: Image },
+            { id: 'history' as Tab, label: 'History',                     Icon: Clock },
+          ]).map(t => {
+            const active = tab === t.id;
+            const TabIcon = t.Icon;
+            return (
+              <button key={t.id} onClick={() => setTab(t.id)}
+                className='flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[16px] font-mono transition-all'
+                style={active
+                  ? { background: pc.color + '22', color: pc.color, border: `1px solid ${pc.color}40` }
+                  : { color: 'var(--text-muted)', border: '1px solid transparent' }}>
+                <TabIcon size={12} />
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Ad Sets tab */}
+        {tab === 'adsets' && (
+          adSets.length > 0 ? (
             <div className='space-y-1.5'>
               {adSets.map(as => {
                 const asc = STATUS_CONFIG[as.status];
@@ -191,27 +231,38 @@ export default function CampaignDetail({ campaign: c, onClose }: Props) {
                 );
               })}
             </div>
-          </div>
+          ) : (
+            <div className='rounded-xl p-6 text-center text-base'
+              style={{ background: 'var(--bg-elevated)', border: '1px dashed var(--border-subtle)', color: 'var(--text-muted)' }}>
+              <Users size={20} className='mx-auto mb-2 opacity-50' />
+              No ad sets for this campaign yet.
+            </div>
+          )
         )}
 
-        {/* A/B Creatives */}
-        {creatives.length > 0 && (
-          <div>
-            <div className='flex items-center gap-2 mb-2'>
-              <Image size={11} style={{ color: 'var(--text-muted)' }} />
-              <span className='section-label'>A/B Test — {creatives.length} Creatives</span>
-            </div>
+        {/* Individual Ads tab (creatives w/ thumbnails) */}
+        {tab === 'ads' && (
+          creatives.length > 0 ? (
             <div className='space-y-1.5'>
               {creatives.map(cr => {
                 const isWinner = cr.status === 'winner';
                 const isLoser  = cr.status === 'loser';
                 const crColor  = isWinner ? '#10d98a' : isLoser ? '#ff4444' : cr.status === 'active' ? '#00d9ff' : '#ffb347';
+                const TypeIcon = CREATIVE_TYPE_ICON[cr.type];
                 return (
-                  <div key={cr.id} className='rounded-xl p-3'
+                  <div key={cr.id} className='rounded-xl p-3 flex gap-3'
                     style={{
                       background: isWinner ? 'rgba(16,217,138,0.05)' : isLoser ? 'rgba(255,68,68,0.04)' : 'var(--bg-elevated)',
                       border: `1px solid ${isWinner ? 'rgba(16,217,138,0.22)' : isLoser ? 'rgba(255,68,68,0.15)' : 'var(--border-subtle)'}`,
                     }}>
+                    {/* Thumbnail placeholder — colored by creative type */}
+                    <div className='shrink-0 rounded-lg flex items-center justify-center relative overflow-hidden'
+                      style={{ width: 52, height: 52, background: `linear-gradient(135deg, ${crColor}30, ${crColor}10)`, border: `1px solid ${crColor}30` }}>
+                      <TypeIcon size={22} style={{ color: crColor, opacity: isLoser ? 0.4 : 0.9 }} />
+                      <span className='absolute bottom-0.5 right-0.5 text-[16px] font-mono uppercase px-1 rounded'
+                        style={{ fontSize: 9, background: 'var(--bg-base)', color: 'var(--text-muted)' }}>{cr.type[0]}</span>
+                    </div>
+                    <div className='flex-1 min-w-0'>
                     <div className='flex items-center justify-between mb-2'>
                       <div className='flex items-center gap-2'>
                         <span className='text-base font-semibold'
@@ -255,15 +306,47 @@ export default function CampaignDetail({ campaign: c, onClose }: Props) {
                         </div>
                       ))}
                     </div>
+                    </div>
                   </div>
                 );
               })}
             </div>
+          ) : (
+            <div className='rounded-xl p-6 text-center text-base'
+              style={{ background: 'var(--bg-elevated)', border: '1px dashed var(--border-subtle)', color: 'var(--text-muted)' }}>
+              <Image size={20} className='mx-auto mb-2 opacity-50' />
+              No individual ads for this campaign yet.
+            </div>
+          )
+        )}
+
+        {/* History tab */}
+        {tab === 'history' && (
+          <div className='space-y-2'>
+            {history.map((ev, i) => {
+              const EvIcon = ev.Icon;
+              return (
+                <div key={i} className='flex items-start gap-3 rounded-xl p-3'
+                  style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                  <div className='shrink-0 rounded-lg flex items-center justify-center'
+                    style={{ width: 30, height: 30, background: ev.color + '1a', border: `1px solid ${ev.color}30` }}>
+                    <EvIcon size={15} style={{ color: ev.color }} />
+                  </div>
+                  <div className='flex-1 min-w-0'>
+                    <div className='flex items-center justify-between gap-2'>
+                      <span className='text-base font-semibold' style={{ color: 'var(--text-primary)' }}>{ev.label}</span>
+                      <span className='text-[16px] font-mono shrink-0' style={{ color: 'var(--text-muted)' }}>{ev.when}</span>
+                    </div>
+                    <div className='text-[16px] font-mono mt-0.5' style={{ color: 'var(--text-secondary)' }}>{ev.detail}</div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
 
-        {/* Ad Frequency warning */}
-        {c.frequency && (
+        {/* Ad Frequency warning (Ad Sets tab) */}
+        {tab === 'adsets' && c.frequency && (
           <div className='rounded-xl p-3 text-base'
             style={{
               background: c.frequency > 4.5 ? 'rgba(255,68,68,0.06)' : 'var(--bg-elevated)',
@@ -284,8 +367,8 @@ export default function CampaignDetail({ campaign: c, onClose }: Props) {
           </div>
         )}
 
-        {/* Quality Score */}
-        {c.qualityScore && (
+        {/* Quality Score (Ad Sets tab) */}
+        {tab === 'adsets' && c.qualityScore && (
           <div className='rounded-xl p-3 text-base'
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
             <div className='flex items-center justify-between mb-2'>
