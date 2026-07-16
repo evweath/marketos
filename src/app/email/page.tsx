@@ -4,8 +4,20 @@ import { useState } from 'react';
 import { usePersistentState } from '@/lib/usePersistentState';
 import Sidebar from '@/components/layout/Sidebar';
 import TopBar from '@/components/layout/TopBar';
-import { computeEmailStats, TRIGGER_CONFIG } from '@/lib/emailData';
-import type { EmailFlow, FlowStatus, EmailCampaign, SegmentData, DeliverabilityMetric } from '@/lib/emailData';
+import {
+  computeEmailStats, TRIGGER_CONFIG,
+  computeSmsStats,
+  SAMPLE_PUSH_CAMPAIGNS, SAMPLE_PUSH_AUTOMATIONS, computePushStats, SAMPLE_PUSH_SUBSCRIBERS_BY_STORE,
+  TX_TEMPLATES, SAMPLE_EMAIL_AB_TESTS, computeAbTestStats,
+} from '@/lib/emailData';
+import type {
+  EmailFlow, FlowStatus, EmailCampaign, SegmentData, DeliverabilityMetric,
+  SmsMessage, SmsConversation, SmsCampaign, SmsStatus, SmsFlow, SmsFlowStatus,
+  PushCampaign, PushStatus, PushAutomation, PushAutoStatus, PushSubscriberCount,
+  TxTemplate, TxStatus, EmailABTest, ABTestStatus, ABTestType,
+} from '@/lib/emailData';
+import { useStores, useStoreScope, resolveStoreId } from '@/lib/storeScope';
+import { StoreScopeBar } from '@/components/shared/StoreScopeBar';
 import { Mail, GitBranch, Users, Shield, Play, Pause, CheckCircle, AlertTriangle, XCircle, MessageSquare, Bell, LayoutTemplate, Clock, FlaskConical, ShoppingBag, GripVertical, Trash2, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 
 const c$ = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
@@ -89,26 +101,37 @@ function FlowCard({ flow }: { flow: EmailFlow }) {
   );
 }
 
-function CampaignsList() {
+function CampaignsList({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
   const SS = { sent: { color: '#10d98a', label: 'Sent' }, scheduled: { color: 'var(--cyan)', label: 'Scheduled' }, draft: { color: '#7b93ff', label: 'Draft' } };
-  const [campaigns, setCampaigns] = usePersistentState<EmailCampaign[]>('email.campaigns', []);
+  const [allCampaigns, setCampaigns] = usePersistentState<EmailCampaign[]>('email.campaigns', []);
+  const campaigns = allCampaigns.filter(c => selectedStoreIds.includes(resolveStoreId(c.store, stores) ?? ''));
+  const [newCampaignStore, setNewCampaignStore] = useState(stores[0]?.domain ?? '');
   const addCampaign = () => {
     const id = `ec-${Date.now()}`;
     setCampaigns(prev => [{
       id, subject: '[DRAFT] Untitled Campaign',
       preview: 'Add a subject and content to get started...',
-      status: 'draft', store: 'donut-supplies.com', sentTo: 0,
+      status: 'draft', store: newCampaignStore, sentTo: 0,
     }, ...prev]);
   };
   return (
     <div className="glass-card overflow-hidden">
       <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
         <span className="section-label">Email Campaigns</span>
-        <button onClick={addCampaign} className="text-base px-3 py-1.5 rounded-lg font-medium"
-          style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>+ New Campaign</button>
+        <div className="flex items-center gap-2">
+          <select value={newCampaignStore} onChange={e => setNewCampaignStore(e.target.value)}
+            className="text-base px-2 py-1.5 rounded-lg" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+            {stores.map(s => <option key={s.id} value={s.domain}>{s.name}</option>)}
+          </select>
+          <button onClick={addCampaign} className="text-base px-3 py-1.5 rounded-lg font-medium"
+            style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>+ New Campaign</button>
+        </div>
       </div>
       {campaigns.length === 0 && (
-        <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>No campaigns yet — create one to get started.</div>
+        <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>
+          {allCampaigns.length === 0 ? 'No campaigns yet — create one to get started.' : `No campaigns for the selected store${selectedStoreIds.length !== 1 ? 's' : ''}.`}
+        </div>
       )}
       {campaigns.map(camp => {
         const ss = SS[camp.status];
@@ -274,24 +297,16 @@ function DeliverabilityPanel() {
 
 // ─── Conversational SMS (F-09) ───────────────────────────────────────────────
 
-interface SmsMessage { role: 'brand' | 'customer'; text: string; time: string }
-interface SmsConversation {
-  id: string; customer: string; cartValue: number; store: string;
-  status: 'recovered' | 'active' | 'no_response';
-  messages: SmsMessage[];
-}
-
-// Empty until real 2-way SMS conversations exist for a store.
-const SMS_CONVERSATIONS: SmsConversation[] = [];
-
 const CONV_STATUS_CFG = {
   recovered:   { label: 'Recovered',    color: '#10d98a', bg: 'rgba(16,217,138,.1)'  },
   active:      { label: 'Active',       color: 'var(--cyan)', bg: 'rgba(0,217,255,.1)'   },
   no_response: { label: 'No Response',  color: '#ffb347', bg: 'rgba(255,179,71,.1)'  },
 };
 
-function ConversationalSmsPanel() {
-  const [conversations, setConversations] = usePersistentState<SmsConversation[]>('email.conversations', SMS_CONVERSATIONS);
+function ConversationalSmsPanel({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
+  const [allConversations, setConversations] = usePersistentState<SmsConversation[]>('email.conversations', []);
+  const conversations = allConversations.filter(c => selectedStoreIds.includes(resolveStoreId(c.store, stores) ?? ''));
   const [selected, setSelected] = useState<string | null>(null);
   const [reply, setReply] = useState('');
   const conv = conversations.find(c => c.id === selected);
@@ -389,38 +404,10 @@ function ConversationalSmsPanel() {
 
 // ─── SMS types ───────────────────────────────────────────────────────────────
 
-type SmsStatus = 'sent' | 'scheduled' | 'draft';
-type SmsFlowStatus = 'active' | 'paused';
-
 const SMS_FLOW_STATUS_BADGE: Record<SmsFlowStatus, { color: string; bg: string; label: string }> = {
   active: { color: '#10d98a', bg: 'rgba(16,217,138,0.1)', label: 'Active' },
   paused: { color: '#ffb347', bg: 'rgba(255,179,71,0.1)', label: 'Paused' },
 };
-
-interface SmsCampaign {
-  id: string;
-  name: string;
-  status: SmsStatus;
-  sentAt: string;
-  recipients: number;
-  delivered: number;
-  deliveryRate: number;
-  ctr: number;
-  conversions: number;
-  revenue: number;
-  store: string;
-}
-
-interface SmsFlow {
-  id: string;
-  name: string;
-  trigger: string;
-  status: SmsFlowStatus;
-  steps: number;
-  triggered30d: number;
-  convRate: number | null;
-  revenue30d: number;
-}
 
 type SmsSubTab = 'campaigns' | 'flows' | 'conversational' | 'compliance';
 
@@ -473,7 +460,8 @@ function SmsFlowCard({ flow }: { flow: SmsFlow }) {
 
 // ─── SMS Panel ───────────────────────────────────────────────────────────────
 
-function SmsCampaignsPanel() {
+function SmsCampaignsPanel({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
   const [subTab, setSubTab] = useState<SmsSubTab>('campaigns');
   const [compliance, setCompliance] = usePersistentState<Record<string, boolean>>('email.compliance', {
     'TCPA Consent Required': true,
@@ -485,33 +473,27 @@ function SmsCampaignsPanel() {
   });
   const toggleCompliance = (label: string) => setCompliance(prev => ({ ...prev, [label]: !prev[label] }));
 
-  const [smsCampaigns, setSmsCampaigns] = usePersistentState<SmsCampaign[]>('email.smsCampaigns', [
-    { id: 'sms-001', name: 'Spring Sale Blast', status: 'sent', sentAt: '2d ago', recipients: 4820, delivered: 4739, deliveryRate: 98.3, ctr: 12.4, conversions: 84, revenue: 18420, store: 'All Stores' },
-    { id: 'sms-002', name: 'Back In Stock: Donut Glazer Pro', status: 'sent', sentAt: '5d ago', recipients: 1240, delivered: 1228, deliveryRate: 99.0, ctr: 24.8, conversions: 31, revenue: 22480, store: 'donut-equipment.com' },
-    { id: 'sms-003', name: 'Flash Sale — 15% Off Today Only', status: 'scheduled', sentAt: 'Tomorrow 10am', recipients: 6200, delivered: 0, deliveryRate: 0, ctr: 0, conversions: 0, revenue: 0, store: 'All Stores' },
-    { id: 'sms-004', name: 'VIP Early Access — New Products', status: 'draft', sentAt: '—', recipients: 842, delivered: 0, deliveryRate: 0, ctr: 0, conversions: 0, revenue: 0, store: 'bakerywholesalers.com' },
-  ]);
-  const SMS_CAMPAIGNS = smsCampaigns;
+  const [allSmsCampaigns, setSmsCampaigns] = usePersistentState<SmsCampaign[]>('email.smsCampaigns', []);
+  const inScope = (store: string) => store === 'All Stores' || selectedStoreIds.includes(resolveStoreId(store, stores) ?? '');
+  const SMS_CAMPAIGNS = allSmsCampaigns.filter(c => inScope(c.store));
+  const [newSmsStore, setNewSmsStore] = useState(stores[0]?.id ?? '');
   const addSmsCampaign = () => {
     const id = `sms-${Date.now()}`;
     setSmsCampaigns(prev => [{
       id, name: 'Untitled SMS Campaign', status: 'draft', sentAt: '—',
-      recipients: 0, delivered: 0, deliveryRate: 0, ctr: 0, conversions: 0, revenue: 0, store: 'All Stores',
+      recipients: 0, delivered: 0, deliveryRate: 0, ctr: 0, conversions: 0, revenue: 0, store: newSmsStore,
     }, ...prev]);
   };
 
-  const SMS_FLOWS: SmsFlow[] = [
-    { id: 'sf-001', name: 'Abandoned Cart SMS Recovery', trigger: 'Cart Abandoned > 1hr', status: 'active', steps: 2, triggered30d: 412, convRate: 14.2, revenue30d: 28400 },
-    { id: 'sf-002', name: 'Order Confirmation + Tracking', trigger: 'Order Placed', status: 'active', steps: 3, triggered30d: 847, convRate: null, revenue30d: 0 },
-    { id: 'sf-003', name: 'VIP Welcome SMS', trigger: 'Customer tagged VIP', status: 'active', steps: 1, triggered30d: 38, convRate: 42.1, revenue30d: 4200 },
-    { id: 'sf-004', name: 'Win-Back — 90 Day Lapsed', trigger: 'No purchase 90d', status: 'paused', steps: 2, triggered30d: 124, convRate: 6.8, revenue30d: 3100 },
-  ];
+  const [allSmsFlows] = usePersistentState<SmsFlow[]>('email.smsFlows', []);
+  const SMS_FLOWS = allSmsFlows.filter(f => inScope(f.store));
 
   const sentCampaigns = SMS_CAMPAIGNS.filter(c => c.status === 'sent');
-  const totalSent = sentCampaigns.reduce((s, c) => s + c.delivered, 0);
-  const avgDelivery = sentCampaigns.reduce((s, c) => s + c.deliveryRate, 0) / sentCampaigns.length;
-  const avgCtr = sentCampaigns.reduce((s, c) => s + c.ctr, 0) / sentCampaigns.length;
-  const smsRevenue = sentCampaigns.reduce((s, c) => s + c.revenue, 0);
+  const smsStats = computeSmsStats(sentCampaigns);
+  const totalSent = smsStats.totalSent;
+  const avgDelivery = smsStats.avgDelivery;
+  const avgCtr = smsStats.avgCtr;
+  const smsRevenue = smsStats.revenue;
 
   const STATUS_BADGE: Record<SmsStatus, { color: string; label: string }> = {
     sent:      { color: '#10d98a', label: 'Sent'      },
@@ -565,11 +547,22 @@ function SmsCampaignsPanel() {
         <div className="glass-card overflow-hidden">
           <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
             <span className="section-label">SMS Campaigns</span>
-            <button onClick={addSmsCampaign} className="text-base px-3 py-1.5 rounded-lg font-medium"
-              style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
-              + New SMS Campaign
-            </button>
+            <div className="flex items-center gap-2">
+              <select value={newSmsStore} onChange={e => setNewSmsStore(e.target.value)}
+                className="text-base px-2 py-1.5 rounded-lg" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+                {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+              <button onClick={addSmsCampaign} className="text-base px-3 py-1.5 rounded-lg font-medium"
+                style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
+                + New SMS Campaign
+              </button>
+            </div>
           </div>
+          {SMS_CAMPAIGNS.length === 0 && (
+            <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>
+              {allSmsCampaigns.length === 0 ? 'No SMS campaigns yet.' : `No SMS campaigns for the selected store${selectedStoreIds.length !== 1 ? 's' : ''}.`}
+            </div>
+          )}
           {SMS_CAMPAIGNS.map(camp => {
             const badge = STATUS_BADGE[camp.status];
             const isSent = camp.status === 'sent';
@@ -621,13 +614,18 @@ function SmsCampaignsPanel() {
       {/* SMS Flows */}
       {subTab === 'flows' && (
         <div className="grid grid-cols-2 gap-3">
+          {SMS_FLOWS.length === 0 && (
+            <div className="col-span-2 text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>
+              {allSmsFlows.length === 0 ? 'No SMS flows yet.' : `No SMS flows for the selected store${selectedStoreIds.length !== 1 ? 's' : ''}.`}
+            </div>
+          )}
           {SMS_FLOWS.map(flow => <SmsFlowCard key={flow.id} flow={flow} />)}
         </div>
       )}
 
       {/* Conversational SMS Recovery (F-09) */}
       {subTab === 'conversational' && (
-        <ConversationalSmsPanel />
+        <ConversationalSmsPanel selectedStoreIds={selectedStoreIds} />
       )}
 
       {/* SMS Compliance */}
@@ -753,31 +751,7 @@ function SmsCampaignsPanel() {
 
 // ─── Push types ───────────────────────────────────────────────────────────────
 
-type PushStatus = 'sent' | 'scheduled';
-type PushAutoStatus = 'active' | 'paused';
 type PushSubTab = 'campaigns' | 'automations' | 'health';
-
-interface PushCampaign {
-  id: string;
-  name: string;
-  status: PushStatus;
-  sentAt: string;
-  sent: number;
-  delivered: number;
-  clicked: number;
-  ctr: number;
-  revenue: number;
-}
-
-interface PushAutomation {
-  id: string;
-  name: string;
-  trigger: string;
-  status: PushAutoStatus;
-  triggered30d: number;
-  ctr: number;
-  revenue30d: number;
-}
 
 const PUSH_AUTO_STATUS_BADGE: Record<PushAutoStatus, { color: string; bg: string; label: string }> = {
   active: { color: '#10d98a', bg: 'rgba(16,217,138,0.1)', label: 'Active' },
@@ -827,29 +801,24 @@ function PushAutoRow({ auto }: { auto: PushAutomation }) {
 
 // ─── Push Panel ───────────────────────────────────────────────────────────────
 
-function PushPanel() {
+function PushPanel({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
   const [subTab, setSubTab] = useState<PushSubTab>('campaigns');
+  const inScope = (store: string) => store === 'All Stores' || selectedStoreIds.includes(resolveStoreId(store, stores) ?? '');
 
-  const [pushCampaigns, setPushCampaigns] = usePersistentState<PushCampaign[]>('email.pushCampaigns', [
-    { id: 'pn-001', name: 'Weekend Sale Reminder', status: 'sent', sentAt: '1d ago', sent: 28400, delivered: 26912, clicked: 2154, ctr: 8.0, revenue: 4840 },
-    { id: 'pn-002', name: 'New Product Launch — Croissant Maker X2', status: 'sent', sentAt: '3d ago', sent: 28400, delivered: 27100, clicked: 3280, ctr: 12.1, revenue: 8420 },
-    { id: 'pn-003', name: 'Flash Sale — 4 Hours Only', status: 'scheduled', sentAt: 'Today 3pm', sent: 0, delivered: 0, clicked: 0, ctr: 0, revenue: 0 },
-  ]);
-  const PUSH_CAMPAIGNS = pushCampaigns;
+  const [allPushCampaigns, setPushCampaigns] = usePersistentState<PushCampaign[]>('email.pushCampaigns', []);
+  const PUSH_CAMPAIGNS = allPushCampaigns.filter(c => inScope(c.store));
+  const [newPushStore, setNewPushStore] = useState('All Stores');
   const addPushCampaign = () => {
     const id = `pn-${Date.now()}`;
     setPushCampaigns(prev => [{
       id, name: 'Untitled Push Campaign', status: 'scheduled', sentAt: 'Not scheduled',
-      sent: 0, delivered: 0, clicked: 0, ctr: 0, revenue: 0,
+      sent: 0, delivered: 0, clicked: 0, ctr: 0, revenue: 0, store: newPushStore,
     }, ...prev]);
   };
 
-  const PUSH_AUTOMATIONS: PushAutomation[] = [
-    { id: 'pa-001', name: 'Abandoned Cart Push Reminder', trigger: 'Cart Abandoned 30min', status: 'active', triggered30d: 847, ctr: 7.2, revenue30d: 3240 },
-    { id: 'pa-002', name: 'Back In Stock Alert', trigger: 'Product Restocked', status: 'active', triggered30d: 124, ctr: 24.8, revenue30d: 8420 },
-    { id: 'pa-003', name: 'Price Drop Alert', trigger: 'Price decreased ≥ 10%', status: 'active', triggered30d: 84, ctr: 18.4, revenue30d: 4120 },
-    { id: 'pa-004', name: 'Order Shipped', trigger: 'Fulfillment updated', status: 'active', triggered30d: 412, ctr: 31.2, revenue30d: 0 },
-  ];
+  const [allPushAutomations] = usePersistentState<PushAutomation[]>('email.pushAutomations', []);
+  const PUSH_AUTOMATIONS = allPushAutomations.filter(a => inScope(a.store));
 
   const PUSH_CAMPAIGN_BADGE: Record<PushStatus, { color: string; label: string }> = {
     sent:      { color: '#10d98a', label: 'Sent'      },
@@ -863,37 +832,26 @@ function PushPanel() {
     { key: 'health',       label: 'Subscriber Health' },
   ];
 
-  const totalRevenue30d = PUSH_CAMPAIGNS.filter(c => c.status === 'sent').reduce((s, c) => s + c.revenue, 0);
+  const pushStats = computePushStats(PUSH_CAMPAIGNS);
 
-  const STORES = [
-    { name: 'donut-equipment.com',    subscribers: 12400 },
-    { name: 'donut-supplies.com',     subscribers: 8200  },
-    { name: 'bakerywholesalers.com',  subscribers: 7800  },
-  ];
+  const [allSubscribersByStore] = usePersistentState<PushSubscriberCount[]>('email.pushSubscribersByStore', []);
+  const STORES = allSubscribersByStore.filter(s => selectedStoreIds.includes(resolveStoreId(s.store, stores) ?? ''));
   const totalSubscribers = STORES.reduce((s, st) => s + st.subscribers, 0);
 
-  const ACTIVITY = [
-    { label: 'Active (0–30d)',   count: 16840, color: '#10d98a' },
-    { label: 'Dormant (31–90d)', count: 7280,  color: '#ffb347' },
-    { label: 'Inactive (90d+)',  count: 4280,  color: '#ff4444' },
-  ];
-
-  const BROWSERS = [
-    { name: 'Chrome',  pct: 68, color: 'var(--cyan)' },
-    { name: 'Safari',  pct: 18, color: '#7b93ff' },
-    { name: 'Firefox', pct: 8,  color: '#ffb347' },
-    { name: 'Edge',    pct: 6,  color: '#10d98a' },
-  ];
+  // No real subscriber-activity/browser tracking model exists yet — zeroed
+  // until a real push-subscription analytics pipeline is connected.
+  const ACTIVITY: Array<{ label: string; count: number; color: string }> = [];
+  const BROWSERS: Array<{ name: string; pct: number; color: string }> = [];
 
   return (
     <div className="flex flex-col gap-4">
       {/* Header stats */}
       <div className="grid grid-cols-4 gap-3 shrink-0">
         {[
-          { label: 'Push Subscribers',  value: fmt(28400),  color: 'var(--cyan)' },
-          { label: 'Avg CTR',           value: '9.4%',      color: '#10d98a' },
-          { label: 'Revenue (30d)',      value: c$(totalRevenue30d), color: '#ffb347' },
-          { label: 'Opt-In Rate',        value: '12.8%',    color: '#7b93ff' },
+          { label: 'Push Subscribers',  value: fmt(totalSubscribers),  color: 'var(--cyan)' },
+          { label: 'Avg CTR',           value: pushStats.avgCtr > 0 ? pushStats.avgCtr.toFixed(1) + '%' : '—', color: '#10d98a' },
+          { label: 'Revenue (30d)',      value: c$(pushStats.totalRevenue30d), color: '#ffb347' },
+          { label: 'Opt-In Rate',        value: '—', color: '#7b93ff' },
         ].map(stat => (
           <div key={stat.label} className="glass-card px-4 py-3">
             <div className="section-label mb-1.5">{stat.label}</div>
@@ -924,11 +882,23 @@ function PushPanel() {
         <div className="glass-card overflow-hidden">
           <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
             <span className="section-label">Push Campaigns</span>
-            <button onClick={addPushCampaign} className="text-base px-3 py-1.5 rounded-lg font-medium"
-              style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
-              + New Push Campaign
-            </button>
+            <div className="flex items-center gap-2">
+              <select value={newPushStore} onChange={e => setNewPushStore(e.target.value)}
+                className="text-base px-2 py-1.5 rounded-lg" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+                <option value="All Stores">All Stores</option>
+                {stores.map(s => <option key={s.id} value={s.domain}>{s.name}</option>)}
+              </select>
+              <button onClick={addPushCampaign} className="text-base px-3 py-1.5 rounded-lg font-medium"
+                style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
+                + New Push Campaign
+              </button>
+            </div>
           </div>
+          {PUSH_CAMPAIGNS.length === 0 && (
+            <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>
+              {allPushCampaigns.length === 0 ? 'No push campaigns yet.' : `No push campaigns for the selected store${selectedStoreIds.length !== 1 ? 's' : ''}.`}
+            </div>
+          )}
           {PUSH_CAMPAIGNS.map(camp => {
             const badge = PUSH_CAMPAIGN_BADGE[camp.status];
             const isSent = camp.status === 'sent';
@@ -977,6 +947,11 @@ function PushPanel() {
           <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
             <span className="section-label">Push Automations</span>
           </div>
+          {PUSH_AUTOMATIONS.length === 0 && (
+            <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>
+              {allPushAutomations.length === 0 ? 'No push automations yet.' : `No push automations for the selected store${selectedStoreIds.length !== 1 ? 's' : ''}.`}
+            </div>
+          )}
           {PUSH_AUTOMATIONS.map(auto => <PushAutoRow key={auto.id} auto={auto} />)}
         </div>
       )}
@@ -987,13 +962,16 @@ function PushPanel() {
           {/* Subscribers by store */}
           <div className="glass-card p-4">
             <div className="section-label mb-3">Subscribers by Store</div>
+            {STORES.length === 0 ? (
+              <div className="text-base text-center py-4" style={{ color: 'var(--text-muted)' }}>No push subscriber data yet.</div>
+            ) : (
             <div className="flex flex-col gap-2">
               {STORES.map(store => {
-                const pct = (store.subscribers / totalSubscribers) * 100;
+                const pct = totalSubscribers > 0 ? (store.subscribers / totalSubscribers) * 100 : 0;
                 return (
-                  <div key={store.name}>
+                  <div key={store.store}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-base" style={{ color: 'var(--text-secondary)' }}>{store.name}</span>
+                      <span className="text-base" style={{ color: 'var(--text-secondary)' }}>{store.store}</span>
                       <span className="text-base font-semibold" style={{ color: 'var(--text-primary)', fontFamily: 'DM Mono' }}>{fmt(store.subscribers)}</span>
                     </div>
                     <div className="h-1.5 rounded-full" style={{ background: 'var(--bg-elevated)' }}>
@@ -1003,11 +981,16 @@ function PushPanel() {
                 );
               })}
             </div>
+            )}
           </div>
 
           {/* 30-day activity breakdown */}
           <div className="glass-card p-4">
             <div className="section-label mb-3">30-Day Activity Breakdown</div>
+            {ACTIVITY.length === 0 ? (
+              <div className="text-base text-center py-4" style={{ color: 'var(--text-muted)' }}>No subscriber activity data yet.</div>
+            ) : (
+            <>
             <div className="flex h-4 rounded-full overflow-hidden mb-3 gap-px">
               {ACTIVITY.map(a => (
                 <div key={a.label} style={{ flex: a.count, background: a.color }} />
@@ -1021,11 +1004,16 @@ function PushPanel() {
                 </div>
               ))}
             </div>
+            </>
+            )}
           </div>
 
           {/* Browser breakdown */}
           <div className="glass-card p-4">
             <div className="section-label mb-3">Browser Breakdown</div>
+            {BROWSERS.length === 0 ? (
+              <div className="text-base text-center py-4" style={{ color: 'var(--text-muted)' }}>No browser breakdown data yet.</div>
+            ) : (
             <div className="flex flex-col gap-2">
               {BROWSERS.map(b => (
                 <div key={b.name}>
@@ -1039,6 +1027,7 @@ function PushPanel() {
                 </div>
               ))}
             </div>
+            )}
           </div>
         </div>
       )}
@@ -1318,23 +1307,16 @@ function SendTimePanel() {
 
 // ─── Email A/B Testing (F-14) ─────────────────────────────────────────────────
 
-type ABTestStatus = 'running' | 'completed' | 'draft';
-type ABTestType = 'subject' | 'content' | 'send_time';
-
-interface EmailABTest {
-  id: string; name: string; type: ABTestType; status: ABTestStatus;
-  variantA: string; variantB: string;
-  openA: number; openB: number; clickA: number; clickB: number;
-  sampleSize: number; confidence: number; winner: 'A' | 'B' | null;
-  started: string;
-}
-
-function EmailABPanel() {
-  const [tests, setTests] = usePersistentState<EmailABTest[]>('email.abTests', []);
+function EmailABPanel({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
+  const [allTests, setTests] = usePersistentState<EmailABTest[]>('email.abTests', []);
+  const inScope = (store: string) => store === 'All Stores' || selectedStoreIds.includes(resolveStoreId(store, stores) ?? '');
+  const tests = allTests.filter(t => inScope(t.store));
+  const [newTestStore, setNewTestStore] = useState(stores[0]?.id ?? '');
   const addTest = () => {
     const id = `ab-${Date.now()}`;
     setTests(prev => [{
-      id, name: 'Untitled A/B Test', type: 'subject', status: 'draft',
+      id, name: 'Untitled A/B Test', type: 'subject', status: 'draft', store: newTestStore,
       variantA: 'Variant A subject', variantB: 'Variant B subject',
       openA: 0, openB: 0, clickA: 0, clickB: 0, sampleSize: 2000, confidence: 0, winner: null, started: '—',
     }, ...prev]);
@@ -1346,6 +1328,7 @@ function EmailABPanel() {
     completed: { color: 'var(--cyan)', bg: 'rgba(0,217,255,.1)',  label: 'Completed' },
     draft:     { color: '#7b93ff', bg: 'rgba(123,147,255,.1)', label: 'Draft'    },
   };
+  const abStats = computeAbTestStats(tests);
 
   return (
     <div className="flex flex-col gap-4">
@@ -1353,8 +1336,8 @@ function EmailABPanel() {
         {[
           { label: 'Active Tests',      value: tests.filter(t => t.status === 'running').length.toString(), color: '#10d98a' },
           { label: 'Completed (30d)',   value: tests.filter(t => t.status === 'completed').length.toString(), color: 'var(--cyan)' },
-          { label: 'Avg Confidence',    value: '79%', color: '#7b93ff' },
-          { label: 'Avg Open Rate Lift', value: '+4.8%', color: '#ffb347' },
+          { label: 'Avg Confidence',    value: abStats.avgConfidence > 0 ? abStats.avgConfidence + '%' : '—', color: '#7b93ff' },
+          { label: 'Avg Open Rate Lift', value: abStats.avgOpenLift !== 0 ? (abStats.avgOpenLift > 0 ? '+' : '') + abStats.avgOpenLift + '%' : '—', color: '#ffb347' },
         ].map(s => (
           <div key={s.label} className="glass-card px-4 py-3">
             <div className="section-label mb-1">{s.label}</div>
@@ -1366,13 +1349,21 @@ function EmailABPanel() {
       <div className="glass-card overflow-hidden">
         <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
           <span className="section-label">A/B Tests</span>
-          <button onClick={addTest} className="text-base px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5"
-            style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
-            <Plus size={11} />New Test
-          </button>
+          <div className="flex items-center gap-2">
+            <select value={newTestStore} onChange={e => setNewTestStore(e.target.value)}
+              className="text-base px-2 py-1.5 rounded-lg" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+              {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+            <button onClick={addTest} className="text-base px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5"
+              style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
+              <Plus size={11} />New Test
+            </button>
+          </div>
         </div>
         {tests.length === 0 && (
-          <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>No A/B tests yet — create one to get started.</div>
+          <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>
+            {allTests.length === 0 ? 'No A/B tests yet — create one to get started.' : `No A/B tests for the selected store${selectedStoreIds.length !== 1 ? 's' : ''}.`}
+          </div>
         )}
         {tests.map(test => {
           const sc = STATUS_CFG[test.status];
@@ -1445,38 +1436,21 @@ function EmailABPanel() {
 
 // ─── Transactional Email (F-15) ───────────────────────────────────────────────
 
-type TxStatus = 'active' | 'paused' | 'draft';
-interface TxTemplate {
-  id: string; name: string; trigger: string; status: TxStatus;
-  sent30d: number; deliveryRate: number; openRate: number; store: string;
-}
-
-// Standard transactional email trigger types every store can enable — the
-// list itself is structural, but activity (sent/delivery/open) is honestly
-// zeroed until real order/fulfillment webhooks are connected.
-const TX_TEMPLATES: TxTemplate[] = [
-  { id: 'tx-1', name: 'Order Confirmation',       trigger: 'order.placed',         status: 'draft', sent30d: 0, deliveryRate: 0, openRate: 0, store: 'All Stores' },
-  { id: 'tx-2', name: 'Shipping Confirmation',    trigger: 'fulfillment.shipped',   status: 'draft', sent30d: 0, deliveryRate: 0, openRate: 0, store: 'All Stores' },
-  { id: 'tx-3', name: 'Out for Delivery',          trigger: 'fulfillment.in_transit', status: 'draft', sent30d: 0, deliveryRate: 0, openRate: 0, store: 'All Stores' },
-  { id: 'tx-4', name: 'Delivered Confirmation',   trigger: 'fulfillment.delivered', status: 'draft', sent30d: 0, deliveryRate: 0, openRate: 0, store: 'All Stores' },
-  { id: 'tx-5', name: 'Refund Processed',          trigger: 'refund.created',        status: 'draft', sent30d: 0, deliveryRate: 0, openRate: 0, store: 'All Stores' },
-  { id: 'tx-6', name: 'Password Reset',            trigger: 'customer.password_reset', status: 'draft', sent30d: 0, deliveryRate: 0, openRate: 0, store: 'All Stores' },
-  { id: 'tx-7', name: 'Account Created',           trigger: 'customer.created',      status: 'draft', sent30d: 0, deliveryRate: 0, openRate: 0, store: 'All Stores' },
-  { id: 'tx-8', name: 'Wholesale Invoice Ready',   trigger: 'invoice.created',       status: 'draft', sent30d: 0, deliveryRate: 0, openRate: 0, store: 'bakerywholesalers.com' },
-  { id: 'tx-9', name: 'Back-in-Stock Notification', trigger: 'inventory.back_in_stock', status: 'draft', sent30d: 0, deliveryRate: 0, openRate: 0, store: 'All Stores' },
-];
-
-function TransactionalPanel() {
-  const [templates, setTemplates] = usePersistentState<TxTemplate[]>('email.txTemplates', TX_TEMPLATES);
+function TransactionalPanel({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
+  const [allTemplates, setTemplates] = usePersistentState<TxTemplate[]>('email.txTemplates', TX_TEMPLATES);
+  const inScope = (store: string) => store === 'All Stores' || selectedStoreIds.includes(resolveStoreId(store, stores) ?? '');
+  const templates = allTemplates.filter(t => inScope(t.store));
   const [flows, setFlows] = usePersistentState<Record<string, boolean>>(
     'email.txFlows',
     Object.fromEntries(TX_TEMPLATES.map(t => [t.id, t.status === 'active']))
   );
+  const [newTemplateStore, setNewTemplateStore] = useState('All Stores');
   const addTemplate = () => {
     const id = `tx-${Date.now()}`;
     setTemplates(prev => [{
       id, name: 'Untitled Template', trigger: 'custom.event', status: 'draft',
-      sent30d: 0, deliveryRate: 0, openRate: 0, store: 'All Stores',
+      sent30d: 0, deliveryRate: 0, openRate: 0, store: newTemplateStore,
     }, ...prev]);
   };
   const STATUS_CFG: Record<TxStatus, { color: string; bg: string; label: string }> = {
@@ -1487,8 +1461,8 @@ function TransactionalPanel() {
 
   const active = templates.filter(t => t.status === 'active');
   const totalSent = active.reduce((s, t) => s + t.sent30d, 0);
-  const avgDelivery = active.reduce((s, t) => s + t.deliveryRate, 0) / active.length;
-  const avgOpen = active.reduce((s, t) => s + t.openRate, 0) / active.length;
+  const avgDelivery = active.length > 0 ? active.reduce((s, t) => s + t.deliveryRate, 0) / active.length : 0;
+  const avgOpen = active.length > 0 ? active.reduce((s, t) => s + t.openRate, 0) / active.length : 0;
 
   return (
     <div className="flex flex-col gap-4">
@@ -1509,11 +1483,23 @@ function TransactionalPanel() {
       <div className="glass-card overflow-hidden">
         <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
           <span className="section-label">Transactional Templates</span>
-          <button onClick={addTemplate} className="text-base px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5"
-            style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
-            <Plus size={11} />New Template
-          </button>
+          <div className="flex items-center gap-2">
+            <select value={newTemplateStore} onChange={e => setNewTemplateStore(e.target.value)}
+              className="text-base px-2 py-1.5 rounded-lg" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+              <option value="All Stores">All Stores</option>
+              {stores.map(s => <option key={s.id} value={s.domain}>{s.name}</option>)}
+            </select>
+            <button onClick={addTemplate} className="text-base px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5"
+              style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
+              <Plus size={11} />New Template
+            </button>
+          </div>
         </div>
+        {templates.length === 0 && (
+          <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>
+            No transactional templates for the selected store{selectedStoreIds.length !== 1 ? 's' : ''}.
+          </div>
+        )}
         <table className="w-full text-base">
           <thead style={{ background: 'var(--bg-elevated)' }}>
             <tr>
@@ -1563,7 +1549,11 @@ function TransactionalPanel() {
 
 export default function EmailPage() {
   const [tab, setTab] = useState<Tab>('flows');
-  const [flows] = usePersistentState<EmailFlow[]>('email.flows', []);
+  const [stores] = useStores();
+  const { selectedStoreIds } = useStoreScope('email');
+  const [allFlows] = usePersistentState<EmailFlow[]>('email.flows', []);
+  const inScope = (store: string) => store === 'All Stores' || selectedStoreIds.includes(resolveStoreId(store, stores) ?? '');
+  const flows = allFlows.filter(f => inScope(f.store));
   const s = computeEmailStats(flows);
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-base)' }}>
@@ -1571,6 +1561,7 @@ export default function EmailPage() {
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <TopBar title="Email & SMS" subtitle={`${s.activeFlows} active flows`} breadcrumbs={['MarketOS', 'Email & SMS']} />
         <main className="flex-1 overflow-hidden flex flex-col p-5 gap-4" style={{ minHeight: 0 }}>
+          <div className="shrink-0"><StoreScopeBar sectionKey="email" /></div>
           <div className="grid grid-cols-5 gap-3 shrink-0">
             {[
               { label: 'Subscribers',   value: fmt(s.totalSubscribers),      color: 'var(--cyan)' },
@@ -1607,20 +1598,22 @@ export default function EmailPage() {
             {tab === 'flows'          && (
               <div className="grid grid-cols-2 gap-3">
                 {flows.length === 0 && (
-                  <div className="col-span-2 text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>No automation flows yet.</div>
+                  <div className="col-span-2 text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>
+                    {allFlows.length === 0 ? 'No automation flows yet.' : `No automation flows for the selected store${selectedStoreIds.length !== 1 ? 's' : ''}.`}
+                  </div>
                 )}
                 {flows.map(f => <FlowCard key={f.id} flow={f} />)}
               </div>
             )}
-            {tab === 'campaigns'      && <CampaignsList />}
+            {tab === 'campaigns'      && <CampaignsList selectedStoreIds={selectedStoreIds} />}
             {tab === 'builder'        && <EmailBuilderPanel />}
             {tab === 'segments'       && <SegmentsPanel />}
             {tab === 'deliverability' && <DeliverabilityPanel />}
-            {tab === 'abtesting'      && <EmailABPanel />}
+            {tab === 'abtesting'      && <EmailABPanel selectedStoreIds={selectedStoreIds} />}
             {tab === 'sendtime'       && <SendTimePanel />}
-            {tab === 'transactional'  && <TransactionalPanel />}
-            {tab === 'sms'            && <SmsCampaignsPanel />}
-            {tab === 'push'           && <PushPanel />}
+            {tab === 'transactional'  && <TransactionalPanel selectedStoreIds={selectedStoreIds} />}
+            {tab === 'sms'            && <SmsCampaignsPanel selectedStoreIds={selectedStoreIds} />}
+            {tab === 'push'           && <PushPanel selectedStoreIds={selectedStoreIds} />}
           </div>
         </main>
       </div>

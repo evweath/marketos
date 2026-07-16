@@ -3,7 +3,11 @@ import { SAMPLE_ALERT_RULES, SAMPLE_FIRED_ALERTS } from './alertData';
 import { SAMPLE_STORE_HEALTH, SAMPLE_TRAFFIC, SAMPLE_CONVERSIONS, SAMPLE_ABANDONED_CARTS, SAMPLE_TRANSACTIONS, SAMPLE_PAGE_CHANGES, SAMPLE_SEO_SNAPSHOTS } from './mockData';
 import { SAMPLE_CHANNEL_METRICS, SAMPLE_TIME_SERIES, SAMPLE_ATTRIBUTION, SAMPLE_AI_INSIGHTS, SAMPLE_SHARED_REPORTS, emptyChannelMetrics, emptyTimeSeries, emptyAttribution } from './analyticsData';
 import { SAMPLE_SOCIAL_POSTS, SAMPLE_INBOX_MESSAGES, SAMPLE_LISTENING_ITEMS, SAMPLE_PLATFORM_STATS, SAMPLE_APPROVAL_POSTS, SAMPLE_DM_RULES, emptyPlatformStats } from './socialData';
-import { SAMPLE_EMAIL_FLOWS, SAMPLE_EMAIL_CAMPAIGNS, SAMPLE_SEGMENTS, SAMPLE_DELIVERABILITY } from './emailData';
+import {
+  SAMPLE_EMAIL_FLOWS, SAMPLE_EMAIL_CAMPAIGNS, SAMPLE_SEGMENTS, SAMPLE_DELIVERABILITY,
+  SAMPLE_SMS_CAMPAIGNS, SAMPLE_SMS_FLOWS, SAMPLE_PUSH_CAMPAIGNS, SAMPLE_PUSH_AUTOMATIONS,
+  SAMPLE_PUSH_SUBSCRIBERS_BY_STORE, SAMPLE_EMAIL_AB_TESTS,
+} from './emailData';
 import { SAMPLE_GENERATED_CREATIVES, SAMPLE_COMPETITOR_ADS, SAMPLE_PERFORMANCE_SCORES, SAMPLE_CAMPAIGN_BRIEFS, SAMPLE_BRAND_VOICE_SETTINGS, DEFAULT_BRAND_VOICE_SETTINGS } from './contentData';
 import { SAMPLE_KEYWORD_RANKINGS, SAMPLE_GSC_METRICS, SAMPLE_SEO_AUDIT_ITEMS, SAMPLE_COMPETITOR_DATA, SAMPLE_BRAND_MENTIONS, SAMPLE_LLM_VISIBILITY, SAMPLE_PREVIOUS_BLOGS, emptyLlmVisibility } from './seoData';
 import { SAMPLE_SEQUENCES, SAMPLE_RECOVERED_LIST, SAMPLE_UPSELL_OFFERS, SAMPLE_WATCH_PRODUCTS, SAMPLE_CUSTOMERS } from './cartData';
@@ -64,6 +68,12 @@ const REGISTRY: SampleDataEntry[] = [
   { key: 'email.campaigns',           sample: SAMPLE_EMAIL_CAMPAIGNS,  empty: [] },
   { key: 'email.segments',            sample: SAMPLE_SEGMENTS,         empty: [] },
   { key: 'email.deliverability',      sample: SAMPLE_DELIVERABILITY,   empty: [] },
+  { key: 'email.smsCampaigns',        sample: SAMPLE_SMS_CAMPAIGNS,    empty: [] },
+  { key: 'email.smsFlows',            sample: SAMPLE_SMS_FLOWS,        empty: [] },
+  { key: 'email.pushCampaigns',       sample: SAMPLE_PUSH_CAMPAIGNS,   empty: [] },
+  { key: 'email.pushAutomations',     sample: SAMPLE_PUSH_AUTOMATIONS, empty: [] },
+  { key: 'email.pushSubscribersByStore', sample: SAMPLE_PUSH_SUBSCRIBERS_BY_STORE, empty: [] },
+  { key: 'email.abTests',             sample: SAMPLE_EMAIL_AB_TESTS,   empty: [] },
   { key: 'content.creatives',         sample: SAMPLE_GENERATED_CREATIVES, empty: [] },
   { key: 'content.competitorAds',     sample: SAMPLE_COMPETITOR_ADS,   empty: [] },
   { key: 'content.performanceScores', sample: SAMPLE_PERFORMANCE_SCORES, empty: [] },
