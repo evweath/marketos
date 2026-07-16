@@ -18,7 +18,8 @@ import type {
 } from '@/lib/emailData';
 import { useStores, useStoreScope, resolveStoreId } from '@/lib/storeScope';
 import { StoreScopeBar } from '@/components/shared/StoreScopeBar';
-import { Mail, GitBranch, Users, Shield, Play, Pause, CheckCircle, AlertTriangle, XCircle, MessageSquare, Bell, LayoutTemplate, Clock, FlaskConical, ShoppingBag, GripVertical, Trash2, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Mail, GitBranch, Users, Shield, Play, Pause, CheckCircle, AlertTriangle, XCircle, MessageSquare, Bell, LayoutTemplate, Clock, FlaskConical, ShoppingBag, GripVertical, Trash2, Plus, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import type { StoreRecord } from '@/lib/storeScope';
 
 const c$ = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
 const fmt = (n: number) => n >= 1000 ? (n / 1000).toFixed(1) + 'K' : n.toString();
@@ -101,32 +102,169 @@ function FlowCard({ flow }: { flow: EmailFlow }) {
   );
 }
 
+const CAMPAIGN_TEMPLATES = ['Newsletter', 'Promotion / Sale', 'Product Launch', 'Win-Back', 'Announcement'];
+
+function CampaignWizardModal({ stores, segments, onClose, onCreate }: {
+  stores: StoreRecord[];
+  segments: SegmentData[];
+  onClose: () => void;
+  onCreate: (c: EmailCampaign) => void;
+}) {
+  const [step, setStep] = useState(1);
+  const [store, setStore] = useState(stores[0]?.domain ?? '');
+  const [segmentId, setSegmentId] = useState<string>('all');
+  const [template, setTemplate] = useState(CAMPAIGN_TEMPLATES[0]);
+  const [subject, setSubject] = useState('');
+  const [preview, setPreview] = useState('');
+  const [schedule, setSchedule] = useState<'now' | 'later'>('now');
+  const [when, setWhen] = useState('');
+
+  const inputStyle = { background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' } as const;
+  const seg = segments.find(s => s.id === segmentId);
+  const recipients = seg ? seg.count : segments.reduce((s, x) => s + x.count, 0);
+  const canNext = step === 3 ? subject.trim() !== '' : true;
+  const steps = ['Segment', 'Template', 'Subject', 'Review', 'Schedule'];
+
+  const create = () => {
+    onCreate({
+      id: `ec-${Date.now()}`,
+      subject: subject.trim() || '[Draft] Untitled Campaign',
+      preview: preview.trim() || `${template} to ${seg ? seg.name : 'all subscribers'}`,
+      status: schedule === 'later' ? 'scheduled' : 'draft',
+      store,
+      sentTo: recipients,
+      scheduledFor: schedule === 'later' ? (when || 'Not set') : undefined,
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={onClose}>
+      <div className="rounded-2xl w-[580px] max-w-[92vw] flex flex-col" style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-dim)' }} onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+          <div>
+            <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>New Email Campaign</div>
+            <div className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Step {step} of 5 · {steps[step - 1]}</div>
+          </div>
+          <button onClick={onClose} style={{ color: 'var(--text-muted)' }}><X size={16} /></button>
+        </div>
+        <div className="flex gap-1 px-5 pt-3">
+          {[1, 2, 3, 4, 5].map(n => <div key={n} className="flex-1 h-1 rounded-full" style={{ background: n <= step ? '#ffb347' : 'var(--bg-elevated)' }} />)}
+        </div>
+        <div className="p-5 flex flex-col gap-4" style={{ minHeight: 240 }}>
+          {step === 1 && (
+            <>
+              <div>
+                <label className="section-label block mb-1.5">Store</label>
+                <select value={store} onChange={e => setStore(e.target.value)} className="w-full px-3 py-2 rounded-lg text-base outline-none" style={inputStyle}>
+                  {stores.map(s => <option key={s.id} value={s.domain}>{s.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="section-label block mb-1.5">Audience segment</label>
+                <select value={segmentId} onChange={e => setSegmentId(e.target.value)} className="w-full px-3 py-2 rounded-lg text-base outline-none" style={inputStyle}>
+                  <option value="all">All subscribers{segments.length ? ` (${segments.reduce((s, x) => s + x.count, 0).toLocaleString()})` : ''}</option>
+                  {segments.map(s => <option key={s.id} value={s.id}>{s.name} ({s.count.toLocaleString()})</option>)}
+                </select>
+                <div className="text-[16px] mt-1.5" style={{ color: 'var(--text-muted)' }}>{recipients.toLocaleString()} recipients{segments.length === 0 && ' — load sample data or create segments first'}</div>
+              </div>
+            </>
+          )}
+          {step === 2 && (
+            <div>
+              <label className="section-label block mb-1.5">Template</label>
+              <div className="grid grid-cols-2 gap-2">
+                {CAMPAIGN_TEMPLATES.map(t => {
+                  const active = template === t;
+                  return (
+                    <button key={t} onClick={() => setTemplate(t)}
+                      className="px-3 py-3 rounded-lg text-base text-left transition-all"
+                      style={{ background: active ? 'rgba(255,179,71,0.1)' : 'var(--bg-elevated)', color: active ? '#ffb347' : 'var(--text-secondary)', border: `1px solid ${active ? 'rgba(255,179,71,0.3)' : 'var(--border-subtle)'}` }}>
+                      <LayoutTemplate size={14} className="mb-1.5" />{t}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {step === 3 && (
+            <>
+              <div>
+                <label className="section-label block mb-1.5">Subject line</label>
+                <input value={subject} onChange={e => setSubject(e.target.value)} placeholder="🍩 Your subject line…"
+                  className="w-full px-3 py-2 rounded-lg text-base outline-none" style={inputStyle} />
+              </div>
+              <div>
+                <label className="section-label block mb-1.5">Preview text</label>
+                <input value={preview} onChange={e => setPreview(e.target.value)} placeholder="The teaser shown after the subject…"
+                  className="w-full px-3 py-2 rounded-lg text-base outline-none" style={inputStyle} />
+              </div>
+              {/* inbox preview */}
+              <div className="rounded-lg p-3" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                <div className="text-[16px] mb-1" style={{ color: 'var(--text-muted)' }}>Inbox preview</div>
+                <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>{subject || 'Your subject line'}</div>
+                <div className="text-[16px]" style={{ color: 'var(--text-muted)' }}>{preview || 'Preview text appears here…'}</div>
+              </div>
+            </>
+          )}
+          {step === 4 && (
+            <div className="rounded-xl p-4 space-y-2 text-[16px] font-mono" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)' }}>
+              <div className="flex gap-2"><span className="w-20 text-right" style={{ color: 'var(--text-muted)' }}>STORE</span><span style={{ color: 'var(--text-secondary)' }}>{store}</span></div>
+              <div className="flex gap-2"><span className="w-20 text-right" style={{ color: 'var(--text-muted)' }}>SEGMENT</span><span style={{ color: 'var(--text-secondary)' }}>{seg ? seg.name : 'All subscribers'} · {recipients.toLocaleString()} recipients</span></div>
+              <div className="flex gap-2"><span className="w-20 text-right" style={{ color: 'var(--text-muted)' }}>TEMPLATE</span><span style={{ color: 'var(--text-secondary)' }}>{template}</span></div>
+              <div className="flex gap-2"><span className="w-20 text-right" style={{ color: 'var(--text-muted)' }}>SUBJECT</span><span style={{ color: '#ffb347' }}>{subject || '—'}</span></div>
+            </div>
+          )}
+          {step === 5 && (
+            <>
+              <label className="section-label block mb-1.5">When to send</label>
+              <div className="flex flex-col gap-2">
+                <button onClick={() => setSchedule('now')} className="px-3 py-2.5 rounded-lg text-base text-left" style={{ background: schedule === 'now' ? 'rgba(16,217,138,0.1)' : 'var(--bg-elevated)', color: schedule === 'now' ? '#10d98a' : 'var(--text-secondary)', border: `1px solid ${schedule === 'now' ? 'rgba(16,217,138,0.25)' : 'var(--border-subtle)'}` }}>
+                  {schedule === 'now' && '✓ '}Save as draft (send later manually)
+                </button>
+                <button onClick={() => setSchedule('later')} className="px-3 py-2.5 rounded-lg text-base text-left" style={{ background: schedule === 'later' ? 'rgba(0,217,255,0.1)' : 'var(--bg-elevated)', color: schedule === 'later' ? 'var(--cyan)' : 'var(--text-secondary)', border: `1px solid ${schedule === 'later' ? 'rgba(0,217,255,0.25)' : 'var(--border-subtle)'}` }}>
+                  {schedule === 'later' && '✓ '}Schedule for a specific time
+                </button>
+                {schedule === 'later' && (
+                  <input value={when} onChange={e => setWhen(e.target.value)} placeholder="e.g. Tomorrow 9:00 AM"
+                    className="w-full px-3 py-2 rounded-lg text-base outline-none" style={inputStyle} />
+                )}
+              </div>
+            </>
+          )}
+        </div>
+        <div className="flex items-center justify-between px-5 py-3 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
+          <button onClick={() => step === 1 ? onClose() : setStep(step - 1)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-base" style={{ color: 'var(--text-muted)' }}>
+            {step === 1 ? 'Cancel' : <><ChevronLeft size={13} />Back</>}
+          </button>
+          {step < 5 ? (
+            <button onClick={() => canNext && setStep(step + 1)} disabled={!canNext} className="flex items-center gap-1 px-4 py-1.5 rounded-lg text-base font-medium disabled:opacity-50" style={{ background: '#ffb347', color: '#0a0e1a' }}>Next<ChevronRight size={13} /></button>
+          ) : (
+            <button onClick={create} className="px-4 py-1.5 rounded-lg text-base font-semibold" style={{ background: '#ffb347', color: '#0a0e1a' }}>{schedule === 'later' ? 'Schedule Campaign' : 'Create Draft'}</button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CampaignsList({ selectedStoreIds }: { selectedStoreIds: string[] }) {
   const [stores] = useStores();
   const SS = { sent: { color: '#10d98a', label: 'Sent' }, scheduled: { color: 'var(--cyan)', label: 'Scheduled' }, draft: { color: '#7b93ff', label: 'Draft' } };
   const [allCampaigns, setCampaigns] = usePersistentState<EmailCampaign[]>('email.campaigns', []);
+  const [allSegments] = usePersistentState<SegmentData[]>('email.segments', []);
   const campaigns = allCampaigns.filter(c => selectedStoreIds.includes(resolveStoreId(c.store, stores) ?? ''));
-  const [newCampaignStore, setNewCampaignStore] = useState(stores[0]?.domain ?? '');
-  const addCampaign = () => {
-    const id = `ec-${Date.now()}`;
-    setCampaigns(prev => [{
-      id, subject: '[DRAFT] Untitled Campaign',
-      preview: 'Add a subject and content to get started...',
-      status: 'draft', store: newCampaignStore, sentTo: 0,
-    }, ...prev]);
-  };
+  const [wizard, setWizard] = useState(false);
   return (
     <div className="glass-card overflow-hidden">
+      {wizard && (
+        <CampaignWizardModal stores={stores} segments={allSegments}
+          onClose={() => setWizard(false)}
+          onCreate={(c) => { setCampaigns(prev => [c, ...prev]); setWizard(false); }} />
+      )}
       <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
         <span className="section-label">Email Campaigns</span>
-        <div className="flex items-center gap-2">
-          <select value={newCampaignStore} onChange={e => setNewCampaignStore(e.target.value)}
-            className="text-base px-2 py-1.5 rounded-lg" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
-            {stores.map(s => <option key={s.id} value={s.domain}>{s.name}</option>)}
-          </select>
-          <button onClick={addCampaign} className="text-base px-3 py-1.5 rounded-lg font-medium"
-            style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>+ New Campaign</button>
-        </div>
+        <button onClick={() => setWizard(true)} className="text-base px-3 py-1.5 rounded-lg font-medium"
+          style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>+ New Campaign</button>
       </div>
       {campaigns.length === 0 && (
         <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>
