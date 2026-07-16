@@ -65,6 +65,17 @@ const PHOTO_JOBS: PhotoJob[] = [];
 
 const STYLE_PRESETS = ['Studio White', 'Lifestyle Kitchen', 'Dark Dramatic', 'Flat Lay', 'Outdoor Market', 'Minimalist'];
 
+// Representative gradient for each style — used by the preview cards + the
+// "after" side of the before/after mockup.
+const STYLE_GRADIENTS: Record<string, string> = {
+  'Studio White':     'linear-gradient(135deg, #f5f5f7, #d8dbe4)',
+  'Lifestyle Kitchen':'linear-gradient(135deg, #e8c9a0, #c98a5a)',
+  'Dark Dramatic':    'linear-gradient(135deg, #1a1f33, #0a0e1a)',
+  'Flat Lay':         'linear-gradient(135deg, #ffe0d0, #ffb39c)',
+  'Outdoor Market':   'linear-gradient(135deg, #a8d8a0, #5a9e6a)',
+  'Minimalist':       'linear-gradient(135deg, #e4e7ee, #b9c0d0)',
+};
+
 function PhotoStudioPanel() {
   const [activeStyle, setActiveStyle] = useState<string>('Studio White');
   const [mode, setMode] = useState<'bg_remove' | 'style'>('bg_remove');
@@ -128,14 +139,21 @@ function PhotoStudioPanel() {
             {mode === 'style' && (
               <div>
                 <div className='text-base font-medium mb-2' style={{ color: 'var(--text-primary)' }}>Style Preset</div>
-                <div className='flex flex-wrap gap-1.5'>
-                  {STYLE_PRESETS.map(s => (
-                    <button key={s} onClick={() => setActiveStyle(s)}
-                      className='text-[16px] px-2 py-1 rounded-lg transition-all'
-                      style={{ background: activeStyle === s ? 'rgba(123,147,255,0.12)' : 'var(--bg-elevated)', color: activeStyle === s ? '#7b93ff' : 'var(--text-muted)', border: `1px solid ${activeStyle === s ? 'rgba(123,147,255,0.3)' : 'transparent'}` }}>
-                      {s}
-                    </button>
-                  ))}
+                <div className='grid grid-cols-3 gap-2'>
+                  {STYLE_PRESETS.map(s => {
+                    const active = activeStyle === s;
+                    return (
+                      <button key={s} onClick={() => setActiveStyle(s)}
+                        className='rounded-lg overflow-hidden transition-all text-left'
+                        style={{ border: `1px solid ${active ? '#7b93ff' : 'var(--border-subtle)'}` }}>
+                        <div style={{ height: 40, background: STYLE_GRADIENTS[s] }} />
+                        <div className='px-1.5 py-1 text-[16px] truncate'
+                          style={{ background: active ? 'rgba(123,147,255,0.12)' : 'var(--bg-elevated)', color: active ? '#7b93ff' : 'var(--text-muted)' }}>
+                          {active && '✓ '}{s}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -145,6 +163,29 @@ function PhotoStudioPanel() {
               <Wand2 size={12} />
               {mode === 'bg_remove' ? 'Remove Background' : 'Apply AI Style'}
             </button>
+          </div>
+
+          {/* Before / After preview mockup */}
+          <div className='glass-card p-4'>
+            <div className='section-label mb-3'>Before / After Preview</div>
+            <div className='grid grid-cols-2 gap-2'>
+              {[
+                { tag: 'Before', bg: 'repeating-conic-gradient(var(--bg-overlay) 0% 25%, var(--bg-elevated) 0% 50%) 50% / 16px 16px', label: 'Original' },
+                { tag: 'After', bg: mode === 'bg_remove' ? 'var(--bg-base)' : STYLE_GRADIENTS[activeStyle], label: mode === 'bg_remove' ? 'BG Removed' : activeStyle },
+              ].map(p => (
+                <div key={p.tag} className='rounded-xl overflow-hidden' style={{ border: '1px solid var(--border-subtle)' }}>
+                  <div className='relative flex items-center justify-center' style={{ height: 110, background: p.bg }}>
+                    <Image size={22} style={{ color: p.tag === 'Before' ? 'var(--text-muted)' : 'rgba(0,0,0,0.35)' }} />
+                    <span className='absolute top-1.5 left-1.5 text-[16px] font-mono px-1.5 py-0.5 rounded'
+                      style={{ background: 'rgba(0,0,0,0.5)', color: 'white' }}>{p.tag}</span>
+                  </div>
+                  <div className='px-2 py-1.5 text-[16px] text-center' style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>{p.label}</div>
+                </div>
+              ))}
+            </div>
+            <div className='text-[16px] mt-2 text-center' style={{ color: 'var(--text-muted)' }}>
+              {mode === 'bg_remove' ? 'Isolates your product on a transparent background.' : `Restyles your product with the "${activeStyle}" look.`}
+            </div>
           </div>
         </div>
 
