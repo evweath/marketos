@@ -45,34 +45,92 @@ const FLOW_STATUS_CFG: Record<FlowStatus, { color: string; bg: string; label: st
   draft:  { color: '#7b93ff', bg: 'rgba(123,147,255,0.1)', label: 'Draft'  },
 };
 
+const DEFAULT_STEP_DELAYS = ['Immediate', '+1 day', '+3 days', '+5 days', '+7 days', '+10 days', '+14 days'];
+const STEP_CH_ICON: Record<'email' | 'sms' | 'push', string> = { email: '✉️', sms: '💬', push: '🔔' };
+
 function FlowCard({ flow }: { flow: EmailFlow }) {
   const tc = TRIGGER_CONFIG[flow.trigger];
   const sc = FLOW_STATUS_CFG[flow.status];
   const [enabled, setEnabled] = usePersistentState(`email.flowEnabled.${flow.id}`, flow.status === 'active');
+  const [expanded, setExpanded] = useState(false);
+  const [stepCount, setStepCount] = usePersistentState(`email.flowStepCount.${flow.id}`, flow.steps);
+  const [delays, setDelays] = usePersistentState<string[]>(`email.flowStepDelays.${flow.id}`, []);
+
+  // Synthesize the step sequence from the flow's real config: cycle channels,
+  // progressive delays. Delays are editable + persisted per step.
+  const stepDelay = (i: number) => delays[i] ?? DEFAULT_STEP_DELAYS[i] ?? `+${i * 2} days`;
+  const setStepDelay = (i: number, v: string) => setDelays(prev => {
+    const next = [...prev];
+    while (next.length <= i) next.push(DEFAULT_STEP_DELAYS[next.length] ?? `+${next.length * 2} days`);
+    next[i] = v;
+    return next;
+  });
+  const stepChannel = (i: number) => flow.channels[i % flow.channels.length] ?? 'email';
 
   return (
     <div className="glass-card p-4 transition-all hover:border-white/10"
       style={{ opacity: flow.status === 'draft' ? 0.75 : 1 }}>
       <div className="flex items-start justify-between mb-3">
-        <div className="flex items-start gap-2.5">
+        <button onClick={() => setExpanded(e => !e)} className="flex items-start gap-2.5 text-left flex-1 min-w-0">
           <div className="w-8 h-8 rounded-xl flex items-center justify-center text-base shrink-0"
             style={{ background: tc.color + '18' }}>{tc.icon}</div>
-          <div>
-            <div className="text-base font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>{flow.name}</div>
-            <div className="flex items-center gap-2 text-[16px]">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <ChevronDown size={13} className="transition-transform shrink-0" style={{ color: 'var(--text-muted)', transform: expanded ? 'none' : 'rotate(-90deg)' }} />
+              <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>{flow.name}</div>
+            </div>
+            <div className="flex items-center gap-2 text-[16px] mt-0.5 ml-5">
               <span className="font-mono px-1.5 py-0.5 rounded" style={{ background: sc.bg, color: sc.color }}>{sc.label}</span>
-              <span style={{ color: 'var(--text-muted)' }}>{flow.steps} steps · {flow.channels.join(' + ')} · {flow.store}</span>
+              <span style={{ color: 'var(--text-muted)' }}>{stepCount} steps · {flow.channels.join(' + ')} · {flow.store}</span>
             </div>
           </div>
-        </div>
+        </button>
         {flow.status !== 'draft' && (
           <button onClick={() => setEnabled(e => !e)}
-            className="p-1.5 rounded-lg transition-all"
+            className="p-1.5 rounded-lg transition-all shrink-0"
             style={{ background: enabled ? 'rgba(255,179,71,0.08)' : 'rgba(16,217,138,0.08)', color: enabled ? '#ffb347' : '#10d98a' }}>
             {enabled ? <Pause size={12} /> : <Play size={12} />}
           </button>
         )}
       </div>
+
+      {/* Expanded step-by-step visualization + edit */}
+      {expanded && (
+        <div className="mb-3 rounded-xl p-3" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+          <div className="flex items-center justify-between mb-2.5">
+            <span className="section-label">Flow Steps</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>Trigger: {tc.label}</span>
+              <button onClick={() => setStepCount(n => Math.max(1, n - 1))}
+                className="w-5 h-5 rounded flex items-center justify-center" style={{ background: 'var(--bg-overlay)', color: 'var(--text-secondary)' }}>−</button>
+              <span className="text-[16px] font-mono w-4 text-center" style={{ color: 'var(--text-primary)' }}>{stepCount}</span>
+              <button onClick={() => setStepCount(n => Math.min(7, n + 1))}
+                className="w-5 h-5 rounded flex items-center justify-center" style={{ background: 'var(--bg-overlay)', color: 'var(--text-secondary)' }}>+</button>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            {Array.from({ length: stepCount }, (_, i) => {
+              const ch = stepChannel(i);
+              return (
+                <div key={i} className="flex items-center gap-2.5 rounded-lg px-2.5 py-2" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
+                  <span className="text-base">{STEP_CH_ICON[ch]}</span>
+                  <span className="text-[16px] font-mono px-1.5 py-0.5 rounded shrink-0" style={{ background: 'var(--bg-overlay)', color: 'var(--text-muted)' }}>Step {i + 1}</span>
+                  <span className="text-[16px] capitalize" style={{ color: 'var(--text-secondary)', width: 44 }}>{ch}</span>
+                  <input
+                    value={stepDelay(i)}
+                    onChange={e => setStepDelay(i, e.target.value)}
+                    className="text-[16px] font-mono px-2 py-1 rounded outline-none"
+                    style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)', width: 90 }}
+                  />
+                  <span className="text-[16px] truncate flex-1" style={{ color: 'var(--text-muted)' }}>
+                    {tc.label} message #{i + 1}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
       {flow.sent > 0 ? (
         <div className="grid grid-cols-4 gap-2">
           {[
