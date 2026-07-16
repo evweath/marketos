@@ -45,6 +45,7 @@ const STATUS_CONFIG: Record<ABStatus, { label: string; color: string; bg: string
 
 function ABTestingPanel() {
   const [tests, setTests] = usePersistentState<ABTest[]>('ads.abTests', []);
+  const [autoPause, setAutoPause] = usePersistentState<Record<string, boolean>>('ads.abAutoPause', {});
   const [expanded, setExpanded] = useState<string | null>('ab-001');
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
@@ -192,6 +193,53 @@ function ABTestingPanel() {
                       );
                     })}
                   </div>
+                  {/* Variant comparison bar charts */}
+                  {test.variants.some(v => v.spend > 0) && (
+                    <div className="rounded-xl p-3" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)' }}>
+                      <div className="section-label mb-2">Variant Comparison</div>
+                      {([
+                        { key: 'ctr' as const,  label: 'CTR',  fmt: (v: number) => pct(v),      higherBetter: true },
+                        { key: 'roas' as const, label: 'ROAS', fmt: (v: number) => v + '×',      higherBetter: true },
+                        { key: 'cpa' as const,  label: 'CPA',  fmt: (v: number) => c$(v),        higherBetter: false },
+                      ]).map(metric => {
+                        const vals = test.variants.map(v => v[metric.key]);
+                        const max = Math.max(...vals, 0.0001);
+                        const best = metric.higherBetter ? Math.max(...vals) : Math.min(...vals.filter(x => x > 0));
+                        return (
+                          <div key={metric.key} className="mb-2.5 last:mb-0">
+                            <div className="section-label text-[16px] mb-1">{metric.label}</div>
+                            {test.variants.map(v => {
+                              const val = v[metric.key];
+                              const isBest = val === best && val > 0;
+                              return (
+                                <div key={v.id} className="flex items-center gap-2 mb-1">
+                                  <span className="text-[16px] font-mono w-16 shrink-0" style={{ color: 'var(--text-muted)' }}>{v.label}</span>
+                                  <div className="flex-1 h-4 rounded" style={{ background: 'var(--bg-elevated)' }}>
+                                    <div className="h-4 rounded transition-all" style={{ width: `${Math.max(3, (val / max) * 100)}%`, background: isBest ? '#10d98a' : '#7b93ff', opacity: v.autoPaused ? 0.4 : 1 }} />
+                                  </div>
+                                  <span className="text-[16px] font-mono w-14 text-right shrink-0" style={{ color: isBest ? '#10d98a' : 'var(--text-secondary)' }}>{val > 0 ? metric.fmt(val) : '—'}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Per-test auto-pause toggle */}
+                  <button onClick={() => setAutoPause(prev => ({ ...prev, [test.id]: !prev[test.id] }))}
+                    className="flex items-center justify-between rounded-xl px-3 py-2.5 transition-all"
+                    style={{ background: 'var(--bg-base)', border: `1px solid ${autoPause[test.id] ? 'rgba(16,217,138,0.3)' : 'var(--border-dim)'}` }}>
+                    <div className="text-left">
+                      <div className="text-base" style={{ color: 'var(--text-primary)' }}>Auto-pause losing variant</div>
+                      <div className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Automatically pause the loser once confidence reaches 95%</div>
+                    </div>
+                    <span className="relative w-9 h-5 rounded-full transition-colors shrink-0" style={{ background: autoPause[test.id] ? '#10d98a' : 'var(--bg-overlay)' }}>
+                      <span className="absolute w-3.5 h-3.5 bg-white rounded-full top-0.5 transition-all" style={{ left: autoPause[test.id] ? '18px' : '2px' }} />
+                    </span>
+                  </button>
+
                   <div className="flex items-center gap-2">
                     <div className="flex-1 rounded-full h-1.5" style={{ background: 'var(--bg-elevated)' }}>
                       <div className="h-1.5 rounded-full transition-all" style={{ width: pct(test.confidence), background: test.confidence >= 95 ? '#10d98a' : test.confidence >= 70 ? '#ffb347' : '#7b93ff' }} />
