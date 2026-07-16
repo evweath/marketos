@@ -305,19 +305,77 @@ function CampaignWizardModal({ stores, segments, onClose, onCreate }: {
   );
 }
 
+interface CampaignAbConfig { variantB: string; split: number; metric: string; }
+
+function CampaignAbModal({ campaign, existing, onClose, onStart }: {
+  campaign: EmailCampaign; existing?: CampaignAbConfig; onClose: () => void; onStart: (cfg: CampaignAbConfig) => void;
+}) {
+  const [variantB, setVariantB] = useState(existing?.variantB ?? '');
+  const [split, setSplit] = useState(existing?.split ?? 50);
+  const [metric, setMetric] = useState(existing?.metric ?? 'openRate');
+  const inputStyle: React.CSSProperties = { background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' };
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(10,14,26,0.85)' }} onClick={onClose}>
+      <div className="glass-card w-[520px] p-5" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2"><FlaskConical size={14} style={{ color: '#7b93ff' }} /><span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>A/B Test — {campaign.subject.slice(0, 40)}</span></div>
+          <button onClick={onClose} style={{ color: 'var(--text-muted)' }}><X size={14} /></button>
+        </div>
+        <div className="space-y-3">
+          <div>
+            <label className="section-label block mb-1.5">Variant A (control) — subject</label>
+            <input value={campaign.subject} disabled className="w-full px-3 py-2 rounded-lg text-base outline-none" style={{ ...inputStyle, opacity: 0.7 }} />
+          </div>
+          <div>
+            <label className="section-label block mb-1.5">Variant B — subject</label>
+            <input value={variantB} onChange={e => setVariantB(e.target.value)} placeholder="Alternate subject line to test…" className="w-full px-3 py-2 rounded-lg text-base outline-none" style={inputStyle} />
+          </div>
+          <div>
+            <label className="section-label block mb-1.5">Traffic Split — A {split}% / B {100 - split}%</label>
+            <input type="range" min={10} max={90} value={split} onChange={e => setSplit(Number(e.target.value))} className="w-full" style={{ accentColor: '#7b93ff' }} />
+          </div>
+          <div>
+            <label className="section-label block mb-1.5">Winning Metric</label>
+            <select value={metric} onChange={e => setMetric(e.target.value)} className="w-full px-3 py-2 rounded-lg text-base outline-none" style={inputStyle}>
+              <option value="openRate">Open Rate</option>
+              <option value="clickRate">Click Rate</option>
+              <option value="revenue">Revenue per recipient</option>
+            </select>
+          </div>
+        </div>
+        <div className="flex gap-2 mt-5">
+          <button onClick={() => onStart({ variantB, split, metric })} disabled={!variantB.trim()}
+            className="flex-1 py-2.5 rounded-xl text-base font-semibold transition-all"
+            style={{ background: variantB.trim() ? '#7b93ff' : 'rgba(123,147,255,0.3)', color: '#0a0e1a', cursor: variantB.trim() ? 'pointer' : 'not-allowed' }}>
+            {existing ? 'Update Test' : 'Start A/B Test'}
+          </button>
+          <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-base" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-dim)' }}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CampaignsList({ selectedStoreIds }: { selectedStoreIds: string[] }) {
   const [stores] = useStores();
   const SS = { sent: { color: '#10d98a', label: 'Sent' }, scheduled: { color: 'var(--cyan)', label: 'Scheduled' }, draft: { color: '#7b93ff', label: 'Draft' } };
   const [allCampaigns, setCampaigns] = usePersistentState<EmailCampaign[]>('email.campaigns', []);
   const [allSegments] = usePersistentState<SegmentData[]>('email.segments', []);
+  const [abTests, setAbTests] = usePersistentState<Record<string, CampaignAbConfig>>('email.campaignAbTests', {});
   const campaigns = allCampaigns.filter(c => selectedStoreIds.includes(resolveStoreId(c.store, stores) ?? ''));
   const [wizard, setWizard] = useState(false);
+  const [abCampaign, setAbCampaign] = useState<EmailCampaign | null>(null);
   return (
     <div className="glass-card overflow-hidden">
       {wizard && (
         <CampaignWizardModal stores={stores} segments={allSegments}
           onClose={() => setWizard(false)}
           onCreate={(c) => { setCampaigns(prev => [c, ...prev]); setWizard(false); }} />
+      )}
+      {abCampaign && (
+        <CampaignAbModal campaign={abCampaign} existing={abTests[abCampaign.id]}
+          onClose={() => setAbCampaign(null)}
+          onStart={cfg => { setAbTests(prev => ({ ...prev, [abCampaign.id]: cfg })); setAbCampaign(null); }} />
       )}
       <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border-subtle)' }}>
         <span className="section-label">Email Campaigns</span>
@@ -338,10 +396,20 @@ function CampaignsList({ selectedStoreIds }: { selectedStoreIds: string[] }) {
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-[16px] font-mono px-1.5 py-0.5 rounded" style={{ background: ss.color + '18', color: ss.color }}>{ss.label}</span>
                   <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>{camp.store}</span>
+                  {abTests[camp.id] && (
+                    <span className="text-[16px] font-mono px-1.5 py-0.5 rounded flex items-center gap-1" style={{ background: 'rgba(123,147,255,0.15)', color: '#7b93ff' }}>
+                      <FlaskConical size={9} />A/B {abTests[camp.id].split}/{100 - abTests[camp.id].split}
+                    </span>
+                  )}
                 </div>
                 <div className="text-base font-medium mb-0.5" style={{ color: 'var(--text-primary)' }}>{camp.subject}</div>
                 <div className="text-base truncate" style={{ color: 'var(--text-muted)' }}>{camp.preview}</div>
               </div>
+              <button onClick={() => setAbCampaign(camp)}
+                className="text-[16px] px-2.5 py-1 rounded-lg font-medium shrink-0 self-start flex items-center gap-1"
+                style={{ background: abTests[camp.id] ? 'rgba(123,147,255,0.15)' : 'var(--bg-elevated)', color: abTests[camp.id] ? '#7b93ff' : 'var(--text-secondary)', border: `1px solid ${abTests[camp.id] ? 'rgba(123,147,255,0.3)' : 'var(--border-dim)'}` }}>
+                <FlaskConical size={11} />{abTests[camp.id] ? 'Edit A/B' : 'A/B Test'}
+              </button>
               {camp.status === 'sent' && (
                 <div className="flex items-center gap-4 shrink-0">
                   <div className="text-right"><div className="data-value text-base font-semibold" style={{ color: '#10d98a' }}>{camp.openRate?.toFixed(1)}%</div><div className="section-label">Open</div></div>
