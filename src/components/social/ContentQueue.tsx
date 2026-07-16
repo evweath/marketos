@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Clock, BarChart2 } from 'lucide-react';
+import { Clock, BarChart2, GripVertical, Check, X } from 'lucide-react';
 import { PLATFORM_CONFIG, CATEGORY_CONFIG } from '@/lib/socialData';
 import type { SocialPost, PostStatus, SocialPlatform } from '@/lib/socialData';
+import { usePersistentState } from '@/lib/usePersistentState';
 
 interface Props {
   posts: SocialPost[];
@@ -40,12 +41,38 @@ const STATUS_TABS: { key: PostStatus | 'all'; label: string }[] = [
 
 export default function ContentQueue({ posts, onSelectPost, filterPlatform }: Props) {
   const [statusFilter, setStatusFilter] = useState<PostStatus | 'all'>('all');
+  const [, setAllPosts] = usePersistentState<SocialPost[]>('social.posts', []);
+  const [order, setOrder] = usePersistentState<string[]>('social.queueOrder', []);
+  const [dragId, setDragId] = useState<string | null>(null);
+
+  const setStatus = (id: string, status: PostStatus) => {
+    setAllPosts(prev => prev.map(p => p.id === id ? { ...p, status } : p));
+  };
+
+  const orderIdx = (id: string) => {
+    const i = order.indexOf(id);
+    return i === -1 ? Infinity : i;
+  };
+  const reorder = (fromId: string, toId: string) => {
+    if (fromId === toId) return;
+    const ids = visiblePosts.map(p => p.id);
+    const base = order.length ? order.filter(id => ids.includes(id)) : ids;
+    const merged = [...base, ...ids.filter(id => !base.includes(id))];
+    const from = merged.indexOf(fromId), to = merged.indexOf(toId);
+    if (from === -1 || to === -1) return;
+    merged.splice(to, 0, merged.splice(from, 1)[0]);
+    setOrder(merged);
+  };
 
   const visiblePosts = posts.filter(p => {
     if (statusFilter !== 'all' && p.status !== statusFilter) return false;
     if (filterPlatform !== 'all' && !p.platforms.includes(filterPlatform)) return false;
     return true;
-  }).sort((a, b) => new Date(a.scheduledFor).getTime() - new Date(b.scheduledFor).getTime());
+  }).sort((a, b) => {
+    const oa = orderIdx(a.id), ob = orderIdx(b.id);
+    if (oa !== ob) return oa - ob;
+    return new Date(a.scheduledFor).getTime() - new Date(b.scheduledFor).getTime();
+  });
 
   return (
     <div className="glass-card flex flex-col" style={{ minHeight: 0 }}>
@@ -98,11 +125,21 @@ export default function ContentQueue({ posts, onSelectPost, filterPlatform }: Pr
 
           return (
             <div key={post.id}
+              draggable
+              onDragStart={() => setDragId(post.id)}
+              onDragOver={e => e.preventDefault()}
+              onDrop={e => { e.preventDefault(); if (dragId) reorder(dragId, post.id); setDragId(null); }}
+              onDragEnd={() => setDragId(null)}
               className="border-b group hover:bg-white/[0.02] transition-colors cursor-pointer relative"
-              style={{ borderColor: 'var(--border-subtle)', borderLeft: `3px solid ${ss.color}` }}
+              style={{ borderColor: 'var(--border-subtle)', borderLeft: `3px solid ${ss.color}`, opacity: dragId === post.id ? 0.5 : 1 }}
               onClick={() => onSelectPost(post)}>
 
               <div className="flex items-start gap-3 px-4 py-3">
+                {/* Drag handle */}
+                <div className="mt-1 shrink-0 cursor-grab opacity-30 group-hover:opacity-70 transition-opacity"
+                  onClick={e => e.stopPropagation()} style={{ color: 'var(--text-muted)' }}>
+                  <GripVertical size={13} />
+                </div>
                 {/* Author avatar */}
                 <div
                   className="w-7 h-7 rounded-full flex items-center justify-center text-[16px] font-bold shrink-0 mt-0.5"
@@ -171,6 +208,22 @@ export default function ContentQueue({ posts, onSelectPost, filterPlatform }: Pr
                         style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.15)' }}>
                         ⚡ Boost
                       </span>
+                    )}
+
+                    {/* Inline approve / reject for posts in review */}
+                    {post.status === 'review' && (
+                      <div className="flex items-center gap-1.5 ml-auto">
+                        <button onClick={e => { e.stopPropagation(); setStatus(post.id, 'scheduled'); }}
+                          className="flex items-center gap-1 text-[16px] px-2 py-0.5 rounded font-medium"
+                          style={{ background: 'rgba(16,217,138,0.12)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.25)' }}>
+                          <Check size={10} />Approve
+                        </button>
+                        <button onClick={e => { e.stopPropagation(); setStatus(post.id, 'draft'); }}
+                          className="flex items-center gap-1 text-[16px] px-2 py-0.5 rounded font-medium"
+                          style={{ background: 'rgba(255,68,68,0.1)', color: '#ff4444', border: '1px solid rgba(255,68,68,0.2)' }}>
+                          <X size={10} />Reject
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
