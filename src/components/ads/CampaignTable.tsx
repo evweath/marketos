@@ -22,7 +22,7 @@ function DeltaPill({ v }: { v: number }) {
   );
 }
 
-type SortKey = 'name' | 'spendToDate' | 'revenue' | 'roas' | 'conversions' | 'cpa' | 'ctr' | 'impressions';
+type SortKey = 'name' | 'spendToDate' | 'revenue' | 'roas' | 'conversions' | 'cpa' | 'ctr' | 'impressions' | 'clicks' | 'cpc';
 
 interface Props {
   onSelectCampaign: (c: Campaign) => void;
@@ -45,11 +45,15 @@ const STATUS_FILTERS: { key: CampaignStatus | 'all'; label: string }[] = [
   { key: 'active',   label: 'Active'   },
   { key: 'paused',   label: 'Paused'   },
   { key: 'learning', label: 'Learning' },
+  { key: 'ended',    label: 'Ended'    },
+  { key: 'draft',    label: 'Draft'    },
 ];
 
 const COLS: { key: SortKey; label: string }[] = [
   { key: 'impressions', label: 'Impr.'   },
+  { key: 'clicks',      label: 'Clicks'  },
   { key: 'ctr',         label: 'CTR'     },
+  { key: 'cpc',         label: 'CPC'     },
   { key: 'spendToDate', label: 'Spend'   },
   { key: 'revenue',     label: 'Revenue' },
   { key: 'roas',        label: 'ROAS'    },
@@ -60,16 +64,24 @@ const COLS: { key: SortKey; label: string }[] = [
 export default function CampaignTable({ onSelectCampaign, selected, selectedStoreIds }: Props) {
   const [stores] = useStores();
   const [allStoreCampaigns] = usePersistentState<Campaign[]>('ads.campaigns', []);
-  const [platform, setPlatform] = useState<AdPlatform | 'all'>('all');
+  const [platforms, setPlatforms] = useState<Set<AdPlatform>>(new Set());  // empty = all
   const [status,   setStatus]   = useState<CampaignStatus | 'all'>('all');
+  const [storeFilter, setStoreFilter] = useState<string>('all');
   const [sortKey,  setSortKey]  = useState<SortKey>('revenue');
   const [sortDir,  setSortDir]  = useState<'asc' | 'desc'>('desc');
+
+  const togglePlatform = (p: AdPlatform) => setPlatforms(prev => {
+    const n = new Set(prev);
+    n.has(p) ? n.delete(p) : n.add(p);
+    return n;
+  });
 
   const allCampaigns = allStoreCampaigns.filter(c => selectedStoreIds.includes(resolveStoreId(c.store, stores) ?? ''));
 
   const campaigns = allCampaigns
-    .filter(c => platform === 'all' || c.platform === platform)
+    .filter(c => platforms.size === 0 || platforms.has(c.platform))
     .filter(c => status === 'all' || c.status === status)
+    .filter(c => storeFilter === 'all' || resolveStoreId(c.store, stores) === storeFilter)
     .sort((a, b) => {
       if (sortKey === 'name') {
         return sortDir === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
@@ -94,18 +106,19 @@ export default function CampaignTable({ onSelectCampaign, selected, selectedStor
       {/* Filters */}
       <div className='px-4 py-3 border-b space-y-2 shrink-0' style={{ borderColor: 'var(--border-subtle)' }}>
 
-        {/* Platform pill tabs */}
+        {/* Platform multi-select pills */}
         <div className='flex items-center gap-1 overflow-x-auto pb-0.5'>
           {PLATFORM_TABS.map(t => {
             const cfg = t.key !== 'all' ? AD_PLATFORM_CONFIG[t.key as AdPlatform] : null;
             const count = t.key === 'all'
               ? allCampaigns.length
               : allCampaigns.filter(c => c.platform === t.key).length;
-            const isActive = platform === t.key;
+            // "All" active when no platform selected; others when in the set (multi-select).
+            const isActive = t.key === 'all' ? platforms.size === 0 : platforms.has(t.key as AdPlatform);
 
             return (
               <button key={t.key}
-                onClick={() => setPlatform(t.key)}
+                onClick={() => t.key === 'all' ? setPlatforms(new Set()) : togglePlatform(t.key as AdPlatform)}
                 className='flex items-center gap-1.5 px-3 py-1.5 rounded-full text-base font-medium transition-all whitespace-nowrap'
                 style={{
                   background: isActive ? (cfg ? cfg.color + '18' : 'var(--bg-overlay)') : 'transparent',
@@ -128,9 +141,9 @@ export default function CampaignTable({ onSelectCampaign, selected, selectedStor
           })}
         </div>
 
-        {/* Status + count */}
-        <div className='flex items-center justify-between'>
-          <div className='flex items-center gap-0.5'>
+        {/* Status + store filter + count */}
+        <div className='flex items-center justify-between gap-2 flex-wrap'>
+          <div className='flex items-center gap-0.5 flex-wrap'>
             {STATUS_FILTERS.map(f => (
               <button key={f.key}
                 onClick={() => setStatus(f.key)}
@@ -144,9 +157,16 @@ export default function CampaignTable({ onSelectCampaign, selected, selectedStor
               </button>
             ))}
           </div>
-          <span className='text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>
-            {campaigns.length} campaigns
-          </span>
+          <div className='flex items-center gap-2'>
+            <select value={storeFilter} onChange={e => setStoreFilter(e.target.value)}
+              className='px-2 py-1 rounded-lg text-[16px]' style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+              <option value='all'>All Stores</option>
+              {stores.filter(s => selectedStoreIds.includes(s.id)).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+            <span className='text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>
+              {campaigns.length} campaigns
+            </span>
+          </div>
         </div>
       </div>
 
@@ -238,9 +258,17 @@ export default function CampaignTable({ onSelectCampaign, selected, selectedStor
                   <td className='px-3 py-3 text-right font-mono text-base tabular-nums' style={{ color: 'var(--text-secondary)' }}>
                     {fmt(camp.impressions)}
                   </td>
+                  {/* Clicks */}
+                  <td className='px-3 py-3 text-right font-mono text-base tabular-nums' style={{ color: 'var(--text-secondary)' }}>
+                    {fmt(camp.clicks)}
+                  </td>
                   {/* CTR */}
                   <td className='px-3 py-3 text-right font-mono text-base tabular-nums' style={{ color: 'var(--text-secondary)' }}>
                     {camp.ctr.toFixed(2)}%
+                  </td>
+                  {/* CPC */}
+                  <td className='px-3 py-3 text-right font-mono text-base tabular-nums' style={{ color: 'var(--text-secondary)' }}>
+                    ${camp.cpc.toFixed(2)}
                   </td>
                   {/* Spend */}
                   <td className='px-3 py-3 text-right'>
@@ -296,7 +324,7 @@ export default function CampaignTable({ onSelectCampaign, selected, selectedStor
             })}
             {campaigns.length === 0 && (
               <tr>
-                <td colSpan={11} className='px-4 py-10 text-center'>
+                <td colSpan={13} className='px-4 py-10 text-center'>
                   {allStoreCampaigns.length === 0 ? (
                     <>
                       <Megaphone size={22} className='mx-auto mb-2' style={{ color: 'var(--text-muted)' }} />
@@ -313,20 +341,22 @@ export default function CampaignTable({ onSelectCampaign, selected, selectedStor
                         Try selecting a different store, or All Stores.
                       </div>
                     </>
-                  ) : (
-                    <>
-                      <div className='text-base font-medium' style={{ color: 'var(--text-primary)' }}>
-                        {platform !== 'all' && !AD_PLATFORM_STARTED[platform as AdPlatform]
-                          ? 'Not started on this platform yet'
-                          : 'No campaigns match these filters'}
-                      </div>
-                      {platform !== 'all' && !AD_PLATFORM_STARTED[platform as AdPlatform] && (
-                        <div className='text-[16px] mt-1' style={{ color: 'var(--text-muted)' }}>
-                          No ad account has been connected for {AD_PLATFORM_CONFIG[platform as AdPlatform].label} yet.
+                  ) : (() => {
+                    const solePlatform = platforms.size === 1 ? Array.from(platforms)[0] : null;
+                    const notStarted = solePlatform && !AD_PLATFORM_STARTED[solePlatform];
+                    return (
+                      <>
+                        <div className='text-base font-medium' style={{ color: 'var(--text-primary)' }}>
+                          {notStarted ? 'Not started on this platform yet' : 'No campaigns match these filters'}
                         </div>
-                      )}
-                    </>
-                  )}
+                        {notStarted && (
+                          <div className='text-[16px] mt-1' style={{ color: 'var(--text-muted)' }}>
+                            No ad account has been connected for {AD_PLATFORM_CONFIG[solePlatform].label} yet.
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
                 </td>
               </tr>
             )}
@@ -343,6 +373,10 @@ export default function CampaignTable({ onSelectCampaign, selected, selectedStor
               <td className='px-3 py-2.5 text-right font-mono text-base tabular-nums' style={{ color: 'var(--text-secondary)' }}>
                 {fmt(campaigns.reduce((s, c) => s + c.impressions, 0))}
               </td>
+              <td className='px-3 py-2.5 text-right font-mono text-base tabular-nums' style={{ color: 'var(--text-secondary)' }}>
+                {fmt(campaigns.reduce((s, c) => s + c.clicks, 0))}
+              </td>
+              <td className='px-3 py-2.5 text-right text-base' style={{ color: 'var(--text-muted)' }}>—</td>
               <td className='px-3 py-2.5 text-right text-base' style={{ color: 'var(--text-muted)' }}>—</td>
               <td className='px-3 py-2.5 text-right font-mono text-base tabular-nums' style={{ color: 'var(--text-secondary)' }}>
                 {c$(campaigns.reduce((s, c) => s + c.spendToDate, 0))}
