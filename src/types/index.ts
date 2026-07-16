@@ -13,6 +13,7 @@ export interface Store {
   status: StoreStatus;
   responseTime: number;   // ms
   uptime7d: number;       // percentage 0-100
+  uptime30d?: number;     // 30-day uptime %
   sslDaysLeft: number;
   loadSpeed: number;      // ms (Largest Contentful Paint proxy)
   lastChecked: string | null;    // ISO string, null if never checked

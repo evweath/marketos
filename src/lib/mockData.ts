@@ -17,26 +17,27 @@ export interface StoreHealth {
   status: StoreStatus;
   responseTime: number;   // ms
   uptime7d: number;       // percentage 0-100
+  uptime30d?: number;     // 30-day uptime %
   sslDaysLeft: number;
   loadSpeed: number;      // ms
   lastChecked: string | null;
 }
 
 export const DEFAULT_STORE_HEALTH: StoreHealth = {
-  status: 'pending', responseTime: 0, uptime7d: 0, sslDaysLeft: 0, loadSpeed: 0, lastChecked: null,
+  status: 'pending', responseTime: 0, uptime7d: 0, uptime30d: 0, sslDaysLeft: 0, loadSpeed: 0, lastChecked: null,
 };
 
 export const SAMPLE_STORE_HEALTH: Record<string, StoreHealth> = {
   'donut-equipment': {
-    status: 'online', responseTime: 312, uptime7d: 99.94, sslDaysLeft: 87, loadSpeed: 1840,
+    status: 'online', responseTime: 312, uptime7d: 99.94, uptime30d: 99.89, sslDaysLeft: 87, loadSpeed: 1840,
     lastChecked: new Date(Date.now() - 2 * 60000).toISOString(),
   },
   'donut-supplies': {
-    status: 'degraded', responseTime: 1247, uptime7d: 98.71, sslDaysLeft: 14, loadSpeed: 3210,
+    status: 'degraded', responseTime: 1247, uptime7d: 98.71, uptime30d: 99.12, sslDaysLeft: 14, loadSpeed: 3210,
     lastChecked: new Date(Date.now() - 1 * 60000).toISOString(),
   },
   'bakery-wholesalers': {
-    status: 'online', responseTime: 284, uptime7d: 100, sslDaysLeft: 234, loadSpeed: 1560,
+    status: 'online', responseTime: 284, uptime7d: 100, uptime30d: 99.97, sslDaysLeft: 234, loadSpeed: 1560,
     lastChecked: new Date(Date.now() - 3 * 60000).toISOString(),
   },
 };

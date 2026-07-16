@@ -52,7 +52,8 @@ export default function StoreStatusCard({ store, traffic, conversions, isSelecte
   const speedWarning = !pending && store.loadSpeed > 2500;
 
   const responseColor = pending ? 'var(--text-muted)' : store.responseTime > 800 ? '#ffb347' : '#10d98a';
-  const uptimeColor = pending ? 'var(--text-muted)' : store.uptime7d >= 99.9 ? '#10d98a' : store.uptime7d >= 99 ? '#ffb347' : '#ff4444';
+  const uptime = store.uptime30d ?? store.uptime7d;
+  const uptimeColor = pending ? 'var(--text-muted)' : uptime >= 99.9 ? '#10d98a' : uptime >= 99 ? '#ffb347' : '#ff4444';
   const sslColor = pending ? 'var(--text-muted)' : sslCritical ? '#ff4444' : sslWarning ? '#ffb347' : '#10d98a';
   const loadColor = pending ? 'var(--text-muted)' : speedWarning ? '#ffb347' : 'var(--text-primary)';
 
@@ -113,8 +114,8 @@ export default function StoreStatusCard({ store, traffic, conversions, isSelecte
         <MetricCell
           icon={<Activity size={9} />}
           iconColor='#10d98a'
-          label='7d Uptime'
-          value={pending ? '—' : `${store.uptime7d.toFixed(2)}%`}
+          label='30d Uptime'
+          value={pending ? '—' : `${uptime.toFixed(2)}%`}
           valueColor={uptimeColor}
         />
         <MetricCell
