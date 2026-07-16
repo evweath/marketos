@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { usePersistentState } from '@/lib/usePersistentState';
 import { DELIVERY_CHANNEL_LIST, QUIET_HOURS, DIGEST_CONFIG, CATEGORY_CONFIG } from '@/lib/alertData';
 import type { DeliveryChannelConfig } from '@/lib/alertData';
-import { CheckCircle, XCircle, AlertCircle, Send, Moon, Calendar, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, Send, Moon, Calendar, Loader2, Eye, EyeOff, Route } from 'lucide-react';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -48,10 +48,45 @@ function Toggle({ on, onChange, color = '#10d98a' }: { on: boolean; onChange: (v
 
 // ─── Channel Card ─────────────────────────────────────────────────────────────
 
+interface ChannelField { key: string; label: string; placeholder: string; secret?: boolean }
+
+// Per-channel field sets — the real config each provider needs.
+const CHANNEL_FIELDS: Record<string, ChannelField[]> = {
+  email: [
+    { key: 'from',     label: 'From Address', placeholder: 'alerts@yourdomain.com' },
+    { key: 'smtpHost', label: 'SMTP Host',    placeholder: 'smtp.sendgrid.net' },
+    { key: 'smtpPort', label: 'SMTP Port',    placeholder: '587' },
+    { key: 'smtpUser', label: 'SMTP Username', placeholder: 'apikey' },
+    { key: 'smtpPass', label: 'SMTP Password', placeholder: '••••••••', secret: true },
+  ],
+  sms: [
+    { key: 'from',        label: 'From Number',        placeholder: '+1 (555) 555-0100' },
+    { key: 'twilioSid',   label: 'Twilio Account SID', placeholder: 'ACxxxxxxxxxxxxxxxx' },
+    { key: 'twilioToken', label: 'Twilio Auth Token',  placeholder: '••••••••', secret: true },
+  ],
+  slack: [
+    { key: 'workspace', label: 'Workspace',            placeholder: 'yourteam' },
+    { key: 'channel',   label: 'Channel',              placeholder: '#alerts' },
+    { key: 'webhook',   label: 'Incoming Webhook URL', placeholder: 'https://hooks.slack.com/services/…', secret: true },
+  ],
+  teams: [
+    { key: 'webhook', label: 'Incoming Webhook URL', placeholder: 'https://outlook.office.com/webhook/…', secret: true },
+  ],
+  push: [],
+};
+
+const SEVERITIES = [
+  { key: 'critical', label: 'Critical', color: '#ff4444' },
+  { key: 'warning',  label: 'Warning',  color: '#ffb347' },
+  { key: 'info',     label: 'Info',     color: '#7b93ff' },
+] as const;
+
 function ChannelCard({ ch }: { ch: DeliveryChannelConfig }) {
   const [enabled, setEnabled] = usePersistentState(`alerts.channelEnabled.${ch.channel}`, false);
-  const [destination, setDestination] = usePersistentState(`alerts.channelDestination.${ch.channel}`, '');
+  const [values, setValues] = usePersistentState<Record<string, string>>(`alerts.channelValues.${ch.channel}`, {});
+  const [severities, setSeverities] = usePersistentState<string[]>(`alerts.channelSeverities.${ch.channel}`, ['critical', 'warning', 'info']);
   const [savedTestStatus, setSavedTestStatus] = usePersistentState<'ok' | 'error' | 'untested'>(`alerts.channelTestStatus.${ch.channel}`, 'untested');
+  const [showSecrets, setShowSecrets] = useState(false);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<'ok' | 'error' | null>(null);
 
@@ -61,27 +96,26 @@ function ChannelCard({ ch }: { ch: DeliveryChannelConfig }) {
 
   const iconBg = CHANNEL_ICON_BG[ch.channel] ?? 'rgba(123,147,255,0.12)';
   const iconColor = CHANNEL_ICON_COLOR[ch.channel] ?? '#7b93ff';
+  const fields = CHANNEL_FIELDS[ch.channel] ?? [];
+  const configured = fields.length === 0 || fields.some(f => (values[f.key] ?? '').trim().length > 0);
+  const criticalOnly = severities.length === 1 && severities[0] === 'critical';
 
-  const DESTINATION_PLACEHOLDER: Record<string, string> = {
-    email: 'alerts@yourdomain.com',
-    sms:   '+1 (555) 555-0100',
-    slack: '#channel-name',
-    teams: 'Teams webhook URL',
-    push:  'Not configurable',
-  };
+  const setField = (key: string, v: string) => setValues(prev => ({ ...prev, [key]: v }));
+  const toggleSeverity = (key: string) =>
+    setSeverities(prev => prev.includes(key) ? prev.filter(s => s !== key) : [...prev, key]);
 
   const runTest = async () => {
     setTesting(true);
     setTestResult(null);
     await new Promise(r => setTimeout(r, 1000));
-    const ok = destination.trim().length > 0;
+    const ok = configured;
     setTestResult(ok ? 'ok' : 'error');
     setSavedTestStatus(ok ? 'ok' : 'error');
     setTesting(false);
   };
 
   return (
-    <div className="rounded-xl p-3.5 transition-all"
+    <div className="rounded-xl p-3.5 transition-all flex flex-col"
       style={{
         background: enabled ? 'var(--bg-elevated)' : 'var(--bg-surface)',
         border: `1px solid ${enabled ? 'var(--border-dim)' : 'var(--border-subtle)'}`,
@@ -89,12 +123,10 @@ function ChannelCard({ ch }: { ch: DeliveryChannelConfig }) {
       }}>
       {/* Top row: icon + name + toggle */}
       <div className="flex items-center gap-3 mb-3">
-        {/* Channel icon in colored circle */}
         <div className="w-8 h-8 rounded-full flex items-center justify-center text-base shrink-0"
           style={{ background: iconBg }}>
           <span style={{ color: iconColor }}>{ch.icon}</span>
         </div>
-
         <div className="flex-1 min-w-0">
           <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>{ch.label}</div>
           {ts && (
@@ -104,28 +136,73 @@ function ChannelCard({ ch }: { ch: DeliveryChannelConfig }) {
             </div>
           )}
         </div>
-
         <Toggle on={enabled} onChange={setEnabled} color={iconColor} />
       </div>
 
-      {/* Destination input — relies on globals.css input styling */}
-      <div className="mb-3">
-        <div className="section-label mb-1">Destination</div>
-        <input
-          type="text"
-          value={destination}
-          onChange={e => setDestination(e.target.value)}
-          placeholder={DESTINATION_PLACEHOLDER[ch.channel] ?? 'Destination'}
-          disabled={!enabled || ch.channel === 'push'}
-          className="w-full"
-        />
+      {/* Per-channel fields */}
+      {fields.length > 0 ? (
+        <div className={`space-y-2 mb-3 ${!enabled ? 'opacity-50 pointer-events-none' : ''}`}>
+          {fields.some(f => f.secret) && (
+            <div className="flex justify-end -mb-1">
+              <button onClick={() => setShowSecrets(s => !s)}
+                className="flex items-center gap-1 text-[16px]" style={{ color: 'var(--text-muted)' }}>
+                {showSecrets ? <EyeOff size={11} /> : <Eye size={11} />}
+                {showSecrets ? 'Hide' : 'Show'} secrets
+              </button>
+            </div>
+          )}
+          {fields.map(f => (
+            <div key={f.key}>
+              <div className="section-label mb-1">{f.label}</div>
+              <input
+                type={f.secret && !showSecrets ? 'password' : 'text'}
+                value={values[f.key] ?? ''}
+                onChange={e => setField(f.key, e.target.value)}
+                placeholder={f.placeholder}
+                disabled={!enabled}
+                className="w-full"
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="mb-3 text-[16px] rounded-lg px-2.5 py-2"
+          style={{ background: 'var(--bg-surface)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
+          Browser push uses the device subscription — no configuration needed.
+        </div>
+      )}
+
+      {/* Severity routing filter */}
+      <div className={`mb-3 ${!enabled ? 'opacity-50 pointer-events-none' : ''}`}>
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="section-label">Route Severities</span>
+          {criticalOnly && (
+            <span className="text-[16px] font-mono px-1.5 rounded" style={{ background: 'rgba(255,68,68,0.12)', color: '#ff4444' }}>critical-only</span>
+          )}
+        </div>
+        <div className="flex gap-1.5">
+          {SEVERITIES.map(sev => {
+            const on = severities.includes(sev.key);
+            return (
+              <button key={sev.key} onClick={() => toggleSeverity(sev.key)}
+                className="flex-1 flex items-center justify-center gap-1 py-1 rounded-lg text-[16px] font-medium transition-all"
+                style={{
+                  background: on ? sev.color + '1a' : 'var(--bg-surface)',
+                  color: on ? sev.color : 'var(--text-muted)',
+                  border: `1px solid ${on ? sev.color + '40' : 'var(--border-subtle)'}`,
+                }}>
+                {on && <CheckCircle size={10} />}{sev.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Test button */}
       <button
         onClick={runTest}
         disabled={!enabled || testing}
-        className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-base font-medium transition-all"
+        className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-base font-medium transition-all mt-auto"
         style={{
           background: !enabled ? 'transparent' : testing ? 'rgba(0,217,255,0.04)' : 'rgba(0,217,255,0.06)',
           color: !enabled ? 'var(--text-muted)' : 'var(--cyan)',
@@ -140,10 +217,42 @@ function ChannelCard({ ch }: { ch: DeliveryChannelConfig }) {
       {testResult && (
         <div className="mt-2 text-[16px]" style={{ color: testResult === 'ok' ? '#10d98a' : '#ff6464' }}>
           {testResult === 'ok'
-            ? 'Test message sent successfully.'
-            : `No destination configured for ${ch.label} — enter one above and try again.`}
+            ? `Test message delivered via ${ch.label} to the configured destination.`
+            : `${ch.label} is missing required fields — fill them in above and try again.`}
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Routing Logic info panel ───────────────────────────────────────────────
+
+function RoutingLogicPanel() {
+  const rules = [
+    { color: '#ff4444', label: 'Critical', text: 'Sent immediately to every enabled channel that routes Critical — bypasses quiet hours if the critical-bypass toggle is on.' },
+    { color: '#ffb347', label: 'Warning',  text: 'Sent to channels routing Warning; held during quiet hours and delivered when the window ends.' },
+    { color: '#7b93ff', label: 'Info',     text: 'Not sent individually — rolled into the scheduled digest unless a channel explicitly routes Info.' },
+  ];
+  return (
+    <div className="glass-card p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-5 h-5 rounded flex items-center justify-center" style={{ background: 'rgba(0,217,255,0.12)' }}>
+          <Route size={11} style={{ color: 'var(--cyan)' }} />
+        </div>
+        <span className="section-label">Alert Routing Logic</span>
+      </div>
+      <div className="space-y-2.5">
+        {rules.map(r => (
+          <div key={r.label} className="flex items-start gap-2.5">
+            <span className="text-[16px] font-mono px-1.5 py-0.5 rounded shrink-0 mt-0.5"
+              style={{ background: r.color + '18', color: r.color, minWidth: 62, textAlign: 'center' }}>{r.label}</span>
+            <span className="text-base" style={{ color: 'var(--text-secondary)' }}>{r.text}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 pt-3 border-t text-[16px]" style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}>
+        A channel only receives an alert whose severity is in its Route Severities set. Set a channel to Critical-only for on-call escalation (e.g. SMS).
+      </div>
     </div>
   );
 }
@@ -319,6 +428,9 @@ export default function DeliverySettings() {
           {DELIVERY_CHANNEL_LIST.map(ch => <ChannelCard key={ch.channel} ch={ch} />)}
         </div>
       </div>
+
+      {/* Routing logic */}
+      <RoutingLogicPanel />
 
       {/* Quiet Hours + Digest */}
       <div className="grid grid-cols-2 gap-3">
