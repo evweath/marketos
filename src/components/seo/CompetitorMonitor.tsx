@@ -1,10 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Clock, ArrowRight, Package, FileText, DollarSign, X } from 'lucide-react';
+import { Plus, Clock, ArrowRight, Package, FileText, DollarSign, X, ArrowUp, ArrowDown, Minus, Trophy, Target } from 'lucide-react';
 import { usePersistentState } from '@/lib/usePersistentState';
 import { useStores } from '@/lib/storeScope';
-import type { CompetitorChangeType, CompetitorData, StoreId } from '@/lib/seoData';
+import type { CompetitorChangeType, CompetitorData, CompetitorRankRow, StoreId } from '@/lib/seoData';
+
+const rankColor = (r: number | null) =>
+  r == null ? 'var(--text-muted)' : r <= 3 ? '#10d98a' : r <= 10 ? '#ffb347' : '#ff4444';
 
 type ChangeTab = CompetitorChangeType;
 
@@ -33,6 +36,12 @@ export function CompetitorMonitor({ selectedStoreIds }: { selectedStoreIds: stri
   const [stores] = useStores();
   const [allCompetitors, setCompetitors] = usePersistentState<CompetitorData[]>('seo.competitors', []);
   const competitors = allCompetitors.filter(c => selectedStoreIds.includes(c.store));
+  const [allRanks] = usePersistentState<CompetitorRankRow[]>('seo.competitorRanks', []);
+  const ranks = allRanks.filter(r => selectedStoreIds.includes(r.store))
+    .sort((a, b) => (a.ourRank ?? 999) - (b.ourRank ?? 999));
+  const gaps = ranks.filter(r => r.ourRank == null)
+    .sort((a, b) => a.theirRank - b.theirRank).slice(0, 5);
+  const headToHead = ranks.filter(r => r.ourRank != null);
   const [activeTabs, setActiveTabs] = useState<Record<string, ChangeTab>>({});
   const [adding, setAdding]           = useState(false);
   const [newName, setNewName]         = useState('');
@@ -152,9 +161,89 @@ export function CompetitorMonitor({ selectedStoreIds }: { selectedStoreIds: stri
         </div>
       )}
 
-      {competitors.length === 0 && (
+      {/* Rank comparison — head-to-head keyword rankings */}
+      {ranks.length > 0 && (
+        <div className='glass-card p-4'>
+          <div className='flex items-center gap-2 mb-3'>
+            <Trophy size={13} style={{ color: 'var(--cyan)' }} />
+            <span className='text-base font-semibold' style={{ color: 'var(--text-primary)' }}>Rank Comparison</span>
+            <span className='section-label ml-auto'>{headToHead.length} head-to-head keywords</span>
+          </div>
+          <div className='overflow-x-auto'>
+            <table className='w-full text-base' style={{ borderCollapse: 'collapse' }}>
+              <thead>
+                <tr className='section-label' style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                  <th className='text-left font-normal pb-2'>Keyword</th>
+                  <th className='text-left font-normal pb-2'>Competitor</th>
+                  <th className='text-center font-normal pb-2'>Our Rank</th>
+                  <th className='text-center font-normal pb-2'>Their Rank</th>
+                  <th className='text-center font-normal pb-2'>Change (7d)</th>
+                  <th className='text-right font-normal pb-2'>Volume</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ranks.map(r => {
+                  const beating = r.ourRank != null && r.ourRank < r.theirRank;
+                  const ChangeIcon = r.change7d > 0 ? ArrowUp : r.change7d < 0 ? ArrowDown : Minus;
+                  const changeColor = r.change7d > 0 ? '#10d98a' : r.change7d < 0 ? '#ff4444' : 'var(--text-muted)';
+                  return (
+                    <tr key={r.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                      <td className='py-2 pr-2' style={{ color: 'var(--text-primary)' }}>{r.keyword}</td>
+                      <td className='py-2 pr-2 font-mono text-[16px]' style={{ color: '#7b93ff' }}>{r.competitor}</td>
+                      <td className='py-2 text-center'>
+                        <span className='font-mono font-bold' style={{ color: rankColor(r.ourRank) }}>
+                          {r.ourRank == null ? '—' : `#${r.ourRank}`}
+                        </span>
+                        {beating && <Trophy size={10} className='inline ml-1' style={{ color: '#ffd700' }} />}
+                      </td>
+                      <td className='py-2 text-center font-mono font-bold' style={{ color: rankColor(r.theirRank) }}>#{r.theirRank}</td>
+                      <td className='py-2 text-center'>
+                        <span className='inline-flex items-center gap-0.5 font-mono' style={{ color: changeColor }}>
+                          <ChangeIcon size={11} />{r.change7d === 0 ? '—' : Math.abs(r.change7d)}
+                        </span>
+                      </td>
+                      <td className='py-2 text-right font-mono text-[16px]' style={{ color: 'var(--text-muted)' }}>{r.searchVolume.toLocaleString()}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Keyword gaps — they rank, we don't */}
+      {gaps.length > 0 && (
+        <div className='glass-card p-4' style={{ borderLeft: '3px solid rgba(255,179,71,0.5)' }}>
+          <div className='flex items-center gap-2 mb-3'>
+            <Target size={13} style={{ color: 'var(--amber)' }} />
+            <span className='text-base font-semibold' style={{ color: 'var(--text-primary)' }}>
+              Top keywords they rank for that we don&apos;t
+            </span>
+          </div>
+          <div className='space-y-1.5'>
+            {gaps.map(g => (
+              <div key={g.id} className='flex items-center justify-between rounded-lg px-3 py-2'
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                <div className='min-w-0'>
+                  <div className='text-base font-medium truncate' style={{ color: 'var(--text-primary)' }}>{g.keyword}</div>
+                  <div className='text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>
+                    <span style={{ color: '#7b93ff' }}>{g.competitor}</span> ranks #{g.theirRank}
+                  </div>
+                </div>
+                <span className='text-[16px] font-mono px-2 py-1 rounded shrink-0'
+                  style={{ background: 'rgba(255,179,71,0.12)', color: 'var(--amber)' }}>
+                  {g.searchVolume.toLocaleString()} vol
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {competitors.length === 0 && ranks.length === 0 && (
         <div className='text-base text-center py-10' style={{ color: 'var(--text-muted)' }}>
-          {allCompetitors.length === 0
+          {allCompetitors.length === 0 && allRanks.length === 0
             ? 'No competitors tracked yet — click Add Competitor to start monitoring.'
             : `No competitors tracked for the selected store${selectedStoreIds.length !== 1 ? 's' : ''}.`}
         </div>

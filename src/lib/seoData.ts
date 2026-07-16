@@ -566,6 +566,40 @@ export const SAMPLE_COMPETITOR_DATA: CompetitorData[] = [
   },
 ];
 
+// ─── Competitor Rank Comparison ──────────────────────────────────────────────
+// Keyword-level head-to-head: our rank vs the competitor's rank + 7d movement.
+// ourRank === null means the competitor ranks for a keyword we don't (a gap).
+
+export interface CompetitorRankRow {
+  id: string;
+  store: StoreId;
+  keyword: string;
+  competitor: string;      // display name
+  competitorDomain: string;
+  ourRank: number | null;
+  theirRank: number;
+  change7d: number;        // + = we moved up (toward #1), - = we dropped
+  searchVolume: number;
+}
+
+export const SAMPLE_COMPETITOR_RANKS: CompetitorRankRow[] = [
+  // Donut Equipment vs Bakery Equipment Pro
+  { id: 'cr-001', store: 'donut-equipment', keyword: 'commercial donut fryer',        competitor: 'Bakery Equipment Pro', competitorDomain: 'bakeryequipmentpro.com', ourRank: 2,    theirRank: 1,  change7d: +1, searchVolume: 8400 },
+  { id: 'cr-002', store: 'donut-equipment', keyword: 'industrial dough mixer',         competitor: 'Bakery Equipment Pro', competitorDomain: 'bakeryequipmentpro.com', ourRank: 7,    theirRank: 3,  change7d: +5, searchVolume: 14800 },
+  { id: 'cr-003', store: 'donut-equipment', keyword: 'donut glazing machine',          competitor: 'Bakery Equipment Pro', competitorDomain: 'bakeryequipmentpro.com', ourRank: 4,    theirRank: 9,  change7d: +2, searchVolume: 2900 },
+  { id: 'cr-004', store: 'donut-equipment', keyword: 'automated donut finisher',       competitor: 'Bakery Equipment Pro', competitorDomain: 'bakeryequipmentpro.com', ourRank: null, theirRank: 2,  change7d: 0,  searchVolume: 1900 },
+  { id: 'cr-005', store: 'donut-equipment', keyword: 'commercial proofer cabinet',     competitor: 'Bakery Equipment Pro', competitorDomain: 'bakeryequipmentpro.com', ourRank: null, theirRank: 5,  change7d: 0,  searchVolume: 3200 },
+  { id: 'cr-006', store: 'donut-equipment', keyword: 'bakery equipment financing',     competitor: 'Bakery Equipment Pro', competitorDomain: 'bakeryequipmentpro.com', ourRank: 14,   theirRank: 6,  change7d: -4, searchVolume: 5200 },
+  // Donut Supplies vs Wholesale Baking Supplies
+  { id: 'cr-007', store: 'donut-supplies',  keyword: 'bulk donut mix',                 competitor: 'Wholesale Baking Supplies', competitorDomain: 'wholesalebakingsupplies.com', ourRank: 3,    theirRank: 1,  change7d: +1, searchVolume: 6700 },
+  { id: 'cr-008', store: 'donut-supplies',  keyword: 'wholesale baking ingredients',   competitor: 'Wholesale Baking Supplies', competitorDomain: 'wholesalebakingsupplies.com', ourRank: 9,    theirRank: 2,  change7d: +6, searchVolume: 9200 },
+  { id: 'cr-009', store: 'donut-supplies',  keyword: 'organic donut mix 50lb',         competitor: 'Wholesale Baking Supplies', competitorDomain: 'wholesalebakingsupplies.com', ourRank: null, theirRank: 4,  change7d: 0,  searchVolume: 1400 },
+  { id: 'cr-010', store: 'donut-supplies',  keyword: 'bakery packaging supplies',      competitor: 'Wholesale Baking Supplies', competitorDomain: 'wholesalebakingsupplies.com', ourRank: 5,    theirRank: 11, change7d: +4, searchVolume: 7300 },
+  // Bakery Wholesalers vs Restaurant Depot
+  { id: 'cr-011', store: 'bakery-wholesalers', keyword: 'wholesale bakery distributor', competitor: 'Restaurant Depot', competitorDomain: 'restaurantdepot.com', ourRank: 6,    theirRank: 2,  change7d: 0,  searchVolume: 4500 },
+  { id: 'cr-012', store: 'bakery-wholesalers', keyword: 'commercial pastry supplier',   competitor: 'Restaurant Depot', competitorDomain: 'restaurantdepot.com', ourRank: null, theirRank: 3,  change7d: 0,  searchVolume: 3800 },
+];
+
 // ─── Brand Mentions ───────────────────────────────────────────────────────────
 
 export interface BrandMention {

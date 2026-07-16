@@ -9,7 +9,7 @@ import {
   SAMPLE_PUSH_SUBSCRIBERS_BY_STORE, SAMPLE_EMAIL_AB_TESTS,
 } from './emailData';
 import { SAMPLE_GENERATED_CREATIVES, SAMPLE_COMPETITOR_ADS, SAMPLE_PERFORMANCE_SCORES, SAMPLE_CAMPAIGN_BRIEFS, SAMPLE_BRAND_VOICE_SETTINGS, DEFAULT_BRAND_VOICE_SETTINGS } from './contentData';
-import { SAMPLE_KEYWORD_RANKINGS, SAMPLE_GSC_METRICS, SAMPLE_SEO_AUDIT_ITEMS, SAMPLE_COMPETITOR_DATA, SAMPLE_BRAND_MENTIONS, SAMPLE_LLM_VISIBILITY, SAMPLE_PREVIOUS_BLOGS, emptyLlmVisibility } from './seoData';
+import { SAMPLE_KEYWORD_RANKINGS, SAMPLE_GSC_METRICS, SAMPLE_SEO_AUDIT_ITEMS, SAMPLE_COMPETITOR_DATA, SAMPLE_COMPETITOR_RANKS, SAMPLE_BRAND_MENTIONS, SAMPLE_LLM_VISIBILITY, SAMPLE_PREVIOUS_BLOGS, emptyLlmVisibility } from './seoData';
 import { SAMPLE_SEQUENCES, SAMPLE_RECOVERED_LIST, SAMPLE_UPSELL_OFFERS, SAMPLE_WATCH_PRODUCTS, SAMPLE_CUSTOMERS } from './cartData';
 
 // ─── Sample data registry ──────────────────────────────────────────────────
@@ -97,6 +97,7 @@ const REGISTRY: SampleDataEntry[] = [
   { key: 'seo.gscMetrics',         sample: SAMPLE_GSC_METRICS,        empty: [] },
   { key: 'seo.auditItems',         sample: SAMPLE_SEO_AUDIT_ITEMS,    empty: [] },
   { key: 'seo.competitors',        sample: SAMPLE_COMPETITOR_DATA,    empty: [] },
+  { key: 'seo.competitorRanks',    sample: SAMPLE_COMPETITOR_RANKS,   empty: [] },
   { key: 'seo.brandMentions',      sample: SAMPLE_BRAND_MENTIONS,     empty: [] },
   { key: 'seo.llmVisibility',      sample: SAMPLE_LLM_VISIBILITY,     empty: emptyLlmVisibility() },
   { key: 'seo.blogs',              sample: SAMPLE_PREVIOUS_BLOGS,     empty: [] },
