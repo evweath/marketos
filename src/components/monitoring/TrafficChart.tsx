@@ -110,26 +110,29 @@ export default function TrafficChart({ traffic, storeColor }: Props) {
         </ResponsiveContainer>
       </div>
 
-      {/* Traffic sources */}
+      {/* Traffic sources — single stacked bar + legend */}
       <div className='mt-4 pt-4 border-t' style={{ borderColor: 'var(--border-subtle)' }}>
         <div className='section-label mb-2.5'>Traffic Sources</div>
-        <div className='space-y-2'>
-          {traffic.sources.map(src => (
-            <div key={src.source} className='flex items-center gap-2.5'>
-              <div className='w-2 h-2 rounded-full shrink-0' style={{ background: src.color }} />
-              <span className='text-base w-20 shrink-0 truncate' style={{ color: 'var(--text-secondary)' }}>
-                {src.source}
-              </span>
-              <div className='flex-1 h-1.5 rounded-full overflow-hidden' style={{ background: 'var(--bg-overlay)' }}>
-                <div className='h-full rounded-full transition-all duration-500'
+        {traffic.sources.length > 0 && (
+          <>
+            <div className='flex w-full h-4 rounded-full overflow-hidden mb-3' style={{ background: 'var(--bg-overlay)' }}>
+              {traffic.sources.map(src => (
+                <div key={src.source} title={`${src.source}: ${src.value}%`}
+                  className='h-full transition-all duration-500'
                   style={{ width: `${src.value}%`, background: src.color }} />
-              </div>
-              <span className='font-mono text-[16px] w-8 text-right shrink-0' style={{ color: 'var(--text-primary)' }}>
-                {src.value}%
-              </span>
+              ))}
             </div>
-          ))}
-        </div>
+            <div className='flex flex-wrap gap-x-4 gap-y-1.5'>
+              {traffic.sources.map(src => (
+                <div key={src.source} className='flex items-center gap-1.5'>
+                  <div className='w-2 h-2 rounded-full shrink-0' style={{ background: src.color }} />
+                  <span className='text-[16px]' style={{ color: 'var(--text-secondary)' }}>{src.source}</span>
+                  <span className='font-mono text-[16px]' style={{ color: 'var(--text-primary)' }}>{src.value}%</span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
