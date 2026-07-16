@@ -73,6 +73,7 @@ export interface AIInsight {
   detail: string;
   channel?: Channel;
   impact: 'high' | 'medium' | 'low';
+  dollarImpact?: number;   // estimated monthly $ opportunity/risk
   action?: string;
 }
 
@@ -373,6 +374,7 @@ export const SAMPLE_AI_INSIGHTS: AIInsight[] = [
     detail: 'Meta Ads ROAS has declined for 9 consecutive days. Average ad frequency reached 4.8. Top creative running 22 days without refresh.',
     channel: 'meta-ads',
     impact: 'high',
+    dollarImpact: -6800,
     action: 'Refresh top 3 ad creatives and expand to a lookalike audience based on recent purchasers.',
   },
   {
@@ -383,7 +385,38 @@ export const SAMPLE_AI_INSIGHTS: AIInsight[] = [
     detail: 'Email remains the highest-ROI channel with 73.8× ROAS on $1,215 spend generating $89,640 in attributed revenue. Current send cadence is 2×/week. Industry benchmark for your segment is 3-4×/week.',
     channel: 'email',
     impact: 'high',
+    dollarImpact: 24000,
     action: 'Launch a 3rd weekly email focused on product restocks and new arrivals. Test a Sunday evening send slot.',
+  },
+  {
+    id: 'ins-006',
+    store: 'donut-equipment',
+    type: 'opportunity',
+    title: 'Google Ads under-pacing budget by 16%',
+    detail: 'Google Ads has spent 84% of its monthly budget with 6 days left and holds a 6.05× ROAS. There is headroom to scale the top-performing Shopping campaigns without hurting efficiency.',
+    channel: 'google-ads',
+    impact: 'medium',
+    dollarImpact: 9200,
+    action: 'Raise daily budgets 15% on the two Shopping campaigns above 5× ROAS.',
+  },
+  {
+    id: 'ins-007',
+    type: 'warning',
+    title: 'YouTube ROAS below 3× profitability floor',
+    detail: 'YouTube Ads is running at 2.4× ROAS, below the 3× target. Spend is small but trending up week over week.',
+    channel: 'youtube-ads',
+    impact: 'medium',
+    dollarImpact: -1400,
+    action: 'Cap YouTube daily budget and A/B test a shorter 15s hook before scaling further.',
+  },
+  {
+    id: 'ins-008',
+    type: 'win',
+    title: 'Organic SEO revenue up 9.8% this period',
+    detail: 'Organic SEO attributed revenue grew to $112,480 (+9.8%), driven by three commercial keywords entering the top 3.',
+    channel: 'organic',
+    impact: 'low',
+    dollarImpact: 10000,
   },
 ];
 

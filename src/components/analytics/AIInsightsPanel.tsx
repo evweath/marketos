@@ -68,12 +68,6 @@ function InsightCard({ insight }: { insight: AIInsight }) {
         <div className="flex-1 min-w-0">
           {/* Badge row */}
           <div className="flex items-center gap-1.5 mb-1 flex-wrap">
-            <span
-              className="text-[16px] font-mono px-1.5 py-0.5 rounded font-semibold"
-              style={{ background: tc.color + '20', color: tc.color }}
-            >
-              {tc.label.toUpperCase()}
-            </span>
             <span className={IMPACT_BADGE[insight.impact]}>
               {IMPACT_LABEL[insight.impact]}
             </span>
@@ -83,6 +77,12 @@ function InsightCard({ insight }: { insight: AIInsight }) {
                 style={{ background: channelCfg.color + '15', color: channelCfg.color }}
               >
                 {channelCfg.label}
+              </span>
+            )}
+            {insight.dollarImpact != null && (
+              <span className="text-[16px] font-mono px-1.5 py-0.5 rounded font-semibold ml-auto"
+                style={{ background: insight.dollarImpact >= 0 ? 'rgba(16,217,138,0.14)' : 'rgba(255,68,68,0.14)', color: insight.dollarImpact >= 0 ? '#10d98a' : '#ff4444' }}>
+                {insight.dollarImpact >= 0 ? '+' : '−'}${Math.abs(insight.dollarImpact).toLocaleString()}/mo
               </span>
             )}
           </div>
@@ -127,10 +127,13 @@ function InsightCard({ insight }: { insight: AIInsight }) {
   );
 }
 
-export default function AIInsightsPanel({ insights }: { insights: AIInsight[] }) {
-  const [filter, setFilter] = useState<'all' | 'high'>('all');
-  const shown = insights.filter(i => filter === 'all' || i.impact === 'high');
+const COLUMNS: { key: string; label: string; color: string; types: AIInsight['type'][] }[] = [
+  { key: 'opportunities', label: 'Opportunities', color: 'var(--cyan)', types: ['opportunity', 'win'] },
+  { key: 'anomalies',     label: 'Anomalies',     color: '#ff4444',     types: ['anomaly'] },
+  { key: 'warnings',      label: 'Warnings',      color: '#ffb347',     types: ['warning'] },
+];
 
+export default function AIInsightsPanel({ insights }: { insights: AIInsight[] }) {
   // Rendered only after mount to avoid a server/client hydration mismatch
   // (the current time differs between the SSR pass and hydration).
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
@@ -142,6 +145,8 @@ export default function AIInsightsPanel({ insights }: { insights: AIInsight[] })
     return () => clearInterval(id);
   }, []);
 
+  const netImpact = insights.reduce((s, i) => s + (i.dollarImpact ?? 0), 0);
+
   return (
     <div className="glass-card p-4">
       <div className="flex items-center justify-between mb-4">
@@ -149,40 +154,36 @@ export default function AIInsightsPanel({ insights }: { insights: AIInsight[] })
           <Sparkles size={14} style={{ color: '#7b93ff' }} />
           <div className="section-label">AI Insights</div>
         </div>
-        {/* Filter segmented control */}
-        <div
-          className="flex items-center p-0.5 rounded-full"
-          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}
-        >
-          {(['all', 'high'] as const).map(f => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className="px-2.5 py-1 rounded-full text-[16px] transition-all"
-              style={{
-                background: filter === f ? 'var(--bg-overlay)' : 'transparent',
-                color: filter === f ? 'var(--text-primary)' : 'var(--text-muted)',
-                fontFamily: 'DM Mono',
-                fontWeight: filter === f ? 500 : 400,
-                boxShadow: filter === f ? '0 1px 3px rgba(0,0,0,0.35)' : 'none',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              {f === 'all' ? 'All' : 'High Impact'}
-            </button>
-          ))}
-        </div>
+        <span className="text-[16px] font-mono px-2 py-0.5 rounded"
+          style={{ background: netImpact >= 0 ? 'rgba(16,217,138,0.12)' : 'rgba(255,68,68,0.12)', color: netImpact >= 0 ? '#10d98a' : '#ff4444' }}>
+          Net impact {netImpact >= 0 ? '+' : '−'}${Math.abs(netImpact).toLocaleString()}/mo
+        </span>
       </div>
 
-      {shown.length === 0 && (
+      {insights.length === 0 ? (
         <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>No AI insights yet — connect channels with real data to generate recommendations.</div>
+      ) : (
+        <div className="grid grid-cols-3 gap-3">
+          {COLUMNS.map(col => {
+            const items = insights.filter(i => col.types.includes(i.type));
+            return (
+              <div key={col.key}>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span className="w-2 h-2 rounded-full" style={{ background: col.color }} />
+                  <span className="section-label">{col.label}</span>
+                  <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>{items.length}</span>
+                </div>
+                <div className="space-y-2">
+                  {items.map(insight => <InsightCard key={insight.id} insight={insight} />)}
+                  {items.length === 0 && (
+                    <div className="text-[16px] text-center py-4 rounded-xl" style={{ color: 'var(--text-muted)', background: 'var(--bg-elevated)', border: '1px dashed var(--border-subtle)' }}>None</div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
-
-      <div className="space-y-2">
-        {shown.map(insight => (
-          <InsightCard key={insight.id} insight={insight} />
-        ))}
-      </div>
 
       <div
         className="mt-3 pt-3 border-t flex items-center gap-2"
