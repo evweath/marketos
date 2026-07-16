@@ -1,18 +1,18 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { usePersistentState } from '@/lib/usePersistentState';
 import { RefreshCw, ExternalLink, Plus, CheckCircle, Loader2, Webhook, Eye, EyeOff, Save, X, KeyRound, Download, Plug, Wifi, XCircle } from 'lucide-react';
 import type { TrafficMetrics, ConversionMetrics } from '@/types';
 import {
   INITIAL_STORE_CONNECTIONS,
   emptyConnections,
-  withDefaults,
-  type ConnectionKey,
-  type StoreConnection,
+  normalizeConnection,
+  CONNECTION_DEFINITIONS,
+  type StoreConnectionMap,
 } from '@/lib/storeConnectionsData';
 import { useStores, STORE_COLORS, type StoreRecord } from '@/lib/storeScope';
-import { StoreConnectionsPanel } from './StoreConnectionsPanel';
 
 // `StoreData` is kept as an alias so the rest of this file (and future
 // diffs) reads naturally — the canonical shape/seed data now lives in
@@ -129,19 +129,20 @@ interface StoreCardProps {
   store: StoreData;
   savedCreds: Credentials | null;
   onSaveCreds: (id: string, creds: Credentials) => void;
-  connections: Record<ConnectionKey, StoreConnection>;
-  onChangeConnection: (storeId: string, key: ConnectionKey, patch: Partial<StoreConnection>) => void;
+  connections: StoreConnectionMap;
 }
 
-function StoreCard({ store, savedCreds, onSaveCreds, connections, onChangeConnection }: StoreCardProps) {
+function StoreCard({ store, savedCreds, onSaveCreds, connections }: StoreCardProps) {
   const [allTraffic]     = usePersistentState<Record<string, TrafficMetrics>>('monitoring.traffic', {});
   const [allConversions] = usePersistentState<Record<string, ConversionMetrics>>('monitoring.conversions', {});
   const [syncing, setSyncing]         = useState(false);
   const [justSynced, setJustSynced]   = useState(false);
   const [editing, setEditing]         = useState(false);
-  const [showConnections, setShowConnections] = useState(false);
   const [saving, setSaving]           = useState(false);
   const [justSaved, setJustSaved]     = useState(false);
+
+  // Count of connected channels, for the Connections button badge.
+  const connectedCount = CONNECTION_DEFINITIONS.filter(d => normalizeConnection(connections[d.key]).status === 'connected').length;
   const [testing, setTesting]         = useState(false);
   const [testResult, setTestResult]   = useState<{ success: boolean; message: string } | null>(null);
 
@@ -369,23 +370,6 @@ function StoreCard({ store, savedCreds, onSaveCreds, connections, onChangeConnec
         </div>
       </div>
 
-      {/* Connected ad & analytics accounts */}
-      {showConnections && (
-        <div
-          className='rounded-xl p-4 mb-4'
-          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)' }}
-        >
-          <div className='flex items-center gap-2 mb-3'>
-            <Plug size={13} style={{ color: 'var(--cyan)' }} />
-            <span className='text-base font-semibold' style={{ color: 'var(--text-primary)' }}>Connected Accounts</span>
-          </div>
-          <StoreConnectionsPanel
-            connections={connections}
-            onChange={(key, patch) => onChangeConnection(store.id, key, patch)}
-          />
-        </div>
-      )}
-
       {/* Actions */}
       <div className='flex items-center gap-2 flex-wrap'>
         <button
@@ -415,15 +399,14 @@ function StoreCard({ store, savedCreds, onSaveCreds, connections, onChangeConnec
         >
           <Download size={12} />Download Analytics
         </button>
-        <button
-          onClick={() => setShowConnections(c => !c)}
-          className='text-base px-3 py-1.5 rounded-lg font-medium transition-all'
-          style={showConnections
-            ? { background: 'rgba(var(--overlay-rgb),0.08)', color: 'var(--text-secondary)', border: '1px solid var(--border-dim)' }
-            : { background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.18)' }}
+        <Link
+          href={`/stores/${store.id}`}
+          className='flex items-center gap-1.5 text-base px-3 py-1.5 rounded-lg font-medium transition-all'
+          style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.18)' }}
         >
-          {showConnections ? 'Hide Connections' : 'Connections'}
-        </button>
+          <Plug size={12} />Connections
+          <span className='text-[16px] px-1.5 py-0.5 rounded-full font-mono' style={{ background: 'rgba(0,217,255,0.15)' }}>{connectedCount}</span>
+        </Link>
         <button
           onClick={() => setEditing(e => !e)}
           className='ml-auto text-base px-3 py-1.5 rounded-lg font-medium transition-all'
@@ -588,22 +571,13 @@ export function StoreSettings() {
   // with the Sidebar and every store-scoped page via the same 'stores' key.
   const [stores, setStores]                           = useStores();
   const [savedCreds, setSavedCreds]                   = usePersistentState<Record<string, Credentials>>('storeCreds', {});
-  const [storeConnections, setStoreConnections]       = usePersistentState<Record<string, Record<ConnectionKey, StoreConnection>>>(
+  // Read-only here; full channel management lives on /stores/[storeId].
+  const [storeConnections, setStoreConnections]       = usePersistentState<Record<string, StoreConnectionMap>>(
     'storeConnections', INITIAL_STORE_CONNECTIONS,
   );
 
   const handleSaveCreds = (id: string, creds: Credentials) => {
     setSavedCreds(prev => ({ ...prev, [id]: creds }));
-  };
-
-  const handleChangeConnection = (storeId: string, key: ConnectionKey, patch: Partial<StoreConnection>) => {
-    setStoreConnections(prev => ({
-      ...prev,
-      [storeId]: {
-        ...withDefaults(prev[storeId]),
-        [key]: { ...withDefaults(prev[storeId])[key], ...patch },
-      },
-    }));
   };
 
   const handleAddStore = (payload: NewStorePayload) => {
@@ -657,8 +631,7 @@ export function StoreSettings() {
             store={store}
             savedCreds={savedCreds[store.id] ?? null}
             onSaveCreds={handleSaveCreds}
-            connections={withDefaults(storeConnections[store.id])}
-            onChangeConnection={handleChangeConnection}
+            connections={storeConnections[store.id] ?? emptyConnections()}
           />
         ))}
       </div>

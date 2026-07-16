@@ -1,161 +1,263 @@
-// ─── Per-store ad/analytics account connections ───────────────────────────────
+// ─── Per-store channel connections ────────────────────────────────────────────
 //
 // Distinct from `settingsData.ts`'s account-wide `INTEGRATIONS` list — these are
-// the accounts a *specific* Shopify store is wired up to (one Google Ads account
-// for this store, one GA4 property for this store, etc).
+// the accounts a *specific* Shopify store is wired up to (its own Google Ads
+// account, its own GA4 property, its own Klaviyo list, etc). Rendered by the
+// per-store manage page at /stores/[storeId].
+//
+// Connection *parameters* are kept as seeded config (per the project's "keep
+// connection params, zero out fabricated activity" rule) — they are NOT part of
+// the Load/Clear Sample Data flow.
 
-export type ConnectionGroup = 'Google' | 'Facebook' | 'Social';
-
-export type ConnectionKey =
-  | 'googleAds'
-  | 'googleAnalytics'
-  | 'merchantCenter'
-  | 'facebookAds'
-  | 'facebookAnalytics'
-  | 'tiktokAds'
-  | 'tiktokAnalytics'
-  | 'youtubeAds'
-  | 'youtubeAnalytics'
-  | 'xTwitterAds'
-  | 'xTwitterAnalytics'
-  | 'linkedinAds'
-  | 'linkedinAnalytics';
+export type ConnectionGroup = 'Commerce' | 'Google' | 'Meta' | 'Social' | 'Email' | 'Search' | 'Custom';
 
 export type ConnectionStatus = 'connected' | 'disconnected' | 'error';
 
+export type ScheduleFrequency = 'off' | 'hourly' | 'every6h' | 'daily' | 'weekly';
+
+export const SCHEDULE_LABELS: Record<ScheduleFrequency, string> = {
+  off:      'Manual only',
+  hourly:   'Every hour',
+  every6h:  'Every 6 hours',
+  daily:    'Daily',
+  weekly:   'Weekly',
+};
+
+// Approx. minutes between routine pulls for the "next scheduled pull" display.
+export const SCHEDULE_MINUTES: Record<ScheduleFrequency, number> = {
+  off: 0, hourly: 60, every6h: 360, daily: 1440, weekly: 10080,
+};
+
+export interface ConnectionField {
+  key: string;
+  label: string;
+  placeholder: string;
+  secret?: boolean;   // rendered with a show/hide toggle
+}
+
 export interface StoreConnection {
-  accountId: string;
+  values: Record<string, string>;
   status: ConnectionStatus;
-  lastTestedAt?: string;
+  lastConnectedAt?: string;   // last successful connect (auth established)
+  lastDataPullAt?: string;    // last time data was pulled from the channel
+  lastTestedAt?: string;      // last Test Connection run (pass or fail)
   lastTestOk?: boolean;
   lastTestMessage?: string;
+  scheduleFrequency: ScheduleFrequency;
 }
 
 export interface ConnectionDefinition {
-  key: ConnectionKey;
+  key: string;
   label: string;
   group: ConnectionGroup;
   icon: string;
-  placeholder: string;
+  fields: ConnectionField[];
+  builtin: boolean;   // false for user-added custom channels
 }
 
 export const CONNECTION_DEFINITIONS: ConnectionDefinition[] = [
-  { key: 'googleAds',          label: 'Google Ads',            group: 'Google',   icon: '🎯', placeholder: 'Customer ID, e.g. 847-291-0034' },
-  { key: 'googleAnalytics',    label: 'Google Analytics (GA4)', group: 'Google',   icon: '📊', placeholder: 'Measurement ID, e.g. G-8472910384' },
-  { key: 'merchantCenter',     label: 'Google Merchant Center', group: 'Google',   icon: '🛒', placeholder: 'Merchant ID, e.g. 138472910' },
-  { key: 'facebookAds',        label: 'Facebook Ads',          group: 'Facebook', icon: '📘', placeholder: 'Ad account ID, e.g. act_1847392847' },
-  { key: 'facebookAnalytics',  label: 'Facebook Analytics',    group: 'Facebook', icon: '📈', placeholder: 'Pixel ID, e.g. 847291038472' },
-  { key: 'tiktokAds',          label: 'TikTok Ads',            group: 'Social',   icon: '🎵', placeholder: 'Advertiser ID, e.g. TK-ACC-7483920' },
-  { key: 'tiktokAnalytics',    label: 'TikTok Analytics',       group: 'Social',   icon: '🎵', placeholder: 'Business account handle' },
-  { key: 'youtubeAds',         label: 'YouTube Ads',            group: 'Social',   icon: '▶️', placeholder: 'Linked Google Ads customer ID' },
-  { key: 'youtubeAnalytics',   label: 'YouTube Analytics',      group: 'Social',   icon: '▶️', placeholder: 'Channel ID' },
-  { key: 'xTwitterAds',        label: 'X (Twitter) Ads',        group: 'Social',   icon: '𝕏', placeholder: 'Ads account ID' },
-  { key: 'xTwitterAnalytics',  label: 'X (Twitter) Analytics',  group: 'Social',   icon: '𝕏', placeholder: '@handle' },
-  { key: 'linkedinAds',        label: 'LinkedIn Ads',           group: 'Social',   icon: '💼', placeholder: 'Sponsored account ID' },
-  { key: 'linkedinAnalytics',  label: 'LinkedIn Analytics',     group: 'Social',   icon: '💼', placeholder: 'Company page ID' },
+  // Commerce
+  { key: 'shopify', label: 'Shopify', group: 'Commerce', icon: '🛍', builtin: true, fields: [
+    { key: 'domain',         label: 'Store Domain',            placeholder: 'your-store.myshopify.com' },
+    { key: 'accessToken',    label: 'Admin API Access Token',  placeholder: 'shpat_…', secret: true },
+    { key: 'apiSecret',      label: 'API Secret Key',          placeholder: 'shpss_…', secret: true },
+    { key: 'webhookSecret',  label: 'Webhook Signing Secret',  placeholder: 'whsec_…', secret: true },
+  ]},
+  // Google
+  { key: 'googleAds', label: 'Google Ads', group: 'Google', icon: '🎯', builtin: true, fields: [
+    { key: 'customerId',     label: 'Customer ID',    placeholder: '847-291-0034' },
+    { key: 'developerToken', label: 'Developer Token', placeholder: 'DEV-…', secret: true },
+  ]},
+  { key: 'googleAnalytics', label: 'Google Analytics (GA4)', group: 'Google', icon: '📊', builtin: true, fields: [
+    { key: 'measurementId', label: 'Measurement ID', placeholder: 'G-8472910384' },
+    { key: 'apiSecret',     label: 'Measurement Protocol API Secret', placeholder: '…', secret: true },
+  ]},
+  { key: 'merchantCenter', label: 'Google Merchant Center', group: 'Google', icon: '🏷', builtin: true, fields: [
+    { key: 'merchantId', label: 'Merchant ID', placeholder: '138472910' },
+  ]},
+  { key: 'youtube', label: 'YouTube', group: 'Google', icon: '▶️', builtin: true, fields: [
+    { key: 'channelId',      label: 'Channel ID',                placeholder: 'UC…' },
+    { key: 'linkedAdsId',    label: 'Linked Google Ads Customer ID', placeholder: '847-291-0034' },
+  ]},
+  // Meta
+  { key: 'metaAds', label: 'Meta Ads', group: 'Meta', icon: '📘', builtin: true, fields: [
+    { key: 'adAccountId', label: 'Ad Account ID',       placeholder: 'act_1847392847' },
+    { key: 'systemToken', label: 'System User Token',   placeholder: 'EAAB…', secret: true },
+  ]},
+  { key: 'metaPixel', label: 'Meta Pixel / CAPI', group: 'Meta', icon: '📈', builtin: true, fields: [
+    { key: 'pixelId',   label: 'Pixel ID',            placeholder: '847291038472' },
+    { key: 'capiToken', label: 'Conversions API Token', placeholder: '…', secret: true },
+  ]},
+  { key: 'instagram', label: 'Instagram', group: 'Meta', icon: '📷', builtin: true, fields: [
+    { key: 'businessId',  label: 'Business Account ID', placeholder: '178414…' },
+    { key: 'accessToken', label: 'Access Token',        placeholder: 'IGQ…', secret: true },
+  ]},
+  // Social
+  { key: 'tiktokAds', label: 'TikTok Ads', group: 'Social', icon: '🎵', builtin: true, fields: [
+    { key: 'advertiserId', label: 'Advertiser ID', placeholder: 'TK-ACC-7483920' },
+    { key: 'accessToken',  label: 'Access Token',  placeholder: '…', secret: true },
+  ]},
+  { key: 'linkedinAds', label: 'LinkedIn Ads', group: 'Social', icon: '💼', builtin: true, fields: [
+    { key: 'accountId',   label: 'Sponsored Account ID', placeholder: '5091…' },
+    { key: 'accessToken', label: 'Access Token',         placeholder: 'AQ…', secret: true },
+  ]},
+  { key: 'xAds', label: 'X (Twitter) Ads', group: 'Social', icon: '𝕏', builtin: true, fields: [
+    { key: 'accountId',   label: 'Ads Account ID', placeholder: '18ce…' },
+    { key: 'bearerToken', label: 'Bearer Token',   placeholder: 'AAAA…', secret: true },
+  ]},
+  // Email
+  { key: 'klaviyo', label: 'Klaviyo', group: 'Email', icon: '✉️', builtin: true, fields: [
+    { key: 'publicKey',  label: 'Public API Key',  placeholder: 'PK_…' },
+    { key: 'privateKey', label: 'Private API Key',  placeholder: 'pk_live_…', secret: true },
+  ]},
+  // Search
+  { key: 'bingAds', label: 'Microsoft (Bing) Ads', group: 'Search', icon: '🔎', builtin: true, fields: [
+    { key: 'accountId',      label: 'Account ID',      placeholder: 'B0…' },
+    { key: 'developerToken', label: 'Developer Token', placeholder: '…', secret: true },
+  ]},
+  { key: 'yahooAds', label: 'Yahoo (DSP)', group: 'Search', icon: '🟣', builtin: true, fields: [
+    { key: 'seatId', label: 'Seat ID',  placeholder: 'YAH-…' },
+    { key: 'apiKey', label: 'API Key',  placeholder: '…', secret: true },
+  ]},
 ];
 
-export function emptyConnections(): Record<ConnectionKey, StoreConnection> {
-  const result = {} as Record<ConnectionKey, StoreConnection>;
-  for (const def of CONNECTION_DEFINITIONS) {
-    result[def.key] = { accountId: '', status: 'disconnected' };
-  }
+export const CONNECTION_GROUPS: ConnectionGroup[] = ['Commerce', 'Google', 'Meta', 'Social', 'Email', 'Search', 'Custom'];
+
+function emptyConnection(): StoreConnection {
+  return { values: {}, status: 'disconnected', scheduleFrequency: 'off' };
+}
+
+/** Merge a possibly-partial/legacy persisted record into a full, defensively-defaulted one. */
+export function normalizeConnection(c: Partial<StoreConnection> | undefined): StoreConnection {
+  const base = emptyConnection();
+  if (!c) return base;
+  return {
+    values: (c.values && typeof c.values === 'object') ? c.values : {},
+    status: c.status ?? 'disconnected',
+    lastConnectedAt: c.lastConnectedAt,
+    lastDataPullAt: c.lastDataPullAt,
+    lastTestedAt: c.lastTestedAt,
+    lastTestOk: c.lastTestOk,
+    lastTestMessage: c.lastTestMessage,
+    scheduleFrequency: c.scheduleFrequency ?? 'off',
+  };
+}
+
+/** A store's full connection map keyed by definition key (built-in + any custom). */
+export type StoreConnectionMap = Record<string, StoreConnection>;
+
+export function emptyConnections(): StoreConnectionMap {
+  const result: StoreConnectionMap = {};
+  for (const def of CONNECTION_DEFINITIONS) result[def.key] = emptyConnection();
   return result;
 }
 
-// Defensive merge — never let a missing key (legacy localStorage record, or a
-// slot added after a user already had data saved) crash the settings page.
-export function withDefaults(
-  connections: Partial<Record<ConnectionKey, StoreConnection>> | undefined,
-): Record<ConnectionKey, StoreConnection> {
-  const base = emptyConnections();
-  if (!connections) return base;
-  for (const def of CONNECTION_DEFINITIONS) {
-    const existing = connections[def.key];
-    if (existing) base[def.key] = existing;
-  }
-  return base;
+function connected(values: Record<string, string>): StoreConnection {
+  return { values, status: 'connected', scheduleFrequency: 'daily', lastConnectedAt: new Date().toISOString(), lastDataPullAt: new Date().toISOString() };
+}
+function errored(values: Record<string, string>): StoreConnection {
+  return { values, status: 'error', scheduleFrequency: 'daily' };
 }
 
-function seedConnected(accountId: string): StoreConnection {
-  return { accountId, status: 'connected' };
-}
-
-function seedError(accountId: string): StoreConnection {
-  return { accountId, status: 'error' };
-}
-
-export const INITIAL_STORE_CONNECTIONS: Record<string, Record<ConnectionKey, StoreConnection>> = {
+// Seeded connection parameters (kept, per the project's config-retention rule).
+export const INITIAL_STORE_CONNECTIONS: Record<string, StoreConnectionMap> = {
   'donut-equipment': {
     ...emptyConnections(),
-    googleAds:         seedConnected('847-291-0034'),
-    googleAnalytics:   seedConnected('G-8472910384'),
-    merchantCenter:    seedConnected('138472910'),
-    facebookAds:       seedConnected('act_1847392847'),
-    facebookAnalytics: seedConnected('847291038472'),
-    youtubeAnalytics:  seedConnected('UC-donutequipment'),
+    shopify:          connected({ domain: 'donut-equipment.myshopify.com', accessToken: 'shpat_••••4a91', apiSecret: 'shpss_••••7c02', webhookSecret: 'whsec_••••1f88' }),
+    googleAds:        connected({ customerId: '847-291-0034', developerToken: 'DEV-••••9210' }),
+    googleAnalytics:  connected({ measurementId: 'G-8472910384', apiSecret: '••••e731' }),
+    merchantCenter:   connected({ merchantId: '138472910' }),
+    metaAds:          connected({ adAccountId: 'act_1847392847', systemToken: 'EAAB••••02aa' }),
+    metaPixel:        connected({ pixelId: '847291038472', capiToken: '••••55bd' }),
+    youtube:          connected({ channelId: 'UC-donutequipment', linkedAdsId: '847-291-0034' }),
   },
   'donut-supplies': {
     ...emptyConnections(),
-    googleAds:         seedConnected('552-108-4471'),
-    googleAnalytics:   seedConnected('G-5521084471'),
-    // Mirrors this store's overall "Auth Error" badge in the store card above.
-    facebookAds:       seedError('act_5521084471'),
-    facebookAnalytics: seedConnected('552108447100'),
+    shopify:          connected({ domain: 'donut-supplies.myshopify.com', accessToken: 'shpat_••••2b17', apiSecret: 'shpss_••••9d43', webhookSecret: 'whsec_••••6a20' }),
+    googleAds:        connected({ customerId: '552-108-4471', developerToken: 'DEV-••••4471' }),
+    googleAnalytics:  connected({ measurementId: 'G-5521084471', apiSecret: '••••a902' }),
+    metaAds:          errored({ adAccountId: 'act_5521084471', systemToken: 'EAAB••••expired' }),
+    metaPixel:        connected({ pixelId: '552108447100', capiToken: '••••11ce' }),
+    klaviyo:          connected({ publicKey: 'PK_donutsupplies', privateKey: 'pk_live_••••88fa' }),
   },
   'bakery-wholesalers': {
     ...emptyConnections(),
-    googleAds:         seedConnected('219-847-3021'),
-    googleAnalytics:   seedConnected('G-2198473021'),
-    merchantCenter:    seedError('219847302'),
-    facebookAds:       seedConnected('act_2198473021'),
-    facebookAnalytics: seedConnected('219847302100'),
+    shopify:          connected({ domain: 'bakery-wholesalers.myshopify.com', accessToken: 'shpat_••••7e55', apiSecret: 'shpss_••••3b91', webhookSecret: 'whsec_••••cc04' }),
+    googleAds:        connected({ customerId: '219-847-3021', developerToken: 'DEV-••••3021' }),
+    googleAnalytics:  connected({ measurementId: 'G-2198473021', apiSecret: '••••d5f0' }),
+    merchantCenter:   errored({ merchantId: '219847302' }),
+    metaAds:          connected({ adAccountId: 'act_2198473021', systemToken: 'EAAB••••7a31' }),
+    linkedinAds:      connected({ accountId: '509187442', accessToken: 'AQ••••e0b2' }),
   },
 };
 
 // ─── Test Connection ───────────────────────────────────────────────────────────
 
-const SUCCESS_MESSAGES: Record<ConnectionGroup, (accountId: string) => string[]> = {
-  Google: (id) => [
-    `Connection healthy. Account ${id} responded in ${180 + Math.floor(Math.random() * 220)}ms with scopes: adwords, analytics.readonly. Last data sync 4 minutes ago.`,
-    `Authenticated successfully against ${id}. OAuth token valid for another 47 days. Most recent report row landed 2 minutes ago.`,
-  ],
-  Facebook: (id) => [
-    `Connection healthy. Ad account ${id} responded in ${160 + Math.floor(Math.random() * 200)}ms with permissions: ads_read, ads_management. Last sync 3 minutes ago.`,
-    `Authenticated successfully via Meta Business Manager for ${id}. System user token valid, no rate-limit warnings in the last 24h.`,
-  ],
-  Social: (id) => [
-    `Connection healthy. Account ${id} responded in ${200 + Math.floor(Math.random() * 250)}ms. App review status: approved. Last sync 5 minutes ago.`,
-    `Authenticated successfully for ${id}. API quota usage: 12% of daily limit. No permission warnings.`,
-  ],
+function primaryValue(def: ConnectionDefinition, conn: StoreConnection): string {
+  const first = def.fields.find(f => !f.secret) ?? def.fields[0];
+  return (first && conn.values[first.key]) || 'this account';
+}
+
+const SUCCESS_BY_GROUP: Record<ConnectionGroup, (id: string, ms: number) => string> = {
+  Commerce: (id, ms) => `Connection healthy. Shopify store ${id} responded in ${ms}ms — Admin API scopes read_products, read_orders, read_customers verified. Webhooks registered. Last data pull just completed.`,
+  Google:   (id, ms) => `Authenticated successfully against ${id} in ${ms}ms. OAuth token valid for another 47 days, scopes: adwords, analytics.readonly. Most recent report row landed 2 minutes ago.`,
+  Meta:     (id, ms) => `Connection healthy. ${id} responded in ${ms}ms with permissions ads_read, ads_management. System user token valid, no rate-limit warnings in the last 24h.`,
+  Social:   (id, ms) => `Authenticated successfully for ${id} in ${ms}ms. App review status: approved. API quota usage 12% of daily limit. Last sync 5 minutes ago.`,
+  Email:    (id, ms) => `Connection healthy. Klaviyo account ${id} responded in ${ms}ms — list & profile read scopes verified. ${'2'} flows and ${'6'} segments discovered.`,
+  Search:   (id, ms) => `Authenticated successfully against ${id} in ${ms}ms. Developer token approved, account in good standing. Last data pull 8 minutes ago.`,
+  Custom:   (id, ms) => `Connection healthy. ${id} responded in ${ms}ms. Credentials accepted.`,
 };
 
-const ERROR_MESSAGES: Record<ConnectionGroup, (accountId: string) => string[]> = {
-  Google: (id) => [
-    `Authentication failed (401) for ${id}: the stored OAuth refresh token was revoked. Go to Google Ads → Account Access and re-authorize this app, then reconnect here.`,
-    `Permission denied (403) for ${id}: the connected Google account no longer has "Standard" access on this account. Ask an admin to re-grant access in Google Ads → Access and Security.`,
-    `No data returned for ${id} in the last 7 days. The linked property may have been deleted or moved — verify the ID under Admin → Property Settings in Google Analytics.`,
+const ERROR_BY_GROUP: Record<ConnectionGroup, (id: string) => string[]> = {
+  Commerce: (id) => [
+    `Authentication failed (401) for ${id}: the Admin API access token was rejected. Reinstall the app on the store or regenerate the token under Settings → Apps → Develop apps, then reconnect here.`,
+    `Webhook verification failed for ${id}: the stored signing secret no longer matches Shopify's. Copy the current secret from your app's webhook settings and update it here.`,
   ],
-  Facebook: (id) => [
+  Google: (id) => [
+    `Authentication failed (401) for ${id}: the stored OAuth refresh token was revoked. Go to Google Ads → Account Access, re-authorize this app, then reconnect.`,
+    `Permission denied (403) for ${id}: the connected Google account lost "Standard" access. Ask an admin to re-grant it under Access and Security.`,
+    `No data returned for ${id} in the last 7 days — the linked property may have been deleted or moved. Verify the ID under Admin → Property Settings.`,
+  ],
+  Meta: (id) => [
     `Authentication failed (401) for ${id}: the long-lived access token expired. Reconnect via Meta Business Manager → System Users and generate a new token with ads_read scope.`,
-    `Permission denied (403) for ${id}: this app's access to the ad account was removed. Ask a Business Manager admin to re-add the app under Business Settings → Integrations.`,
-    `Pixel ${id} is receiving no events in the last 24h. Check that the Conversions API and browser pixel are both firing — see Events Manager → Diagnostics for details.`,
+    `Permission denied (403) for ${id}: this app's access to the ad account was removed. Re-add it under Business Settings → Integrations.`,
+    `${id} is receiving no events in the last 24h. Check that the Conversions API and browser pixel are both firing — see Events Manager → Diagnostics.`,
   ],
   Social: (id) => [
-    `Authentication failed (401) for ${id}: the access token was revoked, likely due to a password or app-permission change. Reconnect the account to generate a new token.`,
+    `Authentication failed (401) for ${id}: the access token was revoked, likely due to a password or permission change. Reconnect to generate a new token.`,
     `Rate limited (429) while querying ${id}. The app exceeded its API quota — data sync will retry automatically in 1 hour.`,
-    `Permission denied (403) for ${id}: required scopes are missing. Reconnect and make sure to approve the ads/analytics permission prompt this time.`,
+    `Permission denied (403) for ${id}: required scopes are missing. Reconnect and approve the ads/analytics permission prompt.`,
+  ],
+  Email: (id) => [
+    `Authentication failed (401) for ${id}: the private API key is invalid or was rotated. Generate a new key in Klaviyo → Settings → API Keys and update it here.`,
+    `Permission denied (403) for ${id}: the API key lacks the required read scopes for lists and profiles. Create a full-access key and reconnect.`,
+  ],
+  Search: (id) => [
+    `Authentication failed (401) for ${id}: the developer token is not approved for production. Request production access in the partner center, then reconnect.`,
+    `No data returned for ${id}. The account may have no active campaigns, or the seat is suspended — verify status in the ads console.`,
+  ],
+  Custom: (id) => [
+    `Authentication failed for ${id}: the provided credentials were rejected. Double-check each field and try again.`,
+    `No response from ${id}. Verify the endpoint/account identifier is correct and that the integration is enabled.`,
   ],
 };
 
+// Deterministic-ish latency without Math.random at module scope (safe in a click handler).
 export function getTestResult(
-  key: ConnectionKey,
+  def: ConnectionDefinition,
   connection: StoreConnection,
 ): { ok: boolean; message: string } {
-  const def = CONNECTION_DEFINITIONS.find(d => d.key === key)!;
-  const pool = connection.status === 'error'
-    ? ERROR_MESSAGES[def.group](connection.accountId || 'this account')
-    : SUCCESS_MESSAGES[def.group](connection.accountId || 'this account');
-  const message = pool[Math.floor(Math.random() * pool.length)];
-  return { ok: connection.status !== 'error', message };
+  const id = primaryValue(def, connection);
+  const ok = connection.status !== 'error';
+  if (ok) {
+    const ms = 160 + Math.floor(Math.random() * 240);
+    return { ok: true, message: SUCCESS_BY_GROUP[def.group](id, ms) };
+  }
+  const pool = ERROR_BY_GROUP[def.group](id);
+  return { ok: false, message: pool[Math.floor(Math.random() * pool.length)] };
+}
+
+/** Whether every required (non-secret is treated as required) field has a value. */
+export function hasRequiredValues(def: ConnectionDefinition, conn: StoreConnection): boolean {
+  return def.fields.length > 0 && def.fields.every(f => (conn.values[f.key] ?? '').trim().length > 0);
 }
