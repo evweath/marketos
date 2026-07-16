@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Pencil, Trash2, X } from 'lucide-react';
 import { PLATFORM_CONFIG } from '@/lib/socialData';
 import type { SocialPost, SocialPlatform } from '@/lib/socialData';
+import { usePersistentState } from '@/lib/usePersistentState';
 
 interface Props {
   posts: SocialPost[];
@@ -43,6 +44,9 @@ const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 export default function SocialCalendar({ posts, onSelectPost, onNewPost, filterPlatform }: Props) {
   const today = new Date();
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [popoverDay, setPopoverDay] = useState<number | null>(null);
+  const [, setAllPosts] = usePersistentState<SocialPost[]>('social.posts', []);
+  const deletePost = (id: string) => setAllPosts(prev => prev.filter(p => p.id !== id));
 
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
@@ -128,7 +132,7 @@ export default function SocialCalendar({ posts, onSelectPost, onNewPost, filterP
                 outline: isToday ? '1.5px solid #00d9ff' : 'none',
                 outlineOffset: '-1.5px',
               }}
-              onClick={() => { if (dayPosts.length === 0) onNewPost(new Date(year, month, day)); }}>
+              onClick={() => { if (dayPosts.length === 0) onNewPost(new Date(year, month, day)); else setPopoverDay(popoverDay === day ? null : day); }}>
 
               {/* Day number */}
               <div className="flex items-center justify-between mb-0.5">
@@ -185,6 +189,37 @@ export default function SocialCalendar({ posts, onSelectPost, onNewPost, filterP
               {dayPosts.length === 0 && !isPast && (
                 <div className="flex-1 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>+ New Post</span>
+                </div>
+              )}
+
+              {/* Day-cell popover — quick edit/delete */}
+              {popoverDay === day && dayPosts.length > 0 && (
+                <div className="absolute z-30 rounded-xl p-2 shadow-xl"
+                  onClick={e => e.stopPropagation()}
+                  style={{ top: '100%', left: 0, minWidth: 240, maxWidth: 280, background: 'var(--bg-overlay)', border: '1px solid var(--border-dim)', boxShadow: '0 8px 28px rgba(0,0,0,0.4)' }}>
+                  <div className="flex items-center justify-between px-1 mb-1.5">
+                    <span className="section-label">{new Date(year, month, day).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                    <button onClick={() => setPopoverDay(null)} style={{ color: 'var(--text-muted)' }}><X size={12} /></button>
+                  </div>
+                  <div className="space-y-1 max-h-48 overflow-y-auto">
+                    {dayPosts.map(p => (
+                      <div key={p.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5" style={{ background: 'var(--bg-elevated)' }}>
+                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: STATUS_COLORS[p.status] }} />
+                        <span className="text-[16px] truncate flex-1" style={{ color: 'var(--text-secondary)' }}>
+                          {p.caption.replace(/\[DRAFT\]\s*/, '').slice(0, 30)}
+                        </span>
+                        <button onClick={() => { onSelectPost(p); setPopoverDay(null); }} title="Edit"
+                          className="p-1 rounded hover:bg-white/10" style={{ color: '#7b93ff' }}><Pencil size={11} /></button>
+                        <button onClick={() => deletePost(p.id)} title="Delete"
+                          className="p-1 rounded hover:bg-white/10" style={{ color: '#ff4444' }}><Trash2 size={11} /></button>
+                      </div>
+                    ))}
+                  </div>
+                  <button onClick={() => { onNewPost(new Date(year, month, day)); setPopoverDay(null); }}
+                    className="w-full mt-1.5 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[16px] font-medium"
+                    style={{ background: 'rgba(0,217,255,0.1)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
+                    <Plus size={11} /> New post this day
+                  </button>
                 </div>
               )}
             </div>
