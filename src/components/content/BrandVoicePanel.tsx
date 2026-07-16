@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { usePersistentState } from '@/lib/usePersistentState';
 import { Mic, Plus, X, Upload, Check, BookOpen, RefreshCw } from 'lucide-react';
 import { DEFAULT_BRAND_VOICE_SETTINGS as BRAND_VOICE_SETTINGS } from '@/lib/contentData';
+import { useStores } from '@/lib/storeScope';
 
 const PERSONALITY_OPTIONS = [
   'Bold', 'Trustworthy', 'Innovative', 'Friendly', 'Expert',
@@ -11,21 +12,54 @@ const PERSONALITY_OPTIONS = [
   'Inspiring', 'Direct',
 ];
 
+interface TrainingDoc { name: string; size: string; status: string }
+interface BrandVoiceState {
+  toneValue: number;
+  formalityValue: number;
+  traits: string[];
+  avoidWords: string[];
+  useWords: string[];
+  exampleCopy: string;
+  trainingDocs: TrainingDoc[];
+}
+
+const defaultVoice = (): BrandVoiceState => ({
+  toneValue: BRAND_VOICE_SETTINGS.toneValue,
+  formalityValue: BRAND_VOICE_SETTINGS.formalityValue,
+  traits: BRAND_VOICE_SETTINGS.personalityTraits,
+  avoidWords: BRAND_VOICE_SETTINGS.wordListAvoid,
+  useWords: BRAND_VOICE_SETTINGS.wordListUse,
+  exampleCopy: BRAND_VOICE_SETTINGS.exampleCopy,
+  trainingDocs: [],
+});
+
 export function BrandVoicePanel() {
+  const [stores] = useStores();
   const [editing, setEditing] = useState(false);
   const [saved, setSaved] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [browsing, setBrowsing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Editable state
-  const [toneValue, setToneValue] = usePersistentState('content.brandVoice.tone', BRAND_VOICE_SETTINGS.toneValue);
-  const [formalityValue, setFormalityValue] = usePersistentState('content.brandVoice.formality', BRAND_VOICE_SETTINGS.formalityValue);
-  const [traits, setTraits] = usePersistentState<string[]>('content.brandVoice.traits', BRAND_VOICE_SETTINGS.personalityTraits);
-  const [avoidWords, setAvoidWords] = usePersistentState<string[]>('content.brandVoice.avoidWords', BRAND_VOICE_SETTINGS.wordListAvoid);
-  const [useWords, setUseWords] = usePersistentState<string[]>('content.brandVoice.useWords', BRAND_VOICE_SETTINGS.wordListUse);
-  const [exampleCopy, setExampleCopy] = usePersistentState('content.brandVoice.exampleCopy', BRAND_VOICE_SETTINGS.exampleCopy);
-  const [trainingDocs, setTrainingDocs] = usePersistentState<{ name: string; size: string; status: string }[]>('content.brandVoice.trainingDocFiles', []);
+  // Per-store brand voice, all held in one persisted map keyed by store id.
+  const [byStore, setByStore] = usePersistentState<Record<string, BrandVoiceState>>('content.brandVoice.byStore', {});
+  const [activeStore, setActiveStore] = useState(stores[0]?.id ?? '');
+  const storeId = stores.some(s => s.id === activeStore) ? activeStore : (stores[0]?.id ?? '');
+  const v = byStore[storeId] ?? defaultVoice();
+
+  const patch = (p: Partial<BrandVoiceState>) =>
+    setByStore(prev => ({ ...prev, [storeId]: { ...(prev[storeId] ?? defaultVoice()), ...p } }));
+
+  const toneValue = v.toneValue, formalityValue = v.formalityValue;
+  const traits = v.traits, avoidWords = v.avoidWords, useWords = v.useWords;
+  const exampleCopy = v.exampleCopy, trainingDocs = v.trainingDocs;
+  const setToneValue = (n: number) => patch({ toneValue: n });
+  const setFormalityValue = (n: number) => patch({ formalityValue: n });
+  const setExampleCopy = (s: string) => patch({ exampleCopy: s });
+  const setAvoidWords = (fn: (prev: string[]) => string[]) => patch({ avoidWords: fn(avoidWords) });
+  const setUseWords = (fn: (prev: string[]) => string[]) => patch({ useWords: fn(useWords) });
+  const setTraits = (fn: (prev: string[]) => string[]) => patch({ traits: fn(traits) });
+  const setTrainingDocs = (fn: (prev: TrainingDoc[]) => TrainingDoc[]) => patch({ trainingDocs: fn(trainingDocs) });
 
   // Tag input state
   const [avoidInput, setAvoidInput] = useState('');
@@ -68,6 +102,23 @@ export function BrandVoicePanel() {
 
   return (
     <div className="space-y-4">
+      {/* Per-store tabs */}
+      {stores.length > 0 && (
+        <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', width: 'fit-content' }}>
+          {stores.map(s => {
+            const active = storeId === s.id;
+            return (
+              <button key={s.id} onClick={() => { setActiveStore(s.id); setEditing(false); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-base font-medium transition-all"
+                style={{ background: active ? s.color + '20' : 'transparent', color: active ? s.color : 'var(--text-muted)', border: active ? `1px solid ${s.color}40` : '1px solid transparent' }}>
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.color }} />
+                {s.name}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {/* Current Brand Voice Display */}
       <div className="glass-card p-5">
         <div className="flex items-center justify-between mb-4">
