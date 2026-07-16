@@ -471,6 +471,7 @@ export function computeAlertStats(rules: AlertRule[], alerts: FiredAlert[]) {
     totalSnoozed:       alerts.filter(a => a.status === 'snoozed').length,
     criticalActive:     alerts.filter(a => a.status === 'active' && a.severity === 'critical').length,
     warningActive:      alerts.filter(a => a.status === 'active' && a.severity === 'warning').length,
+    infoActive:         alerts.filter(a => a.status === 'active' && a.severity === 'info').length,
     total30d:           rules.reduce((s, r) => s + r.fireCount30d, 0),
     rulesEnabled:       rules.filter(r => r.enabled).length,
     rulesTotal:         rules.length,

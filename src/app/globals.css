@@ -133,6 +133,13 @@ html, body {
 }
 .live-dot-red { animation: liveRingRed 2.2s ease-in-out infinite; }
 
+/* Pulsing left border for unacknowledged critical alerts */
+@keyframes pulseBorderRed {
+  0%, 100% { border-left-color: rgba(255, 68, 68, 1);   }
+  50%      { border-left-color: rgba(255, 68, 68, 0.35); }
+}
+.pulse-border-red { animation: pulseBorderRed 1.8s ease-in-out infinite; }
+
 @keyframes countIn {
   from { opacity: 0; transform: translateY(5px); }
   to   { opacity: 1; transform: translateY(0);   }

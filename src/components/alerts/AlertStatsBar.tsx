@@ -4,7 +4,7 @@ import { computeAlertStats, alertInScope, ruleInScope } from '@/lib/alertData';
 import type { AlertRule, FiredAlert } from '@/lib/alertData';
 import { usePersistentState } from '@/lib/usePersistentState';
 import {
-  AlertCircle, AlertTriangle, CheckCircle, BellOff, Bell, Shield,
+  AlertCircle, AlertTriangle, CheckCircle, BellOff, Bell, Shield, Info,
 } from 'lucide-react';
 
 export default function AlertStatsBar({ selectedStoreIds }: { selectedStoreIds: string[] }) {
@@ -13,6 +13,12 @@ export default function AlertStatsBar({ selectedStoreIds }: { selectedStoreIds: 
   const rules  = allRules.filter(r => ruleInScope(r.storeIds, selectedStoreIds));
   const alerts = allAlerts.filter(a => alertInScope(a.storeId, selectedStoreIds));
   const s = computeAlertStats(rules, alerts);
+
+  // Acknowledged rate: of all alerts that have fired (active/ack/resolved),
+  // the share that a human has acknowledged or resolved (i.e. handled).
+  const handledDenom = s.totalActive + s.totalAcknowledged + s.totalResolved;
+  const ackRate = handledDenom === 0 ? null
+    : Math.round(((s.totalAcknowledged + s.totalResolved) / handledDenom) * 100);
 
   const cards = [
     {
@@ -38,6 +44,28 @@ export default function AlertStatsBar({ selectedStoreIds }: { selectedStoreIds: 
       trend: null as string | null,
     },
     {
+      label: 'Info Active',
+      value: s.infoActive,
+      Icon: Info,
+      color: '#00d9ff',
+      bg: 'rgba(0,217,255,0.06)',
+      border: 'rgba(0,217,255,0.15)',
+      pulse: false,
+      glow: false,
+      trend: null as string | null,
+    },
+    {
+      label: 'Total Active',
+      value: s.totalActive,
+      Icon: Bell,
+      color: 'var(--text-primary)',
+      bg: 'var(--bg-elevated)',
+      border: 'var(--border-dim)',
+      pulse: false,
+      glow: false,
+      trend: 'all severities' as string | null,
+    },
+    {
       label: 'Acknowledged',
       value: s.totalAcknowledged,
       Icon: Bell,
@@ -46,7 +74,7 @@ export default function AlertStatsBar({ selectedStoreIds }: { selectedStoreIds: 
       border: 'rgba(123,147,255,0.15)',
       pulse: false,
       glow: false,
-      trend: null as string | null,
+      trend: ackRate === null ? null : `${ackRate}% ack rate`,
     },
     {
       label: 'Resolved (30d)',
@@ -71,17 +99,6 @@ export default function AlertStatsBar({ selectedStoreIds }: { selectedStoreIds: 
       trend: null as string | null,
     },
     {
-      label: 'Fires This Month',
-      value: s.total30d,
-      Icon: Bell,
-      color: 'var(--cyan)',
-      bg: 'rgba(0,217,255,0.06)',
-      border: 'rgba(0,217,255,0.15)',
-      pulse: false,
-      glow: false,
-      trend: '30-day total' as string | null,
-    },
-    {
       label: 'Rules Active',
       value: `${s.rulesEnabled}/${s.rulesTotal}`,
       Icon: Shield,
@@ -90,12 +107,12 @@ export default function AlertStatsBar({ selectedStoreIds }: { selectedStoreIds: 
       border: 'rgba(16,217,138,0.15)',
       pulse: false,
       glow: false,
-      trend: null as string | null,
+      trend: `${s.total30d} fires/30d` as string | null,
     },
   ];
 
   return (
-    <div className="grid grid-cols-7 gap-2 mb-4">
+    <div className="grid grid-cols-8 gap-2 mb-4">
       {cards.map(card => {
         const Icon = card.Icon;
         return (

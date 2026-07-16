@@ -214,17 +214,21 @@ function AlertDetail({ alert, onClose, onUpdateStatus }: {
 
 // ─── Feed Row ─────────────────────────────────────────────────────────────────
 
-function AlertRow({ alert, selected, onClick }: { alert: FiredAlert; selected: boolean; onClick: () => void }) {
+function AlertRow({ alert, selected, onClick, onDismiss }: { alert: FiredAlert; selected: boolean; onClick: () => void; onDismiss: () => void }) {
   const [stores] = useStores();
   const sc = SEV_CONFIG[alert.severity];
   const stc = STATUS_CONFIG[alert.status];
   const cat = CATEGORY_CONFIG[alert.category];
   const isActive = alert.status === 'active';
+  const isCriticalActive = isActive && alert.severity === 'critical';
 
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
-      className="w-full text-left border-b transition-colors hover:bg-white/[0.025] group"
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
+      className={`w-full text-left border-b transition-colors hover:bg-white/[0.025] group cursor-pointer ${isCriticalActive ? 'pulse-border-red' : ''}`}
       style={{
         borderColor: 'var(--border-subtle)',
         background: selected ? sc.bg : 'transparent',
@@ -252,9 +256,21 @@ function AlertRow({ alert, selected, onClick }: { alert: FiredAlert; selected: b
                 </span>
               )}
             </div>
-            <span className="text-[16px] font-mono shrink-0" style={{ color: 'var(--text-muted)' }} suppressHydrationWarning>
-              {timeAgo(alert.firedAt)}
-            </span>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}
+                title={fmtDate(alert.firedAt)} suppressHydrationWarning>
+                {timeAgo(alert.firedAt)}
+              </span>
+              {isActive && (
+                <button
+                  onClick={e => { e.stopPropagation(); onDismiss(); }}
+                  title="Dismiss (resolve) this alert"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-white/10"
+                  style={{ color: 'var(--text-muted)' }}>
+                  <X size={12} />
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="text-base font-semibold mb-0.5 leading-snug"
@@ -282,7 +298,7 @@ function AlertRow({ alert, selected, onClick }: { alert: FiredAlert; selected: b
           </div>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -304,34 +320,53 @@ const SEV_FILTERS: { key: AlertSeverity | 'all'; label: string; color?: string }
 ];
 
 export default function AlertFeed({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
   const [statusFilter, setStatusFilter] = useState<AlertStatus | 'all'>('all');
   const [sevFilter, setSevFilter] = useState<AlertSeverity | 'all'>('all');
+  const [storeFilter, setStoreFilter] = useState<string | 'all'>('all');
   const [fullAlerts, setAllAlerts] = usePersistentState<FiredAlert[]>('alerts.list', []);
   const allAlerts = fullAlerts.filter(a => alertInScope(a.storeId, selectedStoreIds));
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const selected = selectedId ? allAlerts.find(a => a.id === selectedId) ?? null : null;
 
+  // Stores that actually appear in the (scoped) feed — drives the By-Store filter.
+  const feedStoreIds = Array.from(new Set(allAlerts.map(a => a.storeId).filter(Boolean))) as string[];
+
+  function applyStatus(a: FiredAlert, status: AlertStatus, now: string): FiredAlert {
+    const next = { ...a, status };
+    if (status === 'acknowledged') {
+      next.acknowledgedAt = a.acknowledgedAt ?? now;
+      next.acknowledgedBy = a.acknowledgedBy ?? 'You';
+    } else if (status === 'resolved') {
+      next.acknowledgedAt = a.acknowledgedAt ?? now;
+      next.acknowledgedBy = a.acknowledgedBy ?? 'You';
+      next.resolvedAt = now;
+    }
+    return next;
+  }
+
   function updateStatus(id: string, status: AlertStatus) {
     const now = new Date().toISOString();
-    setAllAlerts(prev => prev.map(a => {
-      if (a.id !== id) return a;
-      const next = { ...a, status };
-      if (status === 'acknowledged') {
-        next.acknowledgedAt = a.acknowledgedAt ?? now;
-        next.acknowledgedBy = a.acknowledgedBy ?? 'You';
-      } else if (status === 'resolved') {
-        next.acknowledgedAt = a.acknowledgedAt ?? now;
-        next.acknowledgedBy = a.acknowledgedBy ?? 'You';
-        next.resolvedAt = now;
-      }
-      return next;
-    }));
+    setAllAlerts(prev => prev.map(a => (a.id === id ? applyStatus(a, status, now) : a)));
   }
+
+  // Bulk actions operate only on the currently-visible (scoped + store-filtered) alerts.
+  function bulkUpdate(match: (a: FiredAlert) => boolean, status: AlertStatus) {
+    const now = new Date().toISOString();
+    const inView = (a: FiredAlert) =>
+      alertInScope(a.storeId, selectedStoreIds) &&
+      (storeFilter === 'all' || a.storeId === storeFilter);
+    setAllAlerts(prev => prev.map(a => (inView(a) && match(a) ? applyStatus(a, status, now) : a)));
+  }
+
+  const activeCount     = allAlerts.filter(a => a.status === 'active' && (storeFilter === 'all' || a.storeId === storeFilter)).length;
+  const activeInfoCount = allAlerts.filter(a => a.status === 'active' && a.severity === 'info' && (storeFilter === 'all' || a.storeId === storeFilter)).length;
 
   const alerts = allAlerts.filter(a => {
     if (statusFilter !== 'all' && a.status !== statusFilter) return false;
     if (sevFilter !== 'all' && a.severity !== sevFilter) return false;
+    if (storeFilter !== 'all' && a.storeId !== storeFilter) return false;
     return true;
   }).sort((a, b) => {
     const order: Record<AlertStatus, number> = { active: 0, acknowledged: 1, snoozed: 2, resolved: 3 };
@@ -398,13 +433,55 @@ export default function AlertFeed({ selectedStoreIds }: { selectedStoreIds: stri
               </button>
             ))}
           </div>
+
+          {/* By-Store filter — only when the feed spans more than one store */}
+          {feedStoreIds.length > 1 && (
+            <div className="flex items-center gap-1 flex-wrap">
+              <span className="section-label mr-0.5 flex items-center gap-1"><Store size={10} /> Store:</span>
+              {(['all', ...feedStoreIds] as const).map(sid => {
+                const st = sid === 'all' ? null : stores.find(s => s.id === sid);
+                const active = storeFilter === sid;
+                return (
+                  <button key={sid} onClick={() => setStoreFilter(sid)}
+                    className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[16px] transition-all"
+                    style={{
+                      background: active ? (st ? st.color + '1f' : 'var(--bg-overlay)') : 'transparent',
+                      color: active ? (st?.color ?? 'var(--text-primary)') : 'var(--text-muted)',
+                      border: active ? `1px solid ${st ? st.color + '40' : 'var(--border-dim)'}` : '1px solid transparent',
+                    }}>
+                    {st && <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: st.color }} />}
+                    {st ? st.name : 'All Stores'}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Bulk actions — act on the visible active alerts */}
+          {activeCount > 0 && (
+            <div className="flex items-center gap-2 pt-0.5">
+              <button onClick={() => bulkUpdate(a => a.status === 'active', 'acknowledged')}
+                className="text-[16px] px-2 py-1 rounded-lg font-medium transition-all"
+                style={{ background: 'rgba(123,147,255,0.12)', color: '#7b93ff', border: '1px solid rgba(123,147,255,0.25)' }}>
+                Acknowledge all ({activeCount})
+              </button>
+              {activeInfoCount > 0 && (
+                <button onClick={() => bulkUpdate(a => a.status === 'active' && a.severity === 'info', 'resolved')}
+                  className="text-[16px] px-2 py-1 rounded-lg font-medium transition-all"
+                  style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-dim)' }}>
+                  Dismiss all info ({activeInfoCount})
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Alert rows */}
         <div className="flex-1 overflow-y-auto">
           {alerts.map(a => (
             <AlertRow key={a.id} alert={a} selected={selectedId === a.id}
-              onClick={() => setSelectedId(selectedId === a.id ? null : a.id)} />
+              onClick={() => setSelectedId(selectedId === a.id ? null : a.id)}
+              onDismiss={() => { updateStatus(a.id, 'resolved'); if (selectedId === a.id) setSelectedId(null); }} />
           ))}
           {alerts.length === 0 && (
             <div className="flex items-center justify-center h-32" style={{ color: 'var(--text-muted)' }}>
