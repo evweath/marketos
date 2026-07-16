@@ -22,6 +22,30 @@ const MODEL_DESC: Record<Model, string> = {
 
 const MODELS: Model[] = ['firstTouch', 'lastTouch', 'linearTouch', 'positionBased'];
 
+function MiniDonut({ rows, model, size = 56 }: { rows: AttributionTouchpoint[]; model: Model; size?: number }) {
+  const r = size / 2 - 5;
+  const circ = 2 * Math.PI * r;
+  const total = rows.reduce((s, x) => s + x[model], 0) || 1;
+  let offset = 0;
+  return (
+    <svg width={size} height={size} className="rotate-[-90deg]">
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--bg-overlay)" strokeWidth={5} />
+      {rows.map(row => {
+        const frac = row[model] / total;
+        const dash = frac * circ;
+        const seg = (
+          <circle key={row.channel} cx={size / 2} cy={size / 2} r={r} fill="none"
+            stroke={row.color} strokeWidth={5}
+            strokeDasharray={`${dash} ${circ - dash}`}
+            strokeDashoffset={-offset} />
+        );
+        offset += dash;
+        return seg;
+      })}
+    </svg>
+  );
+}
+
 export default function AttributionPanel({ dateRange = '30d', channelMetrics, attribution }: { dateRange?: DateRange; channelMetrics: ChannelMetrics[]; attribution: AttributionTouchpoint[] }) {
   const [model, setModel] = useState<Model>('linearTouch');
   const conversions = scaledAttributionConversions(dateRange, channelMetrics);
@@ -34,28 +58,21 @@ export default function AttributionPanel({ dateRange = '30d', channelMetrics, at
         <div className="text-base" style={{ color: 'var(--text-secondary)' }}>{MODEL_DESC[model]}</div>
       </div>
 
-      {/* Segmented model selector — 2×2 grid pill container */}
-      <div
-        className="grid grid-cols-2 gap-0.5 mb-4 p-0.5 rounded-xl"
-        style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}
-      >
-        {MODELS.map(m => (
-          <button
-            key={m}
-            onClick={() => setModel(m)}
-            className="px-2 py-1.5 rounded-[10px] text-[16px] text-center transition-all font-mono"
-            style={{
-              background: model === m ? 'var(--bg-overlay)' : 'transparent',
-              color: model === m ? 'var(--text-primary)' : 'var(--text-muted)',
-              fontWeight: model === m ? 500 : 400,
-              border: model === m ? '1px solid var(--border-dim)' : '1px solid transparent',
-              boxShadow: model === m ? '0 1px 3px rgba(0,0,0,0.35)' : 'none',
-              transition: 'all 0.15s ease',
-            }}
-          >
-            {MODEL_LABELS[m]}
-          </button>
-        ))}
+      {/* 4 model cards with mini donut charts — click to select */}
+      <div className="grid grid-cols-4 gap-2 mb-4">
+        {MODELS.map(m => {
+          const top = [...attribution].sort((a, b) => b[m] - a[m])[0];
+          const active = model === m;
+          return (
+            <button key={m} onClick={() => setModel(m)}
+              className="flex flex-col items-center gap-1.5 py-2.5 rounded-xl transition-all"
+              style={{ background: active ? 'var(--bg-overlay)' : 'var(--bg-elevated)', border: `1px solid ${active ? 'var(--border-bright)' : 'var(--border-subtle)'}` }}>
+              <MiniDonut rows={attribution} model={m} />
+              <span className="text-[16px] font-mono" style={{ color: active ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: active ? 600 : 400 }}>{MODEL_LABELS[m]}</span>
+              {top && <span className="text-[16px]" style={{ color: top.color }}>{top.label.split(' ')[0]} {top[m].toFixed(0)}%</span>}
+            </button>
+          );
+        })}
       </div>
 
       {/* Attribution bars */}
