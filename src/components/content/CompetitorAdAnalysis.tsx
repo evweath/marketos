@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, X, BarChart2, TrendingUp } from 'lucide-react';
+import { Search, X, BarChart2, TrendingUp, LayoutGrid, List, Lightbulb } from 'lucide-react';
 import { usePersistentState } from '@/lib/usePersistentState';
 import { useStores, resolveStoreId } from '@/lib/storeScope';
 import type { CompetitorAd, ContentPlatform, PerformanceIndicator } from '@/lib/contentData';
@@ -204,6 +204,7 @@ export function CompetitorAdAnalysis({ selectedStoreIds }: { selectedStoreIds: s
   const [perfFilter, setPerfFilter] = useState<PerfFilter>('all');
   const [modal, setModal] = useState<AnalysisModal | null>(null);
   const [searching, setSearching] = useState(false);
+  const [view, setView] = useState<'grid' | 'table'>('grid');
 
   const filtered = competitorAds.filter(ad => {
     const matchSearch = !searchQuery || ad.competitor.includes(searchQuery.toLowerCase()) || ad.headline.toLowerCase().includes(searchQuery.toLowerCase());
@@ -220,6 +221,18 @@ export function CompetitorAdAnalysis({ selectedStoreIds }: { selectedStoreIds: s
   }, {} as Record<string, number>);
   const topPlatform = Object.entries(platformCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
   const highCount = competitorAds.filter(a => a.performanceIndicator === 'high').length;
+
+  // Pattern Summary — aggregate the *filtered* set into common creative patterns.
+  const mode = (arr: string[]) => {
+    const counts: Record<string, number> = {};
+    arr.forEach(x => { counts[x] = (counts[x] ?? 0) + 1; });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0] ?? null;
+  };
+  const topCta   = mode(filtered.map(a => a.cta));
+  const topType  = mode(filtered.map(a => a.adType));
+  const topPlat  = mode(filtered.map(a => a.platform));
+  const fAvgDays = filtered.length ? Math.round(filtered.reduce((s, a) => s + a.daysRunning, 0) / filtered.length) : 0;
+  const fHighPct = filtered.length ? Math.round((filtered.filter(a => a.performanceIndicator === 'high').length / filtered.length) * 100) : 0;
 
   return (
     <div className="space-y-4">
@@ -310,18 +323,111 @@ export function CompetitorAdAnalysis({ selectedStoreIds }: { selectedStoreIds: s
             })}
           </div>
 
-          <div className="ml-auto text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
-            {filtered.length} ads
+          <div className="ml-auto flex items-center gap-2">
+            <div className="flex items-center gap-0.5 p-1 rounded-lg" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+              {([['grid', LayoutGrid], ['table', List]] as const).map(([v, Icon]) => {
+                const active = view === v;
+                return (
+                  <button key={v} onClick={() => setView(v)}
+                    className="px-2 py-1 rounded-md transition-all"
+                    style={{ background: active ? 'rgba(0,217,255,0.15)' : 'transparent', color: active ? 'var(--cyan)' : 'var(--text-muted)', border: active ? '1px solid rgba(0,217,255,0.3)' : '1px solid transparent' }}>
+                    <Icon size={13} />
+                  </button>
+                );
+              })}
+            </div>
+            <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>{filtered.length} ads</span>
           </div>
         </div>
       </div>
 
+      {/* Pattern Summary */}
+      {filtered.length > 0 && (
+        <div className="glass-card p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Lightbulb size={13} style={{ color: '#ffb347' }} />
+            <span className="section-label">Pattern Summary</span>
+            <span className="text-[16px] font-mono ml-auto" style={{ color: 'var(--text-muted)' }}>across {filtered.length} tracked ads</span>
+          </div>
+          <div className="grid grid-cols-5 gap-3">
+            {[
+              { label: 'Most Common CTA', value: topCta ? `"${topCta[0]}"` : '—', sub: topCta ? `${topCta[1]}× used` : '', color: 'var(--cyan)' },
+              { label: 'Dominant Format', value: topType ? topType[0] : '—', sub: topType ? `${topType[1]} ads` : '', color: '#7b93ff' },
+              { label: 'Top Platform', value: topPlat ? (PLATFORM_LABELS[topPlat[0] as ContentPlatform]?.label ?? topPlat[0]) : '—', sub: topPlat ? `${topPlat[1]} ads` : '', color: '#0866FF' },
+              { label: 'Avg Days Running', value: `${fAvgDays}d`, sub: 'longevity ≈ profit', color: '#ffb347' },
+              { label: 'High Performers', value: `${fHighPct}%`, sub: 'of tracked ads', color: '#10d98a' },
+            ].map(p => (
+              <div key={p.label} className="rounded-xl p-3" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                <div className="section-label mb-1">{p.label}</div>
+                <div className="text-base font-bold font-mono capitalize truncate" style={{ color: p.color }}>{p.value}</div>
+                <div className="text-[16px] font-mono mt-0.5" style={{ color: 'var(--text-muted)' }}>{p.sub}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Ads Grid */}
-      <div className="grid grid-cols-2 gap-3">
-        {filtered.map(ad => (
-          <AdCard key={ad.id} ad={ad} onAnalyze={a => setModal({ ad: a })} />
-        ))}
-      </div>
+      {view === 'grid' && filtered.length > 0 && (
+        <div className="grid grid-cols-2 gap-3">
+          {filtered.map(ad => (
+            <AdCard key={ad.id} ad={ad} onAnalyze={a => setModal({ ad: a })} />
+          ))}
+        </div>
+      )}
+
+      {/* Ads Table */}
+      {view === 'table' && filtered.length > 0 && (
+        <div className="glass-card p-4 overflow-x-auto">
+          <table className="w-full text-base" style={{ borderCollapse: 'collapse' }}>
+            <thead>
+              <tr className="section-label" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                <th className="text-left font-normal pb-2 pr-2">Competitor</th>
+                <th className="text-left font-normal pb-2 pr-2">Platform</th>
+                <th className="text-left font-normal pb-2 pr-2">Headline</th>
+                <th className="text-left font-normal pb-2 pr-2">Type</th>
+                <th className="text-left font-normal pb-2 pr-2">CTA</th>
+                <th className="text-right font-normal pb-2 pr-2">Est. Spend</th>
+                <th className="text-right font-normal pb-2 pr-2">Days</th>
+                <th className="text-center font-normal pb-2 pr-2">Perf.</th>
+                <th className="text-right font-normal pb-2"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(ad => {
+                const plat = PLATFORM_LABELS[ad.platform];
+                const perf = PERF_CONFIG[ad.performanceIndicator];
+                return (
+                  <tr key={ad.id} style={{ borderBottom: '1px solid var(--border-subtle)' }} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="py-2.5 pr-2 font-mono text-[16px]" style={{ color: 'var(--text-secondary)' }}>{ad.competitor}</td>
+                    <td className="py-2.5 pr-2">
+                      <span className="text-[16px] font-mono px-1.5 py-0.5 rounded" style={{ background: plat.color + '18', color: plat.color }}>{plat.label}</span>
+                    </td>
+                    <td className="py-2.5 pr-2" style={{ color: 'var(--text-primary)', maxWidth: 220 }}>
+                      <span className="block truncate">{ad.headline}</span>
+                    </td>
+                    <td className="py-2.5 pr-2 capitalize" style={{ color: 'var(--text-secondary)' }}>{ad.adType}</td>
+                    <td className="py-2.5 pr-2" style={{ color: 'var(--text-secondary)' }}>{ad.cta}</td>
+                    <td className="py-2.5 pr-2 text-right font-mono" style={{ color: '#ffb347' }}>{ad.estimatedSpend}</td>
+                    <td className="py-2.5 pr-2 text-right font-mono" style={{ color: 'var(--text-secondary)' }}>{ad.daysRunning}d</td>
+                    <td className="py-2.5 pr-2 text-center">
+                      <span className="inline-flex items-center gap-1 text-[16px] font-mono" style={{ color: perf.color }}>
+                        <span className="w-2 h-2 rounded-full" style={{ background: perf.color }} />{perf.label}
+                      </span>
+                    </td>
+                    <td className="py-2.5 text-right">
+                      <button onClick={() => setModal({ ad })}
+                        className="text-[16px] px-2 py-1 rounded-lg font-medium" style={{ background: 'rgba(0,217,255,0.1)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
+                        Analyze
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {filtered.length === 0 && (
         <div className="glass-card p-8 flex flex-col items-center justify-center">
