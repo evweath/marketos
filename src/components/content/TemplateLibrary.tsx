@@ -3,6 +3,18 @@
 import { useState } from 'react';
 import { Search, Star, LayoutGrid, ChevronRight, X } from 'lucide-react';
 import { TEMPLATE_CATEGORIES } from '@/lib/contentData';
+import { usePersistentState } from '@/lib/usePersistentState';
+import { useStores } from '@/lib/storeScope';
+import { normalizeConnection, INITIAL_STORE_CONNECTIONS } from '@/lib/storeConnectionsData';
+import type { StoreConnectionMap } from '@/lib/storeConnectionsData';
+
+// Maps a store connection key to the ad-template platform it enables, so a
+// selected store can filter the (account-wide) library to its live channels.
+const CONN_TO_PLATFORM: Record<string, string> = {
+  googleAds: 'google', googleAnalytics: 'google', merchantCenter: 'google',
+  metaAds: 'meta', metaPixel: 'meta', instagram: 'instagram',
+  youtube: 'youtube', tiktokAds: 'tiktok', linkedinAds: 'linkedin', klaviyo: 'email',
+};
 
 type PlatformFilter = 'all' | 'google' | 'meta' | 'tiktok' | 'instagram' | 'youtube' | 'linkedin' | 'email';
 type SortOption = 'newest' | 'popular' | 'performing';
@@ -55,18 +67,31 @@ const PLATFORM_BADGES: Record<string, { label: string; color: string }> = {
 };
 
 export function TemplateLibrary() {
+  const [stores] = useStores();
+  const [connections] = usePersistentState<Record<string, StoreConnectionMap>>('storeConnections', INITIAL_STORE_CONNECTIONS);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>('all');
+  const [storeFilter, setStoreFilter] = useState<string>('all');
   const [sort, setSort] = useState<SortOption>('popular');
   const [selected, setSelected] = useState<Template | null>(null);
   const [customizing, setCustomizing] = useState(false);
+
+  // Platforms the selected store has actually connected (null = All Stores).
+  const storeConnectedPlatforms: Set<string> | null = storeFilter === 'all' ? null
+    : new Set(Object.entries(connections[storeFilter] ?? {})
+        .filter(([, c]) => normalizeConnection(c).status === 'connected')
+        .map(([k]) => CONN_TO_PLATFORM[k]).filter(Boolean));
 
   const filtered = TEMPLATES.filter(t => {
     const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase()) || t.category.toLowerCase().includes(search.toLowerCase());
     const matchCat = categoryFilter === 'all' || t.category === TEMPLATE_CATEGORIES.find(c => c.id === categoryFilter)?.name;
     const matchPlatform = platformFilter === 'all' || t.platforms.includes(platformFilter);
-    return matchSearch && matchCat && matchPlatform;
+    // Store filter: if a store is selected and has connected channels, only
+    // show templates for those platforms; empty connections → show all.
+    const matchStore = !storeConnectedPlatforms || storeConnectedPlatforms.size === 0
+      || t.platforms.some(p => storeConnectedPlatforms.has(p));
+    return matchSearch && matchCat && matchPlatform && matchStore;
   }).sort((a, b) => {
     if (sort === 'popular')    return b.uses - a.uses;
     if (sort === 'performing') return b.rating - a.rating;
@@ -94,6 +119,12 @@ export function TemplateLibrary() {
                 style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}
               />
             </div>
+            <select value={storeFilter} onChange={e => setStoreFilter(e.target.value)}
+              className="px-3 py-2 rounded-lg text-base outline-none"
+              style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+              <option value="all">All Stores</option>
+              {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
             <select value={sort} onChange={e => setSort(e.target.value as SortOption)}
               className="px-3 py-2 rounded-lg text-base outline-none"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
