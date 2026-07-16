@@ -2,10 +2,186 @@
 
 import { useState } from 'react';
 import { usePersistentState } from '@/lib/usePersistentState';
-import { Zap, Shield, CheckCircle, AlertTriangle, XCircle, Clock, ShieldCheck } from 'lucide-react';
+import { Zap, Shield, CheckCircle, AlertTriangle, XCircle, Clock, ShieldCheck, X, ChevronRight, ChevronLeft } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { AD_PLATFORM_CONFIG } from '@/lib/campaignData';
 import type { AdPlatform, AutomationRule, HealthCheckItem } from '@/lib/campaignData';
+
+// ─── 4-step rule builder ────────────────────────────────────────────────────
+
+type BuilderMetric = 'ROAS' | 'CPA' | 'CTR' | 'Spend' | 'Frequency' | 'Quality Score';
+type BuilderOperator = '<' | '<=' | '>' | '>=';
+type BuilderAction = 'Pause ad set' | 'Pause campaign' | 'Increase daily budget by 20%' | 'Decrease daily budget by 20%' | 'Notify via Slack' | 'Notify via email';
+
+const BUILDER_METRICS: { key: BuilderMetric; unit: string }[] = [
+  { key: 'ROAS', unit: '×' }, { key: 'CPA', unit: '$' }, { key: 'CTR', unit: '%' },
+  { key: 'Spend', unit: '$' }, { key: 'Frequency', unit: '' }, { key: 'Quality Score', unit: '/10' },
+];
+const BUILDER_ACTIONS: BuilderAction[] = ['Pause ad set', 'Pause campaign', 'Increase daily budget by 20%', 'Decrease daily budget by 20%', 'Notify via Slack', 'Notify via email'];
+
+function RuleBuilderModal({ platforms, onClose, onCreate }: {
+  platforms: AdPlatform[];
+  onClose: () => void;
+  onCreate: (rule: AutomationRule) => void;
+}) {
+  const [step, setStep] = useState(1);
+  const [name, setName] = useState('');
+  const [platform, setPlatform] = useState<AdPlatform>(platforms[0] ?? 'meta');
+  const [metric, setMetric] = useState<BuilderMetric>('ROAS');
+  const [operator, setOperator] = useState<BuilderOperator>('<');
+  const [threshold, setThreshold] = useState('2.0');
+  const [periods, setPeriods] = useState('2');
+  const [action, setAction] = useState<BuilderAction>('Pause ad set');
+
+  const unit = BUILDER_METRICS.find(m => m.key === metric)?.unit ?? '';
+  const triggerStr = `${metric} ${operator} ${metric === 'CPA' || metric === 'Spend' ? '$' : ''}${threshold}${unit === '$' ? '' : unit}`;
+  const conditionStr = `For ${periods} consecutive check period${periods === '1' ? '' : 's'}`;
+
+  const create = () => {
+    onCreate({
+      id: `rule-${Date.now()}`,
+      name: name.trim() || `${metric} ${operator} ${threshold} → ${action}`,
+      platform,
+      status: 'active',
+      enabled: true,
+      trigger: triggerStr,
+      action,
+      condition: conditionStr,
+      fireCount: 0,
+      lastFired: undefined,
+    });
+  };
+
+  const canNext = step === 1 ? true : step === 2 ? threshold.trim() !== '' : true;
+  const inputStyle = { background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' } as const;
+
+  return (
+    <div className='fixed inset-0 z-50 flex items-center justify-center' style={{ background: 'rgba(0,0,0,0.6)' }} onClick={onClose}>
+      <div className='rounded-2xl w-[560px] max-w-[92vw] flex flex-col' style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border-dim)' }} onClick={e => e.stopPropagation()}>
+        {/* Header + step indicator */}
+        <div className='flex items-center justify-between px-5 pt-4 pb-3 border-b' style={{ borderColor: 'var(--border-subtle)' }}>
+          <div>
+            <div className='text-base font-semibold' style={{ color: 'var(--text-primary)' }}>New Automation Rule</div>
+            <div className='text-[16px]' style={{ color: 'var(--text-muted)' }}>Step {step} of 4 · {['Basics', 'Condition', 'Action', 'Review'][step - 1]}</div>
+          </div>
+          <button onClick={onClose} style={{ color: 'var(--text-muted)' }}><X size={16} /></button>
+        </div>
+        <div className='flex gap-1 px-5 pt-3'>
+          {[1, 2, 3, 4].map(n => (
+            <div key={n} className='flex-1 h-1 rounded-full' style={{ background: n <= step ? '#ffb347' : 'var(--bg-elevated)' }} />
+          ))}
+        </div>
+
+        <div className='p-5 flex flex-col gap-4' style={{ minHeight: 220 }}>
+          {step === 1 && (
+            <>
+              <div>
+                <label className='section-label block mb-1.5'>Rule Name</label>
+                <input value={name} onChange={e => setName(e.target.value)} placeholder='e.g. Pause underperformers'
+                  className='w-full px-3 py-2 rounded-lg text-base outline-none' style={inputStyle} />
+              </div>
+              <div>
+                <label className='section-label block mb-1.5'>Platform</label>
+                <div className='flex flex-wrap gap-1.5'>
+                  {(platforms.length ? platforms : (['meta', 'google'] as AdPlatform[])).map(p => {
+                    const cfg = AD_PLATFORM_CONFIG[p];
+                    const active = platform === p;
+                    return (
+                      <button key={p} onClick={() => setPlatform(p)}
+                        className='px-3 py-1.5 rounded-lg text-base transition-all'
+                        style={{ background: active ? cfg.color + '18' : 'var(--bg-elevated)', color: active ? cfg.color : 'var(--text-muted)', border: `1px solid ${active ? cfg.color + '40' : 'var(--border-subtle)'}` }}>
+                        {cfg.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
+          {step === 2 && (
+            <>
+              <div>
+                <label className='section-label block mb-1.5'>When metric</label>
+                <select value={metric} onChange={e => setMetric(e.target.value as BuilderMetric)}
+                  className='w-full px-3 py-2 rounded-lg text-base outline-none' style={inputStyle}>
+                  {BUILDER_METRICS.map(m => <option key={m.key} value={m.key}>{m.key}</option>)}
+                </select>
+              </div>
+              <div className='grid grid-cols-2 gap-3'>
+                <div>
+                  <label className='section-label block mb-1.5'>Operator</label>
+                  <select value={operator} onChange={e => setOperator(e.target.value as BuilderOperator)}
+                    className='w-full px-3 py-2 rounded-lg text-base outline-none' style={inputStyle}>
+                    {(['<', '<=', '>', '>='] as BuilderOperator[]).map(o => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className='section-label block mb-1.5'>Threshold {unit && `(${unit})`}</label>
+                  <input value={threshold} onChange={e => setThreshold(e.target.value)} inputMode='decimal'
+                    className='w-full px-3 py-2 rounded-lg text-base outline-none' style={inputStyle} />
+                </div>
+              </div>
+              <div>
+                <label className='section-label block mb-1.5'>Sustained for (consecutive check periods)</label>
+                <select value={periods} onChange={e => setPeriods(e.target.value)}
+                  className='w-full px-3 py-2 rounded-lg text-base outline-none' style={inputStyle}>
+                  {['1', '2', '3', '5', '7'].map(n => <option key={n} value={n}>{n} period{n === '1' ? '' : 's'}</option>)}
+                </select>
+              </div>
+            </>
+          )}
+          {step === 3 && (
+            <div>
+              <label className='section-label block mb-1.5'>Then perform action</label>
+              <div className='flex flex-col gap-1.5'>
+                {BUILDER_ACTIONS.map(a => {
+                  const active = action === a;
+                  return (
+                    <button key={a} onClick={() => setAction(a)}
+                      className='px-3 py-2 rounded-lg text-base text-left transition-all'
+                      style={{ background: active ? 'rgba(0,217,255,0.1)' : 'var(--bg-elevated)', color: active ? 'var(--cyan)' : 'var(--text-secondary)', border: `1px solid ${active ? 'rgba(0,217,255,0.25)' : 'var(--border-subtle)'}` }}>
+                      {active && '✓ '}{a}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {step === 4 && (
+            <div className='rounded-xl p-4 space-y-2 text-[16px] font-mono' style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)' }}>
+              <div className='text-base font-semibold font-sans mb-2' style={{ color: 'var(--text-primary)' }}>{name.trim() || 'Untitled rule'}</div>
+              <div className='flex gap-2'><span className='w-12 text-right' style={{ color: 'var(--text-muted)' }}>ON</span><span style={{ color: AD_PLATFORM_CONFIG[platform].color }}>{AD_PLATFORM_CONFIG[platform].label}</span></div>
+              <div className='flex gap-2'><span className='w-12 text-right' style={{ color: 'var(--text-muted)' }}>IF</span><span style={{ color: '#ffb347' }}>{triggerStr}</span></div>
+              <div className='flex gap-2'><span className='w-12 text-right' style={{ color: 'var(--text-muted)' }}>WHEN</span><span style={{ color: 'var(--text-secondary)' }}>{conditionStr}</span></div>
+              <div className='flex gap-2'><span className='w-12 text-right' style={{ color: 'var(--text-muted)' }}>THEN</span><span style={{ color: 'var(--cyan)' }}>{action}</span></div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer nav */}
+        <div className='flex items-center justify-between px-5 py-3 border-t' style={{ borderColor: 'var(--border-subtle)' }}>
+          <button onClick={() => step === 1 ? onClose() : setStep(step - 1)}
+            className='flex items-center gap-1 px-3 py-1.5 rounded-lg text-base' style={{ color: 'var(--text-muted)' }}>
+            {step === 1 ? 'Cancel' : <><ChevronLeft size={13} />Back</>}
+          </button>
+          {step < 4 ? (
+            <button onClick={() => canNext && setStep(step + 1)} disabled={!canNext}
+              className='flex items-center gap-1 px-4 py-1.5 rounded-lg text-base font-medium disabled:opacity-50'
+              style={{ background: '#ffb347', color: '#0a0e1a' }}>
+              Next<ChevronRight size={13} />
+            </button>
+          ) : (
+            <button onClick={create}
+              className='px-4 py-1.5 rounded-lg text-base font-semibold'
+              style={{ background: '#ffb347', color: '#0a0e1a' }}>
+              Create Rule
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function timeAgo(iso: string): string {
   const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
@@ -61,31 +237,22 @@ const RULE_STATUS_COLOR = {
 
 export function AutomationRulesPanel() {
   const [rules, setRules] = usePersistentState<AutomationRule[]>('ads.automationRules', []);
+  const [building, setBuilding] = useState(false);
 
   const toggle = (id: string) =>
     setRules(prev => prev.map(r => r.id === id ? { ...r, enabled: !r.enabled } : r));
 
-  const addRule = () => {
-    const id = `rule-new-${Date.now()}`;
-    setRules(prev => [
-      {
-        id,
-        name: `New Automation Rule ${prev.length + 1}`,
-        platform: 'meta' as AdPlatform,
-        status: 'active',
-        enabled: true,
-        trigger: 'ROAS < 2.0',
-        action: 'Pause ad set',
-        condition: 'Checked hourly',
-        fireCount: 0,
-        lastFired: undefined,
-      },
-      ...prev,
-    ]);
-  };
+  const platforms = Array.from(new Set(rules.map(r => r.platform))) as AdPlatform[];
 
   return (
     <div className='glass-card p-4'>
+      {building && (
+        <RuleBuilderModal
+          platforms={platforms}
+          onClose={() => setBuilding(false)}
+          onCreate={(rule) => { setRules(prev => [rule, ...prev]); setBuilding(false); }}
+        />
+      )}
       <div className='flex items-center justify-between mb-4'>
         <div className='flex items-center gap-2'>
           <Zap size={13} style={{ color: '#ffb347' }} />
@@ -95,7 +262,7 @@ export function AutomationRulesPanel() {
             {rules.filter(r => r.enabled).length}/{rules.length} active
           </span>
         </div>
-        <button onClick={addRule} className='text-base px-3 py-1.5 rounded-lg font-medium'
+        <button onClick={() => setBuilding(true)} className='text-base px-3 py-1.5 rounded-lg font-medium'
           style={{ background: 'rgba(255,179,71,0.08)', color: '#ffb347', border: '1px solid rgba(255,179,71,0.2)' }}>
           + New Rule
         </button>
