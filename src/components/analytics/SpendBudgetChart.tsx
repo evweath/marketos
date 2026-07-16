@@ -6,9 +6,10 @@ import type { DateRange, ChannelMetrics } from '@/lib/analyticsData';
 const currency = (n: number): string =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
 
+// Pacing tiers: ≥100% over budget (critical), ≥80% on-pace-warning, else ok.
 function pctBadgeClass(pct: number): string {
-  if (pct > 0.9) return 'badge-critical';
-  if (pct > 0.7) return 'badge-warning';
+  if (pct >= 1.0) return 'badge-critical';
+  if (pct >= 0.8) return 'badge-warning';
   return 'badge-ok';
 }
 
@@ -22,6 +23,12 @@ function dimColor(hex: string, opacity: number): string {
 }
 
 export default function SpendBudgetChart({ dateRange = '30d', channelMetrics }: { dateRange?: DateRange; channelMetrics: ChannelMetrics[] }) {
+  // Ideal-pace marker: how far through the current month we are. On-budget
+  // spend should track this % — bars past it are over-pacing.
+  const now = new Date();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const elapsedPct = Math.min(100, (now.getDate() / daysInMonth) * 100);
+
   const data = scaledChannelMetrics(dateRange, channelMetrics)
     .filter(c => c.budget > 0)
     .sort((a, b) => b.budget - a.budget)
@@ -110,11 +117,21 @@ export default function SpendBudgetChart({ dateRange = '30d', channelMetrics }: 
                     }}
                   />
                 )}
+                {/* % period-elapsed ideal-pace marker */}
+                <div className="absolute top-0 h-full" title={`${elapsedPct.toFixed(0)}% of month elapsed (ideal pace)`}
+                  style={{ left: `${elapsedPct}%`, width: 2, background: 'var(--text-primary)', opacity: 0.6 }} />
               </div>
             </div>
           );
         })}
       </div>
+
+      {data.length > 0 && (
+        <div className="flex items-center gap-2 mt-3 pt-3 border-t text-[16px] font-mono" style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}>
+          <span style={{ display: 'inline-block', width: 2, height: 12, background: 'var(--text-primary)', opacity: 0.6 }} />
+          Ideal pace marker — {elapsedPct.toFixed(0)}% of the month elapsed. Bars past it are over-pacing; ≥80% amber, ≥100% red.
+        </div>
+      )}
     </div>
   );
 }

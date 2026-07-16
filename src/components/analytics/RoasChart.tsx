@@ -113,13 +113,18 @@ export default function RoasChart({ dateRange = '30d', channelMetrics }: { dateR
               content={<CustomTooltip />}
               cursor={{ fill: 'rgba(var(--overlay-rgb),0.03)' }}
             />
+            {/* Break-even (1×) and profitability target (2×) reference lines */}
+            <ReferenceLine y={1} stroke="#ff4444" strokeDasharray="2 3" strokeOpacity={0.55}
+              label={{ value: '1× break-even', position: 'insideBottomRight', fill: '#ff4444', fontSize: 16, fontFamily: 'DM Mono', opacity: 0.75 }} />
+            <ReferenceLine y={2} stroke="#7b93ff" strokeDasharray="2 3" strokeOpacity={0.5}
+              label={{ value: '2× target', position: 'insideBottomRight', fill: '#7b93ff', fontSize: 16, fontFamily: 'DM Mono', opacity: 0.7 }} />
             <ReferenceLine
               y={avgRoas}
               stroke="#ffb347"
               strokeDasharray="4 4"
               strokeOpacity={0.5}
               label={{
-                value: `${avgRoas.toFixed(1)}×`,
+                value: `${avgRoas.toFixed(1)}× avg`,
                 position: 'insideTopRight',
                 fill: '#ffb347',
                 fontSize: 16,
