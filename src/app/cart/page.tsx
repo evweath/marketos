@@ -20,7 +20,7 @@ import {
   ShoppingCart, Mail, MessageSquare, Bell, TrendingUp, BarChart2, MapPin,
   MousePointer, Gift, ToggleLeft, ToggleRight, X, ChevronDown, ChevronUp,
   Pencil, Trash2, PauseCircle, PlayCircle, Plus,
-  Package, TrendingDown, Users, Star, AlertTriangle, Tag,
+  Package, TrendingDown, Users, Star, AlertTriangle, Tag, ChevronRight, CheckCircle, Clock, Award,
 } from 'lucide-react';
 
 const c$ = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
@@ -1008,12 +1008,30 @@ export default function CartPage() {
   const [allSequences, setSequences] = usePersistentState<RecoverySequence[]>('cart.sequences', []);
   const [allRecovered] = usePersistentState<RecoveredCart[]>('cart.recovered', []);
   const [buildingSeq, setBuildingSeq] = useState(false);
+  // Abandoned-cart table controls
+  const [cartSort, setCartSort] = useState<{ key: 'cartValue' | 'minutesAgo'; asc: boolean }>({ key: 'minutesAgo', asc: true });
+  const [cartStatusFilter, setCartStatusFilter] = useState<'all' | 'new' | 'recovering'>('all');
+  const [expandedCart, setExpandedCart] = useState<string | null>(null);
 
   const inScope = (storeStr: string) => storeStr === 'All Stores' || selectedStoreIds.includes(resolveStoreId(storeStr, stores) ?? '');
 
   const liveCarts = allLiveCarts.filter(c => selectedStoreIds.includes(c.storeId));
   const SEQUENCES = allSequences.filter(seq => inScope(seq.store));
   const RECOVERED_LIST = allRecovered.filter(r => inScope(r.store));
+
+  // Recovery stage / status derived from which channels have been sent.
+  const cartStage = (c: AbandonedCart) => c.pushSent ? 'Push' : c.smsSent ? 'SMS' : c.recoveryEmailSent ? 'Email' : 'None';
+  const cartStatus = (c: AbandonedCart): 'new' | 'recovering' => (c.recoveryEmailSent || c.smsSent || c.pushSent) ? 'recovering' : 'new';
+
+  const cartRows = liveCarts
+    .filter(c => cartStatusFilter === 'all' || cartStatus(c) === cartStatusFilter)
+    .sort((a, b) => { const d = a[cartSort.key] - b[cartSort.key]; return cartSort.asc ? d : -d; });
+
+  // Recovery metrics (honest derivations from real data)
+  const avgRecoveryMins = RECOVERED_LIST.length
+    ? Math.round(RECOVERED_LIST.reduce((sum, r) => sum + r.minutesAgo, 0) / RECOVERED_LIST.length) : 0;
+  const bestStep = SEQUENCES.flatMap(seq => seq.steps.map(st => ({ ...st, seq: seq.name })))
+    .sort((a, b) => b.convRate - a.convRate)[0] ?? null;
 
   // Recovery tracking (status/stage, recovered revenue, per-channel rates) isn't
   // modeled yet — zeroed honestly rather than fabricated until that data exists.
@@ -1129,6 +1147,21 @@ export default function CartPage() {
                     Trigger All Recovery
                   </button>
                 </div>
+                {/* Status filter */}
+                {liveCarts.length > 0 && (
+                  <div className="flex items-center gap-1 mb-3 p-1 rounded-lg" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', width: 'fit-content' }}>
+                    {(['all', 'new', 'recovering'] as const).map(f => {
+                      const active = cartStatusFilter === f;
+                      return (
+                        <button key={f} onClick={() => setCartStatusFilter(f)}
+                          className="px-2.5 py-1 rounded-md text-[16px] font-mono capitalize transition-all"
+                          style={{ background: active ? 'var(--bg-overlay)' : 'transparent', color: active ? 'var(--text-primary)' : 'var(--text-muted)', border: active ? '1px solid var(--border-dim)' : '1px solid transparent' }}>
+                          {f}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 {liveCarts.length === 0 && (
                   <div className="rounded-xl p-8 text-center" style={{ background: 'var(--bg-elevated)', border: '1px dashed var(--border-dim)' }}>
                     <ShoppingCart size={22} className="mx-auto mb-2" style={{ color: 'var(--text-muted)' }} />
@@ -1136,42 +1169,85 @@ export default function CartPage() {
                     <div className="text-[16px] mt-1" style={{ color: 'var(--text-muted)' }}>Connect a store's Shopify checkout events to start tracking abandoned carts here.</div>
                   </div>
                 )}
-                <div className="space-y-2">
-                  {liveCarts.map(cart => {
-                    const store = stores.find(st => st.id === cart.storeId);
-                    const urgent = cart.minutesAgo < 15;
-                    return (
-                      <div key={cart.id} className="rounded-xl p-3"
-                        style={{ background: urgent ? 'rgba(255,68,68,0.04)' : 'var(--bg-elevated)', border: `1px solid ${urgent ? 'rgba(255,68,68,0.15)' : 'var(--border-subtle)'}` }}>
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-0.5">
-                              <span className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>{cart.customerName}</span>
-                              <span className="text-[16px] font-mono" style={{ color: urgent ? '#ff4444' : 'var(--text-muted)' }}>{formatMinutesAgo(cart.minutesAgo)}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-[16px]" style={{ color: 'var(--text-muted)' }}>
-                              <MapPin size={9} />{cart.location}{store && <span>· {store.domain.split('.')[0]}</span>}
-                              <span>· {cart.items.length} item{cart.items.length !== 1 ? 's' : ''}</span>
-                            </div>
-                          </div>
-                          <div className="text-right shrink-0">
-                            <div className="data-value text-base font-bold" style={{ color: '#ffb347' }}>{formatCurrency(cart.cartValue)}</div>
-                            <div className="flex items-center gap-1 mt-1 justify-end">
-                              {[{ sent: cart.recoveryEmailSent, Icon: Mail }, { sent: cart.smsSent, Icon: MessageSquare }].map(({ sent, Icon }, i) => (
-                                <div key={i} className="p-1 rounded" style={{ background: sent ? 'rgba(16,217,138,0.1)' : 'rgba(123,147,255,0.1)', color: sent ? '#10d98a' : '#7b93ff' }}>
-                                  <Icon size={10} />
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="mt-1.5 pt-1.5 border-t text-[16px] truncate" style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}>
-                          {cart.items[0].name}{cart.items.length > 1 ? ` +${cart.items.length - 1} more` : ''}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                {liveCarts.length > 0 && (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-base" style={{ borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr className="section-label" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                          <th className="text-left font-normal pb-2 pr-2">Customer</th>
+                          <th className="text-left font-normal pb-2 pr-2">Store</th>
+                          <th className="text-right font-normal pb-2 pr-2 cursor-pointer select-none" onClick={() => setCartSort(s => ({ key: 'cartValue', asc: s.key === 'cartValue' ? !s.asc : false }))}>Value {cartSort.key === 'cartValue' ? (cartSort.asc ? '↑' : '↓') : ''}</th>
+                          <th className="text-right font-normal pb-2 pr-2 cursor-pointer select-none" onClick={() => setCartSort(s => ({ key: 'minutesAgo', asc: s.key === 'minutesAgo' ? !s.asc : true }))}>Age {cartSort.key === 'minutesAgo' ? (cartSort.asc ? '↑' : '↓') : ''}</th>
+                          <th className="text-center font-normal pb-2 pr-2">Stage</th>
+                          <th className="text-center font-normal pb-2 pr-2">Push</th>
+                          <th className="text-center font-normal pb-2 pr-2">Status</th>
+                          <th className="text-right font-normal pb-2"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {cartRows.map(cart => {
+                          const store = stores.find(st => st.id === cart.storeId);
+                          const urgent = cart.minutesAgo < 15;
+                          const status = cartStatus(cart);
+                          const stage = cartStage(cart);
+                          const expanded = expandedCart === cart.id;
+                          const stageColor = stage === 'None' ? 'var(--text-muted)' : stage === 'Push' ? 'var(--cyan)' : stage === 'SMS' ? '#10d98a' : '#ffb347';
+                          return (
+                            <>
+                              <tr key={cart.id} className="transition-colors hover:bg-white/[0.02] cursor-pointer"
+                                onClick={() => setExpandedCart(expanded ? null : cart.id)}
+                                style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                                <td className="py-2.5 pr-2">
+                                  <div className="flex items-center gap-1.5">
+                                    <ChevronRight size={12} className="transition-transform" style={{ color: 'var(--text-muted)', transform: expanded ? 'rotate(90deg)' : 'none' }} />
+                                    <span style={{ color: 'var(--text-primary)' }}>{cart.customerName}</span>
+                                  </div>
+                                </td>
+                                <td className="py-2.5 pr-2 font-mono text-[16px]" style={{ color: '#7b93ff' }}>{store ? store.domain.split('.')[0] : cart.storeId}</td>
+                                <td className="py-2.5 pr-2 text-right font-mono font-bold" style={{ color: '#ffb347' }}>{formatCurrency(cart.cartValue)}</td>
+                                <td className="py-2.5 pr-2 text-right font-mono" style={{ color: urgent ? '#ff4444' : 'var(--text-muted)' }}>{formatMinutesAgo(cart.minutesAgo)}</td>
+                                <td className="py-2.5 pr-2 text-center">
+                                  <span className="text-[16px] font-mono px-1.5 py-0.5 rounded" style={{ background: stageColor + '18', color: stageColor }}>{stage}</span>
+                                </td>
+                                <td className="py-2.5 pr-2 text-center">
+                                  {cart.pushSent ? <CheckCircle size={13} className="inline" style={{ color: '#10d98a' }} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}
+                                </td>
+                                <td className="py-2.5 pr-2 text-center">
+                                  <span className="text-[16px] font-mono px-1.5 py-0.5 rounded capitalize" style={{ background: status === 'recovering' ? 'rgba(16,217,138,0.14)' : 'rgba(255,179,71,0.14)', color: status === 'recovering' ? '#10d98a' : '#ffb347' }}>{status}</span>
+                                </td>
+                                <td className="py-2.5 text-right">
+                                  {status === 'new' && (
+                                    <button onClick={e => { e.stopPropagation(); setLiveCarts(prev => prev.map(c => c.id === cart.id ? { ...c, recoveryEmailSent: true } : c)); }}
+                                      className="text-[16px] px-2 py-1 rounded-lg font-medium" style={{ background: 'rgba(0,217,255,0.1)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
+                                      Start Recovery
+                                    </button>
+                                  )}
+                                </td>
+                              </tr>
+                              {expanded && (
+                                <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                                  <td colSpan={8} className="py-2.5 px-6" style={{ background: 'var(--bg-elevated)' }}>
+                                    <div className="flex items-center gap-2 mb-2 text-[16px]" style={{ color: 'var(--text-muted)' }}>
+                                      <MapPin size={10} />{cart.location} · {cart.customerEmail} · {cart.items.length} item{cart.items.length !== 1 ? 's' : ''}
+                                    </div>
+                                    <div className="space-y-1">
+                                      {cart.items.map((it, i) => (
+                                        <div key={i} className="flex items-center justify-between text-[16px]">
+                                          <span style={{ color: 'var(--text-secondary)' }}>{it.name}</span>
+                                          <span className="font-mono" style={{ color: 'var(--text-muted)' }}>{formatCurrency(it.price)}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
+                            </>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1248,6 +1324,38 @@ export default function CartPage() {
             )}
 
             {tab === 'recovered' && (
+              <div className="space-y-3">
+              {/* Recovery metrics */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="glass-card px-4 py-3 flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(0,217,255,0.15)' }}>
+                    <Clock size={16} style={{ color: 'var(--cyan)' }} />
+                  </div>
+                  <div>
+                    <div className="section-label mb-0.5">Avg Recovery Time</div>
+                    <div className="data-value text-lg font-bold" style={{ color: 'var(--cyan)' }}>
+                      {avgRecoveryMins > 0 ? formatMinutesAgo(avgRecoveryMins) : '—'}
+                    </div>
+                  </div>
+                  <span className="ml-auto text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>across {RECOVERED_LIST.length} recoveries</span>
+                </div>
+                <div className="glass-card px-4 py-3 flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(16,217,138,0.15)' }}>
+                    <Award size={16} style={{ color: '#10d98a' }} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="section-label mb-0.5">Best Performing Step</div>
+                    {bestStep ? (
+                      <div className="text-base font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                        {bestStep.subject} <span className="font-mono" style={{ color: '#10d98a' }}>· {bestStep.convRate}% conv</span>
+                      </div>
+                    ) : (
+                      <div className="text-base" style={{ color: 'var(--text-muted)' }}>No sequences yet</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div className="glass-card overflow-hidden">
                 <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
                   <span className="section-label">Recently Recovered Carts</span>
@@ -1271,6 +1379,7 @@ export default function CartPage() {
                     <span className="text-[16px] font-mono shrink-0" style={{ color: 'var(--text-muted)', minWidth: 44 }}>{formatMinutesAgo(r.minutesAgo)}</span>
                   </div>
                 ))}
+              </div>
               </div>
             )}
 

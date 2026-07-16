@@ -82,6 +82,7 @@ export interface AbandonedCart {
   minutesAgo: number;
   recoveryEmailSent: boolean;
   smsSent: boolean;
+  pushSent?: boolean;
 }
 
 // ─── Transactions ─────────────────────────────────────────────────────────────
