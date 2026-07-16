@@ -5,7 +5,7 @@ import { PLATFORM_CONFIG } from '@/lib/socialData';
 import type { SocialListeningItem } from '@/lib/socialData';
 import { usePersistentState } from '@/lib/usePersistentState';
 import { useStores, resolveStoreId } from '@/lib/storeScope';
-import { Search, ExternalLink, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Search, ExternalLink } from 'lucide-react';
 
 const SENTIMENT_CONFIG = {
   positive: { color: '#10d98a', bg: 'rgba(16,217,138,0.12)', border: 'rgba(16,217,138,0.22)', arrow: '↑', label: 'Positive' },
@@ -14,98 +14,76 @@ const SENTIMENT_CONFIG = {
 };
 
 // ─── Sentiment Analytics ───────────────────────────────────────────────────────
-//
-// Empty until real historical sentiment tracking exists — this weekly-trend
-// view is slated for a full rebuild (a real donut chart) in a later pass.
-const SENTIMENT_HISTORY: Array<{ week: string; positive: number; neutral: number; negative: number }> = [];
+// A real sentiment donut computed from the current (scoped/filtered) mentions.
+
+function SentimentDonut({ counts, total }: { counts: Record<'positive' | 'neutral' | 'negative', number>; total: number }) {
+  const size = 96, r = 38, cx = size / 2, cy = size / 2;
+  const circ = 2 * Math.PI * r;
+  let offset = 0;
+  const order = ['positive', 'neutral', 'negative'] as const;
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="rotate-[-90deg]">
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--bg-overlay)" strokeWidth={9} />
+        {total > 0 && order.map(k => {
+          const frac = counts[k] / total;
+          const dash = frac * circ;
+          const seg = (
+            <circle key={k} cx={cx} cy={cy} r={r} fill="none" stroke={SENTIMENT_CONFIG[k].color} strokeWidth={9}
+              strokeDasharray={`${dash} ${circ - dash}`} strokeDashoffset={-offset} />
+          );
+          offset += dash;
+          return seg;
+        })}
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="font-mono font-bold" style={{ fontSize: 20, color: 'var(--text-primary)' }}>{total}</span>
+        <span className="section-label" style={{ fontSize: 16 }}>mentions</span>
+      </div>
+    </div>
+  );
+}
 
 function SentimentAnalyticsPanel({ listeningItems }: { listeningItems: SocialListeningItem[] }) {
-  const totalMentions = listeningItems.length;
-
-  if (SENTIMENT_HISTORY.length < 2) {
-    return (
-      <div className="rounded-xl p-4 mb-4 flex flex-col gap-2" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-        <div className="flex items-center justify-between">
-          <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Sentiment Analysis</span>
-          <span className="section-label">{totalMentions} mentions monitored</span>
-        </div>
-        <p className="text-base" style={{ color: 'var(--text-muted)' }}>Not enough history yet to show a sentiment trend.</p>
-      </div>
-    );
-  }
-
-  const current  = SENTIMENT_HISTORY[SENTIMENT_HISTORY.length - 1];
-  const previous = SENTIMENT_HISTORY[SENTIMENT_HISTORY.length - 2];
-  const posDelta = current.positive - previous.positive;
-  const negDelta = current.negative - previous.negative;
-
+  const total = listeningItems.length;
+  const counts = {
+    positive: listeningItems.filter(i => i.sentiment === 'positive').length,
+    neutral:  listeningItems.filter(i => i.sentiment === 'neutral').length,
+    negative: listeningItems.filter(i => i.sentiment === 'negative').length,
+  };
   return (
-    <div className="rounded-xl p-4 mb-4 flex flex-col gap-4"
+    <div className="rounded-xl p-4 mb-4 flex flex-col gap-3"
       style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
       <div className="flex items-center justify-between">
         <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Sentiment Analysis</span>
-        <span className="section-label">{totalMentions} mentions monitored</span>
+        <span className="section-label">{total} mentions monitored</span>
       </div>
-
-      {/* Current breakdown */}
-      <div className="grid grid-cols-3 gap-3">
-        {([
-          { key: 'positive' as const, delta: posDelta,    TrendIcon: posDelta >= 0 ? TrendingUp : TrendingDown },
-          { key: 'neutral'  as const, delta: 0,           TrendIcon: Minus },
-          { key: 'negative' as const, delta: -negDelta,   TrendIcon: negDelta <= 0 ? TrendingUp : TrendingDown },
-        ]).map(({ key, delta, TrendIcon }) => {
-          const cfg = SENTIMENT_CONFIG[key];
-          const val = current[key];
-          const deltaColor = key === 'negative'
-            ? (negDelta > 0 ? '#ff4444' : '#10d98a')
-            : (delta >= 0 ? '#10d98a' : '#ff4444');
-          return (
-            <div key={key} className="rounded-lg p-3" style={{ background: 'var(--bg-base)', border: `1px solid ${cfg.border}` }}>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[16px] font-medium capitalize" style={{ color: cfg.color }}>{cfg.label}</span>
-                {delta !== 0 && (
-                  <span className="flex items-center gap-0.5 text-[16px] font-mono" style={{ color: deltaColor }}>
-                    <TrendIcon size={9} />{Math.abs(delta)}%
-                  </span>
-                )}
-              </div>
-              <div className="text-xl font-bold mb-1.5" style={{ color: cfg.color }}>{val}%</div>
-              <div className="w-full h-1 rounded-full" style={{ background: 'var(--bg-surface)' }}>
-                <div className="h-1 rounded-full transition-all" style={{ width: `${val}%`, background: cfg.color }} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* 4-week trend */}
-      <div>
-        <div className="section-label mb-2 text-[16px]">4-Week Trend</div>
-        <div className="flex gap-1 items-end h-12">
-          {SENTIMENT_HISTORY.map((wk, i) => (
-            <div key={wk.week} className="flex-1 flex flex-col gap-0.5 items-center">
-              <div className="w-full flex flex-col-reverse gap-px" style={{ height: 36 }}>
-                {([
-                  { pct: wk.positive, color: '#10d98a' },
-                  { pct: wk.neutral,  color: '#7b93ff' },
-                  { pct: wk.negative, color: '#ff4444' },
-                ] as const).map((seg, j) => (
-                  <div key={j} style={{ height: `${seg.pct * 0.36}px`, background: seg.color, borderRadius: 2, opacity: i === SENTIMENT_HISTORY.length - 1 ? 1 : 0.55 }} />
-                ))}
-              </div>
-              <div className="text-[16px]" style={{ color: 'var(--text-muted)' }}>{wk.week}</div>
-            </div>
-          ))}
+      {total === 0 ? (
+        <p className="text-base" style={{ color: 'var(--text-muted)' }}>No mentions to analyze yet.</p>
+      ) : (
+        <div className="flex items-center gap-5">
+          <SentimentDonut counts={counts} total={total} />
+          <div className="flex-1 flex flex-col gap-2.5">
+            {(['positive', 'neutral', 'negative'] as const).map(k => {
+              const cfg = SENTIMENT_CONFIG[k];
+              const pct = total > 0 ? Math.round((counts[k] / total) * 100) : 0;
+              return (
+                <div key={k}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="flex items-center gap-1.5 text-[16px] capitalize" style={{ color: cfg.color }}>
+                      <span className="w-2 h-2 rounded-full" style={{ background: cfg.color }} />{cfg.label}
+                    </span>
+                    <span className="text-[16px] font-mono" style={{ color: cfg.color }}>{counts[k]} · {pct}%</span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full" style={{ background: 'var(--bg-surface)' }}>
+                    <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, background: cfg.color }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-        <div className="flex items-center gap-3 mt-1">
-          {(['positive', 'neutral', 'negative'] as const).map(k => (
-            <div key={k} className="flex items-center gap-1">
-              <div className="w-2 h-2 rounded-full" style={{ background: SENTIMENT_CONFIG[k].color }} />
-              <span className="text-[16px] capitalize" style={{ color: 'var(--text-muted)' }}>{k}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -125,10 +103,15 @@ function timeAgo(iso: string) {
 export default function SocialListening({ selectedStoreIds }: { selectedStoreIds: string[] }) {
   const [stores] = useStores();
   const [allListeningItems] = usePersistentState<SocialListeningItem[]>('social.listeningItems', []);
-  const listeningItems = allListeningItems.filter(i => selectedStoreIds.includes(resolveStoreId(i.store, stores) ?? ''));
+  const scopedItems = allListeningItems.filter(i => selectedStoreIds.includes(resolveStoreId(i.store, stores) ?? ''));
   const [showAnalytics, setShowAnalytics] = useState(true);
+  const [query, setQuery] = useState('');
   const [actedIds, setActedIds] = useState<Set<string>>(new Set());
   const markActed = (id: string) => setActedIds(prev => new Set(prev).add(id));
+
+  const q = query.trim().toLowerCase();
+  const listeningItems = q === '' ? scopedItems : scopedItems.filter(i =>
+    i.content.toLowerCase().includes(q) || i.author.toLowerCase().includes(q) || i.keyword.toLowerCase().includes(q));
   return (
     <div className="glass-card p-4">
       {/* Header */}
@@ -144,6 +127,19 @@ export default function SocialListening({ selectedStoreIds }: { selectedStoreIds
           <div className="w-1.5 h-1.5 rounded-full live-dot" style={{ background: '#10d98a' }} />
           Live monitoring
         </div>
+      </div>
+
+      {/* Search bar */}
+      <div className="relative mb-3">
+        <Search size={12} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+        <input
+          type="text"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder="Search mentions by keyword, author, or content…"
+          className="w-full text-base rounded-lg outline-none"
+          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', padding: '8px 10px 8px 30px' }}
+        />
       </div>
 
       {/* Sentiment analytics toggle */}
@@ -174,6 +170,8 @@ export default function SocialListening({ selectedStoreIds }: { selectedStoreIds
         <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>
           {allListeningItems.length === 0
             ? 'No mentions found yet for your tracked keywords.'
+            : q !== ''
+            ? 'No mentions match your search.'
             : `No mentions for the selected store${selectedStoreIds.length !== 1 ? 's' : ''}.`}
         </div>
       )}
