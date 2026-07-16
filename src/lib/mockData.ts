@@ -426,6 +426,56 @@ export const SAMPLE_SEO_SNAPSHOTS: Record<string, SeoSnapshot> = {
   },
 };
 
+// ─── Customer journey paths (per store) ──────────────────────────────────────
+// Named top conversion paths with sessions, conversion rate, avg time, and a
+// vs-prior-period session delta for the trend arrow.
+
+export interface JourneyPath {
+  id: string;
+  store: string;
+  name: string;
+  steps: string[];
+  sessions: number;
+  convRate: number;
+  avgTime: string;
+  sessionsDelta: number;   // % vs prior period → trend arrow
+}
+
+export const SAMPLE_JOURNEYS: JourneyPath[] = [
+  { id: 'jp-001', store: 'donut-equipment', name: 'Paid → Product → Buy', steps: ['Google Ad', 'Product Page', 'Cart', 'Checkout'], sessions: 1842, convRate: 4.8, avgTime: '6m 12s', sessionsDelta: +11.4 },
+  { id: 'jp-002', store: 'donut-equipment', name: 'Organic Research', steps: ['Organic Search', 'Blog', 'Product Page', 'Cart', 'Checkout'], sessions: 1204, convRate: 3.1, avgTime: '9m 47s', sessionsDelta: +6.2 },
+  { id: 'jp-003', store: 'donut-equipment', name: 'Email Re-engage', steps: ['Email', 'Product Page', 'Checkout'], sessions: 684, convRate: 7.9, avgTime: '3m 05s', sessionsDelta: -2.8 },
+  { id: 'jp-004', store: 'donut-supplies', name: 'Direct Reorder', steps: ['Direct', 'Account', 'Reorder', 'Checkout'], sessions: 928, convRate: 12.4, avgTime: '2m 18s', sessionsDelta: +4.1 },
+  { id: 'jp-005', store: 'donut-supplies', name: 'Social Discovery', steps: ['Social', 'Product Page', 'Cart'], sessions: 512, convRate: 1.9, avgTime: '4m 33s', sessionsDelta: -5.6 },
+  { id: 'jp-006', store: 'bakery-wholesalers', name: 'RFQ → Sales', steps: ['Organic Search', 'Wholesale', 'Request Quote', 'Sales Follow-up'], sessions: 1360, convRate: 8.7, avgTime: '11m 02s', sessionsDelta: +9.3 },
+];
+
+// ─── Sitemap diff (per store): added + removed URLs ──────────────────────────
+
+export interface SitemapEntry { id: string; name: string; url: string; detectedAt: string; category: string; price?: number }
+export interface SitemapDiff { added: SitemapEntry[]; removed: SitemapEntry[] }
+
+export const SAMPLE_SITEMAP_CHANGES: Record<string, SitemapDiff> = {
+  'donut-equipment': {
+    added: [
+      { id: 'sp-a1', name: 'AutoFryer XL 40L', url: '/products/autofryer-xl-40l', detectedAt: '12m ago', category: 'Fryers', price: 6899 },
+      { id: 'sp-a2', name: 'Donut Finisher AF-12', url: '/products/af-12-finisher', detectedAt: '3h ago', category: 'Automation', price: 4299 },
+    ],
+    removed: [
+      { id: 'sp-r1', name: 'Legacy Fryer DF-200 (discontinued)', url: '/products/df-200-fryer', detectedAt: '3h ago', category: 'Fryers' },
+    ],
+  },
+  'donut-supplies': {
+    added: [
+      { id: 'sp-a3', name: 'Organic Donut Mix 50lb', url: '/products/organic-donut-mix-50lb', detectedAt: '1h ago', category: 'Mixes', price: 78 },
+    ],
+    removed: [
+      { id: 'sp-r2', name: 'Seasonal Pumpkin Glaze (out of season)', url: '/products/pumpkin-glaze', detectedAt: '1d ago', category: 'Glazes' },
+      { id: 'sp-r3', name: 'Sample Pack 5lb (retired SKU)', url: '/products/sample-pack-5lb', detectedAt: '2d ago', category: 'Mixes' },
+    ],
+  },
+};
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 export function formatMinutesAgo(minutes: number): string {

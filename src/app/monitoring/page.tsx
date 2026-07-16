@@ -11,12 +11,12 @@ import TransactionFeed from '@/components/monitoring/TransactionFeed';
 import PageChangeLog from '@/components/monitoring/PageChangeLog';
 import AlertBanner from '@/components/monitoring/AlertBanner';
 import SeoSnapshot from '@/components/monitoring/SeoSnapshot';
-import { MapPin, Zap, DollarSign, Globe, Gauge, Route } from 'lucide-react';
+import { MapPin, Zap, DollarSign, Globe, Gauge, Route, TrendingUp, TrendingDown } from 'lucide-react';
 
 import { useMonitoringStores, DEFAULT_TRAFFIC, DEFAULT_CONVERSIONS, DEFAULT_SEO_SNAPSHOT } from '@/lib/mockData';
-import type { StoreWebVitals, WebVitalMetric } from '@/lib/mockData';
+import type { StoreWebVitals, WebVitalMetric, JourneyPath, SitemapDiff } from '@/lib/mockData';
 import { usePersistentState } from '@/lib/usePersistentState';
-import { useStoreScope } from '@/lib/storeScope';
+import { useStoreScope, useStores, resolveStoreId } from '@/lib/storeScope';
 import { StoreScopeBar } from '@/components/shared/StoreScopeBar';
 import type { TrafficMetrics, ConversionMetrics, AbandonedCart, Transaction, PageChange, SeoSnapshot as SeoSnapshotData, Alert } from '@/types';
 import type { FiredAlert } from '@/lib/alertData';
@@ -297,38 +297,46 @@ function PriceChangeMonitor({ storeId, storeColor }: { storeId: string; storeCol
 
 // ─── Sitemap New Product Detection (G-04) ────────────────────────────────────
 
-// Empty until a real sitemap-diff crawl has run for a store.
-const NEW_PRODUCTS: Record<string, Array<{
-  id: string; name: string; url: string; detectedAt: string; category: string; price?: number;
-}>> = {};
-
 function SitemapMonitor({ storeId, storeColor }: { storeId: string; storeColor: string }) {
-  const products = NEW_PRODUCTS[storeId] ?? [];
+  const [allChanges] = usePersistentState<Record<string, SitemapDiff>>('monitoring.sitemapChanges', {});
+  const diff = allChanges[storeId] ?? { added: [], removed: [] };
   const formatCurrency = (v: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(v);
+  const empty = diff.added.length === 0 && diff.removed.length === 0;
+
+  const row = (p: typeof diff.added[number], kind: 'added' | 'removed') => {
+    const color = kind === 'added' ? '#10d98a' : '#ff4444';
+    return (
+      <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: '1px solid var(--border-subtle)' }}>
+        <span style={{ color, fontSize: 16, fontWeight: 700, flexShrink: 0, width: 14, textAlign: 'center' }}>{kind === 'added' ? '+' : '−'}</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 16, color: kind === 'removed' ? 'var(--text-muted)' : 'var(--text-primary)', fontWeight: 500, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: kind === 'removed' ? 'line-through' : 'none' }}>{p.name}</div>
+          <div style={{ fontSize: 16, color: 'var(--text-muted)' }}>{p.category} · {p.url} · {p.detectedAt}</div>
+        </div>
+        {p.price && <div style={{ fontSize: 16, fontWeight: 600, color: storeColor, flexShrink: 0 }}>{formatCurrency(p.price)}</div>}
+        <div style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} title={kind === 'added' ? 'New' : 'Removed'} />
+      </div>
+    );
+  };
 
   return (
     <div className="glass-card" style={{ padding: '16px 20px' }}>
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
         <Globe size={14} style={{ color: storeColor }} />
-        <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>New Products Detected via Sitemap</h3>
+        <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Sitemap Product Changes</h3>
         <span className="px-2 py-0.5 rounded-full text-[16px] font-semibold ml-1"
-          style={{ background: `${storeColor}18`, color: storeColor }}>{products.length} new</span>
+          style={{ background: 'rgba(16,217,138,0.15)', color: '#10d98a' }}>{diff.added.length} added</span>
+        <span className="px-2 py-0.5 rounded-full text-[16px] font-semibold"
+          style={{ background: 'rgba(255,68,68,0.15)', color: '#ff4444' }}>{diff.removed.length} removed</span>
         <span className="section-label ml-auto">Last crawl: 12m ago</span>
       </div>
-      {products.length === 0 ? (
-        <div className="text-base text-center py-4" style={{ color: 'var(--text-muted)' }}>No new products detected since last crawl.</div>
+      {empty ? (
+        <div className="text-base text-center py-4" style={{ color: 'var(--text-muted)' }}>No sitemap changes detected since last crawl.</div>
       ) : (
-        products.map(p => (
-          <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: '1px solid var(--border-subtle)' }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 16, color: 'var(--text-primary)', fontWeight: 500, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
-              <div style={{ fontSize: 16, color: 'var(--text-muted)' }}>{p.category} · {p.url} · {p.detectedAt}</div>
-            </div>
-            {p.price && <div style={{ fontSize: 16, fontWeight: 600, color: storeColor, flexShrink: 0 }}>{formatCurrency(p.price)}</div>}
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#10d98a', flexShrink: 0 }} title="New" />
-          </div>
-        ))
+        <>
+          {diff.added.map(p => row(p, 'added'))}
+          {diff.removed.map(p => row(p, 'removed'))}
+        </>
       )}
     </div>
   );
@@ -428,12 +436,16 @@ function LoadSpeedMonitor({ storeId, storeColor }: { storeId: string; storeColor
 
 // ─── Customer Journey Tracking (G-13) ────────────────────────────────────────
 
-// Empty until real session-path data is available.
-const JOURNEYS: Array<{ id: string; steps: string[]; sessions: number; convRate: number; avgTime: string }> = [];
-
 const STEP_COLORS = ['#00d9ff', '#7b93ff', '#ffb347', '#10d98a', '#ff4444', '#e1306c', '#ff9900'];
 
-function CustomerJourneyTracker() {
+function CustomerJourneyTracker({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
+  const [allJourneys] = usePersistentState<JourneyPath[]>('monitoring.journeys', []);
+  const journeys = allJourneys
+    .filter(j => selectedStoreIds.includes(resolveStoreId(j.store, stores) ?? ''))
+    .sort((a, b) => b.sessions - a.sessions);
+  const maxSessions = journeys[0]?.sessions ?? 1;
+
   return (
     <div className="glass-card" style={{ padding: '16px 20px' }}>
       <div className="flex items-center gap-2 mb-4">
@@ -441,48 +453,61 @@ function CustomerJourneyTracker() {
         <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Customer Journey Tracking</h3>
         <span className="section-label ml-auto">Top paths before purchase</span>
       </div>
-      {JOURNEYS.length === 0 && (
-        <div className="text-base text-center py-4" style={{ color: 'var(--text-muted)' }}>No journey data yet.</div>
+      {journeys.length === 0 && (
+        <div className="text-base text-center py-4" style={{ color: 'var(--text-muted)' }}>
+          {allJourneys.length === 0 ? 'No journey data yet.' : 'No journey data for the selected store(s).'}
+        </div>
       )}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {JOURNEYS.map((journey, ji) => (
-          <div key={journey.id}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1, flexWrap: 'wrap' }}>
-                {journey.steps.map((step, si) => (
-                  <span key={si} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <span style={{
-                      fontSize: 16, padding: '2px 8px', borderRadius: 12, fontWeight: 500,
-                      background: `${STEP_COLORS[si % STEP_COLORS.length]}18`,
-                      color: STEP_COLORS[si % STEP_COLORS.length],
-                      border: `1px solid ${STEP_COLORS[si % STEP_COLORS.length]}30`,
-                      whiteSpace: 'nowrap',
-                    }}>{step}</span>
-                    {si < journey.steps.length - 1 && <span style={{ fontSize: 16, color: 'var(--text-muted)' }}>→</span>}
-                  </span>
-                ))}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {journeys.map(journey => {
+          const up = journey.sessionsDelta >= 0;
+          return (
+            <div key={journey.id}>
+              {/* Named pattern + trend */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>{journey.name}</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2, fontSize: 16, fontFamily: 'DM Mono', color: up ? '#10d98a' : '#ff4444' }}>
+                  {up ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+                  {up ? '+' : ''}{journey.sessionsDelta.toFixed(1)}%
+                </span>
               </div>
-              <div style={{ display: 'flex', gap: 12, flexShrink: 0 }}>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>{journey.sessions.toLocaleString()}</div>
-                  <div style={{ fontSize: 16, color: 'var(--text-muted)' }}>sessions</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1, flexWrap: 'wrap' }}>
+                  {journey.steps.map((step, si) => (
+                    <span key={si} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{
+                        fontSize: 16, padding: '2px 8px', borderRadius: 12, fontWeight: 500,
+                        background: `${STEP_COLORS[si % STEP_COLORS.length]}18`,
+                        color: STEP_COLORS[si % STEP_COLORS.length],
+                        border: `1px solid ${STEP_COLORS[si % STEP_COLORS.length]}30`,
+                        whiteSpace: 'nowrap',
+                      }}>{step}</span>
+                      {si < journey.steps.length - 1 && <span style={{ fontSize: 16, color: 'var(--text-muted)' }}>→</span>}
+                    </span>
+                  ))}
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: '#10d98a' }}>{journey.convRate}%</div>
-                  <div style={{ fontSize: 16, color: 'var(--text-muted)' }}>conv.</div>
+                <div style={{ display: 'flex', gap: 12, flexShrink: 0 }}>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>{journey.sessions.toLocaleString()}</div>
+                    <div style={{ fontSize: 16, color: 'var(--text-muted)' }}>sessions</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 16, fontWeight: 700, color: '#10d98a' }}>{journey.convRate}%</div>
+                    <div style={{ fontSize: 16, color: 'var(--text-muted)' }}>conv.</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-secondary)' }}>{journey.avgTime}</div>
+                    <div style={{ fontSize: 16, color: 'var(--text-muted)' }}>avg time</div>
+                  </div>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-secondary)' }}>{journey.avgTime}</div>
-                  <div style={{ fontSize: 16, color: 'var(--text-muted)' }}>avg time</div>
-                </div>
+              </div>
+              {/* Mini bar */}
+              <div style={{ height: 3, background: 'var(--bg-surface)', borderRadius: 2, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${(journey.sessions / maxSessions) * 100}%`, background: '#7b93ff', opacity: 0.6, borderRadius: 2 }} />
               </div>
             </div>
-            {/* Mini bar */}
-            <div style={{ height: 3, background: 'var(--bg-surface)', borderRadius: 2, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${(journey.sessions / JOURNEYS[0].sessions) * 100}%`, background: '#7b93ff', opacity: 0.6, borderRadius: 2 }} />
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -649,7 +674,7 @@ export default function MonitoringPage() {
           {/* Row 6: Page Load Speed + Customer Journey */}
           <div className="grid grid-cols-2 gap-3 mb-3">
             <LoadSpeedMonitor storeId={activeStoreId} storeColor={store.color} />
-            <CustomerJourneyTracker />
+            <CustomerJourneyTracker selectedStoreIds={selectedStoreIds} />
           </div>
 
         </main>
