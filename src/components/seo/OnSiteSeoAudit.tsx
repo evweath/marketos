@@ -48,6 +48,34 @@ export function OnSiteSeoAudit({ selectedStoreIds }: { selectedStoreIds: string[
     .filter(i => statusFilter === 'all' || i.status === statusFilter)
     .sort((a, b) => IMPACT_ORDER[a.impact] - IMPACT_ORDER[b.impact]);
 
+  const [viewMode, setViewMode] = useState<'table' | 'issues'>('table');
+
+  // Per-URL pivot: one row per page, worst status per audit category + a score.
+  const AUDIT_CATS: AuditCategory[] = ['meta', 'headings', 'content', 'technical', 'links'];
+  const worst = (a: AuditStatus, b: AuditStatus): AuditStatus => {
+    const rank: Record<AuditStatus, number> = { error: 2, warn: 1, ok: 0 };
+    return rank[a] >= rank[b] ? a : b;
+  };
+  const byUrl = Object.values(auditItems.reduce((acc, item) => {
+    const row = acc[item.page] ?? { page: item.page, cells: {} as Record<AuditCategory, AuditStatus>, total: 0, ok: 0 };
+    row.cells[item.category] = row.cells[item.category] ? worst(row.cells[item.category], item.status) : item.status;
+    row.total += 1;
+    if (item.status === 'ok') row.ok += 1;
+    acc[item.page] = row;
+    return acc;
+  }, {} as Record<string, { page: string; cells: Record<AuditCategory, AuditStatus>; total: number; ok: number }>))
+    .sort((a, b) => (a.ok / a.total) - (b.ok / b.total));
+
+  const exportCsv = () => {
+    const header = ['URL', ...AUDIT_CATS, 'Score'];
+    const rows = byUrl.map(r => [r.page, ...AUDIT_CATS.map(c => r.cells[c] ?? '—'), `${Math.round((r.ok / r.total) * 100)}%`]);
+    const csv = [header, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'on-site-audit.csv'; a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleRunAudit = () => {
     setAuditing(true);
     setTimeout(() => {
@@ -132,7 +160,69 @@ export function OnSiteSeoAudit({ selectedStoreIds }: { selectedStoreIds: string[
         </div>
       </div>
 
-      {/* Filters */}
+      {/* View toggle + CSV export */}
+      <div className='flex items-center justify-between mb-3'>
+        <div className='flex items-center gap-0.5 p-0.5' style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: 8 }}>
+          {(['table', 'issues'] as const).map(v => (
+            <button key={v} onClick={() => setViewMode(v)}
+              className='px-3 py-1 text-[16px] transition-all capitalize'
+              style={{ borderRadius: 6, background: viewMode === v ? 'var(--bg-overlay)' : 'transparent', color: viewMode === v ? 'var(--text-primary)' : 'var(--text-muted)', border: viewMode === v ? '1px solid var(--border-dim)' : '1px solid transparent' }}>
+              {v === 'table' ? 'By URL' : 'Issue Feed'}
+            </button>
+          ))}
+        </div>
+        {viewMode === 'table' && byUrl.length > 0 && (
+          <button onClick={exportCsv} className='text-[16px] px-2.5 py-1 rounded-lg' style={{ color: 'var(--cyan)', background: 'rgba(0,217,255,0.08)', border: '1px solid rgba(0,217,255,0.2)' }}>
+            Export CSV
+          </button>
+        )}
+      </div>
+
+      {/* Per-URL audit table */}
+      {viewMode === 'table' && (
+        byUrl.length === 0 ? (
+          <div className='text-center py-10' style={{ color: 'var(--text-muted)' }}>
+            {allAuditItems.length === 0 ? 'No audit has been run yet — click Run New Audit to scan your stores.' : `No audited URLs for the selected store${selectedStoreIds.length !== 1 ? 's' : ''}.`}
+          </div>
+        ) : (
+        <div className='overflow-x-auto'>
+          <table className='w-full text-base' style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                <th className='text-left pb-2 pr-3 section-label'>URL</th>
+                {AUDIT_CATS.map(c => <th key={c} className='pb-2 px-2 section-label text-center'>{CATEGORY_CONFIG[c].label}</th>)}
+                <th className='pb-2 pl-2 section-label text-right'>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {byUrl.map((r, i) => {
+                const score = Math.round((r.ok / r.total) * 100);
+                const scoreColor = score >= 70 ? '#10d98a' : score >= 40 ? '#ffb347' : '#ff4444';
+                return (
+                  <tr key={r.page} style={{ borderBottom: i < byUrl.length - 1 ? '1px solid var(--border-subtle)' : undefined }}>
+                    <td className='py-2.5 pr-3 font-mono' style={{ color: '#7b93ff', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.page}</td>
+                    {AUDIT_CATS.map(c => {
+                      const st = r.cells[c];
+                      const cfg = st ? STATUS_CONFIG[st] : null;
+                      const Icon = cfg?.icon;
+                      return (
+                        <td key={c} className='py-2.5 px-2 text-center'>
+                          {cfg && Icon ? <Icon size={14} style={{ color: cfg.color, display: 'inline' }} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}
+                        </td>
+                      );
+                    })}
+                    <td className='py-2.5 pl-2 text-right font-mono font-bold' style={{ color: scoreColor }}>{score}%</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        )
+      )}
+
+      {/* Filters (issue feed only) */}
+      {viewMode === 'issues' && (
       <div className='flex items-center gap-3 mb-4 flex-wrap'>
         {/* Category pills */}
         <div className='flex gap-1.5 flex-wrap flex-1'>
@@ -188,8 +278,10 @@ export function OnSiteSeoAudit({ selectedStoreIds }: { selectedStoreIds: string[
           })}
         </div>
       </div>
+      )}
 
-      {/* Audit list */}
+      {/* Audit list (issue feed only) */}
+      {viewMode === 'issues' && (
       <div className='space-y-2'>
         {filtered.length === 0 && (
           <div className='text-center py-10' style={{ color: 'var(--text-muted)' }}>
@@ -257,6 +349,7 @@ export function OnSiteSeoAudit({ selectedStoreIds }: { selectedStoreIds: string[
           );
         })}
       </div>
+      )}
     </div>
   );
 }
