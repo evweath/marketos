@@ -290,7 +290,7 @@ export const SAMPLE_APPROVAL_POSTS: ApprovalPost[] = [
 // ─── DM Automation ────────────────────────────────────────────────────────────
 
 export type DMPlatform = 'instagram' | 'facebook' | 'tiktok';
-export type DMTrigger = 'comment_keyword' | 'story_reply' | 'first_dm' | 'post_reaction';
+export type DMTrigger = 'comment_keyword' | 'story_reply' | 'first_dm' | 'post_reaction' | 'story_mention';
 
 export interface DMRule {
   id: string;
@@ -304,12 +304,13 @@ export interface DMRule {
   status: 'active' | 'paused';
   triggeredCount: number;
   conversionCount: number;
+  revenueAttributed?: number;
 }
 
 export const SAMPLE_DM_RULES: DMRule[] = [
-  { id: 'dm-1', store: 'donut-equipment.com', name: 'Fryer Info Comment Capture',     platform: 'instagram', trigger: 'comment_keyword', keyword: 'price',     replyMessage: 'Check your DMs! 📬',                      dmMessage: 'Hi! You asked about our fryer prices. Here\'s the link to our full catalog: [catalog-link]. Reply with any questions!', status: 'active', triggeredCount: 284, conversionCount: 47 },
-  { id: 'dm-2', store: 'donut-equipment.com', name: 'Equipment Guide — "info" trigger', platform: 'instagram', trigger: 'comment_keyword', keyword: 'info',      replyMessage: 'Sending you our guide now! 🍩',            dmMessage: 'Hi! Here\'s our free Commercial Donut Equipment Guide: [guide-link]. Let me know if you have questions!',               status: 'active', triggeredCount: 192, conversionCount: 38 },
-  { id: 'dm-3', store: 'donut-supplies.com', name: 'FB Story Reply Capture',          platform: 'facebook',  trigger: 'story_reply',    keyword: undefined,   replyMessage: '',                                         dmMessage: 'Thanks for the reply! Want to know more about our donut supplies? Click here: [link]',                                  status: 'active', triggeredCount: 64,  conversionCount: 12 },
-  { id: 'dm-4', store: 'donut-equipment.com', name: 'TikTok Comment — "how much"',     platform: 'tiktok',    trigger: 'comment_keyword', keyword: 'how much',  replyMessage: 'Check DMs for pricing! 💬',               dmMessage: 'Hey! Pricing starts at $299 for our entry-level fryers. Full catalog: [link]',                                         status: 'paused', triggeredCount: 89,  conversionCount: 9  },
-  { id: 'dm-5', store: 'donut-equipment.com', name: 'New Follower Welcome',             platform: 'instagram', trigger: 'first_dm',       keyword: undefined,   replyMessage: '',                                         dmMessage: 'Welcome to Donut Equipment! 🍩 Here\'s a 10% welcome discount for your first order: WELCOME10. Shop here: [link]',    status: 'active', triggeredCount: 420, conversionCount: 53 },
+  { id: 'dm-1', store: 'donut-equipment.com', name: 'Fryer Info Comment Capture',     platform: 'instagram', trigger: 'comment_keyword', keyword: 'price',     replyMessage: 'Check your DMs! 📬',                      dmMessage: 'Hi! You asked about our fryer prices. Here\'s the link to our full catalog: [catalog-link]. Reply with any questions!', status: 'active', triggeredCount: 284, conversionCount: 47, revenueAttributed: 14100 },
+  { id: 'dm-2', store: 'donut-equipment.com', name: 'Equipment Guide — "info" trigger', platform: 'instagram', trigger: 'comment_keyword', keyword: 'info',      replyMessage: 'Sending you our guide now! 🍩',            dmMessage: 'Hi! Here\'s our free Commercial Donut Equipment Guide: [guide-link]. Let me know if you have questions!',               status: 'active', triggeredCount: 192, conversionCount: 38, revenueAttributed: 11400 },
+  { id: 'dm-3', store: 'donut-supplies.com', name: 'FB Story Reply Capture',          platform: 'facebook',  trigger: 'story_reply',    keyword: undefined,   replyMessage: '',                                         dmMessage: 'Thanks for the reply! Want to know more about our donut supplies? Click here: [link]',                                  status: 'active', triggeredCount: 64,  conversionCount: 12, revenueAttributed: 2280 },
+  { id: 'dm-4', store: 'donut-equipment.com', name: 'TikTok Comment — "how much"',     platform: 'tiktok',    trigger: 'comment_keyword', keyword: 'how much',  replyMessage: 'Check DMs for pricing! 💬',               dmMessage: 'Hey! Pricing starts at $299 for our entry-level fryers. Full catalog: [link]',                                         status: 'paused', triggeredCount: 89,  conversionCount: 9,  revenueAttributed: 2700 },
+  { id: 'dm-5', store: 'donut-equipment.com', name: 'New Follower Welcome',             platform: 'instagram', trigger: 'first_dm',       keyword: undefined,   replyMessage: '',                                         dmMessage: 'Welcome to Donut Equipment! 🍩 Here\'s a 10% welcome discount for your first order: WELCOME10. Shop here: [link]',    status: 'active', triggeredCount: 420, conversionCount: 53, revenueAttributed: 8480 },
 ];

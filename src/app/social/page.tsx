@@ -78,7 +78,7 @@ function InstagramGridPreview({ posts, gridStores, resolveStore, onEditPost, onN
   const [showUpcoming, setShowUpcoming] = useState(false);
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [cellOrder, setCellOrder] = useState<number[]>(() =>
-    Array.from({ length: 12 }, (_, i) => i)
+    Array.from({ length: 9 }, (_, i) => i)
   );
 
   const currentStore = gridStores[Math.min(gridStoreIdx, gridStores.length - 1)];
@@ -93,8 +93,8 @@ function InstagramGridPreview({ posts, gridStores, resolveStore, onEditPost, onN
       return new Date(b.scheduledFor).getTime() - new Date(a.scheduledFor).getTime();
     });
 
-  // Fill grid to 12 cells
-  const GRID_SIZE = 12;
+  // Fill grid to 9 cells (Instagram 3×3 preview)
+  const GRID_SIZE = 9;
   const filledCells = Array.from({ length: GRID_SIZE }, (_, i) => {
     const postIdx = cellOrder[i];
     return postIdx < instagramPosts.length ? instagramPosts[postIdx] : null;
@@ -812,9 +812,11 @@ const TRIGGER_LABELS: Record<DMTrigger, string> = {
   story_reply:     'Story Reply',
   first_dm:        'First DM / New Follower',
   post_reaction:   'Post Reaction',
+  story_mention:   'Story Mention',
 };
 
 const PLT_DM_COLOR: Record<DMPlatform, string> = { instagram: '#e1306c', facebook: '#1877f2', tiktok: '#010101' };
+const c$ = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
 
 function DMAutomationPanel({ selectedStoreIds }: { selectedStoreIds: string[] }) {
   const [stores] = useStores();
@@ -850,16 +852,18 @@ function DMAutomationPanel({ selectedStoreIds }: { selectedStoreIds: string[] })
 
   const totalTriggered   = rules.reduce((s, r) => s + r.triggeredCount,   0);
   const totalConversions = rules.reduce((s, r) => s + r.conversionCount, 0);
+  const totalRevenue     = rules.reduce((s, r) => s + (r.revenueAttributed ?? 0), 0);
   const convRate = totalTriggered > 0 ? ((totalConversions / totalTriggered) * 100).toFixed(1) : '0.0';
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-5 gap-3">
         {[
           { label: 'Active Rules',        value: rules.filter(r => r.status === 'active').length.toString(), color: '#10d98a' },
           { label: 'Total Triggered',     value: totalTriggered.toLocaleString(),                            color: 'var(--cyan)' },
           { label: 'Conversions',         value: totalConversions.toLocaleString(),                          color: '#7b93ff' },
           { label: 'Conversion Rate',     value: convRate + '%',                                             color: '#ffb347' },
+          { label: 'Revenue Attributed',  value: c$(totalRevenue),                                           color: '#10d98a' },
         ].map(s => (
           <div key={s.label} className="glass-card px-4 py-3">
             <div className="section-label mb-1">{s.label}</div>
@@ -930,6 +934,9 @@ function DMAutomationPanel({ selectedStoreIds }: { selectedStoreIds: string[] })
                       <span className="section-label">{TRIGGER_LABELS[rule.trigger]}{rule.keyword ? ` → "${rule.keyword}"` : ''}</span>
                       <span className="section-label flex items-center gap-1"><MessageCircle size={10} /> {rule.triggeredCount.toLocaleString()} triggered</span>
                       <span className="section-label">{rate}% conv.</span>
+                      {(rule.revenueAttributed ?? 0) > 0 && (
+                        <span className="section-label" style={{ color: '#10d98a' }}>{c$(rule.revenueAttributed!)} rev.</span>
+                      )}
                     </div>
                   </div>
                 </button>
@@ -959,11 +966,12 @@ function DMAutomationPanel({ selectedStoreIds }: { selectedStoreIds: string[] })
                       <p className="text-base" style={{ color: 'var(--text-primary)' }}>{rule.dmMessage}</p>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-4 gap-3">
                     {[
                       { l: 'Triggered', v: rule.triggeredCount.toLocaleString(), c: '#00d9ff' },
                       { l: 'Conversions', v: rule.conversionCount.toLocaleString(), c: '#10d98a' },
                       { l: 'Conv. Rate', v: rate + '%', c: '#ffb347' },
+                      { l: 'Revenue Attr.', v: c$(rule.revenueAttributed ?? 0), c: '#10d98a' },
                     ].map(s => (
                       <div key={s.l} className="rounded-lg p-2 text-center" style={{ background: 'var(--bg-base)' }}>
                         <div className="section-label text-[16px]">{s.l}</div>
