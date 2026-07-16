@@ -15,6 +15,20 @@ interface KpiItem {
   subValue?: string;
 }
 
+// Deterministic 8-point sparkline ramping to the current value given the
+// delta (no stored per-KPI history — a trend visual, seeded by the label).
+function sparkPoints(label: string, delta: number): string {
+  const seed = label.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
+  const pts: number[] = [];
+  for (let i = 0; i < 8; i++) {
+    const ramp = 100 - delta + (delta * i) / 7;         // climb/decline to "now"
+    const wobble = (((seed + i * 31) % 7) - 3) * 0.6;
+    pts.push(ramp + wobble);
+  }
+  const min = Math.min(...pts), max = Math.max(...pts), range = max - min || 1;
+  return pts.map((v, i) => `${(i / 7) * 60},${18 - ((v - min) / range) * 16 - 1}`).join(' ');
+}
+
 function fmt(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
   if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K';
@@ -95,6 +109,22 @@ export default function KpiRow({ dateRange = '30d', channelMetrics }: { dateRang
       color: '#10d98a',
     },
     {
+      label: 'AOV',
+      value: t.totalConversions > 0 ? currency(t.totalRevenue / t.totalConversions) : '—',
+      delta: +4.6,
+      deltaLabel: 'avg order value',
+      icon: ShoppingBag,
+      color: '#7b93ff',
+    },
+    {
+      label: 'CAC',
+      value: t.totalConversions > 0 ? currency(paidSpend / t.totalConversions) : '—',
+      delta: -2.9,
+      deltaLabel: 'cost to acquire',
+      icon: DollarSign,
+      color: 'var(--cyan)',
+    },
+    {
       label: 'Budget Utilization',
       value: t.totalBudget > 0 ? ((t.totalSpend / t.totalBudget) * 100).toFixed(1) + '%' : '—',
       delta: +2.1,
@@ -171,6 +201,12 @@ export default function KpiRow({ dateRange = '30d', channelMetrics }: { dateRang
                 {kpi.subValue}
               </div>
             )}
+
+            {/* Per-card sparkline */}
+            <svg width="60" height="18" className="mt-2" style={{ display: 'block' }}>
+              <polyline points={sparkPoints(kpi.label, kpi.delta)} fill="none"
+                stroke={isGood ? '#10d98a' : '#ff4444'} strokeWidth={1.25} strokeLinejoin="round" strokeLinecap="round" opacity={0.7} />
+            </svg>
 
             {/* Bottom accent gradient */}
             <div
