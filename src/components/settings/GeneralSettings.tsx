@@ -1,11 +1,17 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Upload, Trash2, AlertTriangle, Check, Loader2, Bold, Italic, RotateCcw } from 'lucide-react';
+import { Upload, Trash2, AlertTriangle, Check, Loader2, Bold, Italic, RotateCcw, Sun, Moon, Info } from 'lucide-react';
 import { usePersistentState } from '@/lib/usePersistentState';
 import { GENERAL_SETTINGS, NOTIFICATION_PREFERENCES } from '@/lib/settingsData';
 import type { NotificationRule } from '@/lib/settingsData';
 import { useTheme, DEFAULT_APPEARANCE } from '@/lib/ThemeProvider';
+import { useStores } from '@/lib/storeScope';
+
+const APP_VERSION = '1.0.0';
+const APP_BUILD_DATE = '2026-07-15';
+
+const SEVERITY_COLOR: Record<string, string> = { critical: '#ff4444', warning: '#ffb347', info: '#7b93ff' };
 
 const TIMEZONES = [
   'America/New_York',
@@ -128,7 +134,11 @@ function PillToggle({ active, onClick, children }: { active: boolean; onClick: (
 }
 
 export function GeneralSettings() {
-  const { theme, appearance, setAppearance } = useTheme();
+  const { theme, toggleTheme, appearance, setAppearance } = useTheme();
+  const [stores] = useStores();
+
+  // Display preferences
+  const [defaultStore, setDefaultStore] = usePersistentState('settings.general.defaultStore', 'all');
 
   // Business info
   const [businessName, setBusinessName] = usePersistentState('settings.general.businessName', GENERAL_SETTINGS.businessName);
@@ -162,8 +172,8 @@ export function GeneralSettings() {
   const [deleteStep, setDeleteStep] = useState<'idle' | 'confirm1' | 'confirm2' | 'deleted'>('idle');
   const [deleteInput, setDeleteInput] = useState('');
 
-  // Notifications
-  const [notifications, setNotifications] = usePersistentState<NotificationRule[]>('settings.general.notifications', NOTIFICATION_PREFERENCES);
+  // Notifications (v2: severity-based, includes Teams)
+  const [notifications, setNotifications] = usePersistentState<NotificationRule[]>('settings.general.notifications.v2', NOTIFICATION_PREFERENCES);
   const [notifSaved, setNotifSaved] = useState(false);
 
   const makeSimpleSaver = (setter: (v: boolean) => void) => () => {
@@ -202,7 +212,7 @@ export function GeneralSettings() {
     if (file) setLogoName(file.name);
   };
 
-  const toggleNotif = (id: string, channel: 'email' | 'sms' | 'slack' | 'push') => {
+  const toggleNotif = (id: string, channel: 'email' | 'sms' | 'slack' | 'teams') => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, [channel]: !n[channel] } : n));
   };
 
@@ -414,6 +424,47 @@ export function GeneralSettings() {
         </div>
       </div>
 
+      {/* Display & Preferences */}
+      <div className="glass-card p-5">
+        <SectionHeader title="Display & Preferences" description="Theme and default view when the app loads" />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="section-label mb-1.5 block">Theme</label>
+            <div className="flex gap-2">
+              {([
+                { key: 'light', label: 'Light', Icon: Sun },
+                { key: 'dark',  label: 'Dark',  Icon: Moon },
+              ] as const).map(t => {
+                const active = theme === t.key;
+                return (
+                  <button key={t.key}
+                    onClick={() => { if (!active) toggleTheme(); }}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-base font-medium transition-all"
+                    style={{
+                      background: active ? 'rgba(0,217,255,0.12)' : 'var(--bg-elevated)',
+                      color: active ? 'var(--cyan)' : 'var(--text-muted)',
+                      border: `1px solid ${active ? 'rgba(0,217,255,0.3)' : 'var(--border-subtle)'}`,
+                    }}>
+                    <t.Icon size={13} />{t.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div>
+            <label className="section-label mb-1.5 block">Default Store on Load</label>
+            <select
+              value={defaultStore}
+              onChange={e => setDefaultStore(e.target.value)}
+              className="w-full text-base px-3 py-2 rounded-lg outline-none"
+              style={inputStyle}>
+              <option value="all">All Stores (group view)</option>
+              {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          </div>
+        </div>
+      </div>
+
       {/* Reporting */}
       <div className="glass-card p-5">
         <SectionHeader title="Reporting Defaults" description="Configure default date ranges, scheduled reports, and recipients" />
@@ -472,14 +523,14 @@ export function GeneralSettings() {
       <div className="glass-card overflow-hidden">
         <div className="px-5 py-4 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
           <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Notification Preferences</div>
-          <div className="text-base mt-0.5" style={{ color: 'var(--text-muted)' }}>Choose which events trigger alerts and through which channels</div>
+          <div className="text-base mt-0.5" style={{ color: 'var(--text-muted)' }}>Route each alert severity to the channels that should receive it — mirrors the Alerts module’s delivery model</div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                <th className="section-label text-left px-5 py-3 w-full">Alert Type</th>
-                {(['Email', 'SMS', 'Slack', 'Push'] as const).map(ch => (
+                <th className="section-label text-left px-5 py-3 w-full">Severity</th>
+                {(['Email', 'SMS', 'Slack', 'Teams'] as const).map(ch => (
                   <th key={ch} className="section-label px-5 py-3 text-center whitespace-nowrap">{ch}</th>
                 ))}
               </tr>
@@ -489,9 +540,15 @@ export function GeneralSettings() {
                 <tr key={rule.id}
                   style={{ borderBottom: i < notifications.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
                   <td className="px-5 py-3">
-                    <span className="text-base" style={{ color: 'var(--text-secondary)' }}>{rule.label}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full shrink-0" style={{ background: SEVERITY_COLOR[rule.severity] }} />
+                      <div>
+                        <span className="text-base font-semibold" style={{ color: SEVERITY_COLOR[rule.severity] }}>{rule.label}</span>
+                        <div className="text-[16px]" style={{ color: 'var(--text-muted)' }}>{rule.description}</div>
+                      </div>
+                    </div>
                   </td>
-                  {(['email', 'sms', 'slack', 'push'] as const).map(ch => (
+                  {(['email', 'sms', 'slack', 'teams'] as const).map(ch => (
                     <td key={ch} className="px-5 py-3 text-center">
                       <button
                         onClick={() => toggleNotif(rule.id, ch)}
@@ -628,6 +685,27 @@ export function GeneralSettings() {
               </div>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* About */}
+      <div className="glass-card p-5">
+        <SectionHeader title="About" description="Application version and build information" />
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            { label: 'Version',    value: APP_VERSION },
+            { label: 'Build Date', value: APP_BUILD_DATE },
+            { label: 'Product',    value: 'MarketOS' },
+          ].map(item => (
+            <div key={item.label} className="rounded-xl p-3" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+              <div className="section-label mb-1">{item.label}</div>
+              <div className="text-base font-mono font-semibold" style={{ color: 'var(--text-primary)' }}>{item.value}</div>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-start gap-2 mt-4 text-[16px]" style={{ color: 'var(--text-muted)' }}>
+          <Info size={12} className="mt-0.5 shrink-0" />
+          <span>MarketOS marketing-operations console. All data shown is stored locally in your browser; use the Data section to load sample data or reset to an empty state.</span>
         </div>
       </div>
     </div>

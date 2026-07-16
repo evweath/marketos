@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePersistentState } from '@/lib/usePersistentState';
-import { RefreshCw, ExternalLink, Plus, CheckCircle, Loader2, Webhook, Eye, EyeOff, Save, X, KeyRound, Download, Plug, Wifi, XCircle } from 'lucide-react';
+import { RefreshCw, ExternalLink, Plus, CheckCircle, Loader2, Webhook, Eye, EyeOff, Save, X, KeyRound, Download, Plug, Wifi, XCircle, Globe } from 'lucide-react';
 import type { TrafficMetrics, ConversionMetrics } from '@/types';
 import {
   INITIAL_STORE_CONNECTIONS,
@@ -132,7 +132,11 @@ interface StoreCardProps {
   connections: StoreConnectionMap;
 }
 
+const STORE_TIMEZONES = ['America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles', 'America/Phoenix', 'Europe/London', 'Europe/Paris', 'Asia/Tokyo', 'Australia/Sydney', 'UTC'];
+const STORE_CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'SGD'];
+
 function StoreCard({ store, savedCreds, onSaveCreds, connections }: StoreCardProps) {
+  const [, setStores]    = useStores();
   const [allTraffic]     = usePersistentState<Record<string, TrafficMetrics>>('monitoring.traffic', {});
   const [allConversions] = usePersistentState<Record<string, ConversionMetrics>>('monitoring.conversions', {});
   const [syncing, setSyncing]         = useState(false);
@@ -320,6 +324,34 @@ function StoreCard({ store, savedCreds, onSaveCreds, connections }: StoreCardPro
             value={creds.webhookSecret}
             onChange={v => setCreds(c => ({ ...c, webhookSecret: v }))}
           />
+
+          {/* Regional — per-store timezone + currency */}
+          <div className='flex items-center gap-2 mt-1'>
+            <Globe size={13} style={{ color: 'var(--cyan)' }} />
+            <span className='text-base font-semibold' style={{ color: 'var(--text-primary)' }}>Regional</span>
+          </div>
+          <div className='grid grid-cols-2 gap-3'>
+            <div>
+              <label className='section-label mb-1.5 block'>Timezone</label>
+              <select
+                value={store.timezone ?? 'America/New_York'}
+                onChange={e => setStores(prev => prev.map(s => s.id === store.id ? { ...s, timezone: e.target.value } : s))}
+                className='w-full text-base px-3 py-2 rounded-lg outline-none'
+                style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+                {STORE_TIMEZONES.map(tz => <option key={tz} value={tz}>{tz.replace('_', ' ')}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className='section-label mb-1.5 block'>Currency</label>
+              <select
+                value={store.currency ?? 'USD'}
+                onChange={e => setStores(prev => prev.map(s => s.id === store.id ? { ...s, currency: e.target.value } : s))}
+                className='w-full text-base px-3 py-2 rounded-lg outline-none'
+                style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+                {STORE_CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+          </div>
 
           <div className='flex gap-2 pt-1'>
             <button

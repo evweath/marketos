@@ -61,15 +61,19 @@ export interface TrackingSettings {
   serverSideEvents: string[];
 }
 
-export type NotificationChannel = 'email' | 'sms' | 'slack' | 'push';
+export type NotificationChannel = 'email' | 'sms' | 'slack' | 'teams';
 
+// Rebuilt around the Alerts module's severity model: one row per severity,
+// each routable to any of the four channels (matches the Alerts delivery UI).
 export interface NotificationRule {
   id: string;
+  severity: 'critical' | 'warning' | 'info';
   label: string;
+  description: string;
   email: boolean;
   sms: boolean;
   slack: boolean;
-  push: boolean;
+  teams: boolean;
 }
 
 // ─── Integrations ─────────────────────────────────────────────────────────────
@@ -393,14 +397,7 @@ export const TRACKING_SETTINGS: TrackingSettings = {
 // ─── Notification Preferences ─────────────────────────────────────────────────
 
 export const NOTIFICATION_PREFERENCES: NotificationRule[] = [
-  { id: 'np-001', label: 'Critical alerts (downtime, errors)',         email: true,  sms: true,  slack: true,  push: true  },
-  { id: 'np-002', label: 'SSL certificate expiration warnings',        email: true,  sms: false, slack: true,  push: false },
-  { id: 'np-003', label: 'High response time / degraded performance',  email: true,  sms: false, slack: true,  push: true  },
-  { id: 'np-004', label: 'Out-of-stock product detected',              email: true,  sms: false, slack: true,  push: false },
-  { id: 'np-005', label: 'Price change detected',                      email: true,  sms: false, slack: false, push: false },
-  { id: 'np-006', label: 'Daily performance summary',                  email: true,  sms: false, slack: true,  push: false },
-  { id: 'np-007', label: 'Weekly report ready',                        email: true,  sms: false, slack: false, push: false },
-  { id: 'np-008', label: 'Budget threshold reached (>90%)',            email: true,  sms: true,  slack: true,  push: true  },
-  { id: 'np-009', label: 'Abandoned cart spike',                       email: false, sms: false, slack: true,  push: false },
-  { id: 'np-010', label: 'New team member joined',                     email: true,  sms: false, slack: true,  push: false },
+  { id: 'np-critical', severity: 'critical', label: 'Critical', description: 'Downtime, ROAS collapse, policy flags, out-of-stock', email: true,  sms: true,  slack: true,  teams: true  },
+  { id: 'np-warning',  severity: 'warning',  label: 'Warning',  description: 'Budget pacing, traffic drops, SSL expiry, cart spikes', email: true,  sms: false, slack: true,  teams: true  },
+  { id: 'np-info',     severity: 'info',     label: 'Info',     description: 'Traffic spikes, engagement changes, digests',           email: false, sms: false, slack: true,  teams: false },
 ];

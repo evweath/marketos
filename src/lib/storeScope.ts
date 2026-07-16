@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { usePersistentState } from './usePersistentState';
 
 // ─── Canonical store identity ──────────────────────────────────────────────
@@ -22,6 +23,8 @@ export interface StoreRecord {
   orders30d: number;
   activeCampaigns: number;
   webhooks: string[];
+  timezone?: string;
+  currency?: string;
 }
 
 export const STORE_COLORS = ['#00d9ff', '#ffb347', '#10d98a', '#7b93ff', '#ff6ac1', '#f5c542'];
@@ -39,6 +42,8 @@ export const INITIAL_STORES: StoreRecord[] = [
     orders30d: 0,
     activeCampaigns: 0,
     webhooks: ['orders/create', 'orders/updated', 'products/update', 'checkouts/create', 'customers/create'],
+    timezone: 'America/New_York',
+    currency: 'USD',
   },
   {
     id: 'donut-supplies',
@@ -52,6 +57,8 @@ export const INITIAL_STORES: StoreRecord[] = [
     orders30d: 0,
     activeCampaigns: 0,
     webhooks: ['orders/create', 'products/update', 'checkouts/create'],
+    timezone: 'America/Chicago',
+    currency: 'USD',
   },
   {
     id: 'bakery-wholesalers',
@@ -65,6 +72,8 @@ export const INITIAL_STORES: StoreRecord[] = [
     orders30d: 0,
     activeCampaigns: 0,
     webhooks: ['orders/create', 'orders/updated', 'products/update', 'checkouts/create', 'customers/create'],
+    timezone: 'America/Los_Angeles',
+    currency: 'USD',
   },
 ];
 
@@ -110,6 +119,11 @@ export interface StoreScopeState {
 
 const DEFAULT_SCOPE: StoreScopeState = { mode: 'all', selectedIds: [] };
 
+// Tracks which sections have already applied the "default store on load"
+// preference this page-load session. Module-level so it survives client-side
+// navigation between pages but resets on a full reload — matching "on load".
+const defaultApplied = new Set<string>();
+
 /**
  * Persisted, per-section store selection used by the checkbox-based
  * <StoreScopeBar>. `sectionKey` should be unique per page (e.g. 'analytics',
@@ -118,6 +132,22 @@ const DEFAULT_SCOPE: StoreScopeState = { mode: 'all', selectedIds: [] };
 export function useStoreScope(sectionKey: string) {
   const [stores] = useStores();
   const [scope, setScope] = usePersistentState<StoreScopeState>(`scope.${sectionKey}`, DEFAULT_SCOPE);
+
+  // Apply the user's "Default Store on Load" preference (Settings → General)
+  // once per section per page-load, after persisted scope has hydrated.
+  useEffect(() => {
+    if (defaultApplied.has(sectionKey) || stores.length === 0) return;
+    defaultApplied.add(sectionKey);
+    try {
+      const raw = localStorage.getItem('marketos.settings.general.defaultStore');
+      const def = raw ? (JSON.parse(raw) as string) : 'all';
+      if (def && def !== 'all' && stores.some(s => s.id === def)) {
+        setScope({ mode: 'subset', selectedIds: [def] });
+      }
+    } catch {
+      /* ignore unavailable storage */
+    }
+  }, [sectionKey, stores, setScope]);
 
   const selectedStoreIds = scope.mode === 'all'
     ? stores.map(s => s.id)
