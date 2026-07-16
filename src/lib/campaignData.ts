@@ -371,8 +371,8 @@ export const SAMPLE_AUDIENCE_OVERLAPS: AudienceOverlap[] = [
 // ─── Negative Keywords (Google account-level) ────────────────────────────────
 
 export type MatchType = 'exact' | 'phrase' | 'broad';
-export interface NegKeyword { id: string; keyword: string; matchType: MatchType; campaign: string; addedDate: string; impressionsBlocked?: number }
-export interface NegKeywordSuggestion { keyword: string; matchType: MatchType; reason: string }
+export interface NegKeyword { id: string; keyword: string; matchType: MatchType; campaign: string; addedDate: string; impressionsBlocked?: number; source?: 'manual' | 'ai' }
+export interface NegKeywordSuggestion { keyword: string; matchType: MatchType; reason: string; relevance?: number }
 
 export const NEG_KEYWORD_CAMPAIGNS = ['Google — Branded Search', 'Google — Competitor Conquest', 'Google — Shopping — Equipment', 'Google — Shopping — Supplies', 'Google — Display Retargeting'];
 
@@ -388,10 +388,12 @@ export const SAMPLE_NEG_KEYWORDS: NegKeyword[] = [
 ];
 
 export const SAMPLE_NEG_KEYWORD_SUGGESTIONS: NegKeywordSuggestion[] = [
-  { keyword: 'cheap', matchType: 'broad', reason: 'Attracts low-intent traffic unlikely to convert at commercial pricing.' },
-  { keyword: 'repair', matchType: 'phrase', reason: 'Triggers for service queries — irrelevant to new equipment sales.' },
-  { keyword: 'small batch', matchType: 'phrase', reason: 'Indicates hobbyist intent, not commercial buyers.' },
-  { keyword: 'rent', matchType: 'exact', reason: 'Equipment rental queries waste spend on purchase campaigns.' },
+  { keyword: 'cheap', matchType: 'broad', reason: 'Attracts low-intent traffic unlikely to convert at commercial pricing.', relevance: 94 },
+  { keyword: 'repair', matchType: 'phrase', reason: 'Triggers for service queries — irrelevant to new equipment sales.', relevance: 88 },
+  { keyword: 'diy', matchType: 'broad', reason: 'Hobbyist/DIY intent — not commercial buyers.', relevance: 82 },
+  { keyword: 'small batch', matchType: 'phrase', reason: 'Indicates hobbyist intent, not commercial buyers.', relevance: 76 },
+  { keyword: 'used', matchType: 'phrase', reason: 'Second-hand shoppers rarely buy new commercial equipment.', relevance: 71 },
+  { keyword: 'rent', matchType: 'exact', reason: 'Equipment rental queries waste spend on purchase campaigns.', relevance: 68 },
 ];
 
 // ─── Computed Totals ──────────────────────────────────────────────────────────

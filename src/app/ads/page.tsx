@@ -16,7 +16,7 @@ import { StoreScopeBar } from '@/components/shared/StoreScopeBar';
 import {
   BarChart2, Zap, Shield, FlaskConical, Users, XCircle,
   Play, Pause, Trophy, TrendingUp, TrendingDown, AlertTriangle,
-  Plus, Trash2, CheckCircle2, RefreshCw,
+  Plus, Trash2, CheckCircle2, RefreshCw, Download,
 } from 'lucide-react';
 
 type Tab = 'campaigns' | 'automation' | 'health' | 'abtesting' | 'audiences' | 'negkeywords';
@@ -414,16 +414,43 @@ function NegativeKeywordsPanel() {
   const [newCampaign, setNewCampaign] = useState(NEG_KEYWORD_CAMPAIGNS[0]);
   const [bulkText, setBulkText] = useState('');
   const [showBulk, setShowBulk] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const visible = filterCampaign === 'all' ? keywords : keywords.filter(k => k.campaign === filterCampaign);
   const totalBlocked = keywords.reduce((s, k) => s + (k.impressionsBlocked ?? 0), 0);
+
+  const toggleSel = (id: string) => setSelected(prev => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
+  const allVisibleSelected = visible.length > 0 && visible.every(k => selected.has(k.id));
+  const toggleAll = () => setSelected(prev => {
+    const n = new Set(prev);
+    if (allVisibleSelected) visible.forEach(k => n.delete(k.id));
+    else visible.forEach(k => n.add(k.id));
+    return n;
+  });
+
+  const exportCsv = () => {
+    const rows = visible.filter(k => selected.size === 0 || selected.has(k.id));
+    const header = ['Keyword', 'Match Type', 'Campaign', 'Source', 'Added', 'Impressions Blocked'];
+    const csv = [header, ...rows.map(k => [k.keyword, k.matchType, k.campaign, k.source ?? 'manual', k.addedDate, k.impressionsBlocked ?? 0])]
+      .map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'negative-keywords.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  };
 
   const addKeyword = () => {
     if (!newKw.trim()) return;
     const kw: NegKeyword = {
       id: `nk-${Date.now()}`, keyword: newKw.trim().toLowerCase(),
       matchType: newMatch, campaign: newCampaign,
-      addedDate: new Date().toISOString().slice(0, 10),
+      addedDate: new Date().toISOString().slice(0, 10), source: 'manual',
     };
     setKeywords(prev => [kw, ...prev]);
     setNewKw('');
@@ -436,7 +463,7 @@ function NegativeKeywordsPanel() {
     const newKws: NegKeyword[] = lines.map((kw, i) => ({
       id: `nk-bulk-${Date.now()}-${i}`, keyword: kw.toLowerCase(),
       matchType: newMatch, campaign: newCampaign,
-      addedDate: new Date().toISOString().slice(0, 10),
+      addedDate: new Date().toISOString().slice(0, 10), source: 'manual',
     }));
     setKeywords(prev => [...newKws, ...prev]);
     setBulkText(''); setShowBulk(false);
@@ -445,7 +472,7 @@ function NegativeKeywordsPanel() {
   const addSuggestion = (s: NegKeywordSuggestion) => {
     const kw: NegKeyword = {
       id: `nk-sug-${Date.now()}`, keyword: s.keyword, matchType: s.matchType, campaign: newCampaign,
-      addedDate: new Date().toISOString().slice(0, 10),
+      addedDate: new Date().toISOString().slice(0, 10), source: 'ai',
     };
     setKeywords(prev => [kw, ...prev]);
   };
@@ -524,6 +551,14 @@ function NegativeKeywordsPanel() {
               <span className="text-base px-1.5 py-0.5 rounded font-mono font-medium" style={{ color: MATCH_COLOR[s.matchType], background: `${MATCH_COLOR[s.matchType]}18` }}>[{s.matchType}]</span>
               <span className="text-base font-medium flex-1" style={{ color: 'var(--text-primary)' }}>{s.keyword}</span>
               <span className="text-base flex-[2]" style={{ color: 'var(--text-muted)' }}>{s.reason}</span>
+              {s.relevance != null && (
+                <span className="flex items-center gap-1.5 shrink-0" title="AI relevance score">
+                  <span className="w-14 h-1.5 rounded-full" style={{ background: 'var(--bg-overlay)' }}>
+                    <span className="block h-full rounded-full" style={{ width: `${s.relevance}%`, background: s.relevance >= 85 ? '#10d98a' : s.relevance >= 70 ? '#ffb347' : '#7b93ff' }} />
+                  </span>
+                  <span className="text-[16px] font-mono" style={{ color: s.relevance >= 85 ? '#10d98a' : s.relevance >= 70 ? '#ffb347' : '#7b93ff' }}>{s.relevance}</span>
+                </span>
+              )}
               <button onClick={() => addSuggestion(s)} className="flex items-center gap-1 text-base px-2 py-1 rounded-lg" style={{ color: '#10d98a', background: 'rgba(16,217,138,.1)' }}>
                 <Plus size={11} /> Add
               </button>
@@ -539,17 +574,27 @@ function NegativeKeywordsPanel() {
       <div className="glass-card overflow-hidden">
         <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
           <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Keyword List <span className="font-normal text-[16px]" style={{ color: 'var(--text-muted)' }}>({visible.length})</span></span>
-          <select value={filterCampaign} onChange={e => setFilterCampaign(e.target.value)}
-            className="px-2 py-1 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
-            <option value="all">All Campaigns</option>
-            {NEG_KEYWORD_CAMPAIGNS.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
+          <div className="flex items-center gap-2">
+            <button onClick={exportCsv} disabled={visible.length === 0}
+              className="flex items-center gap-1.5 text-base px-2.5 py-1 rounded-lg font-medium disabled:opacity-40"
+              style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
+              <Download size={12} /> CSV{selected.size > 0 ? ` (${selected.size})` : ''}
+            </button>
+            <select value={filterCampaign} onChange={e => setFilterCampaign(e.target.value)}
+              className="px-2 py-1 rounded-lg text-base" style={{ background: 'var(--bg-base)', border: '1px solid var(--border-dim)', color: 'var(--text-primary)' }}>
+              <option value="all">All Campaigns</option>
+              {NEG_KEYWORD_CAMPAIGNS.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
         </div>
         <div className="overflow-y-auto" style={{ maxHeight: 340 }}>
           <table className="w-full text-base">
             <thead style={{ background: 'var(--bg-elevated)', position: 'sticky', top: 0 }}>
               <tr>
-                {['Keyword', 'Match Type', 'Campaign', 'Added', 'Impressions Blocked', ''].map(h => (
+                <th className="px-3 py-2 text-left">
+                  <input type="checkbox" checked={allVisibleSelected} onChange={toggleAll} style={{ accentColor: '#00d9ff' }} />
+                </th>
+                {['Keyword', 'Match Type', 'Source', 'Campaign', 'Added', 'Impressions Blocked', ''].map(h => (
                   <th key={h} className="px-3 py-2 text-left font-medium" style={{ color: 'var(--text-muted)' }}>{h}</th>
                 ))}
               </tr>
@@ -559,9 +604,17 @@ function NegativeKeywordsPanel() {
                 <tr key={k.id} className="transition-colors" style={{ borderBottom: '1px solid var(--border-subtle)' }}
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-elevated)')}
                   onMouseLeave={e => (e.currentTarget.style.background = '')}>
+                  <td className="px-3 py-2">
+                    <input type="checkbox" checked={selected.has(k.id)} onChange={() => toggleSel(k.id)} style={{ accentColor: '#00d9ff' }} />
+                  </td>
                   <td className="px-3 py-2 font-mono font-medium" style={{ color: 'var(--text-primary)' }}>{k.keyword}</td>
                   <td className="px-3 py-2">
                     <span className="px-1.5 py-0.5 rounded text-[16px] font-medium" style={{ color: MATCH_COLOR[k.matchType], background: `${MATCH_COLOR[k.matchType]}18` }}>{k.matchType}</span>
+                  </td>
+                  <td className="px-3 py-2">
+                    <span className="text-[16px] font-mono px-1.5 py-0.5 rounded" style={{ background: k.source === 'ai' ? 'rgba(123,147,255,0.15)' : 'var(--bg-overlay)', color: k.source === 'ai' ? '#7b93ff' : 'var(--text-muted)' }}>
+                      {k.source === 'ai' ? '✨ AI' : 'Manual'}
+                    </span>
                   </td>
                   <td className="px-3 py-2 max-w-[200px] truncate" style={{ color: 'var(--text-secondary)' }}>{k.campaign}</td>
                   <td className="px-3 py-2" style={{ color: 'var(--text-muted)' }}>{k.addedDate}</td>
