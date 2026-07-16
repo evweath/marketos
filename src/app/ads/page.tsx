@@ -215,13 +215,15 @@ const IMPACT_COLOR = { high: '#ff4444', medium: '#ffb347', low: '#10d98a' };
 const overlapCellColor = (pct: number) =>
   pct >= 70 ? '#ff4444' : pct >= 40 ? '#ffb347' : '#10d98a';
 
-function AudienceOverlapPanel() {
+function AudienceOverlapPanel({ selectedStoreIds }: { selectedStoreIds: string[] }) {
+  const [stores] = useStores();
   const [overlaps] = usePersistentState<AudienceOverlap[]>('ads.audienceOverlaps', []);
   const [filter, setFilter] = useState<'all' | 'Meta' | 'Google'>('all');
   const [view, setView] = useState<'matrix' | 'list'>('matrix');
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
 
   const visible = overlaps.filter(o =>
+    selectedStoreIds.includes(resolveStoreId(o.store, stores) ?? '') &&
     !dismissed.has(o.id) && (filter === 'all' || o.platform === filter)
   );
   const highCount = visible.filter(o => o.impact === 'high').length;
@@ -650,7 +652,7 @@ export default function AdsPage() {
           {tab === 'automation'  && <div className="flex-1 overflow-y-auto"><AutomationRulesPanel /></div>}
           {tab === 'health'      && <div className="flex-1 overflow-y-auto"><AccountHealthAudit /></div>}
           {tab === 'abtesting'   && <div className="flex-1 overflow-y-auto"><ABTestingPanel /></div>}
-          {tab === 'audiences'   && <div className="flex-1 overflow-y-auto"><AudienceOverlapPanel /></div>}
+          {tab === 'audiences'   && <div className="flex-1 overflow-y-auto"><AudienceOverlapPanel selectedStoreIds={selectedStoreIds} /></div>}
           {tab === 'negkeywords' && <div className="flex-1 overflow-y-auto"><NegativeKeywordsPanel /></div>}
         </main>
       </div>

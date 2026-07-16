@@ -349,6 +349,7 @@ export const SAMPLE_AB_TESTS: ABTest[] = [
 
 export interface AudienceOverlap {
   id: string;
+  store: string;
   set1: string;
   set2: string;
   campaign1: string;
@@ -360,11 +361,11 @@ export interface AudienceOverlap {
 }
 
 export const SAMPLE_AUDIENCE_OVERLAPS: AudienceOverlap[] = [
-  { id: 'ov-1', set1: 'Lookalike 1% — Purchasers', set2: 'Lookalike 2% — Purchasers', campaign1: 'Spring Sale — Equipment', campaign2: 'Retargeting — Equipment', overlapPct: 68, platform: 'Meta', impact: 'high', recommendation: 'Exclude Lookalike 1% from the Retargeting campaign to stop internal auction competition.' },
-  { id: 'ov-2', set1: 'Website Visitors 30d', set2: 'Website Visitors 60d', campaign1: 'Retargeting — Supplies', campaign2: 'Awareness — Supplies', overlapPct: 84, platform: 'Meta', impact: 'high', recommendation: 'Add "Website Visitors 30d" as an exclusion to the Awareness campaign audience.' },
-  { id: 'ov-3', set1: 'Interest: Commercial Baking', set2: 'Interest: Food Manufacturing', campaign1: 'Awareness — Wholesale', campaign2: 'Prospecting — Equipment', overlapPct: 42, platform: 'Meta', impact: 'medium', recommendation: 'Consider consolidating these interests into a single campaign to avoid bid inflation.' },
-  { id: 'ov-4', set1: 'Customer Match — All Customers', set2: 'In-Market: Commercial Kitchen', campaign1: 'RLSA — Google', campaign2: 'Prospecting — Google', overlapPct: 31, platform: 'Google', impact: 'low', recommendation: 'Low overlap — no action needed. Monitor if campaigns scale.' },
-  { id: 'ov-5', set1: 'Cart Abandoners 14d', set2: 'Cart Abandoners 30d', campaign1: 'Cart Recovery — Meta', campaign2: 'Retargeting — Equipment', overlapPct: 76, platform: 'Meta', impact: 'high', recommendation: 'Exclude Cart Abandoners 14d from the broader 30d retargeting campaign.' },
+  { id: 'ov-1', store: 'donut-equipment.com', set1: 'Lookalike 1% — Purchasers', set2: 'Lookalike 2% — Purchasers', campaign1: 'Spring Sale — Equipment', campaign2: 'Retargeting — Equipment', overlapPct: 68, platform: 'Meta', impact: 'high', recommendation: 'Exclude Lookalike 1% from the Retargeting campaign to stop internal auction competition.' },
+  { id: 'ov-2', store: 'donut-supplies.com', set1: 'Website Visitors 30d', set2: 'Website Visitors 60d', campaign1: 'Retargeting — Supplies', campaign2: 'Awareness — Supplies', overlapPct: 84, platform: 'Meta', impact: 'high', recommendation: 'Add "Website Visitors 30d" as an exclusion to the Awareness campaign audience.' },
+  { id: 'ov-3', store: 'bakery-wholesalers.com', set1: 'Interest: Commercial Baking', set2: 'Interest: Food Manufacturing', campaign1: 'Awareness — Wholesale', campaign2: 'Prospecting — Wholesale', overlapPct: 42, platform: 'Meta', impact: 'medium', recommendation: 'Consider consolidating these interests into a single campaign to avoid bid inflation.' },
+  { id: 'ov-4', store: 'donut-equipment.com', set1: 'Customer Match — All Customers', set2: 'In-Market: Commercial Kitchen', campaign1: 'RLSA — Google', campaign2: 'Prospecting — Google', overlapPct: 31, platform: 'Google', impact: 'low', recommendation: 'Low overlap — no action needed. Monitor if campaigns scale.' },
+  { id: 'ov-5', store: 'donut-equipment.com', set1: 'Cart Abandoners 14d', set2: 'Cart Abandoners 30d', campaign1: 'Cart Recovery — Meta', campaign2: 'Retargeting — Equipment', overlapPct: 76, platform: 'Meta', impact: 'high', recommendation: 'Exclude Cart Abandoners 14d from the broader 30d retargeting campaign.' },
 ];
 
 // ─── Negative Keywords (Google account-level) ────────────────────────────────

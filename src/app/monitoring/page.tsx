@@ -392,12 +392,12 @@ function CwvGauge({ metricKey, metric }: { metricKey: CwvKey; metric: WebVitalMe
         </svg>
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, textAlign: 'center' }}>
           <span className="font-mono font-bold" style={{ fontSize: 20, color: rating.color }}>{m.fmt(metric.current)}</span>
-          <span className="font-mono" style={{ fontSize: 13, color: 'var(--text-muted)', marginLeft: 2 }}>{m.unit}</span>
+          <span className="font-mono" style={{ fontSize: 16, color: 'var(--text-muted)', marginLeft: 2 }}>{m.unit}</span>
         </div>
       </div>
       <div className="text-[16px] font-mono mb-1.5" style={{ color: rating.color }}>{rating.label}</div>
       <Sparkline data={metric.history} color={rating.color} />
-      <div className="section-label mt-1" style={{ fontSize: 13 }}>7-day trend</div>
+      <div className="section-label mt-1" style={{ fontSize: 16 }}>7-day trend</div>
     </div>
   );
 }

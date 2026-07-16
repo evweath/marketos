@@ -256,11 +256,10 @@ export default function CampaignDetail({ campaign: c, onClose }: Props) {
                       border: `1px solid ${isWinner ? 'rgba(16,217,138,0.22)' : isLoser ? 'rgba(255,68,68,0.15)' : 'var(--border-subtle)'}`,
                     }}>
                     {/* Thumbnail placeholder — colored by creative type */}
-                    <div className='shrink-0 rounded-lg flex items-center justify-center relative overflow-hidden'
-                      style={{ width: 52, height: 52, background: `linear-gradient(135deg, ${crColor}30, ${crColor}10)`, border: `1px solid ${crColor}30` }}>
+                    <div className='shrink-0 rounded-lg flex flex-col items-center justify-center gap-0.5 overflow-hidden'
+                      style={{ width: 52, height: 52, background: `linear-gradient(135deg, ${crColor}30, ${crColor}10)`, border: `1px solid ${crColor}30` }}
+                      title={`${cr.type} creative`}>
                       <TypeIcon size={22} style={{ color: crColor, opacity: isLoser ? 0.4 : 0.9 }} />
-                      <span className='absolute bottom-0.5 right-0.5 text-[16px] font-mono uppercase px-1 rounded'
-                        style={{ fontSize: 9, background: 'var(--bg-base)', color: 'var(--text-muted)' }}>{cr.type[0]}</span>
                     </div>
                     <div className='flex-1 min-w-0'>
                     <div className='flex items-center justify-between mb-2'>
