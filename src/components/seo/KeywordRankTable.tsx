@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
+import { ArrowUp, ArrowDown, Minus, Search, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import { usePersistentState } from '@/lib/usePersistentState';
 import type { StoreId, KeywordRanking } from '@/lib/seoData';
@@ -73,14 +73,29 @@ export function KeywordRankTable({ selectedStoreIds }: { selectedStoreIds: strin
   const [storeFilter, setStoreFilter] = useState<StoreId | 'all'>('all');
   const [sortKey, setSortKey]         = useState<SortKey>('rank');
   const [sortAsc, setSortAsc]         = useState(true);
+  const [query, setQuery]             = useState('');
+  const [rankRange, setRankRange]     = useState<'all' | 'top3' | 'top10' | 'top30' | 'beyond'>('all');
+  const [diffTier, setDiffTier]       = useState<'all' | 'easy' | 'medium' | 'hard'>('all');
+  const [page, setPage]               = useState(0);
+  const PAGE_SIZE = 25;
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortAsc(a => !a);
     else { setSortKey(key); setSortAsc(key !== 'change'); }
+    setPage(0);
   };
+
+  const inRankRange = (r: number) =>
+    rankRange === 'all' || (rankRange === 'top3' && r <= 3) || (rankRange === 'top10' && r <= 10)
+    || (rankRange === 'top30' && r <= 30) || (rankRange === 'beyond' && r > 30);
+  const inDiffTier = (d: number) =>
+    diffTier === 'all' || (diffTier === 'easy' && d <= 33) || (diffTier === 'medium' && d > 33 && d <= 66) || (diffTier === 'hard' && d > 66);
 
   const filtered: KeywordRanking[] = keywords
     .filter(k => storeFilter === 'all' || k.store === storeFilter)
+    .filter(k => query.trim() === '' || k.keyword.toLowerCase().includes(query.trim().toLowerCase()))
+    .filter(k => inRankRange(k.rank))
+    .filter(k => inDiffTier(k.difficulty))
     .sort((a, b) => {
       let diff = 0;
       if (sortKey === 'rank')         diff = a.rank - b.rank;
@@ -88,6 +103,24 @@ export function KeywordRankTable({ selectedStoreIds }: { selectedStoreIds: strin
       if (sortKey === 'searchVolume') diff = b.searchVolume - a.searchVolume;
       return sortAsc ? diff : -diff;
     });
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount - 1);
+  const paged = filtered.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE);
+
+  const exportCsv = () => {
+    const header = ['Keyword', 'Store', 'Target URL', 'Rank', 'Prior Rank', 'Change', 'Search Volume', 'Difficulty', 'CPC'];
+    const rows = filtered.map(k => [
+      k.keyword, STORE_ABBR[k.store], k.url, k.rank, k.previousRank, k.change, k.searchVolume, k.difficulty, k.cpc.toFixed(2),
+    ]);
+    const csv = [header, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'keyword-rankings.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  };
 
   function SortIcon({ k }: { k: SortKey }) {
     if (sortKey !== k) return <span className='w-3 inline-block' />;
@@ -122,7 +155,7 @@ export function KeywordRankTable({ selectedStoreIds }: { selectedStoreIds: strin
             return (
               <button
                 key={s}
-                onClick={() => setStoreFilter(s)}
+                onClick={() => { setStoreFilter(s); setPage(0); }}
                 className='px-2.5 py-1 text-[16px] font-mono transition-all'
                 style={{
                   borderRadius: 6,
@@ -139,6 +172,43 @@ export function KeywordRankTable({ selectedStoreIds }: { selectedStoreIds: strin
         </div>
       </div>
 
+      {/* Filters row: search + rank range + difficulty + CSV */}
+      <div className='flex items-center gap-2 mb-3 flex-wrap'>
+        <div className='relative flex-1' style={{ minWidth: 180 }}>
+          <Search size={12} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <input
+            type='text'
+            value={query}
+            onChange={e => { setQuery(e.target.value); setPage(0); }}
+            placeholder='Filter keywords…'
+            className='w-full text-base rounded-lg outline-none'
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', padding: '6px 10px 6px 28px' }}
+          />
+        </div>
+        <select value={rankRange} onChange={e => { setRankRange(e.target.value as typeof rankRange); setPage(0); }}
+          className='text-base rounded-lg outline-none px-2.5 py-1.5'
+          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
+          <option value='all'>All ranks</option>
+          <option value='top3'>Top 3</option>
+          <option value='top10'>Top 10</option>
+          <option value='top30'>Top 30</option>
+          <option value='beyond'>Beyond 30</option>
+        </select>
+        <select value={diffTier} onChange={e => { setDiffTier(e.target.value as typeof diffTier); setPage(0); }}
+          className='text-base rounded-lg outline-none px-2.5 py-1.5'
+          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
+          <option value='all'>All difficulty</option>
+          <option value='easy'>Easy (≤33)</option>
+          <option value='medium'>Medium (34–66)</option>
+          <option value='hard'>Hard (67+)</option>
+        </select>
+        <button onClick={exportCsv}
+          className='flex items-center gap-1.5 text-base px-3 py-1.5 rounded-lg font-medium transition-all'
+          style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
+          <Download size={12} /> CSV
+        </button>
+      </div>
+
       {/* Table */}
       <div className='overflow-x-auto'>
         <table className='w-full text-base' style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
@@ -153,6 +223,7 @@ export function KeywordRankTable({ selectedStoreIds }: { selectedStoreIds: strin
               >
                 <span className='flex items-center justify-center gap-1'>RANK <SortIcon k='rank' /></span>
               </th>
+              <th className='text-center pb-2.5 pr-3' style={TH_STYLE}>PRIOR</th>
               <th
                 className='text-center pb-2.5 pr-3 cursor-pointer select-none'
                 style={TH_STYLE}
@@ -175,12 +246,14 @@ export function KeywordRankTable({ selectedStoreIds }: { selectedStoreIds: strin
           <tbody>
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={8} className='py-6 text-center text-base' style={{ color: 'var(--text-muted)' }}>
-                  No keywords tracked yet — connect Search Console or add keywords to start tracking rankings.
+                <td colSpan={9} className='py-6 text-center text-base' style={{ color: 'var(--text-muted)' }}>
+                  {keywords.length === 0
+                    ? 'No keywords tracked yet — connect Search Console or add keywords to start tracking rankings.'
+                    : 'No keywords match the current filters.'}
                 </td>
               </tr>
             )}
-            {filtered.map((kw, i) => {
+            {paged.map((kw, i) => {
               const storeCfg = STORE_CONFIG[kw.store];
               const rColor   = rankColor(kw.rank);
               const improved = kw.change > 0;
@@ -191,7 +264,7 @@ export function KeywordRankTable({ selectedStoreIds }: { selectedStoreIds: strin
                 <tr
                   key={kw.id}
                   className='transition-colors hover:bg-white/[0.02]'
-                  style={{ borderBottom: i < filtered.length - 1 ? '1px solid var(--border-subtle)' : undefined }}
+                  style={{ borderBottom: i < paged.length - 1 ? '1px solid var(--border-subtle)' : undefined }}
                 >
                   {/* Keyword */}
                   <td className='py-3 pr-3'>
@@ -226,6 +299,13 @@ export function KeywordRankTable({ selectedStoreIds }: { selectedStoreIds: strin
                       style={{ background: rColor + '18', color: rColor, border: `1px solid ${rColor}30` }}
                     >
                       {kw.rank}
+                    </span>
+                  </td>
+
+                  {/* Prior rank */}
+                  <td className='py-3 pr-3 text-center'>
+                    <span className='font-mono text-base tabular-nums' style={{ color: 'var(--text-muted)' }}>
+                      {kw.previousRank > 0 ? `#${kw.previousRank}` : '—'}
                     </span>
                   </td>
 
@@ -288,6 +368,28 @@ export function KeywordRankTable({ selectedStoreIds }: { selectedStoreIds: strin
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {filtered.length > PAGE_SIZE && (
+        <div className='flex items-center justify-between mt-3 pt-3' style={{ borderTop: '1px solid var(--border-subtle)' }}>
+          <span className='text-[16px] font-mono' style={{ color: 'var(--text-muted)' }}>
+            Showing {safePage * PAGE_SIZE + 1}–{Math.min((safePage + 1) * PAGE_SIZE, filtered.length)} of {filtered.length}
+          </span>
+          <div className='flex items-center gap-2'>
+            <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={safePage === 0}
+              className='flex items-center gap-1 text-[16px] px-2 py-1 rounded-lg disabled:opacity-40'
+              style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+              <ChevronLeft size={12} /> Prev
+            </button>
+            <span className='text-[16px] font-mono' style={{ color: 'var(--text-secondary)' }}>{safePage + 1} / {pageCount}</span>
+            <button onClick={() => setPage(p => Math.min(pageCount - 1, p + 1))} disabled={safePage >= pageCount - 1}
+              className='flex items-center gap-1 text-[16px] px-2 py-1 rounded-lg disabled:opacity-40'
+              style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+              Next <ChevronRight size={12} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Legend */}
       <div className='flex items-center gap-5 mt-4 pt-3' style={{ borderTop: '1px solid var(--border-subtle)' }}>
