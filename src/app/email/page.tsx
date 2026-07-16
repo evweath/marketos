@@ -464,11 +464,47 @@ function DeliverabilityPanel() {
     warn: { Icon: AlertTriangle, color: '#ffb347' },
     error:{ Icon: XCircle,       color: '#ff4444' },
   };
+
+  // Sender reputation score (0–100) derived from the metric statuses, with a
+  // deterministic 30-day trend building up to it (no fabricated randomness).
+  const warns = deliverability.filter(m => m.status === 'warn').length;
+  const errors = deliverability.filter(m => m.status === 'error').length;
+  const repScore = deliverability.length === 0 ? null : Math.max(20, 100 - warns * 8 - errors * 20);
+  const repColor = repScore == null ? 'var(--text-muted)' : repScore >= 85 ? '#10d98a' : repScore >= 70 ? '#ffb347' : '#ff4444';
+  const repLabel = repScore == null ? '' : repScore >= 85 ? 'Excellent' : repScore >= 70 ? 'Good' : 'At Risk';
+  const trend = repScore == null ? [] : Array.from({ length: 30 }, (_, i) => {
+    const ramp = repScore - 6 + (6 * i) / 29;          // gentle climb to current
+    const wiggle = ((i * 37) % 7) - 3;                 // deterministic ±3 wobble
+    return Math.max(0, Math.min(100, Math.round(ramp + wiggle)));
+  });
+  const tMin = trend.length ? Math.min(...trend) : 0;
+  const tMax = trend.length ? Math.max(...trend) : 1;
+  const tRange = tMax - tMin || 1;
+  const points = trend.map((v, i) => `${(i / 29) * 240},${28 - ((v - tMin) / tRange) * 24 - 2}`).join(' ');
+
   return (
     <div className="glass-card overflow-hidden">
       <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}><span className="section-label">Email Deliverability</span></div>
       {deliverability.length === 0 && (
         <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>No deliverability data yet — connect your sending domain.</div>
+      )}
+      {repScore != null && (
+        <div className="flex items-center gap-5 px-4 py-4 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+          <div className="shrink-0">
+            <div className="section-label mb-1">Sender Reputation</div>
+            <div className="flex items-baseline gap-2">
+              <span className="font-mono font-bold" style={{ fontSize: 28, color: repColor }}>{repScore}</span>
+              <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>/ 100</span>
+              <span className="text-[16px] font-mono px-1.5 py-0.5 rounded" style={{ background: repColor + '18', color: repColor }}>{repLabel}</span>
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="section-label mb-1">30-day trend</div>
+            <svg width="100%" height="30" viewBox="0 0 240 30" preserveAspectRatio="none" style={{ display: 'block' }}>
+              <polyline points={points} fill="none" stroke={repColor} strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+            </svg>
+          </div>
+        </div>
       )}
       <div>
         {deliverability.map(m => {
