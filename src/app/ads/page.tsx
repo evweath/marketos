@@ -212,15 +212,31 @@ function ABTestingPanel() {
 
 const IMPACT_COLOR = { high: '#ff4444', medium: '#ffb347', low: '#10d98a' };
 
+const overlapCellColor = (pct: number) =>
+  pct >= 70 ? '#ff4444' : pct >= 40 ? '#ffb347' : '#10d98a';
+
 function AudienceOverlapPanel() {
   const [overlaps] = usePersistentState<AudienceOverlap[]>('ads.audienceOverlaps', []);
   const [filter, setFilter] = useState<'all' | 'Meta' | 'Google'>('all');
+  const [view, setView] = useState<'matrix' | 'list'>('matrix');
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
 
   const visible = overlaps.filter(o =>
     !dismissed.has(o.id) && (filter === 'all' || o.platform === filter)
   );
   const highCount = visible.filter(o => o.impact === 'high').length;
+
+  // Build a symmetric audience×audience overlap matrix from the pairwise rows.
+  const audiences: string[] = [];
+  for (const o of visible) {
+    if (!audiences.includes(o.set1)) audiences.push(o.set1);
+    if (!audiences.includes(o.set2)) audiences.push(o.set2);
+  }
+  const cell = (a: string, b: string): number | null => {
+    if (a === b) return 100;
+    const m = visible.find(o => (o.set1 === a && o.set2 === b) || (o.set1 === b && o.set2 === a));
+    return m ? m.overlapPct : null;
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -238,16 +254,27 @@ function AudienceOverlapPanel() {
         ))}
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <span className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Audience Overlap Detection</span>
-        <div className="flex gap-1 p-1 rounded-lg" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
-          {(['all', 'Meta', 'Google'] as const).map(f => (
-            <button key={f} onClick={() => setFilter(f)}
-              className="px-3 py-1 rounded-md text-base transition-all"
-              style={{ background: filter === f ? 'var(--bg-elevated)' : 'transparent', color: filter === f ? 'var(--text-primary)' : 'var(--text-muted)', border: filter === f ? '1px solid var(--border-dim)' : '1px solid transparent' }}>
-              {f === 'all' ? 'All Platforms' : f}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1 p-1 rounded-lg" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
+            {(['matrix', 'list'] as const).map(v => (
+              <button key={v} onClick={() => setView(v)}
+                className="px-3 py-1 rounded-md text-base transition-all capitalize"
+                style={{ background: view === v ? 'var(--bg-elevated)' : 'transparent', color: view === v ? 'var(--text-primary)' : 'var(--text-muted)', border: view === v ? '1px solid var(--border-dim)' : '1px solid transparent' }}>
+                {v}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-1 p-1 rounded-lg" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
+            {(['all', 'Meta', 'Google'] as const).map(f => (
+              <button key={f} onClick={() => setFilter(f)}
+                className="px-3 py-1 rounded-md text-base transition-all"
+                style={{ background: filter === f ? 'var(--bg-elevated)' : 'transparent', color: filter === f ? 'var(--text-primary)' : 'var(--text-muted)', border: filter === f ? '1px solid var(--border-dim)' : '1px solid transparent' }}>
+                {f === 'all' ? 'All Platforms' : f}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -258,6 +285,69 @@ function AudienceOverlapPanel() {
         </div>
       )}
 
+      {/* Heatmap matrix */}
+      {view === 'matrix' && audiences.length > 0 && (
+        <div className="glass-card p-4 overflow-x-auto">
+          <table className="border-separate" style={{ borderSpacing: 3 }}>
+            <thead>
+              <tr>
+                <th className="sticky left-0 z-10" style={{ background: 'var(--bg-surface)', width: 210, minWidth: 210 }} />
+                {audiences.map((_, j) => (
+                  <th key={j} className="text-[16px] font-mono font-semibold pb-1" style={{ color: 'var(--text-muted)', minWidth: 40 }}>
+                    A{j + 1}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {audiences.map((a, i) => (
+                <tr key={a}>
+                  <th className="text-right pr-2 text-[16px] font-mono font-normal whitespace-nowrap overflow-hidden sticky left-0 z-10"
+                    style={{ color: 'var(--text-secondary)', background: 'var(--bg-surface)', width: 210, minWidth: 210, maxWidth: 210, textOverflow: 'ellipsis' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>A{i + 1}</span> · {a.length > 22 ? a.slice(0, 21) + '…' : a}
+                  </th>
+                  {audiences.map((b, j) => {
+                    const v = cell(a, b);
+                    const isDiag = i === j;
+                    const c = v == null ? null : overlapCellColor(v);
+                    return (
+                      <td key={j} className="text-center rounded-md text-[16px] font-mono font-bold tabular-nums"
+                        title={v == null ? 'No measured overlap' : `${a} ↔ ${b}: ${v}%`}
+                        style={{
+                          width: 40, height: 34,
+                          background: isDiag ? 'var(--bg-elevated)'
+                            : v == null ? 'var(--bg-base)'
+                            : `${c}${v >= 70 ? '44' : v >= 40 ? '33' : '22'}`,
+                          color: isDiag ? 'var(--text-muted)' : c ?? 'var(--text-muted)',
+                          border: `1px solid ${isDiag ? 'var(--border-subtle)' : v == null ? 'var(--border-subtle)' : c + '55'}`,
+                        }}>
+                        {isDiag ? '—' : v == null ? '' : v}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="flex items-center gap-4 mt-3 text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
+            <span>Overlap %:</span>
+            {[{ l: '<40 low', c: '#10d98a' }, { l: '40–69 medium', c: '#ffb347' }, { l: '≥70 high', c: '#ff4444' }].map(k => (
+              <span key={k.l} className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-sm" style={{ background: k.c + '44', border: `1px solid ${k.c}55` }} />{k.l}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      {view === 'matrix' && audiences.length === 0 && (
+        <div className="glass-card p-8 text-center">
+          <CheckCircle2 size={32} className="mx-auto mb-2" style={{ color: 'var(--text-muted)' }} />
+          <div className="text-base font-medium" style={{ color: 'var(--text-primary)' }}>No audience overlap analysis yet</div>
+          <div className="section-label mt-1">Connect an ad platform to start detecting audience overlaps.</div>
+        </div>
+      )}
+
+      {view === 'list' && (
       <div className="flex flex-col gap-3">
         {visible.map(ov => (
           <div key={ov.id} className="glass-card p-4 flex flex-col gap-3">
@@ -303,6 +393,7 @@ function AudienceOverlapPanel() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }
