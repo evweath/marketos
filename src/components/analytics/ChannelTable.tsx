@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { TrendingUp, TrendingDown, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, Fragment } from 'react';
+import { TrendingUp, TrendingDown, ChevronDown, ChevronUp, Download } from 'lucide-react';
 import { scaledChannelMetrics, DATE_RANGE_LABELS } from '@/lib/analyticsData';
 import type { ChannelMetrics, DateRange } from '@/lib/analyticsData';
 
@@ -10,7 +10,16 @@ interface Props {
   channelMetrics: ChannelMetrics[];
 }
 
-type SortKey = keyof Pick<ChannelMetrics, 'spend' | 'revenue' | 'roas' | 'conversions' | 'cpa' | 'ctr' | 'clicks' | 'impressions' | 'margin'>;
+type SortKey = keyof Pick<ChannelMetrics, 'spend' | 'revenue' | 'roas' | 'conversions' | 'cpa' | 'cpc' | 'ctr' | 'clicks' | 'impressions' | 'margin'>;
+
+// Deterministic 8-point mini trend for the row-expand (derived from delta).
+function miniTrend(seedStr: string, delta: number): string {
+  const seed = seedStr.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
+  const pts: number[] = [];
+  for (let i = 0; i < 8; i++) pts.push(100 - delta + (delta * i) / 7 + (((seed + i * 29) % 7) - 3) * 0.5);
+  const min = Math.min(...pts), max = Math.max(...pts), range = max - min || 1;
+  return pts.map((v, i) => `${(i / 7) * 120},${28 - ((v - min) / range) * 24 - 2}`).join(' ');
+}
 
 const currency = (n: number): string =>
   n === 0 ? '—' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(n);
@@ -38,6 +47,7 @@ const COLUMNS: { key: SortKey; label: string }[] = [
   { key: 'impressions', label: 'Impressions' },
   { key: 'clicks',      label: 'Clicks'      },
   { key: 'ctr',         label: 'CTR'         },
+  { key: 'cpc',         label: 'CPC'         },
   { key: 'spend',       label: 'Spend'       },
   { key: 'revenue',     label: 'Revenue'     },
   { key: 'roas',        label: 'ROAS'        },
@@ -52,6 +62,18 @@ export default function ChannelTable({ dateRange = '30d', channelMetrics }: Prop
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
 
   const metrics = scaledChannelMetrics(dateRange, channelMetrics);
+
+  const exportCsv = () => {
+    const header = ['Channel', 'Status', 'Impressions', 'Clicks', 'CTR', 'CPC', 'Spend', 'Revenue', 'ROAS', 'Conversions', 'CPA', 'Margin%'];
+    const rows = metrics.map(c => [c.label, STATUS_LABEL[c.status], c.impressions, c.clicks, c.ctr.toFixed(2), c.cpc.toFixed(2), c.spend, c.revenue, c.roas.toFixed(2), c.conversions, c.cpa.toFixed(2), c.margin.toFixed(1)]);
+    const csv = [header, ...rows].map(r => r.map(x => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'channel-performance.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  };
 
   const sorted = [...metrics].sort((a, b) => {
     const av = a[sortKey] as number;
@@ -82,6 +104,7 @@ export default function ChannelTable({ dateRange = '30d', channelMetrics }: Prop
       case 'impressions': return <>{fmt(ch.impressions)}{renderDelta(ch.impressionsDelta)}</>;
       case 'clicks':      return <>{fmt(ch.clicks)}{renderDelta(ch.clicksDelta)}</>;
       case 'ctr':         return <>{ch.ctr === 0 ? '—' : ch.ctr.toFixed(2) + '%'}</>;
+      case 'cpc':         return <>{ch.cpc === 0 ? '—' : '$' + ch.cpc.toFixed(2)}</>;
       case 'spend':       return <>{currency(ch.spend)}{ch.spend > 0 && renderDelta(ch.spendDelta)}</>;
       case 'revenue':     return <>{currency(ch.revenue)}{renderDelta(ch.revenueDelta)}</>;
       case 'roas':        return <>{ch.roas === 0 ? '—' : ch.roas.toFixed(2) + '×'}{ch.roas > 0 && renderDelta(ch.roasDelta)}</>;
@@ -113,8 +136,15 @@ export default function ChannelTable({ dateRange = '30d', channelMetrics }: Prop
             All channels · {DATE_RANGE_LABELS[dateRange].toLowerCase()}
           </div>
         </div>
-        <div className="flex items-center gap-1 text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
-          sorted by {sortKey} {sortDir === 'desc' ? '↓' : '↑'}
+        <div className="flex items-center gap-3">
+          <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
+            sorted by {sortKey} {sortDir === 'desc' ? '↓' : '↑'}
+          </span>
+          <button onClick={exportCsv}
+            className="flex items-center gap-1.5 text-[16px] px-2.5 py-1 rounded-lg font-medium"
+            style={{ background: 'rgba(0,217,255,0.08)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
+            <Download size={12} /> CSV
+          </button>
         </div>
       </div>
 
@@ -165,8 +195,8 @@ export default function ChannelTable({ dateRange = '30d', channelMetrics }: Prop
             {sorted.map(ch => {
               const isSelected = selectedChannel === ch.channel;
               return (
+                <Fragment key={ch.channel}>
                 <tr
-                  key={ch.channel}
                   className="border-t transition-colors cursor-pointer"
                   style={{
                     borderColor: 'var(--border-subtle)',
@@ -228,6 +258,33 @@ export default function ChannelTable({ dateRange = '30d', channelMetrics }: Prop
                     </td>
                   ))}
                 </tr>
+                {isSelected && (
+                  <tr style={{ background: 'rgba(0,217,255,0.03)' }}>
+                    <td colSpan={COLUMNS.length + 2} className="px-4 py-3 sticky left-0" style={{ background: 'rgba(0,217,255,0.03)' }}>
+                      <div className="flex items-center gap-6 flex-wrap">
+                        <div>
+                          <div className="section-label mb-1">Revenue trend (30d)</div>
+                          <svg width="120" height="28" style={{ display: 'block' }}>
+                            <polyline points={miniTrend(ch.channel, ch.revenueDelta)} fill="none" stroke={ch.revenueDelta >= 0 ? '#10d98a' : '#ff4444'} strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round" />
+                          </svg>
+                        </div>
+                        {[
+                          { l: 'CPC', v: ch.cpc > 0 ? '$' + ch.cpc.toFixed(2) : '—' },
+                          { l: 'CPA', v: ch.cpa > 0 ? currency(ch.cpa) : '—' },
+                          { l: 'Margin', v: ch.margin.toFixed(1) + '%' },
+                          { l: 'Budget', v: currency(ch.budget) },
+                          { l: 'Budget used', v: ch.budget > 0 ? ((ch.spend / ch.budget) * 100).toFixed(0) + '%' : '—' },
+                        ].map(m => (
+                          <div key={m.l}>
+                            <div className="section-label mb-1">{m.l}</div>
+                            <div className="text-base font-mono font-semibold" style={{ color: 'var(--text-primary)' }}>{m.v}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                </Fragment>
               );
             })}
           </tbody>
@@ -250,6 +307,7 @@ export default function ChannelTable({ dateRange = '30d', channelMetrics }: Prop
                   impressions: fmt(metrics.reduce((s, c) => s + c.impressions, 0)),
                   clicks:      fmt(metrics.reduce((s, c) => s + c.clicks, 0)),
                   ctr:         '—',
+                  cpc:         (() => { const cl = metrics.reduce((s, c) => s + c.clicks, 0); return cl > 0 ? '$' + (metrics.reduce((s, c) => s + c.spend, 0) / cl).toFixed(2) : '—'; })(),
                   spend:       currency(metrics.reduce((s, c) => s + c.spend, 0)),
                   revenue:     currency(metrics.reduce((s, c) => s + c.revenue, 0)),
                   roas:        (metrics.reduce((s, c) => s + c.revenue, 0) / (metrics.reduce((s, c) => s + c.spend, 0) || 1)).toFixed(2) + '×',
