@@ -22,6 +22,12 @@ export default function ConversionFunnel({ conversions, storeColor }: Props) {
 
   const maxCount = conversions.funnel[0].count;
 
+  // Weakest stage = the biggest drop-off (lowest step conversion rate, idx>0).
+  let weakestIdx = -1, weakestRate = Infinity;
+  conversions.funnel.forEach((s, i) => {
+    if (i > 0 && s.conversionRate < weakestRate) { weakestRate = s.conversionRate; weakestIdx = i; }
+  });
+
   const overallColor = conversions.overallRate >= 3
     ? '#10d98a'
     : conversions.overallRate >= 1.5
@@ -55,19 +61,24 @@ export default function ConversionFunnel({ conversions, storeColor }: Props) {
           const barPct = (step.count / maxCount) * 100;
           const isFirst = idx === 0;
           const isLast = idx === conversions.funnel.length - 1;
+          const isWeakest = idx === weakestIdx;
           const dropColor = step.conversionRate >= 60 ? '#10d98a' : step.conversionRate >= 40 ? '#ffb347' : '#ff4444';
 
           return (
-            <div key={step.label}>
+            <div key={step.label} className='rounded-lg'
+              style={isWeakest ? { background: 'rgba(255,179,71,0.06)', border: '1px solid rgba(255,179,71,0.3)', padding: '6px 8px', margin: '-2px 0' } : undefined}>
               {/* Labels row */}
               <div className='flex items-center justify-between mb-1'>
-                <span className='text-base font-mono'
+                <span className='text-base font-mono flex items-center gap-1.5'
                   style={{ color: isFirst ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
                   {step.label}
+                  {isWeakest && (
+                    <span className='text-[16px] font-mono px-1.5 py-0.5 rounded' style={{ background: 'rgba(255,179,71,0.15)', color: '#ffb347' }}>biggest drop-off</span>
+                  )}
                 </span>
                 <div className='flex items-center gap-3'>
                   {idx > 0 && (
-                    <span className='text-[16px] font-mono' style={{ color: dropColor }}>
+                    <span className='text-[16px] font-mono' style={{ color: isWeakest ? '#ffb347' : dropColor }}>
                       ↓ {step.conversionRate.toFixed(1)}%
                     </span>
                   )}
