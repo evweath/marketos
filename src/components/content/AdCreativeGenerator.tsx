@@ -36,6 +36,21 @@ interface GeneratedResult {
   color: string;
 }
 
+type Tone = 'bold' | 'playful' | 'professional' | 'urgent';
+const TONE_OPTIONS: { value: Tone; label: string }[] = [
+  { value: 'bold', label: 'Bold' }, { value: 'playful', label: 'Playful' },
+  { value: 'professional', label: 'Professional' }, { value: 'urgent', label: 'Urgent' },
+];
+
+// Three distinct creative angles generated simultaneously.
+const VARIANT_ANGLES = [
+  { angle: 'Benefit-led',  color: 'linear-gradient(135deg, #00d9ff, #7b93ff)', score: 84 },
+  { angle: 'Social proof', color: 'linear-gradient(135deg, #10d98a, #00d9ff)', score: 78 },
+  { angle: 'Urgency',      color: 'linear-gradient(135deg, #ffb347, #ff4444)', score: 71 },
+];
+
+interface Variant { id: string; name: string; angle: string; size: string; format: string; color: string; score: number; }
+
 export function AdCreativeGenerator({ selectedStoreIds }: { selectedStoreIds: string[] }) {
   const [stores] = useStores();
   const [subTab, setSubTab] = useState<SubTab>('image');
@@ -45,27 +60,13 @@ export function AdCreativeGenerator({ selectedStoreIds }: { selectedStoreIds: st
   const [sellingPoints, setSellingPoints] = useState('');
   const [ctaText, setCtaText] = useState('Shop Now');
   const [store, setStore] = useState(stores[0]?.domain ?? '');
+  const [tone, setTone] = useState<Tone>('bold');
+  const [useBrandVoice, setUseBrandVoice] = useState(true);
   const [generating, setGenerating] = useState(false);
-  const [generated, setGenerated] = useState<GeneratedResult | null>(null);
-  const [previewAction, setPreviewAction] = useState<'edit' | 'publish' | null>(null);
+  const [variants, setVariants] = useState<Variant[] | null>(null);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [allCreatives, setCreatives] = usePersistentState<GeneratedCreative[]>('content.creatives', []);
   const creatives = allCreatives.filter(c => selectedStoreIds.includes(resolveStoreId(c.store, stores) ?? ''));
-
-  const downloadCreative = (g: GeneratedResult) => {
-    const content = `AI Generated Creative\nName: ${g.name}\nPlatform: ${g.platform}\nSize: ${g.size}\nFormat: ${g.format}`;
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${g.name.replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase()}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const flashAction = (action: 'edit' | 'publish') => {
-    setPreviewAction(action);
-    setTimeout(() => setPreviewAction(null), 2000);
-  };
 
   const subTabs: { key: SubTab; label: string; icon: typeof Image }[] = [
     { key: 'image', label: 'Image Ads',  icon: Image  },
@@ -73,50 +74,47 @@ export function AdCreativeGenerator({ selectedStoreIds }: { selectedStoreIds: st
     { key: 'ugc',   label: 'UGC',        icon: User   },
   ];
 
+  const SIZES: Record<SubTab, Record<ContentPlatform, string>> = {
+    image: { meta: '1080×1080', google: '728×90', tiktok: '1080×1920', youtube: '1920×1080', instagram: '1080×1350', linkedin: '1200×627' },
+    video: { meta: '1080×1080', google: '300×250', tiktok: '1080×1920', youtube: '1920×1080', instagram: '1080×1920', linkedin: '1920×1080' },
+    ugc:   { meta: '1080×1920', google: '1920×1080', tiktok: '1080×1920', youtube: '1080×1920', instagram: '1080×1920', linkedin: '1920×1080' },
+  };
+  const FORMATS: Record<SubTab, string> = { image: 'PNG', video: 'MP4', ugc: 'MP4' };
+
   const handleGenerate = () => {
     if (!productName.trim()) return;
     setGenerating(true);
-    setGenerated(null);
+    setVariants(null);
+    setSavedIds(new Set());
     setTimeout(() => {
-      const sizes: Record<SubTab, Record<ContentPlatform, string>> = {
-        image: { meta: '1080×1080', google: '728×90', tiktok: '1080×1920', youtube: '1920×1080', instagram: '1080×1350', linkedin: '1200×627' },
-        video: { meta: '1080×1080', google: '300×250', tiktok: '1080×1920', youtube: '1920×1080', instagram: '1080×1920', linkedin: '1920×1080' },
-        ugc:   { meta: '1080×1920', google: '1920×1080', tiktok: '1080×1920', youtube: '1080×1920', instagram: '1080×1920', linkedin: '1920×1080' },
-      };
-      const formats: Record<SubTab, string> = { image: 'PNG', video: 'MP4', ugc: 'MP4' };
-      const colors = [
-        'linear-gradient(135deg, #00d9ff, #7b93ff)',
-        'linear-gradient(135deg, #10d98a, #00d9ff)',
-        'linear-gradient(135deg, #ffb347, #ff4444)',
-        'linear-gradient(135deg, #7b93ff, #10d98a)',
-      ];
-      const name = `${productName} — ${PLATFORM_CONFIG[platform].label} ${subTab === 'ugc' ? 'UGC' : subTab.charAt(0).toUpperCase() + subTab.slice(1)}`;
-      const color = colors[Math.floor(Math.random() * colors.length)];
-      setGenerated({
-        name,
-        platform: PLATFORM_CONFIG[platform].label,
-        size: sizes[subTab][platform],
-        format: formats[subTab],
-        color,
-      });
-      const initials = productName.trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
-      const newCreative: GeneratedCreative = {
-        id: `gc-${Date.now()}`,
-        type: subTab,
-        platform,
-        name,
-        status: 'draft',
-        performanceScore: 0,
-        size: sizes[subTab][platform],
-        format: formats[subTab],
-        createdAt: 'just now',
-        store,
-        thumbnailColor: color,
-        thumbnailInitials: initials || 'AD',
-      };
-      setCreatives(prev => [newCreative, ...prev]);
+      const base = `${productName} — ${PLATFORM_CONFIG[platform].label} ${subTab === 'ugc' ? 'UGC' : subTab.charAt(0).toUpperCase() + subTab.slice(1)}`;
+      // 3 simultaneous variations, one per creative angle. Tone + brand-voice
+      // nudge the per-variant score so the controls visibly matter.
+      const toneBonus = tone === 'urgent' ? 4 : tone === 'bold' ? 2 : 0;
+      const bvBonus = useBrandVoice ? 3 : 0;
+      const v: Variant[] = VARIANT_ANGLES.map((a, i) => ({
+        id: `var-${Date.now()}-${i}`,
+        name: `${base} · ${a.angle}`,
+        angle: a.angle,
+        size: SIZES[subTab][platform],
+        format: FORMATS[subTab],
+        color: a.color,
+        score: Math.min(99, a.score + toneBonus + bvBonus),
+      }));
+      setVariants(v);
       setGenerating(false);
-    }, 2000);
+    }, 1600);
+  };
+
+  const saveToLibrary = (v: Variant) => {
+    const initials = productName.trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const newCreative: GeneratedCreative = {
+      id: v.id, type: subTab, platform, name: v.name, status: 'draft',
+      performanceScore: v.score, size: v.size, format: v.format, createdAt: 'just now',
+      store, thumbnailColor: v.color, thumbnailInitials: initials || 'AD',
+    };
+    setCreatives(prev => [newCreative, ...prev]);
+    setSavedIds(prev => new Set(prev).add(v.id));
   };
 
   const filteredCreatives = creatives.filter(c =>
@@ -214,6 +212,33 @@ export function AdCreativeGenerator({ selectedStoreIds }: { selectedStoreIds: st
             </div>
           </div>
 
+          {/* Tone selector */}
+          <div>
+            <label className="section-label block mb-1.5">Tone</label>
+            <div className="grid grid-cols-4 gap-1">
+              {TONE_OPTIONS.map(t => {
+                const active = tone === t.value;
+                return (
+                  <button key={t.value} onClick={() => setTone(t.value)}
+                    className="py-1.5 rounded-lg text-[16px] font-medium transition-all"
+                    style={{ background: active ? 'rgba(0,217,255,0.12)' : 'var(--bg-elevated)', color: active ? 'var(--cyan)' : 'var(--text-muted)', border: `1px solid ${active ? 'rgba(0,217,255,0.3)' : 'var(--border-subtle)'}` }}>
+                    {t.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Brand voice toggle */}
+          <button onClick={() => setUseBrandVoice(v => !v)}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-base transition-all"
+            style={{ background: 'var(--bg-elevated)', border: `1px solid ${useBrandVoice ? 'rgba(123,147,255,0.3)' : 'var(--border-dim)'}` }}>
+            <span style={{ color: 'var(--text-secondary)' }}>Apply Brand Voice</span>
+            <span className="relative w-9 h-5 rounded-full transition-colors" style={{ background: useBrandVoice ? '#7b93ff' : 'var(--bg-overlay)' }}>
+              <span className="absolute w-3.5 h-3.5 bg-white rounded-full top-0.5 transition-all" style={{ left: useBrandVoice ? '18px' : '2px' }} />
+            </span>
+          </button>
+
           <button
             onClick={handleGenerate}
             disabled={generating || !productName.trim()}
@@ -224,47 +249,52 @@ export function AdCreativeGenerator({ selectedStoreIds }: { selectedStoreIds: st
               cursor: generating || !productName.trim() ? 'not-allowed' : 'pointer',
             }}>
             {generating ? <Loader2 size={13} className="animate-spin" /> : <Zap size={13} />}
-            {generating ? 'Generating...' : 'Generate Creative'}
+            {generating ? 'Generating 3 variations…' : 'Generate 3 Variations'}
           </button>
         </div>
 
-        {/* Preview */}
+        {/* 3-way Variations */}
         <div className="glass-card p-4 col-span-1 flex flex-col">
-          <div className="section-label mb-3">Preview</div>
-          {generated ? (
-            <div className="flex flex-col gap-3 flex-1">
-              <div className="rounded-xl flex-1 min-h-48 flex items-center justify-center relative overflow-hidden"
-                style={{ background: generated.color, minHeight: 180 }}>
-                <div className="text-center">
-                  <div className="text-white/40 text-base font-mono mb-1">{generated.size}</div>
-                  <div className="text-white/70 text-base font-semibold">{generated.format}</div>
-                  <div className="text-white/40 text-base mt-1">{generated.platform}</div>
-                </div>
-                <div className="absolute top-2 right-2 text-[16px] font-mono px-1.5 py-0.5 rounded"
-                  style={{ background: 'rgba(0,0,0,0.4)', color: 'rgba(255,255,255,0.7)' }}>
-                  AI Generated
-                </div>
-              </div>
-              <div className="p-3 rounded-lg" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)' }}>
-                <div className="text-base font-medium mb-1" style={{ color: 'var(--text-primary)' }}>{generated.name}</div>
-                <div className="flex gap-2 mt-2">
-                  <button onClick={() => downloadCreative(generated)}
-                    className="flex items-center gap-1 px-2 py-1 rounded text-[16px] transition-colors hover:bg-white/5"
-                    style={{ color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
-                    <Download size={10} />Download
-                  </button>
-                  <button onClick={() => flashAction('edit')}
-                    className="flex items-center gap-1 px-2 py-1 rounded text-[16px] transition-colors hover:bg-white/5"
-                    style={{ color: '#7b93ff', border: '1px solid rgba(123,147,255,0.2)' }}>
-                    <Edit3 size={10} />{previewAction === 'edit' ? 'Editing…' : 'Edit'}
-                  </button>
-                  <button onClick={() => flashAction('publish')}
-                    className="flex items-center gap-1 px-2 py-1 rounded text-[16px] transition-colors hover:bg-white/5"
-                    style={{ color: '#10d98a', border: '1px solid rgba(16,217,138,0.2)' }}>
-                    <Send size={10} />{previewAction === 'publish' ? 'Published!' : 'Publish'}
-                  </button>
-                </div>
-              </div>
+          <div className="flex items-center justify-between mb-3">
+            <span className="section-label">Variations</span>
+            {variants && (
+              <button onClick={handleGenerate}
+                className="flex items-center gap-1 text-[16px] px-2 py-1 rounded-lg transition-colors hover:bg-white/5"
+                style={{ color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
+                <Zap size={10} />Regenerate
+              </button>
+            )}
+          </div>
+          {variants ? (
+            <div className="flex flex-col gap-2.5 flex-1">
+              {variants.map(v => {
+                const saved = savedIds.has(v.id);
+                const sColor = SCORE_COLOR(v.score);
+                return (
+                  <div key={v.id} className="rounded-xl overflow-hidden" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)' }}>
+                    <div className="h-16 flex items-center justify-between px-3 relative" style={{ background: v.color }}>
+                      <span className="text-white/80 text-base font-semibold">{v.angle}</span>
+                      <span className="text-[16px] font-mono px-1.5 py-0.5 rounded" style={{ background: 'rgba(0,0,0,0.4)', color: 'white' }}>{v.size}</span>
+                    </div>
+                    <div className="p-2.5">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[16px]" style={{ color: 'var(--text-muted)' }}>Predicted score</span>
+                        <span className="text-[16px] font-mono font-bold" style={{ color: sColor }}>{v.score}</span>
+                      </div>
+                      <div className="h-1 rounded-full overflow-hidden mb-2" style={{ background: 'var(--bg-overlay)' }}>
+                        <div className="h-full rounded-full" style={{ width: `${v.score}%`, background: sColor }} />
+                      </div>
+                      <button onClick={() => saveToLibrary(v)} disabled={saved}
+                        className="w-full flex items-center justify-center gap-1 py-1.5 rounded-lg text-[16px] font-medium transition-all"
+                        style={saved
+                          ? { background: 'rgba(16,217,138,0.12)', color: '#10d98a', border: '1px solid rgba(16,217,138,0.25)' }
+                          : { background: 'rgba(0,217,255,0.1)', color: 'var(--cyan)', border: '1px solid rgba(0,217,255,0.2)' }}>
+                        {saved ? <><Star size={10} fill="#10d98a" />Saved to Library</> : <><Send size={10} />Save to Library</>}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center rounded-xl min-h-48"
@@ -272,14 +302,13 @@ export function AdCreativeGenerator({ selectedStoreIds }: { selectedStoreIds: st
               {generating ? (
                 <div className="text-center">
                   <Loader2 size={24} className="animate-spin mx-auto mb-2" style={{ color: 'var(--cyan)' }} />
-                  <div className="text-base" style={{ color: 'var(--text-secondary)' }}>AI is generating your creative...</div>
-                  <div className="text-[16px] mt-1" style={{ color: 'var(--text-muted)' }}>This takes about 2 seconds</div>
+                  <div className="text-base" style={{ color: 'var(--text-secondary)' }}>Generating 3 variations…</div>
                 </div>
               ) : (
                 <div className="text-center">
                   <Image size={24} className="mx-auto mb-2" style={{ color: 'var(--text-muted)' }} />
                   <div className="text-base" style={{ color: 'var(--text-muted)' }}>Fill out the form and click</div>
-                  <div className="text-base" style={{ color: 'var(--text-muted)' }}>Generate Creative to see a preview</div>
+                  <div className="text-base" style={{ color: 'var(--text-muted)' }}>Generate to see 3 variations</div>
                 </div>
               )}
             </div>
