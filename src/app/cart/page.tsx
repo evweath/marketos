@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import Sidebar from '@/components/layout/Sidebar';
 import TopBar from '@/components/layout/TopBar';
 import { usePersistentState } from '@/lib/usePersistentState';
@@ -1193,8 +1193,8 @@ export default function CartPage() {
                           const expanded = expandedCart === cart.id;
                           const stageColor = stage === 'None' ? 'var(--text-muted)' : stage === 'Push' ? 'var(--cyan)' : stage === 'SMS' ? '#10d98a' : '#ffb347';
                           return (
-                            <>
-                              <tr key={cart.id} className="transition-colors hover:bg-white/[0.02] cursor-pointer"
+                            <Fragment key={cart.id}>
+                              <tr className="transition-colors hover:bg-white/[0.02] cursor-pointer"
                                 onClick={() => setExpandedCart(expanded ? null : cart.id)}
                                 style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                                 <td className="py-2.5 pr-2">
@@ -1241,7 +1241,7 @@ export default function CartPage() {
                                   </td>
                                 </tr>
                               )}
-                            </>
+                            </Fragment>
                           );
                         })}
                       </tbody>
