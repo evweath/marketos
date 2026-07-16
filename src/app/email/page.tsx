@@ -364,7 +364,19 @@ const PREDICTIVE_CUSTOMERS: Array<{ id: string; name: string; clv: number; churn
 function SegmentsPanel() {
   const [segments] = usePersistentState<SegmentData[]>('email.segments', []);
   const [showPredictive, setShowPredictive] = useState(false);
+  const [drillSegment, setDrillSegment] = useState<string | null>(null);
   const highChurn = PREDICTIVE_CUSTOMERS.filter(c => c.churnRisk >= 60).length;
+
+  // Enriched contacts we hold for a segment: predictive customers whose segment
+  // label overlaps the segment name (honest subset of its total count).
+  const contactsFor = (seg: SegmentData) => {
+    const n = seg.name.toLowerCase();
+    return PREDICTIVE_CUSTOMERS.filter(c => {
+      const s = c.segment.toLowerCase();
+      return n.includes(s) || s.includes(n) || (n.includes('vip') && s === 'vip') || (n.includes('risk') && s === 'at risk');
+    });
+  };
+  const activeSeg = segments.find(s => s.id === drillSegment) ?? null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -374,22 +386,71 @@ function SegmentsPanel() {
           <div className="text-base text-center py-4" style={{ color: 'var(--text-muted)' }}>No segments defined yet.</div>
         )}
         <div className="grid grid-cols-2 gap-3">
-          {segments.map(seg => (
-            <div key={seg.id} className="rounded-xl p-3" style={{ background: 'var(--bg-elevated)', border: `1px solid ${seg.color}20` }}>
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="text-base font-semibold" style={{ color: seg.color }}>{seg.name}</div>
-                <div className="data-value text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{fmt(seg.count)}</div>
-              </div>
-              <div className="text-[16px] mb-2" style={{ color: 'var(--text-secondary)' }}>{seg.description}</div>
-              {seg.avgClv > 0 && (
-                <div className="flex items-center justify-between text-[16px] font-mono">
-                  <span style={{ color: 'var(--text-muted)' }}>CLV: <span style={{ color: seg.color }}>{c$(seg.avgClv)}</span></span>
-                  <span style={{ color: 'var(--text-muted)' }}>AOV: {c$(seg.avgOrderValue)}</span>
+          {segments.map(seg => {
+            const active = drillSegment === seg.id;
+            return (
+              <button key={seg.id} onClick={() => setDrillSegment(active ? null : seg.id)}
+                className="text-left rounded-xl p-3 transition-all"
+                style={{ background: 'var(--bg-elevated)', border: `1px solid ${active ? seg.color : seg.color + '20'}` }}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="text-base font-semibold flex items-center gap-1.5" style={{ color: seg.color }}>
+                    <ChevronRight size={12} style={{ transform: active ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }} />
+                    {seg.name}
+                  </div>
+                  <div className="data-value text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{fmt(seg.count)}</div>
                 </div>
+                <div className="text-[16px] mb-2 ml-5" style={{ color: 'var(--text-secondary)' }}>{seg.description}</div>
+                {seg.avgClv > 0 && (
+                  <div className="flex items-center justify-between text-[16px] font-mono ml-5">
+                    <span style={{ color: 'var(--text-muted)' }}>CLV: <span style={{ color: seg.color }}>{c$(seg.avgClv)}</span></span>
+                    <span style={{ color: 'var(--text-muted)' }}>AOV: {c$(seg.avgOrderValue)}</span>
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Drill-down contact list */}
+        {activeSeg && (() => {
+          const contacts = contactsFor(activeSeg);
+          return (
+            <div className="mt-3 rounded-xl overflow-hidden" style={{ border: `1px solid ${activeSeg.color}30` }}>
+              <div className="px-3 py-2.5 flex items-center justify-between" style={{ background: activeSeg.color + '14' }}>
+                <span className="text-base font-semibold" style={{ color: activeSeg.color }}>{activeSeg.name} — Contacts</span>
+                <span className="text-[16px] font-mono" style={{ color: 'var(--text-muted)' }}>
+                  {contacts.length} enriched of {fmt(activeSeg.count)} total
+                </span>
+              </div>
+              {contacts.length === 0 ? (
+                <div className="text-base text-center py-6" style={{ color: 'var(--text-muted)' }}>
+                  No enriched contact records for this segment yet.
+                </div>
+              ) : (
+                <table className="w-full text-base">
+                  <thead style={{ background: 'var(--bg-elevated)' }}>
+                    <tr>{['Customer', 'Pred. CLV', 'Churn Risk', 'Next Order'].map(h => (
+                      <th key={h} className="px-3 py-2 text-left font-medium" style={{ color: 'var(--text-muted)' }}>{h}</th>
+                    ))}</tr>
+                  </thead>
+                  <tbody>
+                    {contacts.map(c => {
+                      const churnColor = c.churnRisk >= 60 ? '#ff4444' : c.churnRisk >= 30 ? '#ffb347' : '#10d98a';
+                      return (
+                        <tr key={c.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                          <td className="px-3 py-2 font-medium" style={{ color: 'var(--text-primary)' }}>{c.name}</td>
+                          <td className="px-3 py-2 font-mono" style={{ color: 'var(--cyan)' }}>{c$(c.clv)}</td>
+                          <td className="px-3 py-2 font-mono" style={{ color: churnColor }}>{c.churnRisk}%</td>
+                          <td className="px-3 py-2 font-mono" style={{ color: c.nextOrderDays ? '#7b93ff' : '#ff4444' }}>{c.nextOrderDays ? `~${c.nextOrderDays}d` : 'At risk'}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               )}
             </div>
-          ))}
-        </div>
+          );
+        })()}
       </div>
 
       {/* Per-Customer Predictive Intelligence (F-13) */}
