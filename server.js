@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 const hostname = '127.0.0.1';
-const port = 3000;
+const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 const dev = process.env.NODE_ENV !== 'production';
 
 const app = next({ dev, hostname, port });
